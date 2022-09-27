@@ -10,8 +10,8 @@ import random
 
 
 #--- Global
-delta_max = 90
-part_max = 3
+delta_max = 120
+part_max = 20
 
 pusher_speed = 500
 station_speed = 500
@@ -23,7 +23,7 @@ station_delay = 4
 process_time = 5
 unloading_time = 2
 
-flag_done = False
+flag_done = True
 
 
 # declaring optical sensors
