@@ -68,21 +68,27 @@ sim_length=1000000 # very big number! how to determine?
 i=0
 i_part=0
 
-while i < sim_length
+while True:
+  #--- get color of the sensors
   color_st_sensor=colors[station_sensor.value()]
   color_conv_sensor=colors[conveyor_sensor.value()]
+
+  #--- check workpart in convey and station free
   if (color_st_sensor == "black") and (color_conv_sensor == "red"):
     print("part in the buffer. Arrival time is ", datetime.now())
-    i_part=i_part+1
+    i_part = i_part + 1
     motor_station_C.run_forever(speed_sp = 500) # Station_conveyor on
     pusher_D.run_forever(speed_sp=200)
     sleep(1)
+
     pusher_D.stop(stop_action='hold')
     sleep(2)
+
     pusher_D.run_forever(speed_sp=-200)
     sleep(1)
     pusher_D.stop(stop_action='hold')
     sleep(4)
+
     motor_station_C.stop(stop_action = "hold") # station conveyor stops after 4 seconds
   i=i+0.00000001
   
@@ -90,15 +96,15 @@ while i < sim_length
     print("simulation performed for 1 part")
     break
   
-  # if simulation time is too long, program breaks after 2 minutes
-  if (time.time()-T_start)>=120: # datetime format?
-    motor_station_A.stop(stop_action = "hold")
-    motor_station_C.stop(stop_action = "hold")
-    pusher_D.run_forever(speed_sp=200)
-    sleep(1)
-    pusher_D.stop(stop_action='coast')
-    print("simulation breaked after 2 minutes")
-    break
+  # # if simulation time is too long, program breaks after 2 minutes
+  # if (time.time()-T_start)>=120: # datetime format?
+  #   motor_station_A.stop(stop_action = "hold")
+  #   motor_station_C.stop(stop_action = "hold")
+  #   pusher_D.run_forever(speed_sp=200)
+  #   sleep(1)
+  #   pusher_D.stop(stop_action='coast')
+  #   print("simulation breaked after 2 minutes")
+  #   break
     
 
 motor_station_A.stop(stop_action = "hold")
