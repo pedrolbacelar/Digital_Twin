@@ -1,12 +1,37 @@
 #!/usr/bin/env python3
 # so that script can be run from Brickman
 
-from concurrent.futures import process
+"""
+Code to run,
+    - Queue conveyor
+    - station conveyor
+    - automatic activation of pusher depending on the input of conveyor optical sensor
+    - automatic stop of station conveyor when station conveyor identifies prescence of
+      workpiece in station
+
+- ev3dev.ev3 package is already installed on the ev3 lego machine.
+- functions defined for pusher forward and backwards motion.
+- variable "flag_done" is used to force the program wait till the station optical sensor
+  scans the part for processing the station before next part is admitted into the station
+  from the queue.
+
+Flexibility provided to stop the program based on,
+    - condition 1: maximum number of parts (i_part> part_max) accepted by the station (counted
+      when pusher allows the part in to the station)
+    - condition 2: total simulation time (delta > delta_max).
+    - condition 3: emergency stop by ctrl+c from the terminal during execution. Whole system
+      stops at the current position. Pusher has to be reset manually as it does not return to
+      its original position.
+- condition 1 or condition 2 is executed based on which condition is satisfied first.
+- condition 3 over rides the whole program
+
+
+"""
 from ev3dev.ev3 import *
 from time import sleep
 from datetime import datetime
 import time
-import random
+
 
 
 #--- Global
@@ -23,7 +48,7 @@ station_delay = 4
 process_time = 5
 unloading_time = 2
 
-flag_done = True
+flag_done = True # for verification of part in the station.
 
 
 # declaring optical sensors
@@ -33,7 +58,7 @@ conveyor_sensor=ColorSensor(INPUT_2)
 conveyor_sensor.mode='COL-COLOR'
 blocking_sensor=ColorSensor(INPUT_3)
 blocking_sensor.mode='COL-COLOR'
-colors=['unknown','black','blue','green','yellow','red','white','brown']
+colors=['unknown','black','blue','green','yellow','red','white','brown'] # do not change the color name or order
 
 # declaring & initiating conveyors and the pusher
 motor_conveyor = LargeMotor('outA')
@@ -113,7 +138,7 @@ try:
 
 
     
-    
+    # simulation breaks after reaching number of parts limit
     if i_part> part_max:
       print("simulation performed for 1 part")
 
@@ -122,12 +147,7 @@ try:
     # if simulation time is too long, program breaks after 2 minutes
     if (delta > delta_max): # datetime format?
       print("==== Timeout ====")
-      motor_conveyor.stop(stop_action = "hold")
-      motor_station.stop(stop_action = "hold")
-      pusher_D.run_forever(speed_sp=pusher_speed)
-      sleep(pusher_time)
-      pusher_D.stop(stop_action='coast')
-      print("simulation breaked after 2 minutes")
+      print("simulation breaked after ", delta," seconds.")
       break
       
 
@@ -137,11 +157,13 @@ try:
 
   print("simulation stopped at ", datetime.now())
 
+
+# emergency stop <ctrl+c>
 except KeyboardInterrupt as f:
 
-  print('INTERRUPTED FROM PC')
+  print('-----INTERRUPTED FROM PC-----')
 
-  #stop all motors
+  #stop all coveyors and pusher motors
   motor_conveyor.stop(stop_action = "hold")
   motor_station.stop(stop_action = "hold")
   pusher_D.stop(stop_action='hold')
