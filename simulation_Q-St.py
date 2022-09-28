@@ -72,7 +72,6 @@ pusher_D.stop(stop_action='hold')
 # initiating simulation
 T_start = time.time() # time of simulation start
 print ("simulation started at ",datetime.now())
-sim_length=1000000 # very big number! how to determine?
 i=0
 i_part=0
 
