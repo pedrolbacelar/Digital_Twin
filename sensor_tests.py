@@ -1,3 +1,10 @@
+
+"""
+--- Code to test optical sensor working ---
+Code prints the value collected by the sensor
+ev3dev library is already installe din ev3 lego machine
+"""
+
 #--- Import 
 from ev3dev.ev3 import *
 from time import sleep
@@ -17,7 +24,7 @@ conveyor_sensor=ColorSensor(INPUT_2)
 conveyor_sensor.mode='COL-COLOR'
 blocking_sensor=ColorSensor(INPUT_3)
 blocking_sensor.mode='COL-COLOR'
-colors=('unknown','black','blue','green','yellow','red','white''brown')
+colors=('unknown','black','blue','green','yellow','red','white','brown')
 
 #-- initial time
 t_ini = time.time()
@@ -26,8 +33,9 @@ while True:
     t_now = time.time()
     delta = t_now - t_ini
     if delta > delta_max:
-        break
+        break  # to break the code automatically if there is no input from the sensor
     else:
+        # printing the acquired sensor values
         print("=============")
         print("station_sensor = ", station_sensor.value())
         print("conveyor_sensor = ", conveyor_sensor.value())
