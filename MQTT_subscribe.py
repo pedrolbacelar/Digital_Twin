@@ -37,7 +37,7 @@ def on_message(client, userdata, msg):
 
 
 client = mqtt.Client()
-client.connect("192.168.0.104",1883,60,) # verify the IP address before connect
+client.connect("127.0.0.1",1883,60,) # verify the IP address before connect
 
 client.on_connect = on_connect
 client.on_message = on_message
