@@ -28,18 +28,18 @@ try:
     # speed for conveyor_motor negated for motion towards the queue
     motor_station_A.run_forever(speed_sp = -conveyor_motor_speed) 
     sleep(2)
-    motor_station_A.stop(stop_action = "hold")
+    motor_station_A.stop(stop_action = 'coast')
 
-    sleep(3)
+    sleep(2)
 
     #Run Station 
     motor_station_C = LargeMotor('outC')
     # speed for station_motor is positive for motion towards the station
     motor_station_C.run_forever(speed_sp = station_motor_speed)
     sleep(2)
-    motor_station_C.stop(stop_action = "hold")
+    motor_station_C.stop(stop_action = 'coast')
 
-    sleep(3)
+    sleep(2)
 
     # pusher test (negative speed for push, positive speed for pull)
     pusher_D = MediumMotor('outD')
@@ -52,7 +52,7 @@ try:
     pusher_D.stop(stop_action='coast')
     print("=== Pusher testing executed ===")
 
-    sleeper(3)
+    sleep(2)
 
     #Run all three
     motor_station_A.run_forever(speed_sp = -conveyor_motor_speed)
@@ -64,16 +64,16 @@ try:
     pusher_D.run_forever(speed_sp=pusher_motor_speed)
     sleep(1)
     pusher_D.stop(stop_action='coast')
-    motor_station_A.stop(stop_action = "hold")
-    motor_station_C.stop(stop_action = "hold")
+    motor_station_A.stop(stop_action = 'coast')
+    motor_station_C.stop(stop_action = 'coast')
     print("=== All three motors tested succesfully! ===")
 
 # emergency stop <ctrl+c>
 except KeyboardInterrupt as f:
 
   #stop all coveyors and pusher motors
-  motor_conveyor.stop(stop_action = "hold")
-  motor_station.stop(stop_action = "hold")
-  pusher_D.stop(stop_action='hold')
+  motor_conveyor.stop(stop_action = 'coast')
+  motor_station.stop(stop_action = 'coast')
+  pusher_D.stop(stop_action='coast')
 
   print('-----INTERRUPTED FROM PC-----')

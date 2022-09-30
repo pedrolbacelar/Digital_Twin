@@ -67,7 +67,7 @@ motor_conveyor.run_forever(speed_sp = -conveyor_speed) # Queue_conveyor on
 pusher_D = MediumMotor('outD')
 pusher_D.run_forever(speed_sp=-pusher_speed) # pusher is engaged and blocks the part from entering the station
 sleep(pusher_time)
-pusher_D.stop(stop_action='hold')
+pusher_D.stop(stop_action='coast')
 
 # initiating simulation
 T_start = time.time() # time of simulation start
@@ -81,14 +81,14 @@ def Pusher_back():
     pusher_D.run_forever(speed_sp=pusher_speed)
     sleep(pusher_time)
 
-    pusher_D.stop(stop_action='hold')
+    pusher_D.stop(stop_action='coast')
     sleep(pusher_time)
 
 def Pusher_push():
     #--- Pusher: Go Ahead
     pusher_D.run_forever(speed_sp=-pusher_speed)
     sleep(pusher_time)
-    pusher_D.stop(stop_action='hold')
+    pusher_D.stop(stop_action='coast')
     
 
 
@@ -124,13 +124,13 @@ try:
     #--- Loading and Unloading
     if (colors[station_sensor.value()] == "red"): #something is on the station
       #-- Simulating Processing 
-      motor_station.stop(stop_action = "hold") 
+      motor_station.stop(stop_action = "coast") 
       sleep(process_time)
 
       #-- Simulating Unloading
       motor_station.run_forever(speed_sp = station_speed)
       sleep(unloading_time)
-      motor_station.stop(stop_action = "hold") 
+      motor_station.stop(stop_action = "coast") 
 
       flag_done = True
 
@@ -150,8 +150,8 @@ try:
       break
       
 
-  motor_conveyor.stop(stop_action = "hold")
-  motor_station.stop(stop_action = "hold")
+  motor_conveyor.stop(stop_action = "coast")
+  motor_station.stop(stop_action = "coast")
   Pusher_back()
 
   print("simulation stopped at ", datetime.now())
@@ -163,9 +163,9 @@ except KeyboardInterrupt as f:
   print('-----INTERRUPTED FROM PC-----')
 
   #stop all coveyors and pusher motors
-  motor_conveyor.stop(stop_action = "hold")
-  motor_station.stop(stop_action = "hold")
-  pusher_D.stop(stop_action='hold')
+  motor_conveyor.stop(stop_action = "coast")
+  motor_station.stop(stop_action = "coast")
+  pusher_D.stop(stop_action='coast')
 
 
 
