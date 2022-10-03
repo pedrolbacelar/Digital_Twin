@@ -18,11 +18,6 @@ import pandas as pd
 import time
 from time import sleep
 import numpy as np
-from influx import Influxdb
-
-# connect to influx
-db = InfluxDB('http://localhost:8086',precision='ms')  # select server ip address
-NOME_DATABASE = "test"  # select database name
 
 # defining topics to subscribe
 
@@ -36,9 +31,8 @@ def on_message(client, userdata, msg):
     #print(msg.payload) 
     print(str(msg.payload.decode("utf-8")))     # to print the message string
     json_value = json.loads(msg.payload.decode())  #converting message string to python dictionary
-    # print("time",json_value['time'])   # calling individual data in the json dictionary
-    # print(json_value)
-    db.write(NOME_DATABASE,'throughput', fields={"thput":json_value['thput']}, tags={"event":json_value['event']})
+    print("time",json_value['time'])   # calling individual data in the json dictionary
+    print(json_value)
 
 
 
