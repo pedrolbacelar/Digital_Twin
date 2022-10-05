@@ -41,3 +41,7 @@ while True:
             if message_flag == '"stop"':
                 print("STOPPED")
                 break
+            if message_flag == '"kill"':
+                print("TERMINATED")
+                exit()
+

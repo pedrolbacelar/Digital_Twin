@@ -3,8 +3,19 @@
 # import required packages
 
 """
+-----CHANGES RECOMMENDED-----
 change machine id "mc_id" if required
 change ip address of mqtt if required
+
+-----defined MQTT PUBLISH-----
+topic: OUTPUT
+payload = {"counter": counter, "id": mc_id, "ts": time.time()}
+
+-----defined MQTT SUBSCRIBE-----
+topic: STATUS
+payload 1: "start" # to start processing
+payload 2: "stop" # to stop processing. process restart allowed with the "start" payload.
+payload 3: "kill" # to terminate the whole program and exit
 """
 
 # import libraries 
@@ -96,6 +107,11 @@ try:
     client.on_message = on_message
     client.loop_start()
 
+    Pusher_push() 
+    # pusher_push() related to system initiation has to be provided outside the loop.
+    # pusher_push() is removed from "stop" code inside the loop to facilitate multiple restarts.
+    # separate message called "kill" can be used to terminate the whole program
+
     while True:
         if message_flag == '"idle"':
             pass
@@ -108,12 +124,13 @@ try:
                 #--- get color of the sensors
                 print("station_sensor = ", station_sensor.value())
                 print("conveyor_sensor = ", conveyor_sensor.value())
-                motor_conveyor.run_forever(speed_sp = -conveyor_speed) # Queue_conveyor on
+                # initiating conveyor and pusher
+                motor_conveyor.run_forever(speed_sp = -conveyor_speed) # Queue_conveyor on                
                 color_st_sensor = colors[station_sensor.value()]
                 color_conv_sensor = colors[conveyor_sensor.value()]
 
                 #--- Pusher
-                if flag_done == True:
+                if flag_done == True: # flag_done is true only when station has completed processing previous part
                     if (color_st_sensor == "black" or color_st_sensor == "unknown") and ((color_conv_sensor != "black")):
                         print("part in the buffer. Arrival time is ", datetime.now())
                         i_part = i_part + 1
@@ -141,7 +158,7 @@ try:
                     sleep(unloading_time)
                     motor_station.stop(stop_action = "coast") 
 
-                    flag_done = True
+                    flag_done = True # flag_done is false till station finishes processing
                     counter = counter + 1
                     payload = {
                         "counter": counter,
@@ -150,14 +167,24 @@ try:
                     }              
                     client.publish(topic = "OUTPUT", payload= json.dumps(payload))
 
-                if message_flag == '"stop"':
+                if (message_flag == '"stop"') and (flag_done == True): 
+                    # flag_done condition included so that station stops only after completing the processing of current part
+                    motor_conveyor.stop(stop_action = "coast")
+                    motor_station.stop(stop_action = "coast")                    
+                    print(message_flag)
+                    print("simulation stopped at ", datetime.now())
+                    break
+                
+                if (message_flag == '"kill"') and (flag_done == True): 
+                    # flag_done condition included so that station stops only after completing the processing of current part
                     motor_conveyor.stop(stop_action = "coast")
                     motor_station.stop(stop_action = "coast")
                     Pusher_back()
                     print(message_flag)
-                    print("simulation stopped at ", datetime.now())
-                    break
-                                
+                    client.loop_stop()    
+                    client.disconnect()
+                    print("simulation terminated at ", datetime.now())
+                    exit()
 
 # emergency stop <ctrl+c>
 except KeyboardInterrupt as f:
