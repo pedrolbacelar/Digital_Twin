@@ -16,7 +16,7 @@ from influx import InfluxDB
 import time
 
 #--- Global variables
-max_parts_list = [10,10] #number os maximun counting pieces for stations
+max_parts_list = [10,5] #number os maximun counting pieces for stations
 condition = True #condition for while loop
 DATABASE_IP = "http://127.0.0.1:8086" #localhost IP
 DATABASE_NAME = "poc_db"
@@ -37,14 +37,64 @@ print("== Connected to the database at: ", DATABASE_IP, " ==")
 payload = "start"
 client.publish(topic = "STATUS", payload= json.dumps(payload))
 
-try:
-    while condition:
-        #--- Extract data from Database
-        temp = db.select_recent(DATABASE_NAME, 'machine_state')
-
-        print("testing...")
-        time.sleep(request_delay)
+#--- Write dumb data into the database
+# db.write(DATABASE_NAME,'machine', fields={"counter":10, "message": "14:26"}, tags={"id":1})
 
 
-except:
-    print("XXX Digital Twin killed XXX")
+
+# try:
+while condition:
+    print("=================================================")
+
+    recent_raw_data = db.select_recent(DATABASE_NAME, 'machine', relative_time= "5m")
+
+    #--- Extract data from Database
+    tags = db.show_tags(DATABASE_NAME, 'machine')
+    fields = db.show_fields(DATABASE_NAME, 'machine')
+
+    #--- Show tags and fields
+    print("Show Tags: ", tags)
+    print("Show Fields: ", fields)
+
+    #--- Show recent data
+    print()
+    print("--")
+    print("Raw Data stored in the last minute: ")
+    print(recent_raw_data)
+    print("--")
+    print()
+
+
+    #--- Show the last Value
+    machine_id = int(recent_raw_data['results'][0]['series'][0]['values'][-1][2])
+    machine_counter = recent_raw_data['results'][0]['series'][0]['values'][-1][1]
+
+    print("Last Value from:")
+    print("     Machine ID: ", machine_id)
+    print("     Machine Counter: ", machine_counter)
+
+    #--- Verify stop conditions
+    for i in range(len(max_parts_list)): #loop to check all machines
+        if machine_counter >= max_parts_list[i] and (machine_id) == (i + 1):
+
+            print("---")
+            print("Machine ID [", machine_id,"] counter exceeded the maximun: ", max_parts_list[machine_id - 1])
+
+            #--- Payload message to stop (with assigned machine)
+            payload = {
+                "message" : "stop",
+                "id" : machine_id,
+            }     
+
+            #--- Publish the new status
+            client.publish(topic = "STATUS", payload= json.dumps(payload))
+            print("Stop message sent to the Physical Twin")
+            print("---")
+
+
+
+    print("=================================================")
+    time.sleep(request_delay)
+
+# except:
+#     print("XXX Digital Twin killed XXX")
