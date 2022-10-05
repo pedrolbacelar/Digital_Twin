@@ -4,7 +4,7 @@ import time
 import paho.mqtt.client as mqtt
 import json
 
-message_flag = "idle"
+message_flag = '"idle"'
 
 
 def on_connect(client, userdata, flags, rc):
@@ -30,7 +30,7 @@ client.loop_start()
 
 while True:
 
-    if message_flag == "idle":
+    if message_flag == '"idle"':
         print("idle")
         time.sleep(2)
 
@@ -38,5 +38,6 @@ while True:
         print("STARTED")
 
         while True:
-            if message_flag == "stop":
+            if message_flag == '"stop"':
                 print("STOPPED")
+                break

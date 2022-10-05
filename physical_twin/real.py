@@ -18,7 +18,7 @@ import json
 
 
 #--- Global variables
-mc_id=8 # change machine id
+mc_id=4 # change machine id
 delta_max = 300
 part_max = 20
 
@@ -34,7 +34,7 @@ unloading_time = 2
 
 flag_done = True # for verification of part in the station.
 counter=0
-message_flag = "idle"
+message_flag = '"idle"'
 
 # declaring optical sensors
 station_sensor=ColorSensor(INPUT_1)
@@ -97,7 +97,7 @@ try:
     client.loop_start()
 
     while True:
-        if message_flag == "idle":
+        if message_flag == '"idle"':
             pass
 
         elif message_flag == '"start"':
@@ -108,7 +108,7 @@ try:
                 #--- get color of the sensors
                 print("station_sensor = ", station_sensor.value())
                 print("conveyor_sensor = ", conveyor_sensor.value())
-
+                motor_conveyor.run_forever(speed_sp = -conveyor_speed) # Queue_conveyor on
                 color_st_sensor = colors[station_sensor.value()]
                 color_conv_sensor = colors[conveyor_sensor.value()]
 
@@ -154,8 +154,9 @@ try:
                     motor_conveyor.stop(stop_action = "coast")
                     motor_station.stop(stop_action = "coast")
                     Pusher_back()
-
+                    print(message_flag)
                     print("simulation stopped at ", datetime.now())
+                    break
                                 
 
 # emergency stop <ctrl+c>
