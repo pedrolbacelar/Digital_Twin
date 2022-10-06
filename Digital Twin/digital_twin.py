@@ -20,7 +20,7 @@ from termcolor import colored
 #--- Global variables
 max_parts_list = [10,5] #number os maximun counting pieces for stations
 condition = True #condition for while loop
-DATABASE_IP = "http://127.0.0.1:8086" #localhost IP
+DATABASE_IP = "http://192.168.0.50:8086" #localhost IP
 DATABASE_NAME = "poc_db"
 request_delay = 5 #seconds
 verbose = False
@@ -96,12 +96,15 @@ while condition:
             payload = {
                 "message" : "stop",
                 "id" : machine_id,
-            }     
+            }
+
+             
 
             #--- Publish the new status
             client.publish(topic = "STATUS", payload= json.dumps(payload))
             print(colored("Stop", "red"), " message sent to the Physical Twin")
             print("---")
+    
 
 
 

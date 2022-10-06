@@ -182,7 +182,7 @@ try:
                 if (message_flag == "stop") and (flag_done == True): 
                     # flag_done condition included so that station stops only after completing the processing of current part
                     motor_station.stop(stop_action = "coast")  
-
+                    motor_conveyor.stop(stop_action = "coast")
               
                     print(message_flag)
                     print("simulation stopped at ", datetime.now())

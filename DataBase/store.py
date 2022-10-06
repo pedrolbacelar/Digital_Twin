@@ -11,7 +11,7 @@ from influx import InfluxDB
 import time
 
 #--- Global Variables
-DATABASE_IP = "http://127.0.0.1:8086" #localhost IP
+DATABASE_IP = "http://192.168.0.50:8086" #localhost IP
 DATABASE_NAME = "poc_db"
 BROKER_IP = "192.168.0.50" #Factory computer
 PORT = 1883 #default
