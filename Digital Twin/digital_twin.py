@@ -1,11 +1,11 @@
 """ 
-store.py
+digital_twin.py
 created by: Pedro Bacelar
 date: 04-10-2022
 
 First the Digital Twin sends a message to start running the Physical Twin. The digital twin code is a 
 small feature that request last data from the measurement 'machine' of the database 'poc_db' and print
-the data for the user. When the maximun number of workpieces is achived  than DT publish a MQTT payload 
+the data for the user. When the maximun number of workpieces is achieved,  then DT publish a MQTT payload 
 sending a message to stop the physical system.
 """
 #--- Importing libraries
@@ -19,6 +19,7 @@ from termcolor import colored
 
 #--- Global variables
 max_parts_list = [10,5] #number os maximun counting pieces for stations
+machine_status = [
 condition = True #condition for while loop
 DATABASE_IP = "http://127.0.0.1:8086" #localhost IP
 DATABASE_NAME = "poc_db"
