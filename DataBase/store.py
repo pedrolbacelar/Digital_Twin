@@ -31,7 +31,7 @@ def on_message(client, userdata, msg):
         json_value = json.loads(msg.payload.decode())  #convert json to dictionary
         json_value['ts'] = time.time() #change timestamp!
 
-        print("= New payload received on -OUTPUT- ")
+        print("= New payload received on -OUTPUT- =")
         print("payload = ")
         print(json_value)
 

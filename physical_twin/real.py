@@ -19,6 +19,7 @@ payload 3: "kill" # to terminate the whole program and exit
 """
 
 # import libraries 
+from copyreg import add_extension
 from ev3dev.ev3 import *
 from time import sleep
 from datetime import datetime
@@ -29,7 +30,7 @@ import json
 
 
 #--- Global variables
-mc_id=4 # change machine id
+mc_id=2 # change machine id
 delta_max = 300
 part_max = 20
 
@@ -45,7 +46,7 @@ unloading_time = 2
 
 flag_done = True # for verification of part in the station.
 counter=0
-message_flag = '"idle"'
+message_flag = "idle"
 
 # declaring optical sensors
 station_sensor=ColorSensor(INPUT_1)
@@ -87,14 +88,25 @@ def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
     client.subscribe(topic="STATUS")
     
+global old_message
+old_message = "dumy"
 
 def on_message(client, userdata, msg):
     # define global variables
     #print(msg.payload) 
-    global message_flag
-
+    global message_flag 
+    
     print(str(msg.payload.decode("utf-8")))     # to print the message string
-    message_flag = msg.payload.decode()
+
+
+    if msg.topic == "STATUS":
+        json_value = json.loads(msg.payload.decode())  #convert json to dictionary
+        adressed_ID = json_value["id"]
+
+        if adressed_ID == mc_id:
+            message_flag = json_value["message"]
+            print("==> Message Flag changed to: ", message_flag)
+            
 
 
     
@@ -113,17 +125,17 @@ try:
     # separate message called "kill" can be used to terminate the whole program
 
     while True:
-        if message_flag == '"idle"':
+        if message_flag == "idle":
             pass
 
-        elif message_flag == '"start"':
+        elif message_flag == "start":
             while True:
 
                 T_now = time.time()
                 delta = T_now - T_start
                 #--- get color of the sensors
-                print("station_sensor = ", station_sensor.value())
-                print("conveyor_sensor = ", conveyor_sensor.value())
+                # print("station_sensor = ", station_sensor.value())
+                # print("conveyor_sensor = ", conveyor_sensor.value())
                 # initiating conveyor and pusher
                 motor_conveyor.run_forever(speed_sp = -conveyor_speed) # Queue_conveyor on                
                 color_st_sensor = colors[station_sensor.value()]
@@ -167,15 +179,19 @@ try:
                     }              
                     client.publish(topic = "OUTPUT", payload= json.dumps(payload))
 
-                if (message_flag == '"stop"') and (flag_done == True): 
+                if (message_flag == "stop") and (flag_done == True): 
                     # flag_done condition included so that station stops only after completing the processing of current part
-                    motor_conveyor.stop(stop_action = "coast")
-                    motor_station.stop(stop_action = "coast")                    
+                    motor_station.stop(stop_action = "coast")  
+
+              
                     print(message_flag)
                     print("simulation stopped at ", datetime.now())
+                    print("Waiting for re-start...")
+                    message_flag = "idle"
+                    counter = 0
                     break
                 
-                if (message_flag == '"kill"') and (flag_done == True): 
+                if (message_flag == "kill") and (flag_done == True): 
                     # flag_done condition included so that station stops only after completing the processing of current part
                     motor_conveyor.stop(stop_action = "coast")
                     motor_station.stop(stop_action = "coast")
