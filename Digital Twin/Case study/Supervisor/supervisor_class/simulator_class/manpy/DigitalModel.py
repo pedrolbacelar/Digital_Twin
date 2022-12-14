@@ -11,15 +11,31 @@ import numpy
 
 numpy.seterr(all="raise")
 import simpy
+
+
 from manpy.simulation.Globals import G
 from manpy.simulation.Order import Order
 import manpy.simulation.PrintRoute as PrintRoute
 import manpy.simulation.ExcelHandler as ExcelHandler
 from manpy.simulation.ProcessingTimeList import ProcessingTimeList
 from manpy.simulation.RandomNumberGenerator import RandomNumberGenerator
+import manpy.simulation.Globals as Globals
+
+
+"""
+from simulation.Globals import G
+from simulation.Order import Order
+import simulation.PrintRoute as PrintRoute
+import simulation.ExcelHandler as ExcelHandler
+from simulation.ProcessingTimeList import ProcessingTimeList
+from simulation.RandomNumberGenerator import RandomNumberGenerator
+import simulation.Globals as Globals
+"""
+
+
 import time
 from random import Random
-import manpy.simulation.Globals as Globals
+
 
 class DigitalModel:
     def __init__(self, execModel, ID=None):

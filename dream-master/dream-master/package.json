@@ -1,0 +1,32 @@
+{
+  "name": "dream",
+  "title": "Dream",
+  "version": "0.0.1",
+  "description": "The Dream Project",
+  "dependencies": {
+    "handlebars": "^2.0.0-alpha.4",
+    "jio": "git+https://lab.nexedi.com/nexedi/jio.git#45be1eaffc185f04a91e7cc1bfd2a0cf463ea468",
+    "renderjs": "git+https://lab.nexedi.com/nexedi/renderjs.git#846e9ef2408157129208a20994863576405ccc0d",
+    "rsvp": "git+https://lab.nexedi.com/nexedi/rsvp.js.git#b0c4596df6a52d75705a59262bc992a166ff11a1",
+    "uritemplate": "git+https://lab.nexedi.com/nexedi/uritemplate-js.git#93dea6b5b522be7f327c86c7ad81411a94fc7f32"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.5",
+    "grunt-cli": "~0.1.11",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-copy": "~0.5.0",
+    "grunt-contrib-less": "~0.9.0",
+    "grunt-contrib-uglify": "~0.2.x",
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt-manifest": "~0.4",
+    "grunt-curl": "~1.2.1",
+    "grunt-jslint": "~1.1.x",
+    "grunt-zip": "~0.13.0",
+    "qunitjs": "^1.14.0"
+  },
+  "scripts": {
+    "test": "./node_modules/.bin/grunt test",
+    "lint": "./node_modules/.bin/grunt lint",
+    "prepublish": "./node_modules/.bin/grunt build"
+  }
+}
