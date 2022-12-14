@@ -9,7 +9,7 @@ Following documentation is related to installation and implementation of the Inf
 ## Installation
 
 - Since this is an older version of the database, the intallation file is not available in the InfluxDB website anymore. The setup files are currently available as a *.zip* folder. The required setup files will be made available in the lab computer for future.
-- Extract the *.zip* folder to: **C:\Program Files\InfluxData\** as “influxdb-1.7.7-1”
+- Extract the *.zip* folder to: **C:\Program Files\InfluxData\** (or you can extract in a different location, just remember to change the path for the next steps) as “influxdb-1.7.7-1” (you can find this folder [here](Outliers Codes/influxdb-1.7.7_windows_amd64.zip) or try to find in the main brench Digital_Twin/Outliers Code
 
 ## **Running InfluxDB server instance**
 
