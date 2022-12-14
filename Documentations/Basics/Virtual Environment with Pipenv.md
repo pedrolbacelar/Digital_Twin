@@ -39,7 +39,8 @@ pipenv shell
 
 First, within the the virtual environment folder you need to have a .txt file with all the necessaries packages with the versions, like that:
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/2f6c27da-cfe9-460a-830b-5418144a22be/Untitled.png)
+![image](https://user-images.githubusercontent.com/72768576/207631116-06943d71-2cd9-4733-abcc-fd510a535291.png)
+
 
 Then just run:
 
@@ -64,12 +65,12 @@ pipenv uninstall <package_name>
 If you were with the VS code opened it’s better to restart it before trying to use the new virtual environment.
 
 1. Select to change the python path: **3.9.5(#####)**
+![image](https://user-images.githubusercontent.com/72768576/207631246-b26e9d88-9dec-4223-9f94-cdbc16b85a9f.png)
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/f3d69fdf-c4d6-4e1f-a5c6-db155b2f8065/Untitled.png)
 
 1. Choose the folder name that you created the virtual environment
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/893e3155-c146-4fe9-a4fe-cc5472a9b1b2/Untitled.png)
+![image](https://user-images.githubusercontent.com/72768576/207631185-276dda2a-a5a8-4865-aa0b-32b0be9e01e5.png)
 
 ## Troubleshoot
 
