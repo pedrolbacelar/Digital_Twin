@@ -1,0 +1,4 @@
+paho.mqtt==1.6.1
+numpy==1.23.3
+pandas==1.5.0
+simpy==4.0
