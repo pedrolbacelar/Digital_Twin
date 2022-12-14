@@ -1,0 +1,1 @@
+['test:0', 'sync with t_horizon=10m', 'controller sleep:5s', 'dist_fit t_horizon_fit=10m', 'dist processing_time 1: deterministic 5s', 'dist processing_time 2: deterministic 5s']

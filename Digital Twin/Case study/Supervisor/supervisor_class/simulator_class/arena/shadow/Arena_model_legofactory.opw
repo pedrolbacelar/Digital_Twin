@@ -1,0 +1,10 @@
+[RESOURCES]
+Machine 1
+Machine 2
+[VARIABLES]
+att_CycleTime
+att_capacity_buffer_2
+att_capacity_buffer_1
+att_processing_timeS2
+att_processing_timeS1
+att_n_pallet

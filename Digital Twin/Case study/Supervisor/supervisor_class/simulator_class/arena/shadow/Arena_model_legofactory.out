@@ -1,0 +1,70 @@
+
+                                      ARENA Simulation Results
+                          francesco.verucchi@hotmail.it - License: STUDENT
+
+                                  Summary for Replication 1 of 1
+
+Project: Unnamed Project                                             Run execution date :11/30/2021
+Analyst: francesco.verucchi@hotmail.it                               Model revision date:11/29/2021
+
+Replication ended at time      : 30000000.0 Seconds 
+Base Time Units: Seconds
+
+                                           TALLY VARIABLES
+
+Identifier                                  Average   Half Width  Minimum    Maximum   Observations
+___________________________________________________________________________________________________
+
+Tally_System_time                           97.562     (Insuf)    1.0000     123.64         41    
+Processing_timeS2                               --         --         --         --          0
+interdeparture_S1                           9.5950     (Insuf)    4.2200     19.220         40    
+Tally 1                                         --         --         --         --          0
+Pallet.VATime                                   --         --         --         --          0
+Pallet.NVATime                                  --         --         --         --          0
+Pallet.WaitTime                                 --         --         --         --          0
+Pallet.TranTime                                 --         --         --         --          0
+Pallet.OtherTime                                --         --         --         --          0
+Pallet.TotalTime                                --         --         --         --          0
+Queue 1.WaitingTime                         51.732     (Insuf)    .00000     75.540         41    
+Queue 2.WaitingTime                         23.616     (Insuf)    .00000     30.858         35    
+
+                                     DISCRETE-CHANGE VARIABLES
+
+Identifier                                  Average   Half Width  Minimum    Maximum   Final Value
+___________________________________________________________________________________________________
+
+Pallet.WIP                                  10.000     (Insuf)    .00000     12.000     10.000    
+Machine 1.NumberBusy                        1.0000     (Insuf)    .00000     1.0000     1.0000    
+Machine 1.NumberScheduled                   1.0000     (Insuf)    1.0000     1.0000     1.0000    
+Machine 1.Utilization                       1.0000     (Insuf)    .00000     1.0000     1.0000    
+Machine 2.NumberBusy                        1.0000     (Insuf)    .00000     1.0000     1.0000    
+Machine 2.NumberScheduled                   1.0000     (Insuf)    1.0000     1.0000     1.0000    
+Machine 2.Utilization                       1.0000     (Insuf)    .00000     1.0000     1.0000    
+Queue 1.NumberInQueue                       4.0000     (Insuf)    .00000     7.0000     4.0000    
+Queue 2.NumberInQueue                       5.9999     (Insuf)    .00000     6.0000     6.0000    
+
+                                             COUNTERS
+
+Identifier                                    Count   Limit
+_____________________________________________________________
+
+WIP                                              12  Infinite
+
+                                             OUTPUTS
+
+Identifier                                   Value
+_____________________________________________________________
+
+final_position                              4.0000    
+Output 2                                    1.0000    
+Pallet.NumberIn                             13.000    
+Pallet.NumberOut                            3.0000    
+Machine 1.NumberSeized                      41.000    
+Machine 1.ScheduledUtilization              1.0000    
+Machine 2.NumberSeized                      35.000    
+Machine 2.ScheduledUtilization              1.0000    
+System.NumberOut                            .00000    
+
+
+Simulation run time: 0.00 minutes.
+Simulation run complete.

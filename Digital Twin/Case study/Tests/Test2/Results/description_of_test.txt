@@ -1,0 +1,1 @@
+['test:2', 'sync with t_horizon=10m', 'controller sleep:5s', 'dist_fit t_horizon_fit=10m', 'dist processing_time 1: triang [3,8,5]', 'dist processing_time 2: triang [1,4,3]']

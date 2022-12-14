@@ -1,0 +1,1 @@
+['test:4', 'sync with t_horizon=10m', 'controller sleep:5s', 'analyser sleep(5s)', 'dist_fit t_horizon_fit=10m', 'dist processing_time 1: triangular [3,8,5]', 'dist processing_time 2: triangular [2,5,3]', 'scenario applied 2']

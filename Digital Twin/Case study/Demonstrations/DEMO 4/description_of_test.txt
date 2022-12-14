@@ -1,0 +1,1 @@
+['----------- Experiment 4---------------\n', '----------- RTSimulator  ---------------\n', 'Scenario 4 \n', 'sync with t_horizon=20m\n', 'Forecast sleep:5m\n', 'Time demostration 40m\n', 'analyser sleep(2s)\n', 'Validation: T_query:10min  frequency: 1min Simulator type: Manpy   Information type: KPI   KPI: System time  MEthod: DTW  Threshold: logic 0.95 input: 0.92']

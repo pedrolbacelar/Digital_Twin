@@ -1,0 +1,198 @@
+{
+    "general": {
+        "maxSimTime": 1,
+        "numberOfReplications": 1,
+        "Trace": "No",
+        "seed": 1
+    },
+    "graph": {
+        "edge": {
+            "1": {
+                "_class": "manpy.Edge",
+                "destination": "QM2_1",
+                "source": "M1"
+            },
+            "2": {
+                "_class": "manpy.Edge",
+                "destination": "QM2_2",
+                "source": "M1"
+            },
+            "3": {
+                "_class": "manpy.Edge",
+                "destination": "QM2_3",
+                "source": "M1"
+            },
+            "4": {
+                "_class": "manpy.Edge",
+                "destination": "QM1_1",
+                "source": "M2"
+            },
+            "5": {
+                "_class": "manpy.Edge",
+                "destination": "QM1_2",
+                "source": "M2"
+            },
+            "6": {
+                "_class": "manpy.Edge",
+                "destination": "QM1_3",
+                "source": "M2"
+            },
+            "7": {
+                "_class": "manpy.Edge",
+                "destination": "Q2",
+                "source": "QM2_1"
+            },
+            "8": {
+                "_class": "manpy.Edge",
+                "destination": "Q2",
+                "source": "QM2_2"
+            },
+            "9": {
+                "_class": "manpy.Edge",
+                "destination": "Q2",
+                "source": "QM2_3"
+            },
+            "10": {
+                "_class": "manpy.Edge",
+                "destination": "Q1",
+                "source": "QM1_1"
+            },
+            "11": {
+                "_class": "manpy.Edge",
+                "destination": "Q1",
+                "source": "QM1_2"
+            },
+            "12": {
+                "_class": "manpy.Edge",
+                "destination": "Q1",
+                "source": "QM1_3"
+            },
+            "13": {
+                "_class": "manpy.Edge",
+                "destination": "M1",
+                "source": "Q1"
+            },
+            "14": {
+                "_class": "manpy.Edge",
+                "destination": "M2",
+                "source": "Q2"
+            }
+        },
+        "node": {
+            "M1": {
+                "_class": "manpy.Machine",
+                "name": "Machine",
+                "processingTime": {
+                    "NormalSP": {
+                        "locSP": 10,
+                        "scaleSP": 20
+                    }
+                },
+                "unloadTime": {
+                    "Fixed": {
+                        "mean": 3.2
+                    }
+                },
+                "gatherSysTime": 1,
+                "gatherIntArr": 1,
+                "id": "M1"
+            },
+            "M2": {
+                "_class": "manpy.Machine",
+                "name": "Machine",
+                "processingTime": {
+                    "NormalSP": {
+                        "locSP": 10,
+                        "scaleSP": 20
+                    }
+                },
+                "unloadTime": {
+                    "Fixed": {
+                        "mean": 3.2
+                    }
+                },
+                "id": "M2"
+            },
+            "QM1_1": {
+                "_class": "manpy.Machine",
+                "name": "Transport",
+                "capacity": 1,
+                "processingTime": {
+                    "Fixed": {
+                        "mean": 17.2
+                    }
+                },
+                "id": "QM1_1"
+            },
+            "QM1_2": {
+                "_class": "manpy.Machine",
+                "name": "Transport",
+                "capacity": 1,
+                "processingTime": {
+                    "Fixed": {
+                        "mean": 17.2
+                    }
+                },
+                "id": "QM1_2"
+            },
+            "QM1_3": {
+                "_class": "manpy.Machine",
+                "name": "Transport",
+                "capacity": 1,
+                "processingTime": {
+                    "Fixed": {
+                        "mean": 17.2
+                    }
+                },
+                "id": "QM1_3"
+            },
+            "QM2_1": {
+                "_class": "manpy.Machine",
+                "name": "Transport",
+                "capacity": 1,
+                "processingTime": {
+                    "Fixed": {
+                        "mean": 17.2
+                    }
+                },
+                "id": "QM2_1"
+            },
+            "QM2_2": {
+                "_class": "manpy.Machine",
+                "name": "Transport",
+                "capacity": 1,
+                "processingTime": {
+                    "Fixed": {
+                        "mean": 17.2
+                    }
+                },
+                "id": "QM2_2"
+            },
+            "QM2_3": {
+                "_class": "manpy.Machine",
+                "name": "Transport",
+                "capacity": 1,
+                "processingTime": {
+                    "Fixed": {
+                        "mean": 17.2
+                    }
+                },
+                "id": "QM2_3"
+            },
+            "Q1": {
+                "_class": "manpy.Queue",
+                "capacity": 5,
+                "name": "Queue",
+                "wip": [],
+                "id": "Q1"
+            },
+            "Q2": {
+                "_class": "manpy.Queue",
+                "capacity": 5,
+                "name": "Queue",
+                "wip": [],
+                "id": "Q2"
+            }
+        }
+    }
+}

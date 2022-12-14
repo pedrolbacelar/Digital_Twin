@@ -1,0 +1,1 @@
+{"modelred": {"desired_size": 4, "n_aggregate": 2, "n_reducing": 2, "max_iters": 10}, "batching": {"threshold_nodes": 0.5, "threshold_arcs": 0.5}, "modelscores": {}, "datapath": "C:\\Users\\giova\\OneDrive - Politecnico di Milano\\WIP\\MSM_experiments\\FLOWSHOP\\res\\log1.txt"}

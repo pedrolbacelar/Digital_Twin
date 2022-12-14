@@ -1,0 +1,30 @@
+{
+    "modelred": {
+        "desired_size": 6,
+        "n_aggregate": 2,
+        "n_reducing": 2,
+        "max_iters": 100,
+		"proxy" : "frequency",
+        "weights": {
+            "ws": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "y1n": 0.5,
+            "y1a": 0.5,
+            "y4in": 0.5,
+            "y4out": 0.5,
+            "y6n": 0.5,
+            "y6a": 0.5
+        }
+    },
+    "batching": {
+        "threshold_nodes": 0.5,
+        "threshold_arcs": 0.5
+    },
+    "modelscores": {}
+}
