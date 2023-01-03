@@ -7,4 +7,4 @@ Given that the idea is to share as much information as possible, this tutorials 
 * [📂 Setting up virtual enviorment with pipenv](Documentations/Basics/Virtual_Environment_with_Pipenv.md)
 * [💽 InfluxDB](Documentations/Basics/InfluxDB.md)
 * [🦟 MQTT and Mosquitto](Documentations/Basics/MQTT_Broker.md)
-* [MobaXterm](Documentations/Basics/MobaXterm.md)
+* [📶 MobaXterm](Documentations/Basics/MobaXterm.md)
