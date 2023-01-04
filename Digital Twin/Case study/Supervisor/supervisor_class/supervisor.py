@@ -24,7 +24,7 @@ from analytics.analyser_real_c import analyser_real
 #broker.active()
 
 
-db=interface_DB("192.168.0.50","RTSimulatorDB",8086)#Create object database
+db = interface_DB("192.168.0.50","RTSimulatorDB",8086)#Create object database
 #("localhost","legoDT",8086)
 #("192.168.0.50","RTSimuldataatorDB",8086)
 #n_pallet=db.queryData("number_of_pallets","parameters")
@@ -32,10 +32,10 @@ db=interface_DB("192.168.0.50","RTSimulatorDB",8086)#Create object database
 n_pallet=12
 
 
-sync=synchroniser(db,n_pallet=n_pallet,source_type="sensors",simulator_type="Manpy",t_horizon="10m")
+sync = synchroniser(db,n_pallet=n_pallet,source_type="sensors",simulator_type="Manpy",t_horizon="10m")
 
 
-controller=controller(db,synchroniser=sync,n_pallet=n_pallet ,t_horizon="10m")
+controller = controller(db,synchroniser=sync,n_pallet=n_pallet ,t_horizon="10m")
 
 controller.start()
 
