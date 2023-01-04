@@ -18,5 +18,5 @@ Given that the idea is to share as much information as possible, this tutorials 
 * [[Presentation]_Bi-Weekly-3_11-11-2022](Documentations/Presentations/[Presentation]_Bi-Weekly-3_11-11-2022.pdf)
 * [[Presentation]_Bi-Weekly-4_18-11-2022](Documentations/Presentations/[Presentation]_Bi-Weekly-4_18-11-2022.pdf)
 * [[Presentation]_Bi-Weekly-5_05-12-2022](Documentations/Presentations/[Presentation]_Bi-Weekly-5_05-12-2022.pdf)
-* [[Presentation]_Bi-Weekly-Project Review_16-12-2022](Documentations/Presentations/[Presentation]_Bi-Weekly-Project-Review_16-12-2022.pdf)
-* [[Presentation]_Bi-Weekly-Use Case _07-12-2022](Documentations/Presentations/[Presentation]_Bi-Weekly-Use-Case_07-12-2022.pdf)
+* [[Presentation]_Bi-Weekly-Project-Review_16-12-2022](Documentations/Presentations/[Presentation]_Bi-Weekly-Project-Review_16-12-2022.pdf)
+* [[Presentation]_Bi-Weekly-Use-Case _07-12-2022](Documentations/Presentations/[Presentation]_Bi-Weekly-Use-Case_07-12-2022.pdf)
