@@ -1,0 +1,7 @@
+MODIFICATIONS TO MANPY OBJECTS
+
+++Aggiunta di completed jobs in "Machine.py"++
+
+json["results"]["completed_jobs"] = self.completedJobs			Linea 1512
+
+# In questo modo da in output solo il valore dell'ultima replication, da inserire in CoreObject.py

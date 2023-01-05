@@ -1,0 +1,100 @@
+{
+     "graph": {
+          "node": {
+				"E1": {
+				  "_class": "Dream.Exit", 
+				  "element_id": "DreamNode_5", 
+				  "name": "Exit"
+				}, 
+				"Q1": {
+				  "_class": "Dream.Queue", 
+				  "capacity": 1, 
+				  "element_id": "DreamNode_2", 
+				  "name": "Queue", 
+				  "schedulingRule": "FIFO"
+				}, 
+				"S1": {
+				  "_class": "Dream.BatchSource", 
+				  "batchNumberOfUnits": 80, 
+				  "element_id": "DreamNode_1", 
+				  "entity": "Dream.Batch", 
+				  "interarrivalTime": {
+					"Fixed": {
+				      "mean": 0.5
+				     }
+				  }, 
+				  "name": "Source"
+				}, 
+				"St1": {
+				  "_class": "Dream.BatchScrapMachine", 
+				  "element_id": "DreamNode_3", 
+				  "interruptions": {
+                   
+                    }, 
+				  "name": "Milling1", 
+				  "processingTime": {
+					"distributionType": "Fixed", 
+					"max": "", 
+					"mean": 0.75, 
+					"min": "", 
+					"stdev": ""
+				  }
+				}, 
+				"St2": {
+				  "_class": "Dream.BatchScrapMachine", 
+				  "element_id": "DreamNode_4", 
+				  "interruptions": {
+                    }, 
+				  "name": "Milling2", 
+				  "processingTime": {
+					"distributionType": "Fixed", 
+					"max": "", 
+					"mean": 0.75, 
+					"min": "", 
+					"stdev": ""
+				  }
+				}
+			  }, 
+			"edge": {
+               "0": {
+                    "source": "S1", 
+                    "destination": "Q1", 
+                    "data": {}, 
+                    "_class": "Dream.Edge"
+               }, 
+               "1": {
+                    "source": "Q1", 
+                    "destination": "St1", 
+                    "data": {}, 
+                    "_class": "Dream.Edge"
+               }, 
+               "2": {
+                    "source": "Q1", 
+                    "destination": "St2", 
+                    "data": {}, 
+                    "_class": "Dream.Edge"
+               }, 
+               "3": {
+                    "source": "St1", 
+                    "destination": "E1", 
+                    "data": {}, 
+                    "_class": "Dream.Edge"
+               }, 
+               "4": {
+                    "source": "St2", 
+                    "destination": "E1", 
+                    "data": {}, 
+                    "_class": "Dream.Edge"
+               }	
+			}
+		},
+		"_class": "Dream.Simulation", 
+		"general": {
+          "maxSimTime": "1440", 
+          "_class": "Dream.Configuration", 
+          "confidenceLevel": "0.95", 
+          "trace": "No", 
+		  "seed":1,
+          "numberOfReplications": "1"
+		} 
+}

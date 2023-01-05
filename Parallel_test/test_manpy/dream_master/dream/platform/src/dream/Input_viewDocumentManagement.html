@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Manage document</title>
+    <script src="../<%= copy.rsvp.relative_dest %>" type="text/javascript"></script>
+    <script src="../<%= copy.renderjs.relative_dest %>" type="text/javascript"></script>
+    <script src="../<%= curl.jquery.relative_dest %>" type="text/javascript"></script>
+    <script src="../<%= curl.jquerymobilejs.relative_dest %>" type="text/javascript"></script>
+
+    <script src="mixin_gadget.js" type="text/javascript"></script>
+    <script src="mixin_promise.js" type="text/javascript"></script>
+    <script src="Input_viewDocumentManagement.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <a class="export_link ui-btn ui-btn-inline ui-icon-action ui-btn-icon-right">Export</a>
+    <form id="export_form" style="display:none" method="post" action="../../postJSONData">
+      <textarea id="export_json" name="data"></textarea>
+    </form>
+
+    <form class="knowledge_form">
+      <button type="submit" class="ui-btn ui-btn-b ui-btn-inline
+      ui-icon-refresh ui-btn-icon-right">Run Knowledge Extraction Tool</button>
+    </form>
+    <form class="delete_form">
+      <button type="submit" class="ui-btn ui-btn-b ui-btn-inline ui-icon-delete ui-btn-icon-right" title="Permanently delete this model">Delete Document</button>
+    </form>
+  </body>
+</html>

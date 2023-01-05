@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../lib/jquery-ui.css">
+    <link rel="stylesheet" href="../lib/jquerymobile.css">
+    <link rel="stylesheet" href="jsplumb.css">
+
+    <script src="../lib/jquery.js"></script>
+    <script src="../lib/jquery-ui.js"></script>
+    <script src="../lib/jquerymobile.js"></script>
+    <script src="../lib/rsvp.min.js"></script>
+    <script src="../lib/renderjs.min.js"></script>
+    <script src="../lib/jquery.jsplumb.js"></script>
+    <script src="../lib/handlebars.min.js"></script>
+
+    <script src="../dream/mixin_gadget.js"></script>
+    <script src="../dream/mixin_promise.js"></script>
+    <script src="jsplumb.js"></script>
+
+    <script id="node-template" type="text/x-handlebars-template">
+      <div class="window {{class}}"
+           id="{{element_id}}"
+           title="{{title}}">
+        {{name}}
+        <div class="ep"></div>
+      </div>
+    </script>
+    <script id="popup-edit-template" type="text/x-handlebars-template">
+      <div id="edit-popup" data-position-to="origin">
+        <div data-role="header" data-theme="a">
+          <h1 class="node_class">Edit properties</h1>
+          <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+        </div>
+        <br/>
+        <form class="ui-content">
+          <fieldset></fieldset>
+          <input type="button" value="Delete">
+          <input type="submit" value="Validate">
+        </form>
+      </div>
+    </script>
+  </head>
+  <body>
+    <div id="main"></div>
+    <div class="dummy_window"></div>
+  </body>
+</html>
