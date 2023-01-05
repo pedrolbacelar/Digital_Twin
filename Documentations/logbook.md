@@ -58,6 +58,7 @@
   - Try to follow the documentation to understand better how ManPy works and see until when it's possible to replicate the examples even without using the right version of the ManPy (because we're using one from the Digital Twin and not the "Dream" one)
   - Try to run the examples and replicate differents 
   - Start testing the functions of the Digital Twin in case isoleted
+  - Test the SED with Simpy, maybe we can use directly this library instead of ManPy
  
   
 </details>
