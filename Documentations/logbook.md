@@ -1,3 +1,30 @@
+
+<details>
+  <summary>06/01/2023</summary>
+  Retired to install ManPy available from ManPy's github repository: https://github.com/nexedi/dream. The docuementation for ManPy which had the installation guidelines are available at https://github.com/Nexedi/dream/raw/master/ManPy_documentation.pdf.
+  As per the guidelines in the abaove documentation, running setup.py file inside the package should have installed ManPy and related packages. The installation was tried with different perspectives including trying to install outside the virtual environment. But it gave out following error:
+  
+  ```
+  ERROR: Could not find a version that satisfies the requirement setup.py (from versions: none)
+  ERROR: No matching distribution found for setup.py
+  ```
+  
+  One of the probable solution was to install the required dependencies manually before executing the setup.py file. The requirements were obtained from the list of requirements inside the setup.py script. Still the above mentioned error was repeated. Following were the requiremnts mentioned:
+  - flask
+  - SimPy>=3
+  - xlrd
+  - xlwt
+  - pyparsing
+  - pydot
+  - numpy
+  - zope.dottedname
+  - rpy2
+  - pulp
+  - tablib
+  - mysqlclient
+  
+</details>
+
 <details>
   <summary>05/01/2023</summary>
   
@@ -62,3 +89,4 @@
  
   
 </details>
+
