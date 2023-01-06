@@ -13,6 +13,23 @@
 
 <details>
   <summary>06/01/2023</summary>
+  
+  <details>
+  <summary>Pedro</summary>
+    
+trying to install SimPy solving the following issues:
+- issue  (https://github.com/pedrolbacelar/Digital_Twin/issues/46#issue-1522359636)
+- issue (https://github.com/pedrolbacelar/Digital_Twin/issues/44#issue-1522302420)
+
+Testing the simpy and writing the documentation:
+- [simpy document](Documentations/simpy_tests.md)  
+
+    
+  </details>
+  
+  <tab>
+  <details>
+  <summary>Alex</summary>
   ManPy package installed using the following command does not have any simulation related files inside the library.
   
   ```python
@@ -125,7 +142,8 @@ It was also noticed that the scripts had problem importing functions and were gi
   Error: Module not Found
   ```
   Given the difficulties in DREAM, it is better to move to the existing ManPy and test for functioning of its modules and compatibility with digital twin codes. If that also fails, it would be better to move SimPy, given that the codes might have to be reworked.
-  
+ </details> 
+</tab>
 </details>
 
 [//]: # (======================================================================================================)
