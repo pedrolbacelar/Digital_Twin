@@ -1,0 +1,99 @@
+image: python
+
+stages:
+  - build
+  - test
+  - deploy
+
+build:
+  stage: build
+  script:
+    - python setup.py sdist
+    - python -m pip install dist/*.tar.gz
+    - python -c 'import simpy; print(simpy.__version__)'
+    - python -m pip uninstall --yes --quiet simpy
+    - python setup.py bdist_wheel
+    - python -m pip install dist/*.whl
+    - python -c 'import simpy; print(simpy.__version__)'
+    - python -m pip uninstall --yes --quiet simpy
+  artifacts:
+    paths:
+      - dist
+
+python36:
+  image: python:3.6
+  stage: test
+  script:
+    - python -m pip install tox
+    - python -m tox -e py36
+
+python37:
+  image: python:3.7
+  stage: test
+  script:
+    - python -m pip install tox
+    - python -m tox -e py37
+
+python38:
+  image: python:3.8
+  stage: test
+  script:
+    - python -m pip install tox
+    - python -m tox -e py38
+
+python39:
+  image: python:3.9
+  stage: test
+  script:
+    - python -m pip install tox
+    - python -m tox -e py39
+
+python310:
+  image: python:3.10
+  stage: test
+  script:
+    - python -m pip install tox
+    - python -m tox -e py310
+
+pypy3:
+  image: pypy:3
+  stage: test
+  script:
+    - pypy3 -m pip install tox
+    - pypy3 -m tox -e pypy3
+
+doctest:
+  stage: test
+  script:
+    - python -m pip install tox
+    - python -m tox -e docs
+
+flake8:
+  stage: test
+  script:
+    - python -m pip install tox
+    - python -m tox -e flake8
+
+mypy:
+  stage: test
+  script:
+    - python -m pip install tox
+    - python -m tox -e mypy
+
+twine-check:
+  stage: test
+  dependencies:
+    - build
+  script:
+    - python -m pip install twine
+    - python -m twine check dist/*
+
+pypi:
+  stage: deploy
+  dependencies:
+    - build
+  only:
+    - tags
+  script:
+    - python -m pip install twine
+    - python -m twine upload --non-interactive dist/*

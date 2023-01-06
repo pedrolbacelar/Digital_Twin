@@ -1,0 +1,10 @@
+[build-system]
+requires = [
+    "setuptools>=42",
+    "setuptools_scm[toml]>=3.4",
+    "wheel",
+]
+build-backend = "setuptools.build_meta"
+
+## TODO: The presence of this section breaks tox running pypy3 on GitLab CI.
+# [tool.setuptools_scm]
