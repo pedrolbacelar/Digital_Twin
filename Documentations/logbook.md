@@ -22,7 +22,7 @@ trying to install SimPy solving the following issues:
 - issue (https://github.com/pedrolbacelar/Digital_Twin/issues/44#issue-1522302420)
 
 Testing the simpy and writing the documentation:
-- [simpy document](Documentations/simpy_tests.md)  
+- [simpy document](https://github.com/pedrolbacelar/Digital_Twin/blob/c3cff914a02c034b170190ae5d6fe802fdb0cf82/Documentations/simpy_tests.md)  
 
     
   </details>
