@@ -1,15 +1,15 @@
 
-<details>
+<details open>
   <summary>06/01/2023</summary>
   ManPy package installed using the following command does not have any simulation related files inside the library.
   
   ```python
   python3 -m pipenv install manpy
-  ```
+```
   
   It was first noticed while trying to run the following code:
   
-
+```python
     import manpy
     # Create the simulation
     sim = manpy.Simulation()
@@ -43,8 +43,7 @@
     print(f"Total number of entities: {sink.number_of_entities}")
     print(f"Utilization of Machine 1: {machine1.utilization:.2f}")
     print(f"Utilization of Machine 2: {machine2.utilization:.2f}")
-  
-    ```
+```
   
   It was then confirmed by checking the library contents directly at the site of library installation.
   
