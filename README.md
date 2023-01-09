@@ -50,7 +50,7 @@ The logbook is in use since the start of the year 2023 (05/01/2023).
   - <details>
      <summary>January, 2023</summary>
 
-
+     * [09-01-2023 - Monday](Documentations/logbook/09-01-2023.md) 
      * [06-01-2023 - Friday](Documentations/logbook/06-01-2023.md) 
      * [05-01-2023 - Thursday](Documentations/logbook/05-01-2023.md)
 
