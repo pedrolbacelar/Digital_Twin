@@ -19,8 +19,10 @@ Given that the idea is to share as much information as possible, this tutorials 
   
 <details>
   <summary>SOFTWARE DOCUMENTATIONS</summary>
-  Following folder contains instructions an documentations of various softwares and libraries.
   
+  Following folder contains instructions an documentations of various softwares and libraries.
+  * [ManPy_documentation](Documentations/Software Documentations/ManPy_documentation.pdf)
+  * [SimPy_documentation](Documentations/Software Documentations/SimPy_documentation.pdf)
   
 </details>  
 
