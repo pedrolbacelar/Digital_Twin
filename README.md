@@ -17,14 +17,27 @@ Given that the idea is to share as much information as possible, this tutorials 
 
 </details>
   
-<details>
-  <summary>SOFTWARE DOCUMENTATIONS</summary>
+<details open>
+<summary>SOFTWARE</summary>
   
-  Following folder contains instructions an documentations of various softwares and libraries.
-  * [ManPy_documentation](Documentations/Software_Documentations/ManPy_documentation.pdf)
-  * [SimPy_documentation](Documentations/Software_Documentations/SimPy_documentation.pdf)
+  - <details>
+    <summary>First Steps</summary>
+
+    Following folder contains instructions for testing and start woring with a software or package.
+    * [simpy_tests](Documentations/simpy_tests.md)
+
+    </details> 
   
-</details>  
+  - <details>
+    <summary>Software Documentations</summary>
+
+    Following folder contains instructions an documentations of various softwares and libraries.
+    * [ManPy_documentation](Documentations/Software_Documentations/ManPy_documentation.pdf)
+    * [SimPy_documentation](Documentations/Software_Documentations/SimPy_documentation.pdf)
+
+    </details> 
+    
+  </details>  
 
 <details>
   <summary>PRESENTATIONS</summary>
@@ -40,7 +53,7 @@ Given that the idea is to share as much information as possible, this tutorials 
 
 </details>
   
-<details>
+<details open>
   <summary>LOG BOOK</summary>
 
 
