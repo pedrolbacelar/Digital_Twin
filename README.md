@@ -45,7 +45,6 @@ Given that the idea is to share as much information as possible, this tutorials 
 
 
 Followig folder contains the daily activity log of the developement of Digital twin.
-
 The logbook is in use since the start of the year 2023 (05/01/2023).
 
   - <details>
