@@ -4,8 +4,9 @@ This readme contains all the learns and tutorials necessary to run the Digital T
 Given that the idea is to share as much information as possible, this tutorials are going to be split between different sections as follow:
 
 <details>
-  <summary>Basics instalations</summary>
-
+  <summary>BASICS INSTALLATIONS</summary>
+  
+  Following folder contains guidelines for basic entities.
   * [📂 Setting up virtual enviorment with pipenv](Documentations/Basics/Virtual_Environment_with_Pipenv.md)
   * [💽 InfluxDB](Documentations/Basics/InfluxDB.md)
   * [🦟 MQTT and Mosquitto](Documentations/Basics/MQTT_Broker.md)
@@ -16,21 +17,24 @@ Given that the idea is to share as much information as possible, this tutorials 
 
 </details>
   
-### Software
-
-#### First steps
-* 
+<details>
+  <summary>SOFTWARE DOCUMENTATIONS</summary>
+  Following folder contains instructions an documentations of various softwares and libraries.
+  
+  
+</details>  
 
 <details>
-  <summary>Presentations</summary>
+  <summary>PRESENTATIONS</summary>
 
-* [[Presentation]_Bi-Weekly-1 _11-10-2022](Documentations/Presentations/[Presentation]_Bi-Weekly-1%20_11-10-2022.pdf)
-* [[Presentation]_Bi-Weekly-2_28-10-2022](Documentations/Presentations/[Presentation]_Bi-Weekly-2_28-10-2022.pdf)
-* [[Presentation]_Bi-Weekly-3_11-11-2022](Documentations/Presentations/[Presentation]_Bi-Weekly-3_11-11-2022.pdf)
-* [[Presentation]_Bi-Weekly-4_18-11-2022](Documentations/Presentations/[Presentation]_Bi-Weekly-4_18-11-2022.pdf)
-* [[Presentation]_Bi-Weekly-5_05-12-2022](Documentations/Presentations/[Presentation]_Bi-Weekly-5_05-12-2022.pdf)
-* [[Presentation]_Bi-Weekly-Project-Review_16-12-2022](Documentations/Presentations/[Presentation]_Bi-Weekly-Project-Review_16-12-2022.pdf)
-* [[Presentation]_Bi-Weekly-Use-Case _07-12-2022](Documentations/Presentations/[Presentation]_Bi-Weekly-Use-Case_07-12-2022.pdf)
+  Following folder contains presentations presented during the progress  of Digital Twin Progress.
+  * [[Presentation]_Bi-Weekly-1 _11-10-2022](Documentations/Presentations/[Presentation]_Bi-Weekly-1%20_11-10-2022.pdf)
+  * [[Presentation]_Bi-Weekly-2_28-10-2022](Documentations/Presentations/[Presentation]_Bi-Weekly-2_28-10-2022.pdf)
+  * [[Presentation]_Bi-Weekly-3_11-11-2022](Documentations/Presentations/[Presentation]_Bi-Weekly-3_11-11-2022.pdf)
+  * [[Presentation]_Bi-Weekly-4_18-11-2022](Documentations/Presentations/[Presentation]_Bi-Weekly-4_18-11-2022.pdf)
+  * [[Presentation]_Bi-Weekly-5_05-12-2022](Documentations/Presentations/[Presentation]_Bi-Weekly-5_05-12-2022.pdf)
+  * [[Presentation]_Bi-Weekly-Project-Review_16-12-2022](Documentations/Presentations/[Presentation]_Bi-Weekly-Project-Review_16-12-2022.pdf)
+  * [[Presentation]_Bi-Weekly-Use-Case _07-12-2022](Documentations/Presentations/[Presentation]_Bi-Weekly-Use-Case_07-12-2022.pdf)
 
 </details>
   
