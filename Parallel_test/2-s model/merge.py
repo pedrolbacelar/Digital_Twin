@@ -32,32 +32,49 @@ class Part():
         self.termination_time = termination_time
 
 class Machine():
-    def __init__(self, env, name, queue_in, queue_out, final_machine = False):
+    def __init__(self, env, id, queue_in, queue_out, process_time, capacity, blocking_policy, final_machine = False):
         self.env = env
-        self.name = name
+        self.name = 'machine_'+str(id)
         self.queue_in = queue_in
         self.queue_out = queue_out
+        self.process_time = process_time
+        self.capacity = capacity
+        self.blocking_policy = blocking_policy
         self.final_machine = final_machine
 
     def run(self):
         while True:
+            part = yield self.queue_in.get()
+            print(f'{self.name} got part at {env.now}')
+
+            #--- blocking policy for Blocking Before Service (BBS)
+            if self.blocking_policy == 'BBS':
+                while self.queue_out.get_len()>=self.queue_out.capacity:
+                    yield
+
+            #--- processing of the part depending on part type                    
+            yield env.timeout(self.process_time[part.get_type()])  # processing time stored in a dictionary
+            
+            #--- blocking policy for Blocking After Service (BAS)
+            if self.blocking_policy == 'BAS':
+                while self.queue_out.get_len()>=self.queue_out.capacity:
+                    yield
+
+
+            #------ Add the part in the next Queue ------
+
             if self.final_machine == False:
-                resource = yield self.queue_in.get()
-                print(f'{self.name} got resource at {env.now}')
-                yield env.timeout(5)  # processing time
-                self.queue_out.put(resource)
-                print(f'{self.name} put resource in {self.queue_out.name} at {env.now}')
+                #--- Put the part in the next queue as usual
+                self.queue_out.put(part)
+                print(f'{self.name} put part in {self.queue_out.name} at {env.now}')
 
             if self.final_machine == True:
-                resource = yield self.queue_in.get()
-                print(f'{self.name} got resource at {env.now}')
-                yield env.timeout(5)  # processing time
-
-                terminator = Terminator(env= env, loop_type= "closed", resource = resource)
+                #--- Terminate
+                terminator = Terminator(env= env, loop_type= "closed", part = part)
                 terminator.terminate_part()
                 
-               
-                new_part = Part(id= resource.get_id() + 1, type= resource.get_type(), location= 0, creation_time= env.now)
+               #--- Replace part
+                new_part = Part(id= part.get_id() + 100, type= part.get_type(), location= 0, creation_time= env.now)
                 print(f'{new_part.name} replaced at {env.now}')
                 self.queue_out.put(new_part)
 
@@ -69,6 +86,9 @@ class Queue():
         self.id = id
         self.name = "Queue " + str(self.id)
         self.store = simpy.Store(env, capacity=capacity)
+        self.capacity = capacity
+        self.queue_strength = None   # add initial condition
+
 
     def put(self, resource):
         return self.store.put(resource)
@@ -78,6 +98,10 @@ class Queue():
 
     def get_all_items(self):
         return self.store.items
+
+    def get_len(self):
+        self.queue_strength = len(self.store.items)
+        return self.queue_strength
 
 
 class Generator():
@@ -98,16 +122,16 @@ class Generator():
 
 
 class Terminator():
-    def __init__(self, env=None, loop_type=None, resource=None):
+    def __init__(self, env=None, loop_type=None, part=None):
         self.loop_type = loop_type
-        self.resource = resource
+        self.part = part
         self.env = env
         self.store = simpy.Store(env) #Terminator with infinity capacity
     
     def terminate_part(self):
-        self.resource.set_termination(self.env.now) #set the termination time
-        self.store.put(self.resource)
-        print(f'{self.resource.name} terminated at {self.env.now}')
+        self.part.set_termination(env.now) #set the termination time
+        self.store.put(self.part)
+        print(f'xxx {self.part.name} terminated at {self.env.now} xxx')
 
 
 #========================================================================    
@@ -139,8 +163,12 @@ for queue in queue_vector:
     print(queue.name + ": ", queue.get_all_items())
 
 #================== Simple Model ==================
-machine1 = Machine(env=env, name= "Machine 1", queue_in= queue_vector[0], queue_out= queue_vector[1])      
-machine2 = Machine(env=env, name= "Machine 2", queue_in= queue_vector[1], queue_out= queue_vector[0], final_machine= True)      
+process_time_1 = {'A':5, 'B':15}
+process_time_2 = {'A':5, 'B':17}
+
+
+machine1 = Machine(env=env, id=0, process_time=process_time_1, queue_in= queue_vector[0],blocking_policy="BAS", capacity= 1, queue_out= queue_vector[1])      
+machine2 = Machine(env=env, id=1, process_time=process_time_2,  queue_in= queue_vector[1], blocking_policy= "BAS",  capacity= 1, queue_out= queue_vector[0], final_machine= True)      
 
 env.process(machine1.run())
 env.process(machine2.run())
