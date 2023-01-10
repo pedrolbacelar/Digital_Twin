@@ -30,17 +30,17 @@ class Machine:
             # processinf of the part depending on part type
                         
             yield env.timeout(self.process_time[resource.get_type()])  # processing time stored in a dictionary
-            self.queue_out.put(resource)
+
 
             # blocking policy for Blocking After Service (BAS)
             if self.blocking_policy == 'BAS':
                 while self.queue_out.get_len()>=self.queue_out.capacity:
                     yield
-
+            self.queue_out.put(resource)
             print(f'{self.name} put resource in {self.queue_out.name} at {env.now}')
 
 class Queue:
-    def __init__(self, env, id, capacity, machine_in, machine_out):
+    def __init__(self, env, id, capacity, machine_in, machine_out):  # machine_in/out might be contradictory.
         self.env = env
         self.id = id
         self.name = 'queue_'+str(id)
