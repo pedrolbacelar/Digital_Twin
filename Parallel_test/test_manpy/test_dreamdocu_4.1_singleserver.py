@@ -1,4 +1,3 @@
-# from dream_master.dream.simulation.ManPyObject import ManPyObject
 from manpy.simulation.imports import Source, Queue, Machine, Exit
 from manpy.simulation.Globals import runSimulation
 
