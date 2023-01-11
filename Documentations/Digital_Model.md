@@ -6,6 +6,8 @@ This documentation initally refers to this [commit](https://github.com/pedrolbac
 ## Source Code
 
 ```python
+import simpy
+
 class Part():
     def __init__(self, id, type, location, creation_time, termination_time = None):
         self.id = id
@@ -80,7 +82,9 @@ class Machine():
                 terminator.terminate_part()
                 
                #--- Replace part
-                new_part = Part(id= part.get_id() + 100, type= part.get_type(), location= 0, creation_time= env.now)
+                global last_part_id # variable assigned with datab from part_vector
+                last_part_id += 1   
+                new_part = Part(id= last_part_id, type= part.get_type(), location= 0, creation_time= env.now)
                 print(f'{new_part.name} replaced at {env.now}')
                 self.queue_out.put(new_part)
 
@@ -145,20 +149,16 @@ class Terminator():
 #--- Initial Part Generation (Maybe automated in the future)
 part_vector = [Part(id= 0,type= "A", location= 0, creation_time= 0),
             Part(id= 1,type= "A", location= 0, creation_time= 0),
-            Part(id= 2,type= "A", location= 2, creation_time= 0),
-            Part(id= 3,type= "A", location= 3, creation_time= 0),
-            Part(id= 4,type= "A", location= 3, creation_time= 0),
-            Part(id= 5,type= "A", location= 3, creation_time= 0)]
+]
 
+last_part_id = 2 # id used by the last part created # initialised here based on data from part_vector
+print("-------Simulation initiated with ", last_part_id, " parts in the queues-------")
 #--- Queue Creation (should come from the Translator)
 env = simpy.Environment()
 
 
 queue_vector = [Queue(env = env, id= 0, capacity= 5),
-            Queue(env = env, id= 1, capacity= 5),
-            Queue(env = env, id= 2, capacity= 5),
-            Queue(env = env, id= 3, capacity= 5),
-            Queue(env = env, id= 4, capacity= 5)]
+            Queue(env = env, id= 1, capacity= 5),]
 
 #--- Initialize Generator
 generator_initial = Generator(env= env, loop_type="closed", part_vector= part_vector, queue_vector= queue_vector)
@@ -181,6 +181,8 @@ env.process(machine2.run())
 
 
 env.run(until=20)
+print("------- End of simulation -------")
+print("The last part created is part id: ",last_part_id)
 
 ```
 
@@ -307,20 +309,16 @@ First we start creating the Queues and the Parts:
 #--- Initial Part Generation (Maybe automated in the future)
 part_vector = [Part(id= 0,type= "A", location= 0, creation_time= 0),
             Part(id= 1,type= "A", location= 0, creation_time= 0),
-            Part(id= 2,type= "A", location= 2, creation_time= 0),
-            Part(id= 3,type= "A", location= 3, creation_time= 0),
-            Part(id= 4,type= "A", location= 3, creation_time= 0),
-            Part(id= 5,type= "A", location= 3, creation_time= 0)]
+]
 
+last_part_id = 2 # id used by the last part created # initialised here based on data from part_vector
+print("-------Simulation initiated with ", last_part_id, " parts in the queues-------")
 #--- Queue Creation (should come from the Translator)
 env = simpy.Environment()
 
 
 queue_vector = [Queue(env = env, id= 0, capacity= 5),
-            Queue(env = env, id= 1, capacity= 5),
-            Queue(env = env, id= 2, capacity= 5),
-            Queue(env = env, id= 3, capacity= 5),
-            Queue(env = env, id= 4, capacity= 5)]
+            Queue(env = env, id= 1, capacity= 5),]
 
 #--- Initialize Generator
 generator_initial = Generator(env= env, loop_type="closed", part_vector= part_vector, queue_vector= queue_vector)
