@@ -373,6 +373,49 @@ The final_machine attribute on machine2 is set to True, which means that the par
 The `env.process()` function is used to schedule the execution of the run() method of the machine.
 
 
+### Expected Results
+
+The following results are expected to be generated from the previous simulation:
+
+```
+-------Simulation initiated with  2  parts in the queues-------
+Queue 0:  [<__main__.Part object at 0x0000021D30BACFD0>, <__main__.Part object at 0x0000021D30BACFA0>]
+Queue 1:  []
+machine_0 got part at 0
+machine_0 put part in Queue 1 at 5
+machine_0 got part at 5
+machine_1 got part at 5
+machine_0 put part in Queue 1 at 10
+xxx Part 0 terminated at 10 xxx
+Part 3 replaced at 10
+machine_1 got part at 10
+machine_0 got part at 10
+xxx Part 1 terminated at 15 xxx
+Part 4 replaced at 15
+machine_0 put part in Queue 1 at 15
+machine_0 got part at 15
+machine_1 got part at 15
+------- End of simulation -------
+The last part created is part id:  4
+```
+
+The results of the simulation show the state of the queues at the end of the simulation and the activity of the machines during the simulation.
+
+The simulation starts with two parts in queue 0, part 0 and part 1, and all other queues are empty.
+
+machine_0 gets the part from queue 0 at time 0, processes it and puts it in queue 1 at time 5.
+It then repeats the process for the next part from queue 0 and put it in queue 1 at time 10.
+
+machine_1 gets the part from queue 1 at time 5, processes it and terminates it at time 10. A new part with ID 103 is created at time 10 to replace the terminated part 0.
+
+machine_1 repeat the same process with part 1 and terminates it at time 15. A new part with ID 104 is created at time 15 to replace the terminated part 1.
+
+machine_0 get the last part from queue 1 at time 15 and put it back in queue 1
+
+At the end of the simulation all queues are empty, the two original parts were replaced by two new parts (ID 103 and 104), which shows that they were terminated.
+
+
+
 
 
 
