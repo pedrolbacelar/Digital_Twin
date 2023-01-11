@@ -141,22 +141,16 @@ class Terminator():
 #--- Initial Part Generation (Maybe automated in the future)
 part_vector = [Part(id= 0,type= "A", location= 0, creation_time= 0),
             Part(id= 1,type= "A", location= 0, creation_time= 0),
-            Part(id= 2,type= "A", location= 2, creation_time= 0),
-            Part(id= 3,type= "A", location= 3, creation_time= 0),
-            Part(id= 4,type= "A", location= 3, creation_time= 0),
-            Part(id= 5,type= "A", location= 3, creation_time= 0)]
+]
 
-last_part_id = 5 # id used by the last part created # initialised here based on data from part_vector
-print("-------Simulation initiated with ", last_part_id + 1, " parts in the queues-------")
+last_part_id = 2 # id used by the last part created # initialised here based on data from part_vector
+print("-------Simulation initiated with ", last_part_id, " parts in the queues-------")
 #--- Queue Creation (should come from the Translator)
 env = simpy.Environment()
 
 
 queue_vector = [Queue(env = env, id= 0, capacity= 5),
-            Queue(env = env, id= 1, capacity= 5),
-            Queue(env = env, id= 2, capacity= 5),
-            Queue(env = env, id= 3, capacity= 5),
-            Queue(env = env, id= 4, capacity= 5)]
+            Queue(env = env, id= 1, capacity= 5),]
 
 #--- Initialize Generator
 generator_initial = Generator(env= env, loop_type="closed", part_vector= part_vector, queue_vector= queue_vector)
