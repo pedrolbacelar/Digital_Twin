@@ -4,7 +4,7 @@ This readme contains all the learns and tutorials necessary to run the Digital T
 Given that the idea is to share as much information as possible, this tutorials are going to be split between different sections as follow:
 
 <details>
-  <summary>BASICS INSTALLATIONS</summary>
+  <summary>🐣 BASICS INSTALLATIONS</summary>
   
   Following folder contains guidelines for basic entities.
   * [📂 Setting up virtual enviorment with pipenv](Documentations/Basics/Virtual_Environment_with_Pipenv.md)
@@ -17,14 +17,23 @@ Given that the idea is to share as much information as possible, this tutorials 
 
 </details>
   
-<details open>
-<summary>SOFTWARE</summary>
+<details>
+<summary>🐥 BASICS CODES</summary>
+  
+  - <details>
+    <summary>Basic Python</summary>
+    
+    Basic required knowledge in python
+    * [Importing Classes](https://github.com/pedrolbacelar/Digital_Twin/blob/main/Documentations/python/importing_class.md)
+    * [Creating Libraries](https://github.com/pedrolbacelar/Digital_Twin/blob/main/Documentations/python/creating_libraries.md)
+    
+    </details> 
   
   - <details>
     <summary>First Steps</summary>
 
     Following folder contains instructions for testing and start woring with a software or package.
-    * [simpy_tests](Documentations/simpy_tests.md)
+    * [simpy_tests](https://github.com/pedrolbacelar/Digital_Twin/blob/main/Documentations/SimPy/simpy_tests.md)
 
     </details> 
   
@@ -37,10 +46,18 @@ Given that the idea is to share as much information as possible, this tutorials 
 
     </details> 
     
-  </details>  
+  </details> 
+  
+<details >
+  <summary> 🤖 Digital Model</summary>
+  
+  - [Digital Model Documentation (0.0.1)](https://github.com/pedrolbacelar/Digital_Twin/blob/main/Documentations/Digital%20Model/Digital_Model%20(0.0.1).md)
+  
+</details> 
+  
 
 <details>
-  <summary>PRESENTATIONS</summary>
+  <summary>🗣️ PRESENTATIONS</summary>
 
   Following folder contains presentations presented during the progress  of Digital Twin Progress.
   * [[Presentation]_Bi-Weekly-1 _11-10-2022](Documentations/Presentations/[Presentation]_Bi-Weekly-1%20_11-10-2022.pdf)
@@ -54,7 +71,7 @@ Given that the idea is to share as much information as possible, this tutorials 
 </details>
   
 <details open>
-  <summary>LOG BOOK</summary>
+  <summary>🦜 LOG BOOK</summary>
 
 
 Followig folder contains the daily activity log of the developement of Digital twin.
