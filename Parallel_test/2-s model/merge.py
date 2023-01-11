@@ -74,7 +74,9 @@ class Machine():
                 terminator.terminate_part()
                 
                #--- Replace part
-                new_part = Part(id= part.get_id() + 100, type= part.get_type(), location= 0, creation_time= env.now)
+                global last_part_id # variable assigned with datab from part_vector
+                last_part_id += 1   
+                new_part = Part(id= last_part_id, type= part.get_type(), location= 0, creation_time= env.now)
                 print(f'{new_part.name} replaced at {env.now}')
                 self.queue_out.put(new_part)
 
@@ -144,6 +146,8 @@ part_vector = [Part(id= 0,type= "A", location= 0, creation_time= 0),
             Part(id= 4,type= "A", location= 3, creation_time= 0),
             Part(id= 5,type= "A", location= 3, creation_time= 0)]
 
+last_part_id = 5 # id used by the last part created # initialised here based on data from part_vector
+print("-------Simulation initiated with ", last_part_id + 1, " parts in the queues-------")
 #--- Queue Creation (should come from the Translator)
 env = simpy.Environment()
 
@@ -175,3 +179,5 @@ env.process(machine2.run())
 
 
 env.run(until=20)
+print("------- End of simulation -------")
+print("The last part created is part id: ",last_part_id)
