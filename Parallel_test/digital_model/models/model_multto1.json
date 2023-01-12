@@ -1,0 +1,64 @@
+{
+    "nodes": [
+        {
+            "activity": 1,
+            "predecessors": [
+                
+            ],
+            "successors": [
+                3
+            ],
+            "frequency": 999,
+            "capacity": 1,
+            "contemp": 414,
+            "cluster": 1
+        },
+        {
+            "activity": 2,
+            "predecessors": [
+                
+            ],
+            "successors": [
+                3
+            ],
+            "frequency": 999,
+            "capacity": 1,
+            "contemp": 379,
+            "cluster": 2
+        },
+        {
+            "activity": 3,
+            "predecessors": [
+                1,
+                2
+            ],
+            "successors": [
+                
+            ],
+            "frequency": 999,
+            "capacity": 1,
+            "contemp": 379,
+            "cluster": 2
+        }
+    ],
+    "arcs": [
+        {
+            "arc": [
+                1,
+                3
+            ],
+            "capacity": 10,
+            "frequency": 1000,
+            "contemp": 92
+        },
+        {
+            "arc": [
+                2,
+                3
+            ],
+            "capacity": 10,
+            "frequency": 1000,
+            "contemp": 149
+        }
+    ]
+}

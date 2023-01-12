@@ -1,0 +1,54 @@
+{
+    "nodes": [
+        {
+            "activity": 1,
+            "predecessors": [
+                2
+            ],
+            "successors": [
+                2
+            ],
+            "frequency": 999,
+            "capacity": 1,
+            "contemp": 5,
+            "cluster": 1
+        },
+        {
+            "activity": 2,
+            "predecessors": [
+                1
+            ],
+            "successors": [
+                2
+            ],
+            "frequency": 999,
+            "capacity": 1,
+            "contemp": 5,
+            "cluster": 2
+        }
+    ],
+    "arcs": [
+        {
+            "arc": [
+                1,
+                2
+            ],
+            "capacity": 10,
+            "frequency": 1000,
+            "contemp": 1
+        },
+        {
+            "arc": [
+                2,
+                1
+            ],
+            "capacity": 10,
+            "frequency": 1000,
+            "contemp": 1
+        }
+    ],
+    "initial":[
+        0,
+        5
+    ]
+}
