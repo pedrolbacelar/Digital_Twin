@@ -94,6 +94,33 @@ class MyClass1:
 ```
 
 
+## More ways:
+
+There are a few ways to import a class from a previous folder in Python:
+
+Use the full path to the module:
+```python
+from path.to.previous.folder import MyClass
+```
+
+Add the path to the previous folder to the system path: You can use the sys.path.append() method to add the path to the previous folder to the system path. This will allow you to import modules from the previous folder without specifying the full path.
+```python
+import sys
+sys.path.append('path/to/previous/folder')
+from my_module import MyClass
+```
+
+Use relative imports: you can use the .. notation to go up one level in the directory hierarchy, then specify the path to the module.
+```python
+from ..previous_folder import MyClass
+```
+
+It's worth noting that the relative imports are based on the name attribute of the module, so if the module is run as the main module, the relative imports will be relative to the current working directory, but if the module is imported as a module, the relative imports will be relative to the location of the module file.
+
+Also, you can check the current path of your script using import os; print(os.getcwd()). This will print the current working directory path, and you can check if it's the correct folder or you are in a different location.
+
+Finally, if all the above methods don't work, you can check if the folder and the file you want to import are in the correct location, and also check if the names of the folder and file are written correctly.
+
 
 
 
