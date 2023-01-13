@@ -2,6 +2,12 @@ import simpy
 import json
 import matplotlib.pyplot as plt
 
+#--- Import simulation components
+from .components import Part
+from .components import Machine
+from .components import Queue
+from .components import Generator
+from .components import Terminator
 
 #--- Reload Package
 
@@ -11,12 +17,6 @@ importlib.reload(package.components) #reload this specifc module to upadte the c
 
 
 
-#--- Import simulation components
-from .components import Part
-from .components import Machine
-from .components import Queue
-from .components import Generator
-from .components import Terminator
 
 
 
