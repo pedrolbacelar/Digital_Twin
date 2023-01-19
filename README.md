@@ -70,14 +70,14 @@ Given that the idea is to share as much information as possible, this tutorials 
 
 </details>
   
-<details open>
+<details>
   <summary>🦜 LOG BOOK</summary>
 
 
 Followig folder contains the daily activity log of the developement of Digital twin.
 The logbook is in use since the start of the year 2023 (05/01/2023).
 
-  - <details open>
+  - <details>
      <summary>January, 2023</summary>
 
      * [10-01-2023 - Tuesday](Documentations/logbook/10-01-2023.md) 
