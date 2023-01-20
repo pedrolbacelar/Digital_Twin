@@ -74,7 +74,6 @@ class Model():
         generator_initial = Generator(env= self.env, loop_type="closed", part_vector= self.initial_parts, queue_vector= self.queues_vector)
         self.queues_vector = generator_initial.allocate_part()
 
-
     def model_translator(self):
         
 
@@ -133,9 +132,6 @@ class Model():
         plt.plot(parts_finished_id, parts_finished_time, '-o')
         plt.show()
         plt.savefig(f"figures/{self.name}.png")
-
-
-
 
     def get_model_components(self):
         return (self.machines_vector, self.queues_vector)
