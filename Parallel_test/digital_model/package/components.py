@@ -58,86 +58,96 @@ class Machine():
 
 
     def run(self):
-        
 
-        while True:
-            #xxx From Which Queue should I take a part? (plural) xxx
-            
+        with open('digital_event_logg.txt', 'w') as elog_file:
+            elog_file.write("cleaning")
 
-            if (self.allocated_part == True) or (self.allocated_part==False and self.new_part==False):
+
+        with open('digital_event_logg.txt', 'a') as elog_file:
+            elog_file.write(f"--- [{self.name}] writing on the file --- \n")
+            while True:
+                #xxx From Which Queue should I take a part? (plural) xxx
                 
-                for queue in self.queue_in: #MDSSSSSSSSS se nao tiver um yiel ele nao sai do processo!!!!
-                    queue_empty = queue.get_len() == 0
 
-                    if queue_empty:
-                        self.new_part = False
+                if (self.allocated_part == True) or (self.allocated_part==False and self.new_part==False):
                     
-                    else:
-                        try_to_get = queue.get() #Not necessary the yield
-                        part = try_to_get.value
-                        print(f'Time: {self.env.now} - {self.name} got {part.get_name()}')
-                        self.new_part = True
-                        break
+                    for queue in self.queue_in: #MDSSSSSSSSS se nao tiver um yiel ele nao sai do processo!!!!
+                        queue_empty = queue.get_len() == 0
 
-                    
-                    if self.counter_queue_in >= len(self.queue_in):
-                        yield self.env.timeout(self.waiting)
-
-                        self.counter_queue_in = 0
-                        break
-
-                    self.counter_queue_in +=1
-            
-            if self.new_part == True:
-
-                #xxx For What Queue should I put this part? xxx
-                for queue in self.queue_out:
-                    self.allocated_part = False
-                    if queue.get_len() >= queue.capacity: #queue  full
-                        pass
-
-                    else:
-                        #--- blocking policy for Blocking Before Service (BBS)
-                        if self.blocking_policy == 'BBS':
-                            while queue.get_len()>=queue.capacity:
-                                yield self.env.timeout(self.waiting)
-
-                        #--- processing of the part depending on part type                    
-                        yield self.env.timeout(self.process_time[part.get_type()])  # processing time stored in a dictionary
-                        #yield self.env.timeout(5)
-
-                        #--- blocking policy for Blocking After Service (BAS)
-                        if self.blocking_policy == 'BAS':
-                            while queue.get_len()>=queue.capacity:
-                                yield self.env.timeout(self.waiting)
-
-
-                        #------ Add the part in the next Queue ------
-                        if self.final_machine == False:
-                            #--- Put the part in the next queue as usual
-                            queue.put(part)
-                            self.allocated_part = True
-                            print(f'Time: {self.env.now} - {self.name} put {part.get_name()} in {queue.name}')
+                        if queue_empty:
+                            self.new_part = False
+                        
+                        else:
+                            try_to_get = queue.get() #Not necessary the yield
+                            part = try_to_get.value
+                            print(f'Time: {self.env.now} - [{self.name}] got {part.get_name()}')
+                            elog_file.write(f'Time: {self.env.now} - [{self.name}] got {part.get_name()} \n')
+                            self.new_part = True
                             break
 
-                        if self.final_machine == True:
-                            #--- Terminate
-                            self.terminator.terminate_part(part)
-                            
-                            #--- Replace part
-                            self.last_part_id += 1   
-                            new_part_produced = Part(id= self.last_part_id, type= part.get_type(), location= 0, creation_time= self.env.now)
-                            print(f'Time: {self.env.now} - {new_part_produced.name} replaced')
-                            queue.put(new_part_produced)
-                            self.allocated_part = True
-                            break
-                    
-                    if self.counter_queue_out >= len(self.queue_out):
-                        yield self.env.timeout(self.waiting)
+                        
+                        if self.counter_queue_in >= len(self.queue_in):
+                            yield self.env.timeout(self.waiting)
 
-                        self.counter_queue_out = 0
-                        break
-                    self.counter_queue_out += 1
+                            self.counter_queue_in = 0
+                            break
+
+                        self.counter_queue_in +=1
+                
+                if self.new_part == True:
+
+                    #xxx For What Queue should I put this part? xxx
+                    for queue in self.queue_out:
+                        self.allocated_part = False
+                        if queue.get_len() >= queue.capacity: #queue  full
+                            pass
+
+                        else:
+                            #--- blocking policy for Blocking Before Service (BBS)
+                            if self.blocking_policy == 'BBS':
+                                while queue.get_len()>=queue.capacity:
+                                    yield self.env.timeout(self.waiting)
+
+                            #--- processing of the part depending on part type                    
+                            yield self.env.timeout(self.process_time[part.get_type()])  # processing time stored in a dictionary
+                            #yield self.env.timeout(5)
+
+                            #--- blocking policy for Blocking After Service (BAS)
+                            if self.blocking_policy == 'BAS':
+                                while queue.get_len()>=queue.capacity:
+                                    yield self.env.timeout(self.waiting)
+
+
+                            #------ Add the part in the next Queue ------
+                            if self.final_machine == False:
+                                #--- Put the part in the next queue as usual
+                                queue.put(part)
+                                self.allocated_part = True
+                                print(f'Time: {self.env.now} - [{self.name}] put {part.get_name()} in {queue.name}')
+                                elog_file.write(f'Time: {self.env.now} - [{self.name}] put {part.get_name()} in {queue.name}\n')
+                                break
+
+                            if self.final_machine == True:
+                                #--- Terminate
+                                self.terminator.terminate_part(part)
+                                print(f'Time: {self.env.now} - [Terminator] xxx {part.name} terminated xxx')
+                                elog_file.write(f'Time: {self.env.now} - [Terminator] xxx {part.name} terminated xxx')
+                                
+                                #--- Replace part
+                                self.last_part_id += 1   
+                                new_part_produced = Part(id= self.last_part_id, type= part.get_type(), location= 0, creation_time= self.env.now)
+                                print(f'Time: {self.env.now} - [Terminator] {new_part_produced.name} replaced')
+                                elog_file.write(f'Time: {self.env.now} - [Terminator] {new_part_produced.name} replaced \n')
+                                queue.put(new_part_produced)
+                                self.allocated_part = True
+                                break
+                        
+                        if self.counter_queue_out >= len(self.queue_out):
+                            yield self.env.timeout(self.waiting)
+
+                            self.counter_queue_out = 0
+                            break
+                        self.counter_queue_out += 1
 
 
     #--- Defining Gets and Setsv.t
@@ -278,7 +288,7 @@ class Terminator():
     def terminate_part(self, part):
         part.set_termination(self.env.now) #set the termination time
         self.store.put(part)
-        print(f'Time: {self.env.now} - xxx {part.name} terminated xxx')
+        
     
     def get_all_items(self):
         return self.store.items

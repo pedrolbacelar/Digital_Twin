@@ -16,10 +16,6 @@ import package
 importlib.reload(package.components) #reload this specifc module to upadte the class
 
 
-
-
-
-
 #--- Class Model
 class Model():
     def __init__(self, name, env, model_path, initial= False, until= 20, part_type= "A", loop_type= "closed"):
@@ -121,17 +117,79 @@ class Model():
         self.env.run(until= self.until)
         print("### Simulation Done ###")
 
-    def analyze_results(self):
+    def analyze_results(self, options = ["all"]):
+        #--- Get the finished Parts and each Time
         parts_finished = self.terminator.get_all_items()
+        number_parts = len(parts_finished)
         parts_finished_time = []
         parts_finished_id = []
+        parts_creation_time = []
         for part in parts_finished:
             parts_finished_time.append(part.get_termination())
             parts_finished_id.append(part.get_id())
+            parts_creation_time.append(part.get_creation())
+        print("######## Running Analysis ########")
+        print(f"Number of Parts finished: {len(parts_finished)}")
+        print(f"Total time of Simulation: {self.until}")
+
+        def plot_finished():
+            plt.plot(parts_finished_id, parts_finished_time, '-o')
+            plt.show()
+            plt.savefig(f"figures/{self.name}.png")
+
+        #-- Function to calculate the throughput
+        def throughput():
+            th = number_parts / self.until
+            print(f">>> *** SYSTEM THROUGHPUT: {th} [parts / time unit] ***")
+
+        #-- Function to calculate the average cycle time
+        def avg_cycle_time():
+            sum_ct = 0
+            parts_cycle_time = []
+            for i in range(number_parts):
+                #-- calculate individual CT
+                parts_cycle_time.append(parts_finished_time[i] - parts_creation_time[i])
+                #-- Sum up every CT
+                sum_ct += parts_cycle_time[i]
+
+            #-- Print cycle time of each part
+            print(">>> Cycle Time of each part:")
+            print(parts_cycle_time)
+                
+            #-- Maximum and Minimum CT
+            max_CT = max(parts_cycle_time)
+            min_CT = min(parts_cycle_time)
+            print(f"- Maximum Cycle Time: {max_CT}")
+            print(f"- Minimum Cycle Time: {min_CT}")
+
+            #-- Avereage Cycle Time
+            avg_CT = sum_ct / number_parts
+            print(f"*** AVERAGE CYCLE TIME OF THE SYSTEM: {avg_CT} [time unit]***")
+
+
+        #--- Run selected analysis
+        if options[0] == "all":
+            print("-- All Analysis Selected --")
+            options = ["plot_finished", "throughput", "avg_cycle_time"]
+
+        for option in options:
+            if option == "plot_finished":
+                plot_finished()
+            if option == "throughput":
+                throughput()
+            if option == "avg_cycle_time":
+                avg_cycle_time()
+            
+        print("##########################")
+
+
+
+
+
+
+
+
         
-        plt.plot(parts_finished_id, parts_finished_time, '-o')
-        plt.show()
-        plt.savefig(f"figures/{self.name}.png")
 
     def get_model_components(self):
         return (self.machines_vector, self.queues_vector)
