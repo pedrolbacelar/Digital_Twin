@@ -80,7 +80,7 @@ class Machine():
                         else:
                             try_to_get = queue.get() #Not necessary the yield
                             part = try_to_get.value
-                            print(f'Time: {self.env.now} - [{self.name}] got {part.get_name()}')
+                            print(f'Time: {self.env.now} - [{self.name}] got {part.get_name()} from {queue.get_name()} (capacity= {queue.get_len()})')
                             elog_file.write(f'Time: {self.env.now} - [{self.name}] got {part.get_name()} \n')
                             self.new_part = True
                             break
@@ -88,7 +88,6 @@ class Machine():
                         
                         if self.counter_queue_in >= len(self.queue_in):
                             yield self.env.timeout(self.waiting)
-
                             self.counter_queue_in = 0
                             break
 
@@ -121,9 +120,9 @@ class Machine():
                             #------ Add the part in the next Queue ------
                             if self.final_machine == False:
                                 #--- Put the part in the next queue as usual
-                                queue.put(part)
                                 self.allocated_part = True
-                                print(f'Time: {self.env.now} - [{self.name}] put {part.get_name()} in {queue.name}')
+                                queue.put(part)
+                                print(f'Time: {self.env.now} - [{self.name}] put {part.get_name()} in {queue.name} (capacity = {queue.get_len()})')
                                 elog_file.write(f'Time: {self.env.now} - [{self.name}] put {part.get_name()} in {queue.name}\n')
                                 break
 

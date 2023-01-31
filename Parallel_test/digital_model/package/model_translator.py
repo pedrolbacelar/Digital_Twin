@@ -39,7 +39,6 @@ class Model():
 
         self.terminator = Terminator(env= self.env, loop_type= "closed")
 
-
     def queue_allocation(self):
         #Loop through each queue
         for queue in self.queues_vector:
@@ -120,6 +119,7 @@ class Model():
     def analyze_results(self, options = ["all"]):
         #--- Get the finished Parts and each Time
         parts_finished = self.terminator.get_all_items()
+        
         number_parts = len(parts_finished)
         parts_finished_time = []
         parts_finished_id = []
@@ -133,15 +133,19 @@ class Model():
         print(f"Total time of Simulation: {self.until}")
 
         def plot_finished():
-            plt.plot(parts_finished_id, parts_finished_time, '-o')
+            plt.plot(parts_finished_time, parts_finished_id, '-o')
+            plt.title("Lead Time per Part ID")
+            plt.ylabel("Parts ID")
+            plt.xlabel("Raw Time")
             plt.show()
-            plt.savefig(f"figures/{self.name}.png")
+            plt.savefig(f"figures/{self.name}_plot_finished.png")
 
         #-- Function to calculate the throughput
         def throughput():
             th = number_parts / self.until
             print(f">>> *** SYSTEM THROUGHPUT: {th} [parts / time unit] ***")
 
+            return th
         #-- Function to calculate the average cycle time
         def avg_cycle_time():
             sum_ct = 0
@@ -166,6 +170,15 @@ class Model():
             avg_CT = sum_ct / number_parts
             print(f"*** AVERAGE CYCLE TIME OF THE SYSTEM: {avg_CT} [time unit]***")
 
+            #-- Plot the Cycle Time for each Part
+            plt.plot(parts_cycle_time, parts_finished_id, '-x')
+            plt.title("Cycle Time per Part ID")
+            plt.ylabel("Parts ID")
+            plt.xlabel("Cycle Time")
+            plt.show()
+            plt.savefig(f"figures/{self.name}_cycle_time.png")           
+
+            return avg_CT
 
         #--- Run selected analysis
         if options[0] == "all":
@@ -176,20 +189,11 @@ class Model():
             if option == "plot_finished":
                 plot_finished()
             if option == "throughput":
-                throughput()
+                return throughput()
             if option == "avg_cycle_time":
-                avg_cycle_time()
+                return avg_cycle_time()
             
         print("##########################")
-
-
-
-
-
-
-
-
-        
 
     def get_model_components(self):
         return (self.machines_vector, self.queues_vector)
