@@ -1,0 +1,6 @@
+myclass.py
+setup.py
+dtpy_test.egg-info/PKG-INFO
+dtpy_test.egg-info/SOURCES.txt
+dtpy_test.egg-info/dependency_links.txt
+dtpy_test.egg-info/top_level.txt

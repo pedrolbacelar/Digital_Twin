@@ -1,0 +1,125 @@
+{
+    "nodes": [
+      {
+        "activity": 1,
+        "predecessors": [],
+        "successors": [
+          2
+        ],
+        "frequency": 999,
+        "capacity": 1,
+        "contemp": 414,
+        "cluster": 1
+      },
+      {
+        "activity": 2,
+        "predecessors": [
+          1
+        ],
+        "successors": [
+          3
+        ],
+        "frequency": 999,
+        "capacity": 1,
+        "contemp": 379,
+        "cluster": 2
+      },
+      {
+        "activity": 3,
+        "predecessors": [
+          2
+        ],
+        "successors": [
+          4
+        ],
+        "frequency": 999,
+        "capacity": 1,
+        "contemp": 409,
+        "cluster": 3
+      },
+      {
+        "activity": 4,
+        "predecessors": [
+          3
+        ],
+        "successors": [
+          5
+        ],
+        "frequency": 999,
+        "capacity": 1,
+        "contemp": 392,
+        "cluster": 4
+      },
+      {
+        "activity": 5,
+        "predecessors": [
+          4
+        ],
+        "successors": [
+          6
+        ],
+        "frequency": 999,
+        "capacity": 1,
+        "contemp": 391,
+        "cluster": 5
+      },
+      {
+        "activity": 6,
+        "predecessors": [
+          5
+        ],
+        "successors": [],
+        "frequency": 999,
+        "capacity": 1,
+        "contemp": 416,
+        "cluster": 6
+      }
+    ],
+    "arcs": [
+      {
+        "arc": [
+          1,
+          2
+        ],
+        "capacity": 10,
+        "frequency": 1000,
+        "contemp": 92
+      },
+      {
+        "arc": [
+          2,
+          3
+        ],
+        "capacity": 10,
+        "frequency": 1000,
+        "contemp": 149
+      },
+      {
+        "arc": [
+          3,
+          4
+        ],
+        "capacity": 10,
+        "frequency": 1000,
+        "contemp": 128
+      },
+      {
+        "arc": [
+          4,
+          5
+        ],
+        "capacity": 10,
+        "frequency": 1000,
+        "contemp": 224
+      },
+      {
+        "arc": [
+          5,
+          6
+        ],
+        "capacity": 10,
+        "frequency": 999,
+        "contemp": 219
+      }
+    ]
+  }
