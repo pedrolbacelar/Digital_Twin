@@ -65,6 +65,7 @@ Given that the idea is to share as much information as possible, this tutorials 
   * [[Presentation]_Bi-Weekly-3_11-11-2022](Documentations/Presentations/[Presentation]_Bi-Weekly-3_11-11-2022.pdf)
   * [[Presentation]_Bi-Weekly-4_18-11-2022](Documentations/Presentations/[Presentation]_Bi-Weekly-4_18-11-2022.pdf)
   * [[Presentation]_Bi-Weekly-5_05-12-2022](Documentations/Presentations/[Presentation]_Bi-Weekly-5_05-12-2022.pdf)
+  * [[Presentation]_Bi-Weekly-6_02-02-2023](https://github.com/pedrolbacelar/Digital_Twin/blob/main/Documentations/Presentations/%5BPresentation%5D_Bi-Weekly-6_02-01-2023.pdf)
   * [[Presentation]_Bi-Weekly-Project-Review_16-12-2022](Documentations/Presentations/[Presentation]_Bi-Weekly-Project-Review_16-12-2022.pdf)
   * [[Presentation]_Bi-Weekly-Use-Case _07-12-2022](Documentations/Presentations/[Presentation]_Bi-Weekly-Use-Case_07-12-2022.pdf)
 
