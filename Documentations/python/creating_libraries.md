@@ -24,9 +24,9 @@ setup(
     )
 ```
 
-To create the distribution package for your library, run the python setup.py sdist command. This will create a tar.gz file containing your library in the dist directory.
+To create the distribution package for your library, run the `python setup.py sdist` command. This will create a `tar.gz` file containing your library in the `dist` directory.
 
-To install your library, users can run the pip install /path/to/mylib.tar.gz command. This will install your library and make it available for import in their Python programs.
+To install your library, users can run the `pip install /path/to/mylib.tar.gz` command. This will install your library and make it available for import in their Python programs.
 
 Alternatively, you can use tools like setuptools or poetry to package and distribute your library. These tools provide additional features and automation to make it easier to create, publish, and manage Python libraries.
 
