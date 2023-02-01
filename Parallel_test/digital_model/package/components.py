@@ -88,6 +88,11 @@ class Machine():
                         
                         if self.counter_queue_in >= len(self.queue_in):
                             yield self.env.timeout(self.waiting)
+                            
+                            #--- All the queues are empty (wait to get part from the next queue to have a part)
+                            #part = yield self.queue_in[0].get()
+                            #self.new_part = True
+
                             self.counter_queue_in = 0
                             break
 
@@ -105,6 +110,7 @@ class Machine():
                             #--- blocking policy for Blocking Before Service (BBS)
                             if self.blocking_policy == 'BBS':
                                 while queue.get_len()>=queue.capacity:
+                                    print(f'Time: {self.env.now} - [{self.name}] Blocking... <===')
                                     yield self.env.timeout(self.waiting)
 
                             #--- processing of the part depending on part type                    
@@ -114,6 +120,7 @@ class Machine():
                             #--- blocking policy for Blocking After Service (BAS)
                             if self.blocking_policy == 'BAS':
                                 while queue.get_len()>=queue.capacity:
+                                    print(f'Time: {self.env.now} - [{self.name}] Blocking... <===')
                                     yield self.env.timeout(self.waiting)
 
 
