@@ -1,10 +1,3 @@
-Metadata-Version: 2.1
-Name: dtwinpy
-Version: 0.0.2.4
-Summary: Digital Twin Library
-Author: Pedro Bacelar and Alex
-License: MIT
-
 dtwinpy: Digital Twin Library
 
 Library for creating Digital Twins of productions systems and simulations models based on Discrete Even Simulation and Simpy. 

@@ -1,9 +1,6 @@
-import mypythonlib
-from mypythonlib import myfunctions
-
 import simpy
-import numpy
-from dtwinpy_model import Model
+
+from dtwinpy.digital_model import Model
 
 
 
