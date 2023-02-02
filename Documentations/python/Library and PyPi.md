@@ -90,3 +90,7 @@ Some observations:
 - After any final change in the code just run: `python setup.py bdist_wheel`
 - To upload the change, just run: `python -m twine upload dist/*`
 
+
+## References:
+- https://medium.com/analytics-vidhya/how-to-create-a-python-library-7d5aea80cc3f
+- https://laxmena.com/posts/publish-pip-package
