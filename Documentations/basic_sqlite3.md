@@ -1,4 +1,4 @@
-# SQLite3 Introdcution
+# 📂 SQLite3 Introdcution
 SQLite is a free and open-source software library that provides a relational database management system. It is a popular choice for embedded systems and mobile devices, due to its small footprint, fast performance, and ease of use. SQLite uses dynamic typing, which means that data can be stored in a variety of formats, including integers, floats, strings, and blobs. It also supports SQL, the standard language used to manage relational databases. Unlike other databases, SQLite does not run as a separate server process, but instead, it is embedded into the applications that use it, making it easy to distribute and deploy. SQLite also has a proven track record of reliability and stability, with a rich history of use in a wide range of applications.
 
 ## "Instalation" (not necessary for python3)
@@ -205,7 +205,7 @@ conn.close()
 
 This code defines the name of the table you want to clear, then deletes all the rows in that table. Finally, it commits the changes and closes the connection
 
-**Another practical way: **
+**Another practical way:**
 
 ```python
 def clear(self, table):
