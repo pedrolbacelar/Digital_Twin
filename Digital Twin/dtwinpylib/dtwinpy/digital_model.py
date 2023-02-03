@@ -9,6 +9,9 @@ from .components import Queue
 from .components import Generator
 from .components import Terminator
 
+#--- Importing Database components
+from .interfaceDB import Database
+
 #--- Reload Package
 
 import importlib
@@ -20,13 +23,21 @@ importlib.reload(dtwinpylib.dtwinpy.components) #reload this specifc module to u
 
 #--- Class Model
 class Model():
-    def __init__(self, name, model_path, initial= False, until= 20, part_type= "A", loop_type= "closed"):
+    def __init__(self, name, model_path, database_path, initial= False, until= 20, part_type= "A", loop_type= "closed"):
+        #-- Main Model Properties
         self.name = name
         self.model_path = model_path
-        self.loop_type = loop_type
         self.env = simpy.Environment()
-        self.part_type = part_type
         self.until = until
+
+        #-- Database Properties
+        self.database_path = database_path
+        self.event_table = "digital_log"
+        self.Database = Database(self.database_path, self.event_table)
+        
+        #-- Flags and Secondary Properties
+        self.loop_type = loop_type       
+        self.part_type = part_type       
         self.initial = initial
         self.last_part_id = 0
 
@@ -35,11 +46,11 @@ class Model():
         self.machines_vector = []
         # Create an empty list to store Queue objects
         self.queues_vector = []
-
         # Initial Part of the Model
         self.initial_parts = []
-
+        # Link the Terminator
         self.terminator = Terminator(env= self.env, loop_type= "closed")
+
 
     def queue_allocation(self):
         #Loop through each queue
@@ -109,12 +120,18 @@ class Model():
             self.initial_allocation()
 
     def run(self):
-        #for machine in self.machines_vector:
-        #   self.env.process(machine.run())
+        # ==== DataBase Management ====
+        #-- Clean database
+        self.Database.clear(self.event_table)
 
+        #-- Initialize digital_log table
+        self.Database.initialize(self.event_table)
+
+        #--- Initialize each machine process
         for machine in self.machines_vector:
             self.env.process(machine.run())
-            
+
+        #--- Run the Simulation    
         self.env.run(until= self.until)
         print("### Simulation Done ###")
 
@@ -210,6 +227,8 @@ class Model():
                 return throughput()
             if option == "avg_cycle_time":
                 return avg_cycle_time()
+            if option == "read_database":
+                self.Database.read_all_events(self.event_table)
             
         print("##########################")
 
