@@ -152,7 +152,7 @@ In the above example, we connect to an InfluxDB database and write and query dat
 
 - It's a build-in library in python3 (just need to import it, no instalations required)
 - Use the SQL language (learning that can be applied in future projects)
-- Opensource and stable (full documentation and high community activity)
+- Opensource and stable ([full documentation](https://www.sqlite.org/docs.html) and high community activity)
 - Easy to use it and straight forward.
 - Projected for more small and medium-sized applications (limited to 150 TB)
 
