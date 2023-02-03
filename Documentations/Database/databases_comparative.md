@@ -1,4 +1,4 @@
-# Comparing different Database Options
+# 🔍 Comparing different Database Options
 
 ## General Overview
 
