@@ -16,7 +16,9 @@ from .interfaceDB import Database
 
 import importlib
 import dtwinpylib
-importlib.reload(dtwinpylib.dtwinpy.components) #reload this specifc module to upadte the class
+#reload this specifc module to upadte the class
+importlib.reload(dtwinpylib.dtwinpy.components)
+importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
 # This is different from when you're importing the package direct because here the module has the same
 # name as the library, so we start importing from the library root for the software understand that we are 
 # importing the folder and not the library
@@ -84,25 +86,30 @@ class Model():
 
     def model_translator(self):
         
-
-        # Open the json file
+        #--- Open the json file
         with open(self.model_path) as json_file:
-            # Load the json data
+            #========================= Setup =========================
+            #--- Load the json data
             data = json.load(json_file)
             if self.initial == True:
                 #--- Calculate the number of part initially in the model
                 for i in range(len(data['initial'])):
                     self.last_part_id += data['initial'][i]
+            #====================================================================
 
-            #--- Read Basic informationf from the model
+
+            #========================= Create Machines =========================
             # Loop through the nodes in the json data
             for node in data['nodes']:
                 # Create a new Machine object for each node and add it to the list
                 self.machines_vector.append(Machine(env= self.env, id= node['activity'],freq= node['frequency'],capacity= node['capacity'], 
-                process_time= {self.part_type: node['contemp']},cluster= node['cluster'], last_part_id = self.last_part_id, terminator= self.terminator))
+                process_time= {self.part_type: node['contemp']}, database= self.Database, cluster= node['cluster'], last_part_id = self.last_part_id, terminator= self.terminator))
             
             self.machines_vector[-1].set_final_machine(True)
+            #====================================================================
 
+
+            #========================= Create Queues =========================
             # Loop through the arcs in the json data
             queue_id = 0
             for arc in data['arcs']:
@@ -110,14 +117,21 @@ class Model():
                 # Create a new Queue object for each arc and add it to the list
                 self.queues_vector.append(Queue(env= self.env, id= queue_id, arc_links= arc['arc'],
                 capacity= arc['capacity'],freq= arc['frequency'],transportation_time= arc['contemp']))
+            #====================================================================
 
 
+            #========================= Link Queues & Machines ===================
             #--- Allocate the Queues for each machine
             self.queue_allocation()
+            #====================================================================
 
+
+        #========================= Initial Allocation ===================
         if self.initial == True:
             #--- Allocate the initial Parts for each Queue
             self.initial_allocation()
+        #====================================================================
+
 
     def run(self):
         # ==== DataBase Management ====

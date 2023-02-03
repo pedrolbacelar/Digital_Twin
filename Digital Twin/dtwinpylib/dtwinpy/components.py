@@ -86,7 +86,7 @@ class Machine():
 
                         #-- User interface
                         print(f'Time: {self.env.now} - [{self.name}] got {part.get_name()} from {queue.get_name()} (capacity= {queue.get_len()})')
-
+                        queue_in = queue
                         #-- We got the part, so change the status of the flag
                         self.new_part = True
                         break
@@ -113,6 +113,8 @@ class Machine():
                         pass
 
                     else:
+                        queue_out = queue
+                        
                         #--- blocking policy for Blocking Before Service (BBS)
                         if self.blocking_policy == 'BBS':
                             while queue.get_len()>=queue.capacity:
@@ -125,9 +127,10 @@ class Machine():
                         #--- Process Started (Update digital_log)
                         self.database.write_event(self.database.get_event_table(),
                         timestamp= self.env.now,
-                        machine_id= self.id,
-                        activity_type= "s",
-                        part_id= part.get_id())
+                        machine_id= self.name,
+                        activity_type= "Started",
+                        part_id= part.get_name(),
+                        queue= queue_in.get_name())
 
                         #=========================================================
                         yield self.env.timeout(self.process_time[part.get_type()])  # processing time stored in a dictionary
@@ -136,9 +139,10 @@ class Machine():
                         #--- Process Finished (Update digital_log)
                         self.database.write_event(self.database.get_event_table(),
                         timestamp= self.env.now,
-                        machine_id= self.id,
-                        activity_type= "f",
-                        part_id= part.get_id())                                               
+                        machine_id= self.name,
+                        activity_type= "Finished",
+                        part_id= part.get_name(),
+                        queue= queue_out.get_name())                                               
 
                         #--- blocking policy for Blocking After Service (BAS)
                         if self.blocking_policy == 'BAS':
