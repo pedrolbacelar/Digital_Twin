@@ -130,5 +130,93 @@ conn.close()
 ```
 In this example, the values for the name and age variables are passed as a tuple to the .execute() method, and the placeholders ? in the SQL statement are replaced with the actual values. This way, the values are safely separated from the SQL statement and can be easily changed without modifying the SQL code.
 
+## When to use `commit`?
+In SQLite, you need to call the commit method on the connection object every time you make a change to the database that you want to persist. The changes are not automatically saved to the database until you call the commit method.
+
+For example, if you want to insert a single record into the database, you would use the following code:
+
+```python
+conn = sqlite3.connect('example.db')
+conn.execute("INSERT INTO users (id, name, age) VALUES (1, 'John Doe', 30)")
+conn.commit()
+conn.close()
+```
+
+If you want to insert multiple records into the database, you can do so in a single commit call, like this:
+
+```python
+conn = sqlite3.connect('example.db')
+conn.execute("INSERT INTO users (id, name, age) VALUES (1, 'John Doe', 30)")
+conn.execute("INSERT INTO users (id, name, age) VALUES (2, 'Jane Doe', 25)")
+conn.execute("INSERT INTO users (id, name, age) VALUES (3, 'Jim Smith', 35)")
+conn.commit()
+conn.close()
+
+```
+
+In general, you should call commit as soon as possible after making changes to the database, to ensure that the changes are saved in case of a crash or other unexpected error. However, you can also group multiple changes together and call commit once, if that makes sense for your use case.
+
+## Cleaning the Database or Table
+To clear the entire database in SQLite, you can delete all the rows in each table. Here is a sample code to do this:
+
+```python
+# Connect to the database
+conn = sqlite3.connect('example.db')
+cursor = conn.cursor()
+
+# Get a list of all table names
+cursor.execute("SELECT name from sqlite_master where type='table'")
+table_names = cursor.fetchall()
+
+# Loop through each table and delete all rows
+for table_name in table_names:
+    cursor.execute(f'DELETE from {table_name[0]}')
+
+# Commit the changes
+conn.commit()
+
+# Close the connection
+conn.close()
+
+```
+This code first retrieves a list of all table names in the database, then loops through each table and deletes all rows. Finally, it commits the changes and closes the connection.
+
+To clear a specific table in SQLite, you can delete all the rows in that table. Here is a sample code to do this:
+
+```python
+# Connect to the database
+conn = sqlite3.connect('example.db')
+cursor = conn.cursor()
+
+# Define the name of the table you want to clear
+table_name = 'users'
+
+# Delete all rows in the table
+cursor.execute(f'DELETE from {table_name}')
+
+# Commit the changes
+conn.commit()
+
+# Close the connection
+conn.close()
+
+
+```
+
+This code defines the name of the table you want to clear, then deletes all the rows in that table. Finally, it commits the changes and closes the connection
+
+**Another practical way: **
+
+```python
+def clear(self, table):
+    #--- clear all the data written in {table}
+
+    with sqlite3.connect(self.database_path) as digital_model_DB:
+        digital_model_DB.execute(f"DROP TABLE IF EXISTS {table}")
+        digital_model_DB.commit()
+```
+
+
+
 
 
