@@ -125,6 +125,40 @@ In the above example, we connect to an InfluxDB database and write and query dat
 
 > SQLite has good documentation. The official website, sqlite.org, provides detailed documentation on the SQLite syntax, API, and features. The documentation includes examples and tutorials that cover a wide range of topics, from basic database operations to advanced techniques for working with SQLite. Additionally, there is a large community of SQLite users and developers who contribute to the documentation and provide support on forums and other online resources.
 
+# Final Balance
 
+## InfluxDB
+
+##### Gain Points
+
+- It's a build-in Time Series database
+- The lab already worked with it
+- Already have the code written with this database
+
+##### Pain Points
+
+- The version used in the previous codes it's not supported anymore (need to re-write it anyway if you go for making something up to date)
+- Installing the old version of the library is complexity
+    - We didn't manage to fin that version online (just have a zip folder)
+    - You need to first run it in the terminal and after run it in the python codes
+    - It's tricky to know what library to install
+- InfluxDB is moving in the direction of a more comercial software (user management, fancy website), so there is not too much support for the old version
+- Not using the SQL language 
+- Projected for more scalable applications
+
+## SQLite
+
+##### Gain Points
+
+- It's a build-in library in python3 (just need to import it, no instalations required)
+- Use the SQL language (learning that can be applied in future projects)
+- Opensource and stable (full documentation and high community activity)
+- Easy to use it and straight forward.
+- Projected for more small and medium-sized applications (limited to 150 TB)
+
+##### Pain Points
+
+- Not a time-series database (the time need to be add manually)
+- New (but similar) development
 
 
