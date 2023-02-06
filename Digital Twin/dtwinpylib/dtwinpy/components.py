@@ -62,196 +62,17 @@ class Machine():
         self.part_in_machine = None
         self.counter_queue_in = 0
         self.counter_queue_out = 0
-        self.waiting = 10
+        self.waiting = 1
         self.last_part_id = last_part_id # variable assigned with datab from part_vector
 
         #-- Database Properties
         self.database = database
 
-    ##### ============== State Machine Definition ==============
-    #--- States Definitions
-    # =================== Idle State ===================
-    def state_idle(self):
-
-        # ============ Start Action ============
-        #--- Rise the Flag that the machine doesn't have any part
-        flag_new_part = False
-
-        #--- Loop to look to all the queue in availables
-        for queue in self.queue_in:
-            
-            #-- Verify if the queue is empty
-            queue_empty = queue.get_len() == 0
-            if queue_empty:
-                flag_new_part = False
-            
-            #-- If the queue is not empty, we change the status of the flag
-            else:
-                flag_new_part = True
-                self.queue_to_get = queue
-                break # Using break, because I want to stop for the first queue available
-            
-            if self.counter_queue_in >= len(self.queue_in):
-                #--- Pass the simulation for the next machine
-                yield self.env.timeout(self.waiting)
-                #--- Reset Counter In
-                self.counter_queue_in = 0
-
-                #--- All the queues are empty (wait to get part from the next queue to have a part)
-                #part = yield self.queue_in[0].get()
-                #flag_new_part = True     
-                break
-
-            #--- Increment Counter IN
-            self.counter_queue_in +=1    
-
-        # ============ Finished Action ============
-
-
-
-        # ============ State Transition ============
-
-        if flag_new_part == True:
-            self.current_state = "Processing" #return "Processing"
-            
-        else:
-            self.current_state = "Idle" #return "Idle"  
-                
-    # ============================================================================
-
-
-    # =================== Processing State ===================
-    def state_processing(self):
-
-        # ============ Start Action ============
-        #--- First thing before processing is to get the part:
-        #-- Get the part
-        try_to_get = self.queue_to_get.get() #Not necessary the yield
-        self.part_in_machine = try_to_get.value
-
-        #-- Lower the flag that we finish the process
-        flag_process_finished = False
-
-        #-- User interface
-        print(f'Time: {self.env.now} - [{self.name}] got {self.part_in_machine.get_name()} from {self.queue_to_get.get_name()} (capacity= {self.queue_to_get.get_len()})')
-
-        # ====== Processing Time ======
-        # processing of the part depending on part type
-        
-        #--- Process Started (Update digital_log)
-        self.database.write_event(self.database.get_event_table(),
-        timestamp= self.env.now,
-        machine_id= self.name,
-        activity_type= "Started",
-        part_id= self.part_in_machine.get_name(),
-        queue= self.queue_to_get.get_name())
-
-        #=========================================================
-        yield self.env.timeout(self.process_time[self.part_in_machine.get_type()])  # processing time stored in a dictionary
-        #=========================================================
-
-        # -- Rise the flag of processing
-        flag_process_finished = True
-
-        # ============ Finished Action ============
-
-        #------------------------------------------------------
-
-        # ============ State Transition ============
-
-        if flag_process_finished == True:
-            self.current_state = "Allocating" #return "Allocating"
-            
-        else:
-            self.current_state = "Processing" #return "Processing"
-                
-    # ============================================================================
-
-
-    # =================== Allocating State ===================
-    def state_allocating(self):
-
-        #--- First we look for an available queue out
-        flag_allocated_part = False
-
-        # ============ Start Action ============
-        for queue in self.queue_out:
-            if queue.get_len() >= queue.capacity: #queue  full
-                flag_allocated_part = False
-                
-
-            #--- If the current Queue is not full:
-            else:
-                #--- Mark the Queue Out Available
-                self.queue_to_put = queue
-
-                #--- Evaluate if the machine is the last machine in the process or not
-                if self.final_machine == False:
-                    #--- Put the part in the next queue as usual
-                    self.queue_to_put.put(self.part_in_machine)
-                    print(f'Time: {self.env.now} - [{self.name}] put {self.part_in_machine.get_name()} in {self.queue_to_put.name} (capacity = {self.queue_to_put.get_len()})')
-                    flag_allocated_part = True
-
-                    break
-
-                if self.final_machine == True:
-                    #--- Terminate
-                    self.terminator.terminate_part(self.part_in_machine)
-                    print(f'Time: {self.env.now} - [Terminator] xxx {self.part_in_machine.name} terminated xxx')
-                    
-                    
-                    #--- Replace part
-                    self.last_part_id += 1   
-                    new_part_produced = Part(id= self.last_part_id, type= self.part_in_machine.get_type(), location= 0, creation_time= self.env.now)
-                    print(f'Time: {self.env.now} - [Terminator] {new_part_produced.name} replaced')
-                    
-                    self.queue_to_put.put(new_part_produced)
-                    flag_allocated_part = True
-
-                    break
-
-            if self.counter_queue_out >= len(self.queue_out):
-                #--- Pass the simulation for the next machine
-                yield self.env.timeout(self.waiting)
-                #-- Reset counter out
-                self.counter_queue_out = 0
-                break
-
-            #-- Increment counter out
-            self.counter_queue_out += 1
-
-
-        #--- Queue Allocated (Update digital_log)
-        # obs: makes senses to take the time just after the allocation, because in the model becuase the model generation works like that
-        self.database.write_event(self.database.get_event_table(),
-        timestamp= self.env.now,
-        machine_id= self.name,
-        activity_type= "Finished",
-        part_id= self.part_in_machine.get_name(),
-        queue= self.queue_to_put.get_name())  
-
-        # ============ Finished Action ============
-
-        #------------------------------------------------------
-
-        # ============ State Transition ============
-
-        if flag_allocated_part == True:
-            self.current_state = "Idle" #return "Idle"
-            
-        else:
-            self.current_state = "Allocating" #return "Allocating" 
-            
-    # ============================================================================
-        
-    def func_print(self):
-        yield self.env.timeout(self.waiting)
-        print(f'Time: {self.env.now} something')
-
     def run(self):
     
         while True:
             
+            ##### ============== State Machine  ==============
 
             # =================== Idle State ===================
             if self.current_state == "Idle":
@@ -289,13 +110,14 @@ class Machine():
                     self.current_state = "Processing" #return "Processing"
 
                 
-
                 else:
-                    #yield self.env.timeout(self.waiting)
+                    """
                     self.queue_to_get = self.queue_in[0]
                     self.part_in_machine = yield self.queue_to_get.get()
-                    self.current_state = "Processing"
-                    #self.current_state = "Idle" #return "Idle"                    
+                    self.current_state = "Processing"   
+                    """
+                    yield self.env.timeout(1)   
+                    self.current_state = "Idle"          
             # ============================================================================
 
             # =================== Processing State ===================
@@ -400,7 +222,7 @@ class Machine():
 
 
                     #-- Increment counter out
-                    #self.counter_queue_out += 1
+                    self.counter_queue_out += 1
 
 
                 # ============ Finished Action ============
@@ -413,6 +235,7 @@ class Machine():
                     self.current_state = "Idle" #return "Idle"
                     
                 else:
+                    """
                     self.queue_to_put = self.queue_out[0]
                     yield self.queue_to_put.put(self.part_in_machine)
 
@@ -424,32 +247,18 @@ class Machine():
                     activity_type= "Finished",
                     part_id= self.part_in_machine.get_name(),
                     queue= self.queue_to_put.get_name()) 
-
-                    self.current_state = "Idle" #return "Allocating"      
+                    self.current_state = "Idle"
+                    """
+                    yield self.env.timeout(1)
+                    self.current_state = "Allocating"      
             # ==========================================================
+
+            #-------------------- Debuging --------------------
             if self.part_in_machine != None:
                 if self.part_in_machine.get_name() == "Part 16":
                     pass
+            #---------------------------------------------------
 
-            """        
-            if self.counter_queue_in >= len(self.queue_in):
-                #--- Pass the simulation for the next machine
-                yield self.env.timeout(self.waiting)
-                #--- Reset Counter In
-                self.counter_queue_in = 0
-
-                #--- All the queues are empty (wait to get part from the next queue to have a part)
-                #part = yield self.queue_in[0].get()
-                #flag_new_part = True     
-                #break
-
-            if self.counter_queue_out >= len(self.queue_out):
-                #--- Pass the simulation for the next machine
-                yield self.env.timeout(self.waiting)
-                #-- Reset counter out
-                self.counter_queue_out = 0
-                #break
-            """
 
     #--- Defining Gets and Sets
     def get_queue_in(self):
