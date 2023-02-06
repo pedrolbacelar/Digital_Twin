@@ -35,46 +35,59 @@ class Part():
         self.termination_time = termination_time
 
 class Machine():
-    def __init__(self, env, id, process_time, capacity, terminator, last_part_id=None, queue_in= None, queue_out= None, blocking_policy= "BBS", freq= None, cluster= None, final_machine = False):
+    def __init__(self, env, id, process_time, capacity, terminator, database, last_part_id=None, queue_in= None, queue_out= None, blocking_policy= "BBS", freq= None, cluster= None, final_machine = False):
+        #-- Main Properties
         self.env = env
+        self.id = id
         self.name = 'Machine '+str(id)
         self.queue_in = queue_in
         self.queue_out = queue_out
         self.process_time = process_time
-        self.capacity = capacity
-        self.blocking_policy = blocking_policy
-        self.final_machine = final_machine
-        self.freq = freq
-        self.cluster = cluster
-        self.allocated_part = False
-        self.new_part = False
         self.terminator = terminator
 
+        #-- Secundary Proporties
+        self.capacity = capacity
+        self.blocking_policy = blocking_policy     
+        self.freq = freq
+        self.cluster = cluster
+        
+        #-- Flags and Counters Properties
+        self.final_machine = final_machine
+        self.allocated_part = False
+        self.new_part = False
         self.counter_queue_in = 0
         self.counter_queue_out = 0
         self.waiting = 1
         self.last_part_id = last_part_id # variable assigned with datab from part_vector
 
+        #-- Database Properties
+        self.database = database
 
 
     def run(self):
         while True:
-            #xxx From Which Queue should I take a part? (plural) xxx
-            
-
+            ##### ============== Choosing the Queue In and Getting the Part ============== #####    
+            #From Which Queue should I take a part? (plural)
+       
             if (self.allocated_part == True) or (self.allocated_part==False and self.new_part==False):
-                
-                for queue in self.queue_in: #MDSSSSSSSSS se nao tiver um yiel ele nao sai do processo!!!!
+                #--- Loop to look to all the queue in availables
+                for queue in self.queue_in:
+                    
+                    #-- Verify if the queue is empty
                     queue_empty = queue.get_len() == 0
-
                     if queue_empty:
                         self.new_part = False
                     
+                    #-- If the queue is not empty, we get what it's inside
                     else:
+                        #-- Get the part
                         try_to_get = queue.get() #Not necessary the yield
                         part = try_to_get.value
+
+                        #-- User interface
                         print(f'Time: {self.env.now} - [{self.name}] got {part.get_name()} from {queue.get_name()} (capacity= {queue.get_len()})')
-                        
+                        queue_in = queue
+                        #-- We got the part, so change the status of the flag
                         self.new_part = True
                         break
 
@@ -100,24 +113,46 @@ class Machine():
                         pass
 
                     else:
+                        queue_out = queue
+                        
                         #--- blocking policy for Blocking Before Service (BBS)
                         if self.blocking_policy == 'BBS':
                             while queue.get_len()>=queue.capacity:
                                 print(f'Time: {self.env.now} - [{self.name}] Blocking... <===')
                                 yield self.env.timeout(self.waiting)
 
-                        #--- processing of the part depending on part type                    
+                        #================ Processing Time ================
+                        # processing of the part depending on part type
+                       
+                        #--- Process Started (Update digital_log)
+                        self.database.write_event(self.database.get_event_table(),
+                        timestamp= self.env.now,
+                        machine_id= self.name,
+                        activity_type= "Started",
+                        part_id= part.get_name(),
+                        queue= queue_in.get_name())
+
+                        #=========================================================
                         yield self.env.timeout(self.process_time[part.get_type()])  # processing time stored in a dictionary
-                        #yield self.env.timeout(5)
+                        #=========================================================
+
+                        #--- Process Finished (Update digital_log)
+                        self.database.write_event(self.database.get_event_table(),
+                        timestamp= self.env.now,
+                        machine_id= self.name,
+                        activity_type= "Finished",
+                        part_id= part.get_name(),
+                        queue= queue_out.get_name())                                               
 
                         #--- blocking policy for Blocking After Service (BAS)
                         if self.blocking_policy == 'BAS':
                             while queue.get_len()>=queue.capacity:
                                 print(f'Time: {self.env.now} - [{self.name}] Blocking... <===')
                                 yield self.env.timeout(self.waiting)
+                        #=========================================================
 
 
-                        #------ Add the part in the next Queue ------
+                        #============ Allocating to the Next Queue Out ============
                         if self.final_machine == False:
                             #--- Put the part in the next queue as usual
                             self.allocated_part = True
@@ -259,8 +294,6 @@ class Queue():
         print(f"Queue Lenght: {self.get_len()}")
         print("----------------")
 
-
-
 class Generator():
     def __init__(self, env = None,  loop_type = None, part_vector = None, queue_vector = None,):
         self.loop_type = loop_type
@@ -276,7 +309,6 @@ class Generator():
 
     def create_part(self, part_id = None, part_type= None, part_location= None):
         return Part(id= part_id, type= part_type, location= part_location, creation_time= self.env.now)
-
 
 class Terminator():
     def __init__(self, env=None, loop_type=None):

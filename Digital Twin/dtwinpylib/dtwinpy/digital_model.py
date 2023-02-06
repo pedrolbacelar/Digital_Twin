@@ -9,24 +9,37 @@ from .components import Queue
 from .components import Generator
 from .components import Terminator
 
+#--- Importing Database components
+from .interfaceDB import Database
+
 #--- Reload Package
 
 import importlib
 import dtwinpylib
-importlib.reload(dtwinpylib.dtwinpy.components) #reload this specifc module to upadte the class
+#reload this specifc module to upadte the class
+importlib.reload(dtwinpylib.dtwinpy.components)
+importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
 # This is different from when you're importing the package direct because here the module has the same
 # name as the library, so we start importing from the library root for the software understand that we are 
 # importing the folder and not the library
 
 #--- Class Model
 class Model():
-    def __init__(self, name, model_path, initial= False, until= 20, part_type= "A", loop_type= "closed"):
+    def __init__(self, name, model_path, database_path, initial= False, until= 20, part_type= "A", loop_type= "closed"):
+        #-- Main Model Properties
         self.name = name
         self.model_path = model_path
-        self.loop_type = loop_type
         self.env = simpy.Environment()
-        self.part_type = part_type
         self.until = until
+
+        #-- Database Properties
+        self.database_path = database_path
+        self.event_table = "digital_log"
+        self.Database = Database(self.database_path, self.event_table)
+        
+        #-- Flags and Secondary Properties
+        self.loop_type = loop_type       
+        self.part_type = part_type       
         self.initial = initial
         self.last_part_id = 0
 
@@ -35,11 +48,11 @@ class Model():
         self.machines_vector = []
         # Create an empty list to store Queue objects
         self.queues_vector = []
-
         # Initial Part of the Model
         self.initial_parts = []
-
+        # Link the Terminator
         self.terminator = Terminator(env= self.env, loop_type= "closed")
+
 
     def queue_allocation(self):
         #Loop through each queue
@@ -73,25 +86,30 @@ class Model():
 
     def model_translator(self):
         
-
-        # Open the json file
+        #--- Open the json file
         with open(self.model_path) as json_file:
-            # Load the json data
+            #========================= Setup =========================
+            #--- Load the json data
             data = json.load(json_file)
             if self.initial == True:
                 #--- Calculate the number of part initially in the model
                 for i in range(len(data['initial'])):
                     self.last_part_id += data['initial'][i]
+            #====================================================================
 
-            #--- Read Basic informationf from the model
+
+            #========================= Create Machines =========================
             # Loop through the nodes in the json data
             for node in data['nodes']:
                 # Create a new Machine object for each node and add it to the list
                 self.machines_vector.append(Machine(env= self.env, id= node['activity'],freq= node['frequency'],capacity= node['capacity'], 
-                process_time= {self.part_type: node['contemp']},cluster= node['cluster'], last_part_id = self.last_part_id, terminator= self.terminator))
+                process_time= {self.part_type: node['contemp']}, database= self.Database, cluster= node['cluster'], last_part_id = self.last_part_id, terminator= self.terminator))
             
             self.machines_vector[-1].set_final_machine(True)
+            #====================================================================
 
+
+            #========================= Create Queues =========================
             # Loop through the arcs in the json data
             queue_id = 0
             for arc in data['arcs']:
@@ -99,22 +117,35 @@ class Model():
                 # Create a new Queue object for each arc and add it to the list
                 self.queues_vector.append(Queue(env= self.env, id= queue_id, arc_links= arc['arc'],
                 capacity= arc['capacity'],freq= arc['frequency'],transportation_time= arc['contemp']))
+            #====================================================================
 
 
+            #========================= Link Queues & Machines ===================
             #--- Allocate the Queues for each machine
             self.queue_allocation()
+            #====================================================================
 
+
+        #========================= Initial Allocation ===================
         if self.initial == True:
             #--- Allocate the initial Parts for each Queue
             self.initial_allocation()
+        #====================================================================
+
 
     def run(self):
-        #for machine in self.machines_vector:
-        #   self.env.process(machine.run())
+        # ==== DataBase Management ====
+        #-- Clean database
+        self.Database.clear(self.event_table)
 
+        #-- Initialize digital_log table
+        self.Database.initialize(self.event_table)
+
+        #--- Initialize each machine process
         for machine in self.machines_vector:
             self.env.process(machine.run())
-            
+
+        #--- Run the Simulation    
         self.env.run(until= self.until)
         print("### Simulation Done ###")
 
@@ -210,6 +241,8 @@ class Model():
                 return throughput()
             if option == "avg_cycle_time":
                 return avg_cycle_time()
+            if option == "read_database":
+                self.Database.read_all_events(self.event_table)
             
         print("##########################")
 
