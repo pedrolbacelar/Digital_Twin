@@ -182,6 +182,7 @@ class Model():
         print(f"Number of Parts finished: {len(parts_finished)}")
         print(f"Total time of Simulation: {self.until}")
         print(f"List of IDs (AS IS): {parts_finished_id_ASIS}")
+        print(f"List of IDs (sorted): {parts_finished_id}")
 
         def plot_finished():
             plt.plot(parts_finished_id, parts_finished_time, '-o')
