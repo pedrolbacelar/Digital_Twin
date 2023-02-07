@@ -158,11 +158,13 @@ class Model():
         #--- create empty lists
         parts_finished_time = []
         parts_finished_id = []
+        parts_finished_id_ASIS = []
         parts_creation_time = []
 
         #---Create the list with parts ID
         for part in parts_finished:
             parts_finished_id.append(part.get_id())
+            parts_finished_id_ASIS.append(part.get_id())
         
         #--- Sort the list in ascending
         parts_finished_id.sort()
@@ -179,7 +181,7 @@ class Model():
         print("######## Running Analysis ########")
         print(f"Number of Parts finished: {len(parts_finished)}")
         print(f"Total time of Simulation: {self.until}")
-        print(f"List of IDs: {parts_finished_id}")
+        print(f"List of IDs (AS IS): {parts_finished_id_ASIS}")
 
         def plot_finished():
             plt.plot(parts_finished_id, parts_finished_time, '-o')
