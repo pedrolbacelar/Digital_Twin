@@ -83,7 +83,7 @@
                 2,
                 3
             ],
-            "capacity": 3,
+            "capacity": 10,
             "frequency": 1000,
             "contemp": 149
         },
@@ -92,7 +92,7 @@
                 2,
                 4
             ],
-            "capacity": 7,
+            "capacity": 10,
             "frequency": 1000,
             "contemp": 149
         },
