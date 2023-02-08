@@ -25,12 +25,13 @@ importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
 
 #--- Class Model
 class Model():
-    def __init__(self, name, model_path, database_path, initial= False, until= 20, part_type= "A", loop_type= "closed"):
+    def __init__(self, name, model_path, database_path, initial= False, until= None, part_type= "A", loop_type= "closed"):
         #-- Main Model Properties
         self.name = name
         self.model_path = model_path
         self.env = simpy.Environment()
         self.until = until
+        self.exit = self.env.event()
 
         #-- Database Properties
         self.database_path = database_path
@@ -104,7 +105,7 @@ class Model():
                 # Create a new Machine object for each node and add it to the list
                 self.machines_vector.append(Machine(env= self.env, id= node['activity'],freq= node['frequency'],capacity= node['capacity'], 
                 process_time= {self.part_type: node['contemp']}, database= self.Database, cluster= node['cluster'], last_part_id = self.last_part_id,
-                terminator= self.terminator, loop= self.loop_type))
+                terminator= self.terminator, loop= self.loop_type, exit= self.exit))
             
             self.machines_vector[-1].set_final_machine(True)
             #====================================================================
@@ -147,8 +148,12 @@ class Model():
         for machine in self.machines_vector:
             self.env.process(machine.run())
 
-        #--- Run the Simulation    
-        self.env.run(until= self.until)
+        #--- Run the Simulation
+        if self.loop_type == "closed":    
+            self.env.run(until= self.until)
+        elif self.loop_type == "open":
+            self.env.run(until= self.exit)
+
         print("### ============ Simulation Done ============ ###")
 
     def analyze_results(self, options = ["all"]):
@@ -182,7 +187,7 @@ class Model():
 
         print("######## Running Analysis ########")
         print(f"Number of Parts finished: {len(parts_finished)}")
-        print(f"Total time of Simulation: {self.until}")
+        print(f"Total time of Simulation: {parts_finished[-1].get_termination()}")
         print(f"List of IDs (AS IS): {parts_finished_id_ASIS}")
         #print(f"List of IDs (sorted): {parts_finished_id}")
 
@@ -196,7 +201,7 @@ class Model():
 
         #-- Function to calculate the throughput
         def throughput():
-            th = number_parts / self.until
+            th = number_parts / parts_finished[-1].get_termination()
             print(f">>> *** SYSTEM THROUGHPUT: {th} [parts / time unit] ***")
 
             return th

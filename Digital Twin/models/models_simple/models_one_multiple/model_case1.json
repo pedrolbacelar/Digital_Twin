@@ -1,0 +1,186 @@
+{
+    "nodes": [
+        {
+            "activity": 1,
+            "predecessors": [
+
+            ],
+            "successors": [
+                2
+            ],
+            "frequency": 999,
+            "capacity": 1,
+            "contemp": 0,
+            "cluster": 1
+        },
+        {
+            "activity": 2,
+            "predecessors": [
+                1
+            ],
+            "successors": [
+                3,
+                4,
+                5
+            ],
+            "frequency": 999,
+            "capacity": 1,
+            "contemp": 1000,
+            "cluster": 1
+        },
+        {
+            "activity": 3,
+            "predecessors": [
+                2
+            ],
+            "successors": [
+                6
+            ],
+            "frequency": 999,
+            "capacity": 1,
+            "contemp": 0,
+            "cluster": 1
+        },
+        {
+            "activity": 4,
+            "predecessors": [
+                2
+            ],
+            "successors": [
+                6
+            ],
+            "frequency": 999,
+            "capacity": 1,
+            "contemp": 0,
+            "cluster": 1
+        },
+        {
+            "activity": 5,
+            "predecessors": [
+                2
+            ],
+            "successors": [
+                6
+            ],
+            "frequency": 999,
+            "capacity": 1,
+            "contemp": 0,
+            "cluster": 1
+        },
+        {
+            "activity": 6,
+            "predecessors": [
+                3,
+                4,
+                5
+            ],
+            "successors": [
+                7
+            ],
+            "frequency": 999,
+            "capacity": 1,
+            "contemp": 0,
+            "cluster": 1
+        },
+        {
+            "activity": 7,
+            "predecessors": [
+                6
+            ],
+            "successors": [
+                
+            ],
+            "frequency": 999,
+            "capacity": 1,
+            "contemp": 0,
+            "cluster": 1
+        }
+    ],
+    "arcs": [
+        {
+            "arc": [
+                1,
+                2
+            ],
+            "capacity": 10,
+            "frequency": 1000,
+            "contemp": 92
+        },
+        {
+            "arc": [
+                2,
+                3
+            ],
+            "capacity": 1,
+            "frequency": 1000,
+            "contemp": 149
+        },
+        {
+            "arc": [
+                2,
+                4
+            ],
+            "capacity": 1,
+            "frequency": 1000,
+            "contemp": 149
+        },
+        {
+            "arc": [
+                2,
+                5
+            ],
+            "capacity": 1,
+            "frequency": 1,
+            "contemp": 149
+        },
+
+
+
+        {
+            "arc": [
+                5,
+                6
+            ],
+            "capacity": 1000,
+            "frequency": 1000,
+            "contemp": 149
+        },   
+        {
+            "arc": [
+                4,
+                6
+            ],
+            "capacity": 1000,
+            "frequency": 1000,
+            "contemp": 149
+        },
+        {
+            "arc": [
+                3,
+                6
+            ],
+            "capacity": 1000,
+            "frequency": 1000,
+            "contemp": 149
+        },
+        {
+            "arc": [
+                6,
+                7
+            ],
+            "capacity": 1000,
+            "frequency": 1000,
+            "contemp": 149
+        }
+    ],
+    "initial":[
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+    ]
+}

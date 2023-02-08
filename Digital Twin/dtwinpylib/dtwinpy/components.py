@@ -35,7 +35,7 @@ class Part():
         self.termination_time = termination_time
 
 class Machine():
-    def __init__(self, env, id, process_time, capacity, terminator, database, last_part_id=None, queue_in= None, queue_out= None, blocking_policy= "BBS", freq= None, cluster= None, final_machine = False, loop = "closed"):
+    def __init__(self, env, id, process_time, capacity, terminator, database, last_part_id=None, queue_in= None, queue_out= None, blocking_policy= "BBS", freq= None, cluster= None, final_machine = False, loop = "closed", exit = None):
         #-- Main Properties
         self.env = env
         self.id = id
@@ -65,6 +65,7 @@ class Machine():
         self.counter_queue_out = 0
         self.waiting = 1
         self.last_part_id = last_part_id # variable assigned with datab from part_vector
+        self.exit = exit
 
         #-- Database Properties
         self.database = database
@@ -189,57 +190,10 @@ class Machine():
                 flag_allocated_part = False
 
                 # ============ Start Action ============
-                if self.loop == "closed":
-                    for queue in self.queue_out:
-                        if queue.get_len() >= queue.capacity: #queue  full
-                            flag_allocated_part = False
-                            
-
-                        #--- If the current Queue is not full:
-                        else:
-                            #--- Mark the Queue Out Available
-                            self.queue_to_put = queue
-
-                            #--- Queue Allocated (Update digital_log)
-                            # obs: makes senses to take the time just after the allocation, because in the model becuase the model generation works like that
-                            self.database.write_event(self.database.get_event_table(),
-                            timestamp= self.env.now,
-                            machine_id= self.name,
-                            activity_type= "Finished",
-                            part_id= self.part_in_machine.get_name(),
-                            queue= self.queue_to_put.get_name()) 
-
-                            #--- Evaluate if the machine is the last machine in the process or not
-                            if self.final_machine == False:
-                                #--- Put the part in the next queue as usual
-                                self.queue_to_put.put(self.part_in_machine)
-                                print(f'Time: {self.env.now} - [{self.name}] put {self.part_in_machine.get_name()} in {self.queue_to_put.name} (capacity = {self.queue_to_put.get_len()})')
-                                flag_allocated_part = True
-
-                                break
-
-                            if self.final_machine == True:
-                                #--- Terminate
-                                self.terminator.terminate_part(self.part_in_machine)
-                                print(f'Time: {self.env.now} - [Terminator] xxx {self.part_in_machine.name} terminated xxx')
-                                
-                                
-                                #--- Replace part
-                                self.last_part_id += 1   
-                                new_part_produced = Part(id= self.last_part_id, type= self.part_in_machine.get_type(), location= 0, creation_time= self.env.now)
-                                print(f'Time: {self.env.now} - [Terminator] {new_part_produced.name} replaced')
-                                
-                                self.queue_to_put.put(new_part_produced)
-                                flag_allocated_part = True
-
-                                break
-
-
-                        #-- Increment counter out
-                        self.counter_queue_out += 1
 
                 #--- Open Loops requires different allocation for final machines
-                elif self.loop == "open" and self.final_machine == True:
+                if self.loop == "open" and self.final_machine == True:
+
                     #--- Change Flag
                     flag_allocated_part = True
 
@@ -254,6 +208,71 @@ class Machine():
                     activity_type= "Finished",
                     part_id= self.part_in_machine.get_name(),
                     queue= "---") #There is no queue to put
+
+                    #--- Check to finish the simulation
+                    if self.terminator.get_len_terminated() == self.last_part_id:
+                        # we can do this because all the machines were assigned for the same terminator
+                        # (the same terminator that we're using for running analysis in the end)
+
+                        #--- Terminates the simulations
+                        self.exit.succeed()
+
+                else:
+                    #--- Included cases
+                    # All closed loop cases
+                    # Open Loop cases that are not final machines
+
+                    #--- Look to all the Queue Out options
+                    for queue in self.queue_out:
+                        if queue.get_len() >= queue.capacity: #queue  full
+                            flag_allocated_part = False
+                            
+
+                        #--- If the current Queue is not full:
+                        else:
+                            #--- Mark the Queue Out Available
+                            self.queue_to_put = queue
+                            #-- Increment counter out
+                            self.counter_queue_out += 1
+                            break # I take the first free
+
+                    #--- Queue Allocated (Update digital_log)
+                    # obs: makes senses to take the time just after the allocation, because in the model becuase the model generation works like that
+                    self.database.write_event(self.database.get_event_table(),
+                    timestamp= self.env.now,
+                    machine_id= self.name,
+                    activity_type= "Finished",
+                    part_id= self.part_in_machine.get_name(),
+                    queue= self.queue_to_put.get_name()) 
+
+                    #--- Evaluate if the machine is the last machine in the process or not
+                    if self.final_machine == False:
+                        # Open and Closed loop included (that are not final machines)
+                        #--- Put the part in the next queue as usual
+                        self.queue_to_put.put(self.part_in_machine)
+                        print(f'Time: {self.env.now} - [{self.name}] put {self.part_in_machine.get_name()} in {self.queue_to_put.name} (capacity = {self.queue_to_put.get_len()})')
+                        flag_allocated_part = True
+
+                        
+
+                    if self.final_machine == True and self.loop == "closed":
+                        #--- Terminate
+                        self.terminator.terminate_part(self.part_in_machine)
+                        print(f'Time: {self.env.now} - [Terminator] xxx {self.part_in_machine.name} terminated xxx')
+                        
+                        
+                        #--- Replace part
+                        self.last_part_id += 1   
+                        new_part_produced = Part(id= self.last_part_id, type= self.part_in_machine.get_type(), location= 0, creation_time= self.env.now)
+                        print(f'Time: {self.env.now} - [Terminator] {new_part_produced.name} replaced')
+                        
+                        self.queue_to_put.put(new_part_produced)
+                        flag_allocated_part = True
+
+                        
+
+
+
 
                 # ============ Finished Action ============
 
@@ -284,9 +303,13 @@ class Machine():
             # ==========================================================
 
             #-------------------- Debuging --------------------
+            """
             if self.part_in_machine != None:
                 if self.part_in_machine.get_name() == "Part 16":
                     pass
+            """
+            if self.env.now == 1000:
+                pass
             #---------------------------------------------------
 
 
@@ -424,3 +447,5 @@ class Terminator():
     
     def get_all_items(self):
         return self.store.items
+    def get_len_terminated(self):
+        return len(self.store.items)
