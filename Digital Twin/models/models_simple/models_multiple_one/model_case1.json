@@ -3,6 +3,45 @@
         {
             "activity": 1,
             "predecessors": [
+
+            ],
+            "successors": [
+                1
+            ],
+            "frequency": 999,
+            "capacity": 1,
+            "contemp": 100,
+            "cluster": 1
+        },
+        {
+            "activity": 2,
+            "predecessors": [
+
+            ],
+            "successors": [
+                1
+            ],
+            "frequency": 999,
+            "capacity": 1,
+            "contemp": 100,
+            "cluster": 1
+        },
+        {
+            "activity": 3,
+            "predecessors": [
+
+            ],
+            "successors": [
+                1
+            ],
+            "frequency": 999,
+            "capacity": 1,
+            "contemp": 100,
+            "cluster": 1
+        },
+        {
+            "activity": 4,
+            "predecessors": [
                 1,
                 2,
                 3
@@ -43,6 +82,11 @@
             "capacity": 10,
             "frequency": 1000,
             "contemp": 149
-        }
+        }      
+    ],
+    "initial":[
+        1,
+        1,
+        1
     ]
 }

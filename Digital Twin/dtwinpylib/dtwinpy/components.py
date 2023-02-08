@@ -82,24 +82,36 @@ class Machine():
                 #--- Rise the Flag that the machine doesn't have any part
                 flag_new_part = False
 
-                #--- Loop to look to all the queue in availables
-                for queue in self.queue_in:
-                    
-                    #-- Verify if the queue is empty
-                    queue_empty = queue.get_len() == 0
-                    if queue_empty:
-                        flag_new_part = False
-                    
-                    #-- If the queue is not empty, we change the status of the flag
-                    else:
-                        flag_new_part = True
-                        self.queue_to_get = queue
-                        break # Using break, because I want to stop for the first queue available
-                    
+                #--- Check Initial Ghost Machine
+                # Given that every queue need to connect with predecessor machine and sucessor machine, it's
+                # not possible to create an initial queue without previous machine, that's why is important
+                # to create a Ghost Machine that has no previous queue but connect with the first queue.
+                # Issue #95 (add open loop) 
+
+                if self.queue_in != None:
+                    #--- Loop to look to all the queue in availables
+                    for queue in self.queue_in:
+                        
+                        #-- Verify if the queue is empty
+                        queue_empty = queue.get_len() == 0
+                        if queue_empty:
+                            flag_new_part = False
+                        
+                        #-- If the queue is not empty, we change the status of the flag
+                        else:
+                            flag_new_part = True
+                            self.queue_to_get = queue
+                            break # Using break, because I want to stop for the first queue available
+                        
 
 
-                    #--- Increment Counter IN
-                    self.counter_queue_in +=1    
+                        #--- Increment Counter IN
+                        self.counter_queue_in +=1    
+
+                #--- Ghost machine keeps stuck in the IDLE state
+                elif self.queue_in == None:
+                    pass
+
 
                 # ============ Finished Action ============
 
@@ -177,40 +189,41 @@ class Machine():
                 flag_allocated_part = False
 
                 # ============ Start Action ============
-                for queue in self.queue_out:
-                    if queue.get_len() >= queue.capacity: #queue  full
-                        flag_allocated_part = False
-                        
-
-                    #--- If the current Queue is not full:
-                    else:
-                        #--- Mark the Queue Out Available
-                        self.queue_to_put = queue
-
-                        #--- Queue Allocated (Update digital_log)
-                        # obs: makes senses to take the time just after the allocation, because in the model becuase the model generation works like that
-                        self.database.write_event(self.database.get_event_table(),
-                        timestamp= self.env.now,
-                        machine_id= self.name,
-                        activity_type= "Finished",
-                        part_id= self.part_in_machine.get_name(),
-                        queue= self.queue_to_put.get_name()) 
-
-                        #--- Evaluate if the machine is the last machine in the process or not
-                        if self.final_machine == False:
-                            #--- Put the part in the next queue as usual
-                            self.queue_to_put.put(self.part_in_machine)
-                            print(f'Time: {self.env.now} - [{self.name}] put {self.part_in_machine.get_name()} in {self.queue_to_put.name} (capacity = {self.queue_to_put.get_len()})')
-                            flag_allocated_part = True
-
-                            break
-
-                        if self.final_machine == True:
-                            #--- Terminate
-                            self.terminator.terminate_part(self.part_in_machine)
-                            print(f'Time: {self.env.now} - [Terminator] xxx {self.part_in_machine.name} terminated xxx')
+                if self.loop == "closed":
+                    for queue in self.queue_out:
+                        if queue.get_len() >= queue.capacity: #queue  full
+                            flag_allocated_part = False
                             
-                            if self.loop == "closed":
+
+                        #--- If the current Queue is not full:
+                        else:
+                            #--- Mark the Queue Out Available
+                            self.queue_to_put = queue
+
+                            #--- Queue Allocated (Update digital_log)
+                            # obs: makes senses to take the time just after the allocation, because in the model becuase the model generation works like that
+                            self.database.write_event(self.database.get_event_table(),
+                            timestamp= self.env.now,
+                            machine_id= self.name,
+                            activity_type= "Finished",
+                            part_id= self.part_in_machine.get_name(),
+                            queue= self.queue_to_put.get_name()) 
+
+                            #--- Evaluate if the machine is the last machine in the process or not
+                            if self.final_machine == False:
+                                #--- Put the part in the next queue as usual
+                                self.queue_to_put.put(self.part_in_machine)
+                                print(f'Time: {self.env.now} - [{self.name}] put {self.part_in_machine.get_name()} in {self.queue_to_put.name} (capacity = {self.queue_to_put.get_len()})')
+                                flag_allocated_part = True
+
+                                break
+
+                            if self.final_machine == True:
+                                #--- Terminate
+                                self.terminator.terminate_part(self.part_in_machine)
+                                print(f'Time: {self.env.now} - [Terminator] xxx {self.part_in_machine.name} terminated xxx')
+                                
+                                
                                 #--- Replace part
                                 self.last_part_id += 1   
                                 new_part_produced = Part(id= self.last_part_id, type= self.part_in_machine.get_type(), location= 0, creation_time= self.env.now)
@@ -219,12 +232,28 @@ class Machine():
                                 self.queue_to_put.put(new_part_produced)
                                 flag_allocated_part = True
 
-                            break
+                                break
 
 
-                    #-- Increment counter out
-                    self.counter_queue_out += 1
+                        #-- Increment counter out
+                        self.counter_queue_out += 1
 
+                #--- Open Loops requires different allocation for final machines
+                elif self.loop == "open" and self.final_machine == True:
+                    #--- Change Flag
+                    flag_allocated_part = True
+
+                    #--- Terminate
+                    self.terminator.terminate_part(self.part_in_machine)
+                    print(f'Time: {self.env.now} - [Terminator] xxx {self.part_in_machine.name} terminated xxx')
+
+                    #--- Queue Allocated (Update digital_log)
+                    self.database.write_event(self.database.get_event_table(),
+                    timestamp= self.env.now,
+                    machine_id= self.name,
+                    activity_type= "Finished",
+                    part_id= self.part_in_machine.get_name(),
+                    queue= "---") #There is no queue to put
 
                 # ============ Finished Action ============
 
@@ -360,16 +389,11 @@ class Queue():
     def verbose(self):
         print("----------------")
         print(f"{self.get_name()}")
-        print()
-        print("--Intrinsic Properties--")
         print(f"Arc links: {self.get_arc_links()}")
         print(f"Capacity: {self.get_capacity()}")
-        print()
-        print("--Current Status--")
         for part in self.get_all_items():
             print(f"Parts stored: {part.get_name()}")
         print(f"Queue Lenght: {self.get_len()}")
-        print("----------------")
 
 class Generator():
     def __init__(self, env = None,  loop_type = None, part_vector = None, queue_vector = None,):

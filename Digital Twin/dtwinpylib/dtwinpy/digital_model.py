@@ -135,6 +135,7 @@ class Model():
 
 
     def run(self):
+        print("### ============ Simulation Started ============ ###")
         # ==== DataBase Management ====
         #-- Clean database
         self.Database.clear(self.event_table)
@@ -148,7 +149,7 @@ class Model():
 
         #--- Run the Simulation    
         self.env.run(until= self.until)
-        print("### Simulation Done ###")
+        print("### ============ Simulation Done ============ ###")
 
     def analyze_results(self, options = ["all"]):
         #--- Get the finished Parts and each Time
