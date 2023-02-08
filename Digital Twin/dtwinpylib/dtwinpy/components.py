@@ -35,7 +35,7 @@ class Part():
         self.termination_time = termination_time
 
 class Machine():
-    def __init__(self, env, id, process_time, capacity, terminator, database, last_part_id=None, queue_in= None, queue_out= None, blocking_policy= "BBS", freq= None, cluster= None, final_machine = False):
+    def __init__(self, env, id, process_time, capacity, terminator, database, last_part_id=None, queue_in= None, queue_out= None, blocking_policy= "BBS", freq= None, cluster= None, final_machine = False, loop = "closed"):
         #-- Main Properties
         self.env = env
         self.id = id
@@ -50,6 +50,7 @@ class Machine():
         self.blocking_policy = blocking_policy     
         self.freq = freq
         self.cluster = cluster
+        self.loop = loop
         
         #-- Flags and Counters Properties
         self.final_machine = final_machine
@@ -209,14 +210,14 @@ class Machine():
                             self.terminator.terminate_part(self.part_in_machine)
                             print(f'Time: {self.env.now} - [Terminator] xxx {self.part_in_machine.name} terminated xxx')
                             
-                            
-                            #--- Replace part
-                            self.last_part_id += 1   
-                            new_part_produced = Part(id= self.last_part_id, type= self.part_in_machine.get_type(), location= 0, creation_time= self.env.now)
-                            print(f'Time: {self.env.now} - [Terminator] {new_part_produced.name} replaced')
-                            
-                            self.queue_to_put.put(new_part_produced)
-                            flag_allocated_part = True
+                            if self.loop == "closed":
+                                #--- Replace part
+                                self.last_part_id += 1   
+                                new_part_produced = Part(id= self.last_part_id, type= self.part_in_machine.get_type(), location= 0, creation_time= self.env.now)
+                                print(f'Time: {self.env.now} - [Terminator] {new_part_produced.name} replaced')
+                                
+                                self.queue_to_put.put(new_part_produced)
+                                flag_allocated_part = True
 
                             break
 

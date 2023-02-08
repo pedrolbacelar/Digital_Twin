@@ -103,7 +103,8 @@ class Model():
             for node in data['nodes']:
                 # Create a new Machine object for each node and add it to the list
                 self.machines_vector.append(Machine(env= self.env, id= node['activity'],freq= node['frequency'],capacity= node['capacity'], 
-                process_time= {self.part_type: node['contemp']}, database= self.Database, cluster= node['cluster'], last_part_id = self.last_part_id, terminator= self.terminator))
+                process_time= {self.part_type: node['contemp']}, database= self.Database, cluster= node['cluster'], last_part_id = self.last_part_id,
+                terminator= self.terminator, loop= self.loop_type))
             
             self.machines_vector[-1].set_final_machine(True)
             #====================================================================
@@ -182,7 +183,7 @@ class Model():
         print(f"Number of Parts finished: {len(parts_finished)}")
         print(f"Total time of Simulation: {self.until}")
         print(f"List of IDs (AS IS): {parts_finished_id_ASIS}")
-        print(f"List of IDs (sorted): {parts_finished_id}")
+        #print(f"List of IDs (sorted): {parts_finished_id}")
 
         def plot_finished():
             plt.plot(parts_finished_id, parts_finished_time, '-o')
