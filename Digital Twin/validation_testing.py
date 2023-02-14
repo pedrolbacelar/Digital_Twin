@@ -15,8 +15,7 @@ digital_model = digital_twin.generate_digital_model()
 matrix_ptime_TDS = [
     [10,10],
     [15,15],
-    [20,20],
-    [25,25]
+    [20,20]
 ]
 
 matrix_ptime_qTDS = [

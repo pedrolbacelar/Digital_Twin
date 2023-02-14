@@ -103,7 +103,7 @@ class Machine():
     
         while True:
             if self.part_in_machine != None:
-                if self.part_in_machine.get_name() == "Part 4" and self.env.now == 70:
+                if self.part_in_machine.get_name() == "Part 3" and self.env.now == 45:
                     pass
             
             ##### ============== State Machine  ==============
@@ -181,9 +181,12 @@ class Machine():
                 #---- Trace Driven Simulation (TDS) ----
                 # Check if the comming part have trace
                 if self.validator != None:
-                    #--- More parts being created than the existing parts in the TDS
-                    if self.validator.get_len_TDS() < self.part_in_machine.get_id():
+                    #--- If the current part is not within the TDS range (normal simulation)
+                    if self.part_in_machine.get_id() > self.validator.get_len_TDS():
                         self.simtype = None
+                    #--- If the current part if within the TDS range (TDS simulation)
+                    if self.part_in_machine.get_id() <= self.validator.get_len_TDS() and self.simtype != "qTDS":
+                        self.simtype = "TDS"
                         
 
                 #-- User interface
@@ -361,15 +364,16 @@ class Machine():
                         
                         #---- Trace Driven Simulation (TDS) ----
                         # Assign the related Trace for the new part
+                        # Here I don't change the type of simulation, just assign a trace for a part
+                        # if that part exists in the given traces, changing the status I alsways do in
+                        # in the begining.
                         if self.validator != None:
                             #--- More parts being created than the existing parts in the TDS
-                            if self.validator.get_len_TDS() < new_part_produced.get_id():
-                                self.simtype = None
-
-                            #--- Assign the trace
-                            else:
+                            if new_part_produced.get_id() <= self.validator.get_len_TDS():
+                                # if the new part belongs to the given traced parts
                                 current_TDS = self.validator.get_part_TDS(new_part_produced)
                                 new_part_produced.set_ptime_TDS(current_TDS)
+                                
                         #------------------------------------
 
                         #--- Put the part to the next Queue

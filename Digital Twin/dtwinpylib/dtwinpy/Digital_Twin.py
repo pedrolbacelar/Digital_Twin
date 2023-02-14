@@ -34,7 +34,7 @@ class Digital_Twin():
     #--- Run normally the Digital Model and analyze the results
     def run_digital_model(self):
         if self.digital_model == None:
-            self.generate_digital_model()
+            self.digital_model = self.generate_digital_model()
 
         self.digital_model.run()
         self.digital_model.analyze_results()
@@ -42,19 +42,41 @@ class Digital_Twin():
     
     #--- Run the Validation
     def run_validation(self, matrix_ptime_qTDS = None, matrix_ptime_TDS = None):
-        validator_logic = Validator(digital_model= self.digital_model, simtype="TDS", matrix_ptime_TDS=matrix_ptime_TDS)
-        validator_input = Validator(digital_model=self.digital_model, simtype="qTDS", matrix_ptime_qTDS=matrix_ptime_qTDS)
         
-        #--- IMPROVE: give the object validar for the machine to be able to update the ptime_TDS for new parts
+        # ================== Trace Driven Simulation (TDS) ==================
+        #--- (re)generate the Digital Model (reset)
+        self.digital_model = self.generate_digital_model()
+
+        #--- Create the Logic Validator 
+        validator_logic = Validator(digital_model= self.digital_model, simtype="TDS", matrix_ptime_TDS=matrix_ptime_TDS)
+
+        #--- IMPROVE: give the object validator for the machine to be able to update the ptime_TDS for new parts
         #--- Get the components of the simulation
         (machines_vector, queues_vector) = self.digital_model.get_model_components()
         for machine in machines_vector:
             machine.set_validator(validator_logic)
-
-        #--- Trace Driven Simulation (TDS)
+        
+        #--- Allocate the traces
         validator_logic.allocate()
+
+        #--- Run the TDS
         validator_logic.run()
 
-        #--- quasi Trace Driven Simulation (qTDS)
+        # ========================================================================
+
+
+        # ================== quasi Trace Driven Simulation (qTDS) ==================
+
+        #--- (re)generate the Digital Model (reset)
+        self.digital_model = self.generate_digital_model()
+
+        #--- Create the Input Validator
+        validator_input = Validator(digital_model=self.digital_model, simtype="qTDS", matrix_ptime_qTDS=matrix_ptime_qTDS)
+
+        #--- Allocate the traces
         validator_input.allocate()
+
+        #--- Run the qTDS
         validator_input.run()
+
+        # ========================================================================
