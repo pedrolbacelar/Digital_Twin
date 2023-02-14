@@ -184,6 +184,7 @@ class Machine():
                     #--- More parts being created than the existing parts in the TDS
                     if self.validator.get_len_TDS() < self.part_in_machine.get_id():
                         self.simtype = None
+                        
 
                 #-- User interface
                 print(f'Time: {self.env.now} - [{self.name}] got {self.part_in_machine.get_name()} from {self.queue_to_get.get_name()} (capacity= {self.queue_to_get.get_len()})')
