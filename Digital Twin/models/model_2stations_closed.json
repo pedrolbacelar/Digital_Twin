@@ -10,7 +10,7 @@
             ],
             "frequency": 999,
             "capacity": 1,
-            "contemp": 5,
+            "contemp": 500,
             "cluster": 1
         },
         {
@@ -23,7 +23,7 @@
             ],
             "frequency": 999,
             "capacity": 1,
-            "contemp": 5,
+            "contemp": 500,
             "cluster": 2
         }
     ],
@@ -49,6 +49,6 @@
     ],
     "initial":[
         0,
-        4
+        3
     ]
 }

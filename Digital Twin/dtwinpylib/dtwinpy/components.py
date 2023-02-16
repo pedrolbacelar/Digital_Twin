@@ -28,7 +28,8 @@ class Part():
     def get_termination(self):
         return self.termination_time
     
-    
+    def get_all_ptime_TDS(self):
+        return self.ptime_TDS
     def get_ptime_TDS(self, cluster):
         return self.ptime_TDS[cluster]
     def get_finished_clusters(self):
@@ -48,11 +49,13 @@ class Part():
         self.termination_time = termination_time
     def set_finished_clusters(self, finished_cluster):
         self.finished_clusters = finished_cluster
+    def set_ptime_TDS(self, ptime_TDS):
+        self.ptime_TDS = ptime_TDS
     #------------------------------
 
 
 class Machine():
-    def __init__(self, env, id, process_time, capacity, terminator, database, last_part_id=None, queue_in= None, queue_out= None, blocking_policy= "BBS", freq= None, cluster= None, final_machine = False, loop = "closed", exit = None, simtype = None, ptime_qTDS = None):
+    def __init__(self, env, id, process_time, capacity, terminator, database, last_part_id=None, queue_in= None, queue_out= None, blocking_policy= "BBS", freq= None, cluster= None, final_machine = False, loop = "closed", exit = None, simtype = None, ptime_qTDS = None, maxparts= None):
         #-- Main Properties
         self.env = env
         self.id = id
@@ -83,6 +86,7 @@ class Machine():
         self.waiting = 1
         self.last_part_id = last_part_id # variable assigned with datab from part_vector
         self.exit = exit
+        self.maxparts = maxparts
 
         #-- Database Properties
         self.database = database
@@ -91,12 +95,16 @@ class Machine():
         self.simtype = simtype
         self.ptime_qTDS = ptime_qTDS
         self.finished_parts = 0
+        self.validator = None
 
 
 
     def run(self):
     
         while True:
+            if self.part_in_machine != None:
+                if self.part_in_machine.get_name() == "Part 3" and self.env.now == 45:
+                    pass
             
             ##### ============== State Machine  ==============
 
@@ -170,13 +178,26 @@ class Machine():
                 #-- Lower the flag that we finish the process
                 flag_process_finished = False
 
+                #---- Trace Driven Simulation (TDS) ----
+                # Check if the comming part have trace
+                if self.validator != None:
+                    #--- If the current part is not within the TDS range (normal simulation)
+                    if self.part_in_machine.get_id() > self.validator.get_len_TDS():
+                        self.simtype = None
+                    #--- If the current part if within the TDS range (TDS simulation)
+                    if self.part_in_machine.get_id() <= self.validator.get_len_TDS() and self.simtype != "qTDS":
+                        self.simtype = "TDS"
+                        
+
                 #-- User interface
                 print(f'Time: {self.env.now} - [{self.name}] got {self.part_in_machine.get_name()} from {self.queue_to_get.get_name()} (capacity= {self.queue_to_get.get_len()})')
 
                 #------------ Debug ------------
+                """
                 if self.part_in_machine != None:
                     if self.part_in_machine.get_name() == "Part 12":
                         pass
+                """
                 #-----------------------------
 
                 # ====== Processing Time ======
@@ -235,7 +256,7 @@ class Machine():
 
                     if self.finished_parts > (len(self.ptime_qTDS) - 1):
                         # Use > because if it's equall it still have 1 less part to simulate
-                        # -1 because finished parts range from 0 to len(L) -1 (L= [0,1])
+                        # -1 because finished parts range from 0 to len(L) -1 (L= [0,1] ,len(L) = 2)
 
                         #-- Go back to the normal process time procedure
                         self.simtype = None
@@ -337,14 +358,32 @@ class Machine():
                         
                         
                         #--- Replace part
-                        #====> ADD here the ptime_TDS (from the matrix) when creating a new part
                         self.last_part_id += 1   
                         new_part_produced = Part(id= self.last_part_id, type= self.part_in_machine.get_type(), location= 0, creation_time= self.env.now)
                         print(f'Time: {self.env.now} - [Terminator] {new_part_produced.name} replaced')
                         
+                        #---- Trace Driven Simulation (TDS) ----
+                        # Assign the related Trace for the new part
+                        # Here I don't change the type of simulation, just assign a trace for a part
+                        # if that part exists in the given traces, changing the status I alsways do in
+                        # in the begining.
+                        if self.validator != None:
+                            #--- More parts being created than the existing parts in the TDS
+                            if new_part_produced.get_id() <= self.validator.get_len_TDS():
+                                # if the new part belongs to the given traced parts
+                                current_TDS = self.validator.get_part_TDS(new_part_produced)
+                                new_part_produced.set_ptime_TDS(current_TDS)
+                                
+                        #------------------------------------
+
+                        #--- Put the part to the next Queue
                         self.queue_to_put.put(new_part_produced)
                         flag_allocated_part = True
 
+                    #--- Check max number of parts to be produced in the simulation
+                    if self.maxparts != None and self.terminator.get_len_terminated() == self.maxparts:
+                        #--- Terminates the simulations
+                        self.exit.succeed()
                         
 
 
@@ -386,7 +425,8 @@ class Machine():
             if self.env.now == 1000:
                 pass            
             """
-
+            
+ 
             #---------------------------------------------------
 
 
@@ -431,6 +471,10 @@ class Machine():
         self.simtype = simtype
     def set_ptime_qTDS(self, ptime_qTDS):
         self.ptime_qTDS = ptime_qTDS
+    def get_ptime_qTDS(self):
+        return self.ptime_qTDS
+    def set_validator(self, validator):
+        self.validator = validator
     
     def get_id(self):
         return self.id
@@ -452,6 +496,8 @@ class Machine():
         else:
             for queue in self.get_queue_out():
                 print(queue.get_name())
+        print("---Process Time for quasi Trace Driven Simulation---")
+        print(self.get_ptime_qTDS())
         """
         print(f"Capacity: {self.get_capacity()}")
         print(f"Blocking Policy: {self.get_blocking_policy()}")
@@ -503,6 +549,7 @@ class Queue():
         print(f"Capacity: {self.get_capacity()}")
         for part in self.get_all_items():
             print(f"Parts stored: {part.get_name()}")
+            print(f"Part Processes for Trace Driven Simulation: {part.get_all_ptime_TDS()}")
         print(f"Queue Lenght: {self.get_len()}")
 
 class Generator():

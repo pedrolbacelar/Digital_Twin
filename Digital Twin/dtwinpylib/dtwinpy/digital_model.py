@@ -25,13 +25,14 @@ importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
 
 #--- Class Model
 class Model():
-    def __init__(self, name, model_path, database_path, initial= False, until= None, part_type= "A", loop_type= "closed"):
+    def __init__(self, name, model_path, database_path, initial= False, until= None, part_type= "A", loop_type= "closed", maxparts = None):
         #-- Main Model Properties
         self.name = name
         self.model_path = model_path
         self.env = simpy.Environment()
         self.until = until
         self.exit = self.env.event()
+        self.maxparts = maxparts
 
         #-- Database Properties
         self.database_path = database_path
@@ -105,7 +106,7 @@ class Model():
                 # Create a new Machine object for each node and add it to the list
                 self.machines_vector.append(Machine(env= self.env, id= node['activity'],freq= node['frequency'],capacity= node['capacity'], 
                 process_time= {self.part_type: node['contemp']}, database= self.Database, cluster= node['cluster'], last_part_id = self.last_part_id,
-                terminator= self.terminator, loop= self.loop_type, exit= self.exit))
+                terminator= self.terminator, loop= self.loop_type, exit= self.exit, maxparts= self.maxparts))
             
             self.machines_vector[-1].set_final_machine(True)
             #====================================================================
@@ -149,8 +150,11 @@ class Model():
             self.env.process(machine.run())
 
         #--- Run the Simulation
-        if self.loop_type == "closed":    
-            self.env.run(until= self.until)
+        if self.loop_type == "closed":
+            if self.maxparts != None:
+                self.env.run(until= self.exit)
+            else:
+                self.env.run(until= self.until)
         elif self.loop_type == "open":
             self.env.run(until= self.exit)
 
