@@ -1,7 +1,8 @@
 class Validator():
-    def __init__(self, digital_model, simtype, matrix_ptime_qTDS = None, matrix_ptime_TDS = None):
+    def __init__(self, digital_model, simtype, real_event_log = None, matrix_ptime_qTDS = None, matrix_ptime_TDS = None):
         self.digital_model = digital_model
         self.simtype = simtype
+        self.real_event_log = real_event_log
         # qTDS: each row is the list of process time for each part
         self.matrix_ptime_qTDS = matrix_ptime_qTDS 
         # TDS: each row is the list of process time for each machine
@@ -10,24 +11,14 @@ class Validator():
         #--- Get the components of the simulation
         (self.machines_vector, self.queues_vector) = self.digital_model.get_model_components()
 
+    # ======================= TRACE DRIVEN SIMULATION =======================
+   
     #--- For a specific part ID return the related vector of ptime_TDS
     def get_part_TDS(self, part):
         return self.matrix_ptime_TDS[part.get_id() - 1]
     #--- Get the number of parts given in the TDS
     def get_len_TDS(self):
         return len(self.matrix_ptime_TDS)
-
-    def set_qTDS(self):
-        #--- Update each existing machine in the model
-        for machine in self.machines_vector:
-            #--- Set the type of Simulation
-            machine.set_simtype("qTDS")
-
-            #--- Get the related list of process time for that machine
-            current_ptime_TDS = self.matrix_ptime_qTDS[machine.get_id() - 1]
-
-            #--- Assign the list of processes time
-            machine.set_ptime_qTDS(current_ptime_TDS)
     
     def set_TDS(self):
         #--- List for all parts in the simulation
@@ -50,7 +41,33 @@ class Validator():
         for machine in self.machines_vector:
             #--- Set the type of Simulation
             machine.set_simtype("TDS")
+ 
+
+    # =======================================================================
+
+
+
+
+    # ==================== QUASI TRACE DRIVEN SIMULATION ====================
+
+    def set_qTDS(self):
+        #--- Update each existing machine in the model
+        for machine in self.machines_vector:
+            #--- Set the type of Simulation
+            machine.set_simtype("qTDS")
+
+            #--- Get the related list of process time for that machine
+            current_ptime_TDS = self.matrix_ptime_qTDS[machine.get_id() - 1]
+
+            #--- Assign the list of processes time
+            machine.set_ptime_qTDS(current_ptime_TDS)
+
     
+    # =======================================================================
+
+
+
+    # ========================= Overlaping Functions =========================
     def allocate(self):
         if self.simtype == "TDS":
             #--- Set the TDS for each part
@@ -59,7 +76,7 @@ class Validator():
         if self.simtype == "qTDS":
             #--- Set the qTDS for each machine and also the simtype
             self.set_qTDS()
-    
+
     def run(self):
 
         # obs: I can run the simulation direct because the machines already have the type of simulation
@@ -74,6 +91,7 @@ class Validator():
             print("============ Running quasi Trace Driven Simulation ============")
             self.digital_model.run()
             print("===============================================================")
+    # =======================================================================
 
 
 

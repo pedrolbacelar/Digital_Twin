@@ -182,7 +182,7 @@ class Machine():
                 # Check if the comming part have trace
                 if self.validator != None:
                     #--- If the current part is not within the TDS range (normal simulation)
-                    if self.part_in_machine.get_id() > self.validator.get_len_TDS():
+                    if self.part_in_machine.get_id() > self.validator.get_len_TDS() and self.simtype != "qTDS":
                         self.simtype = None
                     #--- If the current part if within the TDS range (TDS simulation)
                     if self.part_in_machine.get_id() <= self.validator.get_len_TDS() and self.simtype != "qTDS":
@@ -190,7 +190,7 @@ class Machine():
                         
 
                 #-- User interface
-                print(f'Time: {self.env.now} - [{self.name}] got {self.part_in_machine.get_name()} from {self.queue_to_get.get_name()} (capacity= {self.queue_to_get.get_len()})')
+                #print(f'Time: {self.env.now} - [{self.name}] got {self.part_in_machine.get_name()} from {self.queue_to_get.get_name()} (capacity= {self.queue_to_get.get_len()})')
 
                 #------------ Debug ------------
                 """
@@ -295,7 +295,7 @@ class Machine():
 
                     #--- Terminate
                     self.terminator.terminate_part(self.part_in_machine)
-                    print(f'Time: {self.env.now} - [Terminator] xxx {self.part_in_machine.name} terminated xxx')
+                    #print(f'Time: {self.env.now} - [Terminator] xxx {self.part_in_machine.name} terminated xxx')
 
                     #--- Queue Allocated (Update digital_log)
                     self.database.write_event(self.database.get_event_table(),
@@ -346,7 +346,7 @@ class Machine():
                         # Open and Closed loop included (that are not final machines)
                         #--- Put the part in the next queue as usual
                         self.queue_to_put.put(self.part_in_machine)
-                        print(f'Time: {self.env.now} - [{self.name}] put {self.part_in_machine.get_name()} in {self.queue_to_put.name} (capacity = {self.queue_to_put.get_len()})')
+                        #print(f'Time: {self.env.now} - [{self.name}] put {self.part_in_machine.get_name()} in {self.queue_to_put.name} (capacity = {self.queue_to_put.get_len()})')
                         flag_allocated_part = True
 
                         
@@ -354,13 +354,13 @@ class Machine():
                     if self.final_machine == True and self.loop == "closed":
                         #--- Terminate
                         self.terminator.terminate_part(self.part_in_machine)
-                        print(f'Time: {self.env.now} - [Terminator] xxx {self.part_in_machine.name} terminated xxx')
+                        #print(f'Time: {self.env.now} - [Terminator] xxx {self.part_in_machine.name} terminated xxx')
                         
                         
                         #--- Replace part
                         self.last_part_id += 1   
                         new_part_produced = Part(id= self.last_part_id, type= self.part_in_machine.get_type(), location= 0, creation_time= self.env.now)
-                        print(f'Time: {self.env.now} - [Terminator] {new_part_produced.name} replaced')
+                        #print(f'Time: {self.env.now} - [Terminator] {new_part_produced.name} replaced')
                         
                         #---- Trace Driven Simulation (TDS) ----
                         # Assign the related Trace for the new part

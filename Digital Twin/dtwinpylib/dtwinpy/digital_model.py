@@ -158,7 +158,11 @@ class Model():
         elif self.loop_type == "open":
             self.env.run(until= self.exit)
 
+        #--- Print the database with all the events
+        self.Database.read_all_events(self.event_table)
+
         print("### ============ Simulation Done ============ ###")
+
 
     def analyze_results(self, options = ["all"]):
         #--- Get the finished Parts and each Time
