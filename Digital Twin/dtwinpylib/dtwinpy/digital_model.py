@@ -193,10 +193,10 @@ class Model():
                     break
             
 
-        print("######## Running Analysis ########")
+        print("================ Running Analysis ================")
         print(f"Number of Parts finished: {len(parts_finished)}")
         print(f"Total time of Simulation: {parts_finished[-1].get_termination()}")
-        print(f"List of IDs (AS IS): {parts_finished_id_ASIS}")
+        #print(f"List of IDs (AS IS): {parts_finished_id_ASIS}")
         #print(f"List of IDs (sorted): {parts_finished_id}")
 
         def plot_finished():
@@ -210,7 +210,7 @@ class Model():
         #-- Function to calculate the throughput
         def throughput():
             th = number_parts / parts_finished[-1].get_termination()
-            print(f">>> *** SYSTEM THROUGHPUT: {th} [parts / time unit] ***")
+            print(f">>> System Throughput: {th} [parts / time unit] ")
 
             return th
         #-- Function to calculate the average cycle time
@@ -224,8 +224,8 @@ class Model():
                 sum_ct += parts_cycle_time[i]
 
             #-- Print cycle time of each part
-            print(">>> Cycle Time of each part:")
-            print(parts_cycle_time)
+            #print(">>> Cycle Time of each part:")
+            #print(parts_cycle_time)
                 
             #-- Maximum and Minimum CT
             max_CT = max(parts_cycle_time)
@@ -235,7 +235,7 @@ class Model():
 
             #-- Avereage Cycle Time
             avg_CT = sum_ct / number_parts
-            print(f"*** AVERAGE CYCLE TIME OF THE SYSTEM: {avg_CT} [time unit]***")
+            print(f">>> Average system cycle time: {avg_CT} [time unit]***")
 
             #-- Plot the Cycle Time for each Part
             plt.plot(parts_finished_id,parts_cycle_time, '-x')
@@ -247,6 +247,12 @@ class Model():
 
             return avg_CT
 
+        #--- Running everything
+        plot_finished()
+        avg_cycle_time()
+        throughput()
+
+        """
         #--- Run selected analysis
         if options[0] == "all":
             print("-- All Analysis Selected --")
@@ -263,6 +269,7 @@ class Model():
                 self.Database.read_all_events(self.event_table)
             
         print("##########################")
+        """
 
     def get_model_components(self):
         return (self.machines_vector, self.queues_vector)

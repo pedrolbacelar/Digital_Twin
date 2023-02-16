@@ -51,3 +51,12 @@ class Database():
 
     def get_event_table(self):
         return self.event_table
+
+    def get_distinct_values(self, column, table):
+        with sqlite3.connect(self.database_path) as DB:
+            return DB.execute(f"SELECT DISTINCT {column} FROM {table}").fetchall()
+
+    def get_time_activity_of_column(self, column, column_id, table):
+        with sqlite3.connect(self.database_path) as DB:
+            return DB.execute(f"SELECT timestamp, activity_type FROM {table} WHERE {column}=?", column_id).fetchall()
+ 

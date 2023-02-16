@@ -1,6 +1,7 @@
 #--- Import DT Features
 from .digital_model import Model
 from .validator import Validator
+from .interfaceDB import Database
 
 #--- Reload Package
 
@@ -9,19 +10,24 @@ import dtwinpylib
 #reload this specifc module to upadte the class
 importlib.reload(dtwinpylib.dtwinpy.digital_model)
 importlib.reload(dtwinpylib.dtwinpy.validator)
+importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
 
 class Digital_Twin():
-    def __init__(self, name, model_path, database_path, initial= False, until= None, part_type= "A", loop_type= "closed", maxparts = None):
+    def __init__(self, name, initial= False, until= None, part_type= "A", loop_type= "closed", maxparts = None):
         #--- Model Parameters
         self.name = name
-        self.model_path = model_path
-        self.database_path = database_path
+        self.model_path = "models/" + self.name + ".json"
         self.initial = initial
         self.until = until
         self.part_type = "A"
         self.loop_type = "closed"
         self.digital_model = None
         self.maxparts = maxparts
+
+        #--- Database
+        self.database_path = "databases/digital_" + self.name + "_db.db"
+        self.real_database_path = "databases/real_" + self.name + "_db.db"
+        self.real_database = Database(self.real_database_path, "real_log")
 
     #--- Create the Digital Model
     def generate_digital_model(self):
@@ -38,7 +44,7 @@ class Digital_Twin():
 
         self.digital_model.run()
         self.digital_model.analyze_results()
-        self.digital_model.analyze_results(options=["avg_cycle_time"])
+
     
     #--- Run the Validation
     def run_validation(self, matrix_ptime_qTDS = None, matrix_ptime_TDS = None):
@@ -48,7 +54,7 @@ class Digital_Twin():
         self.digital_model = self.generate_digital_model()
 
         #--- Create the Logic Validator 
-        validator_logic = Validator(digital_model= self.digital_model, simtype="TDS", matrix_ptime_TDS=matrix_ptime_TDS)
+        validator_logic = Validator(digital_model= self.digital_model, simtype="TDS", real_database= self.real_database)
 
         #--- IMPROVE: give the object validator for the machine to be able to update the ptime_TDS for new parts
         #--- Get the components of the simulation
@@ -71,7 +77,7 @@ class Digital_Twin():
         self.digital_model = self.generate_digital_model()
 
         #--- Create the Input Validator
-        validator_input = Validator(digital_model=self.digital_model, simtype="qTDS", matrix_ptime_qTDS=matrix_ptime_qTDS)
+        validator_input = Validator(digital_model=self.digital_model, simtype="qTDS", real_database= self.real_database)
 
         #--- Allocate the traces
         validator_input.allocate()
