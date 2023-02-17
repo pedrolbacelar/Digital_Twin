@@ -64,7 +64,7 @@ class Validator():
     def generate_TDS_traces(self):
 
         #--- Extract the unique parts IDs from the real log
-        part_ids = self.real_database.get_distinct_values("part_id", "real_log")
+        part_ids = self.real_database.get_distinct_values(column= "part_id", table="real_log")
         #--- Create matrix to store trace of process time for each part
         matrix_ptime_TDS = []
         part_matrix_full_trace = []
@@ -72,7 +72,7 @@ class Validator():
         #--- Loop for each part of the simulation
         for part_id in part_ids:
             #--- Get the full trace for each part
-            part_full_trace = self.real_database.get_time_activity_of_column("part_id", "real_log", part_id)
+            part_full_trace = self.real_database.get_time_activity_of_column(column= "part_id", table="real_log", column_id= part_id)
             part_matrix_full_trace.append(part_full_trace)
 
             #--- Initiate as blank values
@@ -129,7 +129,7 @@ class Validator():
     def generate_qTDS_traces(self):
 
         #--- Extract the unique parts IDs from the real log
-        machines_ids = self.real_database.get_distinct_values("machine_id", "real_log")
+        machines_ids = self.real_database.get_distinct_values(column= "machine_id", table="real_log")
         #--- Create matrix to store trace of process time for each part
         matrix_ptime_qTDS = []
         machine_matrix_full_trace = []
@@ -137,7 +137,7 @@ class Validator():
         #--- Loop for each part of the simulation
         for machine_id in machines_ids:
             #--- Get the full trace for each machine
-            machine_full_trace = self.real_database.get_time_activity_of_column("machine_id", "real_log", machine_id)
+            machine_full_trace = self.real_database.get_time_activity_of_column(column= "machine_id", table="real_log", column_id=machine_id)
             machine_matrix_full_trace.append(machine_full_trace)
 
             #--- Initiate as blank values
@@ -180,7 +180,15 @@ class Validator():
     def allocate(self):
         #--- Generate the tarces
         self.matrix_ptime_qTDS = self.generate_qTDS_traces()
-        self.matrix_ptime_TDS = self.generate_TDS_traces()
+        self.matrix_ptime_TDS= self.generate_TDS_traces()
+
+        print("=== matrix_ptime_qTDS ===")
+        for i in range(len(self.matrix_ptime_qTDS)):
+            print(f"Machine {i+1}: {self.matrix_ptime_qTDS[i]}")
+
+        print("=== matrix_ptime_TDS ===")
+        for j in range(len(self.matrix_ptime_TDS)):
+            print(f"Part {j+1}: {self.matrix_ptime_TDS[j]}")
 
         #--- Setup initial Traces
         if self.simtype == "TDS":
