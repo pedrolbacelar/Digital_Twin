@@ -59,4 +59,8 @@ class Database():
     def get_time_activity_of_column(self, column, column_id, table):
         with sqlite3.connect(self.database_path) as DB:
             return DB.execute(f"SELECT timestamp, activity_type FROM {table} WHERE {column}=?", column_id).fetchall()
- 
+
+    def read_store_data(self, table):
+        with sqlite3.connect(self.database_path) as digital_model_DB: 
+            data_full_trace = digital_model_DB.execute(f"SELECT timestamp, machine_id, activity_type, part_id FROM {table}").fetchall()
+        return data_full_trace
