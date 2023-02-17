@@ -1,5 +1,10 @@
 import simpy
 
+#--- Import distributions
+from scipy.stats import norm
+from scipy.stats import expon
+from scipy.stats import lognorm
+
 
 class Part():
     def __init__(self, id, type, location, creation_time, termination_time = None, ptime_TDS = None):
@@ -62,7 +67,7 @@ class Machine():
         self.name = 'Machine '+str(id)
         self.queue_in = queue_in
         self.queue_out = queue_out
-        self.process_time = process_time
+        self.process_time = process_time #("dist_name", param_A, param_B, param_C)
         self.terminator = terminator
 
         #-- Secundary Proporties
@@ -196,13 +201,6 @@ class Machine():
                 #-- User interface
                 print(f'Time: {self.env.now} - [{self.name}] got {self.part_in_machine.get_name()} from {self.queue_to_get.get_name()} (capacity= {self.queue_to_get.get_len()})')
 
-                #------------ Debug ------------
-                """
-                if self.part_in_machine != None:
-                    if self.part_in_machine.get_name() == "Part 12":
-                        pass
-                """
-                #-----------------------------
 
                 # ====== Processing Time ======
                 # processing of the part depending on part type
@@ -218,11 +216,23 @@ class Machine():
                 #--------------- Type of Simulation ---------------
                 #--- Normal Simulation
                 if self.simtype == None:
-                    #-- Get the current process time
-                    current_process_time = self.process_time[self.part_in_machine.get_type()] # processing time stored in a dictionary
+                    #-- Get the name of the distribution
+                    if type(self.process_time) == list:
 
+                        distribution_name = self.process_time[0]
+
+                        #-- generate the process time following the given distribution
+                        if distribution_name == 'norm':
+                            current_process_time = norm.rvs(self.process_time[1], self.process_time[2], size= 1)
+                            
+                        elif distribution_name == 'expon':
+                            current_process_time = norm.rvs(self.process_time[1], self.process_time[2], size= 1)
+
+                    else:
+                        current_process_time = self.process_time
+                        
                     #=========================================================
-                    yield self.env.timeout(current_process_time)  # processing time
+                    yield self.env.timeout(int(current_process_time))  # processing time
                     #=========================================================
                 
                 #--- Trace Driven Simulation (TDS)

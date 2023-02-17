@@ -47,7 +47,7 @@ class Digital_Twin():
 
     
     #--- Run the Validation
-    def run_validation(self, matrix_ptime_qTDS = None, matrix_ptime_TDS = None):
+    def run_validation(self):
         
         # ================== Trace Driven Simulation (TDS) ==================
         #--- (re)generate the Digital Model (reset)
