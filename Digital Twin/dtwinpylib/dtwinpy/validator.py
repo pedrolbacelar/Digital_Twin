@@ -1,6 +1,8 @@
 #--- Importing Database components
 from .interfaceDB import Database
 import numpy as np
+import matplotlib.pyplot as plt
+
 
 #--- Reload Package
 
@@ -117,15 +119,31 @@ class Validator():
     #--- Initial Setup of qTDS
     def set_qTDS(self):
         #--- Update each existing machine in the model
-        for machine in self.machines_vector:
-            #--- Set the type of Simulation
-            machine.set_simtype("qTDS")
 
-            #--- Get the related list of process time for that machine
-            current_ptime_TDS = self.matrix_ptime_qTDS[machine.get_id() - 1]
+        #--- Extract the unique parts IDs from the real log
+        machines_ids = self.real_database.get_distinct_values(column= "machine_id", table="real_log")
+        
+        # For every machine that was USED in the real world
+        # We iterate the within the machines id because it's possible that
+        # the simulation has more machines rather than the real log, because
+        # one of the machines in the real world was not chosen.
+        for machine_id in machines_ids:
+            
+            # For this machine_id, find the machine object with the same id
+            for i in range(len(self.machines_vector)):
+                if machine_id == self.machines_vector[i].get_name():
+                    machine = self.machines_vector[i]
 
-            #--- Assign the list of processes time
-            machine.set_ptime_qTDS(current_ptime_TDS)
+                    #--- Set the type of Simulation
+                    machine.set_simtype("qTDS")
+
+                    #--- Get the related list of process time for that machine
+                    current_ptime_TDS = self.matrix_ptime_qTDS[machine.get_id() - 1]
+
+                    #--- Assign the list of processes time
+                    machine.set_ptime_qTDS(current_ptime_TDS)
+
+                    break
 
     #--- Generate the traces of qTDS based on the real Event Log (Xr)
     def generate_qTDS_traces(self):
@@ -258,7 +276,7 @@ class Validator():
                 Xs = (dist.ppf(u, a, b, loc, scale))    # generate distribution Xs.
 
             diff[ii]=abs(Xs[pos_one][0]-Xr[pos_one[0][0]])   # Calculate error in the highest value due to impact of umax
-            sse[ii]=np.sum(np.square(Xr-Xs))
+            #sse[ii]=np.sum(np.square(Xr-Xs))
             
             if diff[ii]>diff[ii+1]:
                 Xs=Xsf
@@ -349,12 +367,15 @@ class Validator():
     # ========================= Overlaping Functions =========================
     def allocate(self):
         #--- Generate the traces
+
+        # ---------------- qTDS ----------------
         #--generate Xr of real log for all the machines (matrix)
         Xr_matrix = self.generate_qTDS_traces()
         self.matrix_ptime_qTDS = []
         
         #--- Loop to correlated each Xs with Xr
         # The loop can also be seem as loop through the machines
+
         for i in range(len(Xr_matrix)):
             #--- Take the distribution parameters of each machine
             machine_process_time = self.machines_vector[i].get_process_time()
@@ -373,7 +394,16 @@ class Validator():
                 Xs_vector = Xr_matrix[i]
                 self.matrix_ptime_qTDS.append(Xs_vector)
 
+        """
+        # ---- Plotting to see correlation ----
+        machine = 2
+        counter = range(len(Xr_matrix[machine]))
+        plt.plot(counter,Xr_matrix[machine],color='blue')
+        plt.plot(counter,self.matrix_ptime_qTDS[machine],color='red')
+        plt.show()
+        """
 
+        # ---------------- TDS ----------------
         #-- generate Xr = Xs
         self.matrix_ptime_TDS= self.generate_TDS_traces()
 
@@ -430,7 +460,7 @@ class Validator():
             (Yr_time, Yr_event) = self.generate_event_sequence(database= self.real_database, table= "real_log")
 
             #--- Compare Event Sequence
-            (lcss, lcss_time, lcss_indicator) = self.LCSS(Sequence1= Ys_event, Sequence1_time= Ys_time, Sequence2= Yr_event, Sequence2_time= Yr_time, delta_t=100)
+            (lcss, lcss_time, lcss_indicator) = self.LCSS(Sequence1= Ys_event, Sequence1_time= Ys_time, Sequence2= Yr_event, Sequence2_time= Yr_time, delta_t=2000)
             print("--- LCSS Sequence ---")
             print(lcss)
             print("--- LCSS Time ---")

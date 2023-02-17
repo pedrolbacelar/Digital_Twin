@@ -10,7 +10,7 @@
             ],
             "frequency": 999,
             "capacity": 1,
-            "contemp": ["norm", 5000, 300],
+            "contemp": ["norm", 5000, 500],
             "cluster": 1
         },
         {
@@ -23,7 +23,7 @@
             ],
             "frequency": 999,
             "capacity": 1,
-            "contemp": ["norm", 15000, 1000],
+            "contemp": ["norm", 3500, 350],
             "cluster": 2
         },
         {
@@ -36,7 +36,7 @@
             ],
             "frequency": 999,
             "capacity": 1,
-            "contemp": ["norm", 15000, 2000],
+            "contemp": ["norm", 3500, 350],
             "cluster": 2
         },
         {
@@ -49,7 +49,7 @@
             ],
             "frequency": 999,
             "capacity": 1,
-            "contemp": ["norm", 5000, 600],
+            "contemp": ["norm", 5000, 400],
             "cluster": 2
         },
         {
@@ -62,7 +62,7 @@
             ],
             "frequency": 999,
             "capacity": 1,
-            "contemp": ["norm", 11000, 1000],
+            "contemp": ["norm", 2000, 200],
             "cluster": 2
         }
 
@@ -73,7 +73,7 @@
                 1,
                 2
             ],
-            "capacity": 1,
+            "capacity": 10,
             "frequency": 1000,
             "contemp": 1
         },
