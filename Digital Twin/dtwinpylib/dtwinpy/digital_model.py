@@ -105,7 +105,7 @@ class Model():
             for node in data['nodes']:
                 # Create a new Machine object for each node and add it to the list
                 self.machines_vector.append(Machine(env= self.env, id= node['activity'],freq= node['frequency'],capacity= node['capacity'], 
-                process_time= {self.part_type: node['contemp']}, database= self.Database, cluster= node['cluster'], last_part_id = self.last_part_id,
+                process_time= node['contemp'], database= self.Database, cluster= node['cluster'], last_part_id = self.last_part_id,
                 terminator= self.terminator, loop= self.loop_type, exit= self.exit, maxparts= self.maxparts))
             
             self.machines_vector[-1].set_final_machine(True)
