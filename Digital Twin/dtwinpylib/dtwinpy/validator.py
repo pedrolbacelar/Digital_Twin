@@ -23,6 +23,7 @@ class Validator():
         # here we're just getting the object that point to that
         # database. That's why we don't initialize it.
         self.real_database = real_database
+        self.digital_database = self.digital_model.get_model_database()
 
         #--- Get the components of the simulation
         (self.machines_vector, self.queues_vector) = self.digital_model.get_model_components()
@@ -171,8 +172,63 @@ class Validator():
         #--- Return the matrix of traces
         return matrix_ptime_qTDS
 
-    
     # =======================================================================
+
+    # ======================== Sequence Generator ========================
+    def generate_event_sequence(self, database, table):
+        #--- Extract all the events from the table and store each in tuple
+        events_full_trace = database.read_store_data(table)
+
+        #--- Extract the time and store in a specific vector
+        time_sequence = []
+        for event in events_full_trace:
+            time_sequence.append(event[0])
+        
+        #--- Create the string event and store in the vector of events
+        events_sequence = []
+        for event in events_full_trace:
+            event_string = event[1] + " - " + event[2]
+            events_sequence.append(event_string)
+
+        return (time_sequence, events_sequence)
+
+    # =======================================================================
+
+    # ======================== Sequence Comparing Methods ========================
+
+    def LCSS(self, Sequence1, Sequence1_time, Sequence2, Sequence2_time, delta_t, order = False):
+        # initialize the lengths of the two input vectors
+        m, n = len(Sequence1), len(Sequence2)
+        
+        # initialize an empty list to store the events that belong to the longest common sub-sequence
+        lcss = []
+        lcss_time = []
+        jstart = 1
+        # loop through each event in Sequence1
+        for i in range(1, m + 1):
+            # loop through each event in Sequence2
+            for j in range(jstart, n + 1):
+                # check if the current events in Sequence1 and Sequence2 are within the eps and delta_t threshold,
+                # and if the time difference between them is less than or equal to delta_t
+                if (Sequence1[i-1] == Sequence2[j-1]) and (abs(Sequence1_time[i-1] - Sequence2_time[j-1]) <= delta_t):
+                    # add the current event from Sequence1 to the lcss list
+                    lcss.append(Sequence1[i-1])
+                    lcss_time.append(Sequence1_time[i-1])
+
+                    #--- Mark the j used, the next iteration will look from this j to forward
+                    if order == True:
+                        jstart = j
+
+                    # break from the inner loop
+                    break
+
+        
+        #--- Similarity Indicator
+        indicator = len(lcss) / min(m,n)
+
+        # return the longest common sub-sequence
+        return (lcss, lcss_time, indicator)
+
 
 
 
@@ -206,6 +262,23 @@ class Validator():
             #--- Run Trace Driven Simulation
             print("============ Running Trace Driven Simulation ============")
             self.digital_model.run()
+
+            #--- Generate output event sequence from the digital database
+            (Ys_time, Ys_event) = self.generate_event_sequence(database= self.digital_database, table= "digital_log")
+            
+            #--- Generate output event sequence from the digital database
+            (Yr_time, Yr_event) = self.generate_event_sequence(database= self.real_database, table= "real_log")
+            
+            #--- Compare Event Sequence
+            (lcss, lcss_time, lcss_indicator) = self.LCSS(Sequence1= Ys_event, Sequence1_time= Ys_time, Sequence2= Yr_event, Sequence2_time= Yr_time, delta_t=100)
+            print("--- LCSS Sequence ---")
+            print(lcss)
+
+            print("--- LCSS Time ---")
+            print(lcss_time)
+
+            print(f">>> LCSS Indicator: {lcss_indicator}")
+            
             print("=========================================================")
 
         if self.simtype == "qTDS":
