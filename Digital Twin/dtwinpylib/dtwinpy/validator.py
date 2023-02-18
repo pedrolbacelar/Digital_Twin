@@ -375,24 +375,33 @@ class Validator():
         
         #--- Loop to correlated each Xs with Xr
         # The loop can also be seem as loop through the machines
-
-        for i in range(len(Xr_matrix)):
-            #--- Take the distribution parameters of each machine
-            machine_process_time = self.machines_vector[i].get_process_time()
-            if type(machine_process_time) == list:
-                dist = machine_process_time[0]
-                loc = machine_process_time[1]
-                scale = machine_process_time[2]
-
-                Xr_vector = Xr_matrix[i]
-                print(Xr_vector)
-
-                Xs_vector = self.generate_Xs_machine(loc= loc, scale= scale, distribution= dist, Xr= Xr_vector)
-                self.matrix_ptime_qTDS.append(Xs_vector)
+        machines_ids = self.real_database.get_distinct_values(column= "machine_id", table="real_log")
+        print()
+        for machine_id in machines_ids:
             
-            else:
-                Xs_vector = Xr_matrix[i]
-                self.matrix_ptime_qTDS.append(Xs_vector)
+            # For this machine_id, find the machine object with the same id
+            for i in range(len(self.machines_vector)):
+                if machine_id == self.machines_vector[i].get_name():
+                    machine = self.machines_vector[i]
+                    print("IM HERE")
+                    #--- Take the distribution parameters of each machine
+                    machine_process_time = machine.get_process_time()
+                    if type(machine_process_time) == list:
+                        dist = machine_process_time[0]
+                        loc = machine_process_time[1]
+                        scale = machine_process_time[2]
+
+                        Xr_vector = Xr_matrix[i]
+                        print(Xr_vector)
+
+                        Xs_vector = self.generate_Xs_machine(loc= loc, scale= scale, distribution= dist, Xr= Xr_vector)
+                        self.matrix_ptime_qTDS.append(Xs_vector)
+                    
+                    else:
+                        Xs_vector = Xr_matrix[i]
+                        self.matrix_ptime_qTDS.append(Xs_vector)
+
+                    break
 
         """
         # ---- Plotting to see correlation ----
@@ -408,6 +417,7 @@ class Validator():
         self.matrix_ptime_TDS= self.generate_TDS_traces()
 
         print("=== matrix_ptime_qTDS ===")
+        print(self.matrix_ptime_qTDS)
         for i in range(len(self.matrix_ptime_qTDS)):
             print(f"Machine {i+1}: {self.matrix_ptime_qTDS[i]}")
 
