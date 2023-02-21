@@ -64,3 +64,8 @@ class Database():
         with sqlite3.connect(self.database_path) as digital_model_DB: 
             data_full_trace = digital_model_DB.execute(f"SELECT timestamp, machine_id, activity_type, part_id FROM {table}").fetchall()
         return data_full_trace
+    
+    def read_store_data_all(self, table):
+        with sqlite3.connect(self.database_path) as digital_model_DB: 
+            data_full_trace = digital_model_DB.execute(f"SELECT timestamp, machine_id, activity_type, part_id, queue FROM {table}").fetchall()
+        return data_full_trace

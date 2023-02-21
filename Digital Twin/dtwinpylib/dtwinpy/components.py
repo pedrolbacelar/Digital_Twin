@@ -92,6 +92,7 @@ class Machine():
         self.last_part_id = last_part_id # variable assigned with datab from part_vector
         self.exit = exit
         self.maxparts = maxparts
+        self.working = False
 
         #-- Database Properties
         self.database = database
@@ -182,6 +183,7 @@ class Machine():
 
                 #-- Lower the flag that we finish the process
                 flag_process_finished = False
+                self.working = True
 
                 #---- Trace Driven Simulation (TDS) ----
                 # Check if the comming part have trace
@@ -281,6 +283,7 @@ class Machine():
 
                 # -- Rise the flag of processing
                 flag_process_finished = True
+                self.working = False
 
                 # ============ Finished Action ============
 
@@ -446,32 +449,15 @@ class Machine():
             #---------------------------------------------------
 
 
-    #--- Defining Gets and Sets
+    #--------- Defining GETs ---------
+    def get_working(self):
+        return self.working
     def get_queue_in(self):
-        return self.queue_in
-    def set_queue_in(self, value):
-        self.queue_in = value
-
-    def add_queue_in(self, value):
-        if self.queue_in is None:
-            self.queue_in = []
-        self.queue_in.append(value)
-
-    def add_queue_out(self, value):
-        if self.queue_out is None:
-            self.queue_out = []
-        self.queue_out.append(value)
-
+        return self.queue_in  
     def get_queue_out(self):
         return self.queue_out
-    def set_queue_out(self, value):
-        self.queue_out = value
-
     def get_process_time(self):
         return self.process_time
-    def set_process_time(self, value):
-        self.process_time = value
-
     def get_name(self):
         return self.name
     def get_capacity(self):
@@ -480,20 +466,36 @@ class Machine():
         return self.blocking_policy
     def get_final_machine(self):
         return self.final_machine
+    def get_ptime_qTDS(self):
+        return self.ptime_qTDS
+    def get_id(self):
+        return self.id
+
+    #--------- Defining SETs ---------
+    def set_queue_in(self, value):
+        self.queue_in = value
+    def set_queue_out(self, value):
+        self.queue_out = value
+    def set_process_time(self, value):
+        self.process_time = value
     def set_final_machine(self, value):
         self.final_machine = value
-
     def set_simtype(self, simtype):
         self.simtype = simtype
     def set_ptime_qTDS(self, ptime_qTDS):
         self.ptime_qTDS = ptime_qTDS
-    def get_ptime_qTDS(self):
-        return self.ptime_qTDS
     def set_validator(self, validator):
         self.validator = validator
     
-    def get_id(self):
-        return self.id
+    #--- Special set for queue
+    def add_queue_in(self, value):
+        if self.queue_in is None:
+            self.queue_in = []
+        self.queue_in.append(value)
+    def add_queue_out(self, value):
+        if self.queue_out is None:
+            self.queue_out = []
+        self.queue_out.append(value)
 
 
     #--- Define verbose
