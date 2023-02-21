@@ -2,6 +2,7 @@
 from .digital_model import Model
 from .validator import Validator
 from .interfaceDB import Database
+from .synchronizer import Synchronizer
 
 #--- Reload Package
 
@@ -10,6 +11,7 @@ import dtwinpylib
 #reload this specifc module to upadte the class
 importlib.reload(dtwinpylib.dtwinpy.digital_model)
 importlib.reload(dtwinpylib.dtwinpy.validator)
+importlib.reload(dtwinpylib.dtwinpy.synchronizer)
 importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
 
 class Digital_Twin():
@@ -28,6 +30,7 @@ class Digital_Twin():
         self.database_path = "databases/digital_" + self.name + "_db.db"
         self.real_database_path = "databases/real_" + self.name + "_db.db"
         self.real_database = Database(self.real_database_path, "real_log")
+        
 
     #--- Create the Digital Model
     def generate_digital_model(self):
@@ -86,3 +89,11 @@ class Digital_Twin():
         validator_input.run()
 
         # ========================================================================
+
+    #--- Run Synchronization
+    def run_sync(self):
+        #--- Create the synchronizer
+        synchronizer = Synchronizer(digital_model= self.digital_model, real_database= self.real_database)
+
+        #--- Run the synchronizer (positioning)
+        synchronizer.run()

@@ -5,6 +5,12 @@ class Database():
         self.database_path = database_path
         self.event_table = event_table
 
+        with sqlite3.connect(self.database_path) as db:
+            tables = db.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
+            if len(tables) == 1 and tables[0][0] == "digital_log":
+                self.rename_table("digital_log", "real_log")
+
+
     
     def initialize(self, table):
         with sqlite3.connect(self.database_path) as digital_model_DB:
@@ -69,3 +75,7 @@ class Database():
         with sqlite3.connect(self.database_path) as digital_model_DB: 
             data_full_trace = digital_model_DB.execute(f"SELECT timestamp, machine_id, activity_type, part_id, queue FROM {table}").fetchall()
         return data_full_trace
+
+    def rename_table(self, table_old, table_new):
+        with sqlite3.connect(self.database_path) as digital_model_DB: 
+            digital_model_DB.execute(f"ALTER TABLE {table_old} RENAME TO {table_new};")
