@@ -397,7 +397,7 @@ class Validator():
                         self.matrix_ptime_qTDS[machine.get_name()] = (Xs_vector)
                     
                     else:
-                        Xs_vector = Xr_matrix[i]
+                        Xs_vector = Xr_matrix[machine.get_name()]
                         self.matrix_ptime_qTDS[machine.get_name()] = (Xs_vector)
 
                     break

@@ -8,7 +8,7 @@ importlib.reload(dtwinpylib.dtwinpy.Digital_Twin) #reload this specifc module to
 importlib.reload(dtwinpylib.dtwinpy.interfaceDB) #reload this specifc module to upadte the class
 
 
-
+"""
 class Zone():
     def __init__(self, machine, queue_list):
         self.name = "Zone of " + machine.get_name()
@@ -140,4 +140,8 @@ for key in zones_dict:
     zone_NumParts = current_zone.calculate_parts()
     print(f"[{current_zone.get_name()}] NumParts = {zone_NumParts}")
 print("=========================================")
+"""
 
+
+digital_twin = Digital_Twin(name= "model_2stations_closed",until= 2001, initial=True )
+digital_twin.run_sync()

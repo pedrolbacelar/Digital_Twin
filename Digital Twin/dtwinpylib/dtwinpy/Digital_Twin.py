@@ -58,7 +58,7 @@ class Digital_Twin():
 
         #--- Create the Logic Validator 
         validator_logic = Validator(digital_model= self.digital_model, simtype="TDS", real_database= self.real_database)
-
+        
         #--- IMPROVE: give the object validator for the machine to be able to update the ptime_TDS for new parts
         #--- Get the components of the simulation
         (machines_vector, queues_vector) = self.digital_model.get_model_components()
@@ -92,6 +92,9 @@ class Digital_Twin():
 
     #--- Run Synchronization
     def run_sync(self):
+        #--- Make sure the model is updated
+        self.generate_digital_model()
+
         #--- Create the synchronizer
         synchronizer = Synchronizer(digital_model= self.digital_model, real_database= self.real_database)
 
