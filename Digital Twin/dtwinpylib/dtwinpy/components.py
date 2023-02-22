@@ -93,6 +93,7 @@ class Machine():
         self.exit = exit
         self.maxparts = maxparts
         self.working = False
+        self.part_started_time = self.env.now
 
         #-- Database Properties
         self.database = database
@@ -184,6 +185,7 @@ class Machine():
                 #-- Lower the flag that we finish the process
                 flag_process_finished = False
                 self.working = True
+                self.part_started_time = self.env.now
 
                 #---- Trace Driven Simulation (TDS) ----
                 # Check if the comming part have trace
@@ -470,6 +472,8 @@ class Machine():
         return self.ptime_qTDS
     def get_id(self):
         return self.id
+    def get_part_started_time(self):
+        return self.part_started_time
 
     #--------- Defining SETs ---------
     def set_queue_in(self, value):
@@ -553,11 +557,12 @@ class Queue():
         return self.queue_strength
     def get_arc_links(self):
         return self.arc_links
-
     def get_name(self):
         return self.name
     def get_capacity(self):
         return self.capacity
+    def get_id(self):
+        return self.id
     
     #--- Define verbose
     def verbose(self):

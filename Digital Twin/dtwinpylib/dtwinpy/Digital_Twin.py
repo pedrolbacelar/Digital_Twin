@@ -91,7 +91,7 @@ class Digital_Twin():
         # ========================================================================
 
     #--- Run Synchronization
-    def run_sync(self):
+    def run_sync(self, repositioning = True):
         #--- Make sure the model is updated
         self.generate_digital_model()
 
@@ -99,4 +99,4 @@ class Digital_Twin():
         synchronizer = Synchronizer(digital_model= self.digital_model, real_database= self.real_database)
 
         #--- Run the synchronizer (positioning)
-        synchronizer.run()
+        synchronizer.run(repositioning= repositioning)

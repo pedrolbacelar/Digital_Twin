@@ -143,5 +143,7 @@ print("=========================================")
 """
 
 
-digital_twin = Digital_Twin(name= "model_2stations_closed",until= 2001, initial=True )
+name = "5s_allocation"
+digital_twin = Digital_Twin(name= name,maxparts=5, initial=True )
+digital_twin.run_digital_model()
 digital_twin.run_sync()

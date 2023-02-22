@@ -273,10 +273,10 @@ class Model():
 
     def get_model_components(self):
         return (self.machines_vector, self.queues_vector)
-
     def get_model_database(self):
         return self.Database
-
+    def get_model_path(self):
+        return self.model_path
 
     def verbose(self):
         print(f"==========  Reading the Model: {self.name}  ==========")

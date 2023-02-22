@@ -1,6 +1,6 @@
 #--- Import DT Features
 from .validator import Validator
-
+import json
 
 #--- Reload Package
 
@@ -16,6 +16,7 @@ class Zone():
         self.name = "Zone of " + machine.get_name()
         self.machine = machine
         self.queue_list = queue_list
+        self.zoneInd = None
         #--- Counters for in and out number of parts
         self.inZone = 0
         self.outZone = 0
@@ -52,7 +53,8 @@ class Zone():
         self.machine_working -= 1
     
 
-    def self_validation(self):
+    def self_validation(self, Verbose = True):
+        #--- Use the data from the simulation (digital log)
         self_counter = 0
         #--- Check the number of parts in the queues ins
         for queue in self.queue_list:
@@ -62,10 +64,17 @@ class Zone():
         if self.machine.get_working() == True:
             self_counter += 1
         
-        print(f"[{self.name}] NumParts = {self_counter}, Machine Working = {self.machine.get_working()}")
-    
+        if Verbose == True:
+            print(f"[{self.name}] NumParts = {self_counter}, Machine Working = {self.machine.get_working()}")
+
+        #--- Take the last time that a part was started by the machine
+        part_started_time = self.machine.get_part_started_time()
+
+        #--- Return the number of parts in the zone, if the machine is processing, and the time that the processing started
+        return (self_counter)
 
     #--- Basic Sets and Gets
+    #--- GETs
     def get_name(self):
         return self.name
     def get_queue_list(self):
@@ -77,6 +86,13 @@ class Zone():
             return True
         if self.machine_working == 0:
             return False
+    def get_zoneInd(self):
+        return self.zoneInd
+    def get_NumParts(self):
+        return self.NumParts
+    #--- SETs
+    def set_zoneInd(self, indicador):
+        self.zoneInd = indicador
 
 class Synchronizer():
     def __init__(self, digital_model, real_database):
@@ -136,6 +152,7 @@ class Synchronizer():
                 current_zone.Mstarted()
     
     def sync_TDS(self):
+        print("======================= Running TDS for Sync =======================")
         validator_sync = Validator(digital_model= self.digital_model, simtype= "TDS", real_database= self.real_database)
 
         #-------- Runnin TDS --------
@@ -153,10 +170,107 @@ class Synchronizer():
         #--- Run the TDS
         validator_sync.run()
         #-----------------------------
+        print("=====================================================================")
 
     
-    
+    def sync_indicator(self):
+        for key in self.zones_dict:
+            #--- For each Zone
+            current_zone = self.zones_dict[key]
 
+            #--- Take the number of parts in the zone according to the real log (real zone)
+            NumParts_real = current_zone.calculate_parts()
+
+            #--- Take the information from the digital perspective (digital zone)
+            (NumParts_digital) = current_zone.self_validation(Verbose = False)
+
+            #--- Calculate the Indicator for that Zone
+
+            #--- Check for zeros
+            if NumParts_real != 0:
+                error = (NumParts_real - NumParts_digital) / max(NumParts_real, NumParts_digital)
+                syncInd = 1 - error
+                current_zone.set_zoneInd(syncInd)
+            
+            if NumParts_real == 0:
+                if NumParts_real == NumParts_digital:
+                    error = 0
+                else:
+                    error = 1
+
+                syncInd = 1 - error
+                current_zone.set_zoneInd(syncInd)
+            
+
+    def sync_aligment(self):
+
+        for key in self.zones_dict:
+            #--- For each Zone
+            current_zone = self.zones_dict[key]
+            current_NumParts = current_zone.get_NumParts()
+            parts_in_queues = current_NumParts
+            current_Queues_In = current_zone.get_queue_list()
+
+
+            #--- Verify if the Zone is working or not
+            if current_zone.get_machine_working() == True:
+                #-- Machine is working
+                # So from all the parts in the Zone, I need to subtract one to have the
+                # number of parts in the queues
+                parts_in_queues = current_NumParts - 1
+
+
+
+            # ================== Positioning of Parts in Queues ==================
+            #--- Loop through the Queues to allocate the parts
+            for queue in current_Queues_In:
+                queue_len = queue.get_len()
+
+                #-- Check if we have more parts than space in the current queue
+                if parts_in_queues > queue_len:
+
+                    parts_to_allocate = queue_len
+                    # ============= Update Model.json =============
+                    model_path = self.digital_model.get_model_path()
+                    with open(model_path, 'r+') as model_file:
+                        data = json.load(model_file)
+                        
+                        # Where should I positioned the part? 
+                        #=====================================
+                        data['initial'][queue.get_id() - 1] = parts_to_allocate
+                        #=====================================
+
+                        # Move the file pointer to the beginning of the file
+                        model_file.seek(0)
+                        # Write the modified data back to the file
+                        json.dump(data, model_file)
+                        # Truncate any remaining data in the file
+                        model_file.truncate()
+                    
+                    #--- Update the remaining parts to be allocate
+                    parts_in_queues = parts_in_queues - parts_to_allocate
+
+                
+                #--- Queue has capacity to allocate the remaining parts
+                if parts_in_queues <= queue_len:
+                    # ============= Update Model.json =============
+                    model_path = self.digital_model.get_model_path()
+                    with open(model_path, 'r+') as model_file:
+                        data = json.load(model_file)
+                        
+                        #=====================================
+                        data['initial'][queue.get_id() - 1] = parts_in_queues
+                        #=====================================
+
+                        # Move the file pointer to the beginning of the file
+                        model_file.seek(0)
+                        # Write the modified data back to the file
+                        json.dump(data, model_file)
+                        # Truncate any remaining data in the file
+                        model_file.truncate()
+                    
+                    # Since the number of parts to positioned is less than what i can, i'm done
+                    break
 
 
     def show(self):
@@ -175,10 +289,11 @@ class Synchronizer():
             current_zone = self.zones_dict[key]
             zone_NumParts = current_zone.calculate_parts()
             machine_working = current_zone.get_machine_working()
-            print(f"[{current_zone.get_name()}] NumParts = {zone_NumParts}, Machine Working = {machine_working}")
+            indicator = current_zone.get_zoneInd()
+            print(f"[{current_zone.get_name()}] NumParts = {zone_NumParts}, Machine Working = {machine_working}, Zone Indicador = {indicator}")
         print("=========================================")
     
-    def run(self):
+    def run(self, repositioning = True):
         #--- Create the Zones for the Initial Conditions
         self.create_zones()
 
@@ -187,6 +302,13 @@ class Synchronizer():
 
         #--- Run the Trace Driven Simulation
         self.sync_TDS()
+
+        #--- Calculate the Indicator
+        self.sync_indicator()
+
+        #--- Aligment (re-positioning)
+        if repositioning == True:
+            self.sync_aligment()
 
         #--- Show the results
         self.show()
