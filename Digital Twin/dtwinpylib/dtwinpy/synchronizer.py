@@ -23,6 +23,7 @@ class Zone():
         self.Zone_initial = 0
         self.NumParts = 0
         self.machine_working = 0
+        self.last_started_time = 0
 
         #--- Initial Conditions
         # Multiple Queues
@@ -90,9 +91,13 @@ class Zone():
         return self.zoneInd
     def get_NumParts(self):
         return self.NumParts
+    def get_last_started_time(self):
+        return self.last_started_time
     #--- SETs
     def set_zoneInd(self, indicador):
         self.zoneInd = indicador
+    def set_last_started_time(self, started_time):
+        self.last_started_time = started_time
 
 class Synchronizer():
     def __init__(self, digital_model, real_database):
@@ -101,6 +106,7 @@ class Synchronizer():
         self.real_database = real_database
         self.full_database = self.real_database.read_store_data_all("real_log")
         self.zones_dict = {}
+        self.Tnow = 0
 
         #--- Digital Model
         (self.machines_vector, self.queues_vector) = self.digital_model.get_model_components()
@@ -121,7 +127,7 @@ class Synchronizer():
         #--- Find the Positioning
         for event in self.full_database:
             #--- Extract the important informations
-            (machine_name, status, queue_name) = (event[1], event[2], event[4]) 
+            (time, machine_name, status, queue_name) = (event[0], event[1], event[2], event[4]) 
             
             # We just care about the events with status "Finished",
             # because this in the only moment when we subtract some part from the current
@@ -150,7 +156,26 @@ class Synchronizer():
 
             if status == "Started":
                 current_zone.Mstarted()
+                current_zone.set_last_started_time(time)
+        
+        #--- Assign Tnow according the last event of the real log
+        self.Tnow = self.full_database[-1][0]
     
+    def started_time_discovery(self):
+        for key in self.zones_dict:
+            #--- For each zone, verify if the machine is working
+            current_zone = self.zones_dict[key]
+
+            if current_zone.get_machine_working() == True:
+                #--- Calculate the Delta T between the last started time of the machine and
+                # the current time of the real world (Tnow)
+
+                Delta_T_started = self.Tnow - current_zone.get_last_started_time()
+
+                # TO-DO: IMPLEMENT THIS DELTA_T IN THE MODEL.JSON AND UPDATE THE
+                # MACHINE TO BE ABLE TO ALREADY START THE SIMULATION WITH A CERTAN PROCESS TIME
+
+
     def sync_TDS(self):
         print("======================= Running TDS for Sync =======================")
         validator_sync = Validator(digital_model= self.digital_model, simtype= "TDS", real_database= self.real_database)
@@ -218,6 +243,7 @@ class Synchronizer():
                 # So from all the parts in the Zone, I need to subtract one to have the
                 # number of parts in the queues
                 parts_in_queues = current_NumParts - 1
+
 
 
 
