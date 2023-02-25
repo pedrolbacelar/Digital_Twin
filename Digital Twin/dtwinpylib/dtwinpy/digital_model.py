@@ -86,6 +86,58 @@ class Model():
         generator_initial = Generator(env= self.env, loop_type="closed", part_vector= self.initial_parts, queue_vector= self.queues_vector)
         self.queues_vector = generator_initial.allocate_part()
 
+    def merge_queues(self):
+        """
+        Function to merge existing queues in the input of a machines.
+        """
+
+        # 1) Look through all the input queues of all the machines and stop when find
+        # a machine with multiple queues in the input.
+
+        # 2) Record the id of thoses queues and replace it (summing up the properties)
+        # for a new merged queue
+
+        # 3) With the IDs in hands, look through all the output queues of the machines
+        # and if find one of the previous selected queues, replace it for the merged queue
+
+        #--- Loop through all the machines to MERGE input queues
+        for machine in self.machines_vector:
+            #--- Machine with multiple queues
+            if len(machine.get_queue_in()) > 1:
+                #--- Create the vectors with Queues to be merge
+                queues_to_merge = machine.get_queue_in()
+        
+                #--- Properties of the selected queues 
+                capacity = 0 # Queue capacity
+                merged_id = "merged_"
+
+                #--- Loop through the selected queues to merge to update properties
+                for queue in queues_to_merge:
+                    #-- Increment Queue Capacity
+                    capacity += queue.get_capacity()
+                    merged_id += str(queue.get_id())
+
+                # ----- Create Merged Queue -----
+                Merged_Queue = Queue(env= self.env, id= merged_id, capacity= capacity)
+                #-- Set the new merged queue as list in the Queue In
+                machine.set_queue_in([Merged_Queue])
+        
+                #--- Loop through the output queues to replace for the merged queue
+                for machine in self.machines_vector:
+                    
+                    #--- For each machine, verify if the one of the output queues is between 
+                    # one of the selected queues
+                    for queue_out in machine.get_queue_out():
+                        
+                        #--- compare the queue with all the selected queues
+                        for queue_merged in queues_to_merge:
+                            #-- This machine has an output queue that was merged
+                            if queue_out.get_name() == queue_merged.get_name():
+                                # Remove this existing queue and replace for the new merged queue
+                                
+
+
+
     def model_translator(self):
         
         #--- Open the json file
@@ -129,11 +181,18 @@ class Model():
             #====================================================================
 
 
+        ###### Do the initial allocation after the merge, so we don't have problems with the number of queue
+        # being different than the number of positions in initial allocation vector
+        # The initial allocation could even be a dictionary
+
+
         #========================= Initial Allocation ===================
         if self.initial == True:
             #--- Allocate the initial Parts for each Queue
             self.initial_allocation()
         #====================================================================
+
+
 
 
     def run(self):

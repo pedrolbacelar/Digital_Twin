@@ -530,7 +530,7 @@ class Machine():
 
 
 class Queue():
-    def __init__(self, env, id, capacity, arc_links, transportation_time= None, freq= None):
+    def __init__(self, env, id, capacity, arc_links= None, transportation_time= None, freq= None):
         self.env = env
         self.id = id
         self.name = "Queue " + str(self.id)
