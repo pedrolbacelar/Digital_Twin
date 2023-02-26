@@ -101,11 +101,15 @@ class Model():
         # and if find one of the previous selected queues, replace it for the merged queue
 
         #--- Loop through all the machines to MERGE input queues
+        queue_to_merge_all = []
+        merged_queues_all = []
+
         for machine in self.machines_vector:
             #--- Machine with multiple queues
             if len(machine.get_queue_in()) > 1:
                 #--- Create the vectors with Queues to be merge
                 queues_to_merge = machine.get_queue_in()
+                queue_to_merge_all.append(queues_to_merge)
         
                 #--- Properties of the selected queues 
                 capacity = 0 # Queue capacity
@@ -119,22 +123,47 @@ class Model():
 
                 # ----- Create Merged Queue -----
                 Merged_Queue = Queue(env= self.env, id= merged_id, capacity= capacity)
+                merged_queues_all.append(Merged_Queue)
                 #-- Set the new merged queue as list in the Queue In
                 machine.set_queue_in([Merged_Queue])
         
                 #--- Loop through the output queues to replace for the merged queue
-                for machine in self.machines_vector:
+                for machine_out in self.machines_vector:
                     
                     #--- For each machine, verify if the one of the output queues is between 
                     # one of the selected queues
-                    for queue_out in machine.get_queue_out():
-                        
+                    new_queues_out = []
+                    
+                    for queue_out in machine_out.get_queue_out():
+                        #-- Keep adding queues out in a new vector
+                        new_queues_out.append(queue_out)
                         #--- compare the queue with all the selected queues
                         for queue_merged in queues_to_merge:
                             #-- This machine has an output queue that was merged
                             if queue_out.get_name() == queue_merged.get_name():
                                 # Remove this existing queue and replace for the new merged queue
-                                
+                                #-- Since this queue was merged, we remove the last added
+                                new_queues_out.pop()
+                                #-- Add the new queue
+                                new_queues_out.append(Merged_Queue)
+                    
+                    #--- Finished checking the queues out of this machines, add the updated queues out
+                    machine_out.set_queue_out(new_queues_out)
+
+
+        #--- From now all the machines should have the correct queues, so update the queue vector
+        updated_queues = []
+        for machine in self.machines_vector:
+            #--- each machine has just one queue input now
+            for queue in machine.get_queue_in():
+                updated_queues.append(queue)
+        
+        #--- Update queue vector
+        self.queues_vector = updated_queues
+
+        #--- Update Queues ID
+        for i in range(len(self.queues_vector)):
+            self.queues_vector[i].set_id(i+1)
 
 
 
@@ -184,13 +213,14 @@ class Model():
         ###### Do the initial allocation after the merge, so we don't have problems with the number of queue
         # being different than the number of positions in initial allocation vector
         # The initial allocation could even be a dictionary
-
+        self.merge_queues()
 
         #========================= Initial Allocation ===================
         if self.initial == True:
             #--- Allocate the initial Parts for each Queue
             self.initial_allocation()
         #====================================================================
+
 
 
 

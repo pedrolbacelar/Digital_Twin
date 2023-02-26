@@ -564,6 +564,11 @@ class Queue():
     def get_id(self):
         return self.id
     
+    #--- Define Sets
+    def set_id(self, id):
+        self.id = id
+        self.name = "Queue " + str(self.id)
+    
     #--- Define verbose
     def verbose(self):
         print("----------------")

@@ -15,7 +15,7 @@ importlib.reload(dtwinpylib.dtwinpy.synchronizer)
 importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
 
 class Digital_Twin():
-    def __init__(self, name, initial= False, until= None, part_type= "A", loop_type= "closed", maxparts = None):
+    def __init__(self, name, initial= True, until= None, part_type= "A", loop_type= "closed", maxparts = None):
         #--- Model Parameters
         self.name = name
         self.model_path = "models/" + self.name + ".json"
