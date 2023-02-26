@@ -95,6 +95,11 @@ class Machine():
         self.working = False
         self.part_started_time = self.env.now
 
+        #--- Allocation
+        self.allocation_counter = 0
+        #self.allocation_policy= "first"
+        self.allocation_policy= "alternated"
+
         #-- Database Properties
         self.database = database
 
@@ -308,6 +313,7 @@ class Machine():
 
                 # ============ Start Action ============
 
+                # --------------------- OPEN LOOP ---------------------
                 #--- Open Loops requires different allocation for final machines
                 if self.loop == "open" and self.final_machine == True:
 
@@ -334,24 +340,54 @@ class Machine():
                         #--- Terminates the simulations
                         self.exit.succeed()
 
+                # ------------------- CLOSED LOOP -------------------
                 else:
                     #--- Included cases
                     # All closed loop cases
                     # Open Loop cases that are not final machines
 
-                    #--- Look to all the Queue Out options
-                    for queue in self.queue_out:
-                        if queue.get_len() >= queue.capacity: #queue  full
-                            flag_allocated_part = False
-                            
+                    # ------------------ Choosing the Next Queue ------------------
+                    
+                    # ---------------- First Queue Free Policy ----------------
+                    if self.allocation_policy == "first":
+                        for queue in self.queue_out:
+                            if queue.get_len() >= queue.capacity: #queue  full
+                                flag_allocated_part = False
+                                
 
-                        #--- If the current Queue is not full:
-                        else:
-                            #--- Mark the Queue Out Available
-                            self.queue_to_put = queue
-                            #-- Increment counter out
-                            self.counter_queue_out += 1
-                            break # I take the first free
+                            #--- If the current Queue is not full:
+                            else:
+                                #--- Mark the Queue Out Available
+                                self.queue_to_put = queue
+                                #-- Increment counter out
+                                self.counter_queue_out += 1
+                                break # I take the first free
+                    # --------------------------------------------------------
+
+                    # ---------------- Alternating Policy ----------------
+                    if self.allocation_policy == "alternated":
+                        #--- Select the Queue based on the counter
+                        queue_selected = self.queue_out[self.allocation_counter]
+
+                        # Loop through next queue in the perspective of the counter
+                        for i in range(self.allocation_counter, len(self.queue_out)):
+                            #--- Selected Queue is full
+                            if queue_selected.get_len() >= queue_selected.get_capacity():
+                                queue_selected = self.queue_out[self.allocation_counter + i]
+
+                            #--- Selected Queue is available to receive an input
+                            if queue_selected.get_len() < queue_selected.get_capacity():
+                                self.queue_to_put = queue_selected
+                                break
+
+                        #--- Reset the counter if it's at maximum
+                        if self.allocation_counter >= (len(self.queue_out) - 1):
+                            self.allocation_counter = -1 # minus 1 because we're going to increase 1 anyways
+
+                        #--- Increase the counter for the next allocation
+                        self.allocation_counter += 1
+            
+                    #-------------------------------------------------------------
 
                     #--- Queue Allocated (Update digital_log)
                     # obs: makes senses to take the time just after the allocation, because in the model becuase the model generation works like that
