@@ -1,6 +1,7 @@
 #--- Import DT Features
 from .validator import Validator
 import json
+import sqlite3
 
 #--- Reload Package
 
@@ -103,10 +104,18 @@ class Synchronizer():
     def __init__(self, digital_model, real_database):
         #--- Basic Information
         self.digital_model = digital_model
-        self.real_database = real_database
-        self.full_database = self.real_database.read_store_data_all("real_log")
         self.zones_dict = {}
         self.Tnow = 0
+
+        #--- Database
+        self.real_database = real_database
+        self.real_database_path = self.real_database.get_database_path()
+        with sqlite3.connect(self.real_database_path) as db:
+            tables = db.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
+            if len(tables) == 1 and tables[0][0] == "digital_log":
+                self.real_database.rename_table("digital_log", "real_log")
+        
+        self.full_database = self.real_database.read_store_data_all("real_log")
 
         #--- Digital Model
         (self.machines_vector, self.queues_vector) = self.digital_model.get_model_components()
@@ -253,6 +262,7 @@ class Synchronizer():
                 queue_len = queue.get_len()
 
                 #-- Check if we have more parts than space in the current queue
+                # ----------- Not happing with Merged Queues Ins -----------
                 if parts_in_queues > queue_len:
 
                     parts_to_allocate = queue_len
