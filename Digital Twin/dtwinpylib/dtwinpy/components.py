@@ -60,7 +60,7 @@ class Part():
 
 
 class Machine():
-    def __init__(self, env, id, process_time, capacity, terminator, database, last_part_id=None, queue_in= None, queue_out= None, blocking_policy= "BBS", freq= None, cluster= None, final_machine = False, loop = "closed", exit = None, simtype = None, ptime_qTDS = None, maxparts= None):
+    def __init__(self, env, id, process_time, capacity, terminator, database, worked_time, last_part_id=None, queue_in= None, queue_out= None, blocking_policy= "BBS", freq= None, cluster= None, final_machine = False, loop = "closed", exit = None, simtype = None, ptime_qTDS = None, maxparts= None, initial_part= None):
         #-- Main Properties
         self.env = env
         self.id = id
@@ -108,6 +108,15 @@ class Machine():
         self.ptime_qTDS = ptime_qTDS
         self.finished_parts = 0
         self.validator = None
+
+        #--- Initial part already being processed
+        self.worked_time = worked_time
+        self.initial_part = initial_part
+        if self.worked_time != 0:
+            #-- Part ready to be processed
+            self.current_state == "Processing"
+
+            
 
 
 
@@ -183,9 +192,15 @@ class Machine():
                 # ============ Start Action ============
                 #--- First thing before processing is to get the part:
                 #-- Get the part
-                if self.queue_to_get.get_len() != 0:
-                    try_to_get = self.queue_to_get.get() #Not necessary the yield
+                if self.queue_to_get.get_len() != 0 and self.worked_time == 0:
+                    #- Just get a new part if the machine doesn't have a initial part to be processed
+                    try_to_get = self.queue_to_get.get() 
                     self.part_in_machine = try_to_get.value
+
+                if self.worked_time != 0:
+                    #-- machine has an initial part to be processed
+                    self.part_in_machine = self.initial_part
+
 
                 #-- Lower the flag that we finish the process
                 flag_process_finished = False
@@ -207,20 +222,19 @@ class Machine():
                             self.simtype = None
                         
 
-                #-- User interface
-                print(f'Time: {self.env.now} - [{self.name}] got {self.part_in_machine.get_name()} from {self.queue_to_get.get_name()} (capacity= {self.queue_to_get.get_len()})')
-
-
                 # ====== Processing Time ======
                 # processing of the part depending on part type
-                
-                #--- Process Started (Update digital_log)
-                self.database.write_event(self.database.get_event_table(),
-                timestamp= self.env.now,
-                machine_id= self.name,
-                activity_type= "Started",
-                part_id= self.part_in_machine.get_name(),
-                queue= self.queue_to_get.get_name())
+                if self.worked_time == 0:
+                    #-- User interface
+                    print(f'Time: {self.env.now} - [{self.name}] got {self.part_in_machine.get_name()} from {self.queue_to_get.get_name()} (capacity= {self.queue_to_get.get_len()})')
+
+                    #--- Process Started (Update digital_log)
+                    self.database.write_event(self.database.get_event_table(),
+                    timestamp= self.env.now,
+                    machine_id= self.name,
+                    activity_type= "Started",
+                    part_id= self.part_in_machine.get_name(),
+                    queue= self.queue_to_get.get_name())
 
                 #--------------- Type of Simulation ---------------
                 #--- Normal Simulation
@@ -232,18 +246,19 @@ class Machine():
 
                         #-- generate the process time following the given distribution
                         if distribution_name == 'norm':
-                            current_process_time = norm.rvs(self.process_time[1], self.process_time[2], size= 1)
+                            current_process_time = norm.rvs(self.process_time[1], self.process_time[2], size= 1) - self.worked_time
                             
                         elif distribution_name == 'expon':
-                            current_process_time = norm.rvs(self.process_time[1], self.process_time[2], size= 1)
+                            current_process_time = norm.rvs(self.process_time[1], self.process_time[2], size= 1) - self.worked_time
 
                     else:
-                        current_process_time = self.process_time
+                        current_process_time = self.process_time - self.worked_time
                         
                     #=========================================================
                     yield self.env.timeout(int(current_process_time))  # processing time
                     #=========================================================
-                
+                    
+
                 #--- Trace Driven Simulation (TDS)
                 elif self.simtype == "TDS":
                     #-- Get the current cluster of that part
@@ -288,9 +303,11 @@ class Machine():
                 #------------------------------------------------------
                 
 
-                # -- Rise the flag of processing
+                # --- Rise the flag of processing
                 flag_process_finished = True
                 self.working = False
+                # --- All the work done, initial part done
+                self.worked_time = 0
 
                 # ============ Finished Action ============
 
@@ -556,6 +573,8 @@ class Machine():
                 print(queue.get_name())
         print("---Process Time for quasi Trace Driven Simulation---")
         print(self.get_ptime_qTDS())
+        if self.initial_part != None:
+            print(f"--- Part already being processed: {self.initial_part.get_name()} ---")
         """
         print(f"Capacity: {self.get_capacity()}")
         print(f"Blocking Policy: {self.get_blocking_policy()}")

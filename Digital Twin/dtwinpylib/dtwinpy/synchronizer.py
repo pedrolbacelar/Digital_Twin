@@ -94,6 +94,8 @@ class Zone():
         return self.NumParts
     def get_last_started_time(self):
         return self.last_started_time
+    def get_machine(self):
+        return self.machine
     #--- SETs
     def set_zoneInd(self, indicador):
         self.zoneInd = indicador
@@ -116,6 +118,7 @@ class Synchronizer():
                 self.real_database.rename_table("digital_log", "real_log")
         
         self.full_database = self.real_database.read_store_data_all("real_log")
+        
 
         #--- Digital Model
         (self.machines_vector, self.queues_vector) = self.digital_model.get_model_components()
@@ -170,21 +173,6 @@ class Synchronizer():
         #--- Assign Tnow according the last event of the real log
         self.Tnow = self.full_database[-1][0]
     
-    def started_time_discovery(self):
-        for key in self.zones_dict:
-            #--- For each zone, verify if the machine is working
-            current_zone = self.zones_dict[key]
-
-            if current_zone.get_machine_working() == True:
-                #--- Calculate the Delta T between the last started time of the machine and
-                # the current time of the real world (Tnow)
-
-                Delta_T_started = self.Tnow - current_zone.get_last_started_time()
-
-                # TO-DO: IMPLEMENT THIS DELTA_T IN THE MODEL.JSON AND UPDATE THE
-                # MACHINE TO BE ABLE TO ALREADY START THE SIMULATION WITH A CERTAN PROCESS TIME
-
-
     def sync_TDS(self):
         print("======================= Running TDS for Sync =======================")
         validator_sync = Validator(digital_model= self.digital_model, simtype= "TDS", real_database= self.real_database)
@@ -205,7 +193,6 @@ class Synchronizer():
         validator_sync.run()
         #-----------------------------
         print("=====================================================================")
-
     
     def sync_indicator(self):
         for key in self.zones_dict:
@@ -235,15 +222,15 @@ class Synchronizer():
                 syncInd = 1 - error
                 current_zone.set_zoneInd(syncInd)
             
-
     def sync_aligment(self):
-
+        #--- Loop through each zone (machine and queue in)
         for key in self.zones_dict:
             #--- For each Zone
             current_zone = self.zones_dict[key]
             current_NumParts = current_zone.get_NumParts()
             parts_in_queues = current_NumParts
             current_Queues_In = current_zone.get_queue_list()
+            current_machine = current_zone.get_machine()
 
 
             #--- Verify if the Zone is working or not
@@ -253,8 +240,29 @@ class Synchronizer():
                 # number of parts in the queues
                 parts_in_queues = current_NumParts - 1
 
+                #--- Calculate the Delta T between the last started time of the machine and
+                # the current time of the real world (Tnow)
+                Delta_T_started = self.Tnow - current_zone.get_last_started_time()
 
+                #--- Positioning a part within the working machine
+                # ============= Update Model.json =============
+                model_path = self.digital_model.get_model_path()
+                with open(model_path, 'r+') as model_file:
+                    data = json.load(model_file)
+                    #--- For each machine (node)
+                    for node in data['nodes']:
+                        if node['activity'] == current_machine.get_id():
+                            node['worked_time'] = Delta_T_started
 
+                            #---- Write Back the Changes
+                            # Move the file pointer to the beginning of the file
+                            model_file.seek(0)
+                            # Write the modified data back to the file
+                            json.dump(data, model_file)
+                            # Truncate any remaining data in the file
+                            model_file.truncate()
+
+                            break
 
             # ================== Positioning of Parts in Queues ==================
             #--- Loop through the Queues to allocate the parts

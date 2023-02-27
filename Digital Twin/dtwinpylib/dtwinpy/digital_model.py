@@ -184,10 +184,23 @@ class Model():
             #========================= Create Machines =========================
             # Loop through the nodes in the json data
             for node in data['nodes']:
+                # --- Check if there is any initial part
+                if node["worked_time"] != 0:
+                    #-- Update part ID
+                    self.last_part_id += 1
+
+                    #-- Create the initial part
+                    ## not sure if location matters here ##
+                    ## part created in the past in relation with the current simulation ##
+                    initial_part = Part(id= self.last_part_id, type= "A", location= None, creation_time= - node["worked_time"])
+                else:
+                    initial_part = None
+
                 # Create a new Machine object for each node and add it to the list
                 self.machines_vector.append(Machine(env= self.env, id= node['activity'],freq= node['frequency'],capacity= node['capacity'], 
                 process_time= node['contemp'], database= self.Database, cluster= node['cluster'], last_part_id = self.last_part_id,
-                terminator= self.terminator, loop= self.loop_type, exit= self.exit, maxparts= self.maxparts))
+                terminator= self.terminator, loop= self.loop_type, exit= self.exit, maxparts= self.maxparts,
+                worked_time= node['worked_time'], initial_part= initial_part))
             
             self.machines_vector[-1].set_final_machine(True)
             #====================================================================
@@ -209,11 +222,10 @@ class Model():
             self.queue_allocation()
             #====================================================================
 
-
-        ###### Do the initial allocation after the merge, so we don't have problems with the number of queue
-        # being different than the number of positions in initial allocation vector
-        # The initial allocation could even be a dictionary
+        #========================= Merge Input Queues =========================
+        #--- Merge existing Input Queue and re-assign Output Queues
         self.merge_queues()
+        #======================================================================
 
         #========================= Initial Allocation ===================
         if self.initial == True:

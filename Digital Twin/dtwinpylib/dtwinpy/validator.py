@@ -103,6 +103,19 @@ class Validator():
                     started_time = None
                     finished_time = None
                     processed_time = None
+                
+                #--- In the case of part that already was in the machine (worked_time)
+                if finished_time != None and started_time == None:
+                    processed_time = finished_time
+
+                    #--- Add event process time to the part trace
+                    part_trace.append(processed_time)
+
+                    #--- reset local started and finished time for the next cycle
+                    started_time = None
+                    finished_time = None
+                    processed_time = None
+
             
             #--- Add part trace to the matrix of all parts traces
             matrix_ptime_TDS.append(part_trace)
@@ -178,6 +191,18 @@ class Validator():
                     processed_time = finished_time - started_time
 
                     #--- Add event process time to the machine trace
+                    machine_trace.append(processed_time)
+
+                    #--- reset local started and finished time for the next cycle
+                    started_time = None
+                    finished_time = None
+                    processed_time = None
+
+                #--- In the case of part that already was in the machine (worked_time)
+                if finished_time != None and started_time == None:
+                    processed_time = finished_time
+
+                    #--- Add event process time to the part trace
                     machine_trace.append(processed_time)
 
                     #--- reset local started and finished time for the next cycle
