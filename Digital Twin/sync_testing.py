@@ -17,4 +17,4 @@ name = "5s_merging_sync"
 digital_twin = Digital_Twin(name= name,maxparts=10)
 digital_twin.generate_digital_model()
 digital_twin.run_digital_model()
-
+digital_twin.run_validation()

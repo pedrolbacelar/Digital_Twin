@@ -165,6 +165,48 @@ class Model():
         for i in range(len(self.queues_vector)):
             self.queues_vector[i].set_id(i+1)
 
+    def cluster_discovery(self):
+        # Assumption: The first machines is always not parellized
+
+        for machine in self.machines_vector:
+            #--- Machine's output queues
+            out_queues = machine.get_queue_out()
+            in_queues = machine.get_queue_in()
+
+            #--- First machine, first cluster
+            if machine.get_id() == 1:
+                machine_cluster = 1
+                machine.set_cluster(machine_cluster)
+
+                #-- Increment for the next cluster
+                next_cluster = machine_cluster + 1
+                
+                #-- For each out Queue, set the "next" cluster
+                for queue in out_queues:
+                    queue.set_cluster(next_cluster)
+            
+            #--- Not first, cluster checking by Queues
+            else:
+                # 1. It first look to the property of its queue in (where it has their own cluster counter)
+                # 2. increment the cluster counter
+                # 3. Look for my output queues and assigned the queues as the cluster counter
+
+                #--- If the machine is not the first one, the cluster
+                # is given by the Queue cluster of the input
+                for queue in in_queues:
+                    #--- Take the cluster from the machine queue in
+                    machine_cluster = queue.get_cluster()
+
+                #--- Set the machine cluster
+                machine.set_cluster(machine_cluster)
+                
+                #-- Increment for the next cluster
+                next_cluster = machine_cluster + 1
+                
+                #-- For each out Queue, set the "next" cluster
+                for queue in out_queues:
+                    queue.set_cluster(next_cluster)
+
 
 
     def model_translator(self):
@@ -234,7 +276,10 @@ class Model():
         #====================================================================
 
 
-
+        #========================= Cluster Discovery =========================
+        #--- Set the cluster for each machine
+        self.cluster_discovery()
+        #====================================================================
 
 
     def run(self):

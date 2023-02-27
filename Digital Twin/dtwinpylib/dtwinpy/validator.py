@@ -54,6 +54,16 @@ class Validator():
                 for part in current_parts:
                     part_list.append(part)
         
+        #--- Get the existing parts within operating machines
+        for machine in self.machines_vector:
+            if machine.get_initial_part() != None:
+                part = machine.get_initial_part()
+                part_list.append(part)
+                # Note 1: I can do this because the even the Validator being called after the simulation,
+                # after assigned, we don't change the initial part of a machine
+                # Note 2: In this case, I first add all the parts in the queues and after the parts in the machines
+                # This logic is okay, because the logic for naming parts is also being like that.
+        
         #--- give for each part the ptime_TDS list 
         for part in part_list:
             current_ptime_TDS = self.get_part_TDS(part)

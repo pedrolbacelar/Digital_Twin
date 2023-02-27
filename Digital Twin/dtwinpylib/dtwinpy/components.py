@@ -18,6 +18,16 @@ class Part():
         #--- (quasi) Trace Driven Simulation (qTDS or TDS)
         self.ptime_TDS = ptime_TDS # process time for Trace Driven Simulation
         self.finished_clusters = 0
+
+    def quick_TDS_fix(self, current_cluster):
+        #--- Count the number of theoretical finished clusters
+        finished_clusters = current_cluster - 1
+        #--- create a new vector with zero for the finished clusters
+        new_ptime_TDS = [0] * finished_clusters + self.ptime_TDS
+        #--- Updated old vector with the new vector
+        self.ptime_TDS = new_ptime_TDS
+
+
     
     #------- Get methods -------
     def get_name(self):
@@ -74,7 +84,6 @@ class Machine():
         self.capacity = capacity
         self.blocking_policy = blocking_policy     
         self.freq = freq
-        self.cluster = cluster
         self.loop = loop
         
         #-- Flags and Counters Properties
@@ -112,9 +121,12 @@ class Machine():
         #--- Initial part already being processed
         self.worked_time = worked_time
         self.initial_part = initial_part
+        self.cluster = cluster
         if self.worked_time != 0:
             #-- Part ready to be processed
-            self.current_state == "Processing"
+            self.current_state = "Processing"
+
+        
 
             
 
@@ -191,12 +203,16 @@ class Machine():
             if self.current_state == "Processing":
                 # ============ Start Action ============
                 #--- First thing before processing is to get the part:
-                #-- Get the part
-                if self.queue_to_get.get_len() != 0 and self.worked_time == 0:
-                    #- Just get a new part if the machine doesn't have a initial part to be processed
-                    try_to_get = self.queue_to_get.get() 
-                    self.part_in_machine = try_to_get.value
+                
+                #-- There is no initial part
+                if self.worked_time == 0:
+                    #-- Get the part
+                    if self.queue_to_get.get_len() != 0:
+                        #- Just get a new part if the machine doesn't have a initial part to be processed
+                        try_to_get = self.queue_to_get.get() 
+                        self.part_in_machine = try_to_get.value
 
+                #-- There is an initial part being processed, I don't need to take from the queue
                 if self.worked_time != 0:
                     #-- machine has an initial part to be processed
                     self.part_in_machine = self.initial_part
@@ -261,22 +277,36 @@ class Machine():
 
                 #--- Trace Driven Simulation (TDS)
                 elif self.simtype == "TDS":
+                    #-- Quicky fix for TDS of parts in the middle of the simulation
+                    
+                    #-- If our first part still from the initial working
+                    if self.worked_time != 0:
+                        #-- Updated the processed time list of part considering the "supposed" finished cluster
+                        self.part_in_machine.quick_TDS_fix(self.get_cluster())
+
                     #-- Get the current cluster of that part
                     if self.env.now== 310000:
                         pass
-                    part_current_cluster = self.part_in_machine.get_finished_clusters()
+                    
+                    ##### Old approach before Sync ####
+                    #part_current_cluster = self.part_in_machine.get_finished_clusters()
+                    #current_process_time = self.part_in_machine.get_ptime_TDS(part_current_cluster)
+
+                    #--- Get machine cluster
+                    machine_cluster = self.get_cluster()
 
                     #-- Get the current process time
-                    current_process_time = self.part_in_machine.get_ptime_TDS(part_current_cluster)
+                    # minus 1 because the machine cluster starts with 1 and the position of process time with 0
+                    current_process_time = self.part_in_machine.get_ptime_TDS(machine_cluster - 1)
 
                     # get the related process time for that part and for this cluster of machine
                     #=========================================================
                     yield self.env.timeout(current_process_time)  # processing time
                     #=========================================================
 
-                    #-- Update the next cluster for that part
-                    part_next_cluster = part_current_cluster + 1
-                    self.part_in_machine.set_finished_clusters(part_next_cluster)
+                    #-- (old before sync) Update the next cluster for that part
+                    #part_next_cluster = part_current_cluster + 1
+                    #self.part_in_machine.set_finished_clusters(part_next_cluster)
                 
                 #--- quasi Trace Driven Simulation (qTDS)
                 elif self.simtype == "qTDS":
@@ -527,6 +557,10 @@ class Machine():
         return self.id
     def get_part_started_time(self):
         return self.part_started_time
+    def get_cluster(self):
+        return self.cluster
+    def get_initial_part(self):
+        return self.initial_part
 
     #--------- Defining SETs ---------
     def set_queue_in(self, value):
@@ -543,6 +577,8 @@ class Machine():
         self.ptime_qTDS = ptime_qTDS
     def set_validator(self, validator):
         self.validator = validator
+    def set_cluster(self, cluster):
+        self.cluster = cluster
     
     #--- Special set for queue
     def add_queue_in(self, value):
@@ -558,21 +594,34 @@ class Machine():
     #--- Define verbose
     def verbose(self):
         print("----------------")
+        #--- Machine Name
         print(f"> {self.get_name()}")
+
+        #--- Queue In
         print(f"--Queue In:--")
         if self.get_queue_in() is None:
             print("None")
         else:
             for queue in self.get_queue_in():
                 print(queue.get_name())
+        
+        #--- Queue Out        
         print(f"--Queue Out:--")
         if self.get_queue_out() is None:
             print("None")
         else:
             for queue in self.get_queue_out():
                 print(queue.get_name())
-        print("---Process Time for quasi Trace Driven Simulation---")
-        print(self.get_ptime_qTDS())
+        
+        #--- Machine Cluster
+        print(f"Machine Cluster: {self.get_cluster()}")
+
+        #--- Quasi Trace Driven Simulation
+        if self.get_ptime_qTDS() is not None:
+            print("---Process Time for quasi Trace Driven Simulation---")
+            print(self.get_ptime_qTDS())
+
+        #--- Initial Working Parts
         if self.initial_part != None:
             print(f"--- Part already being processed: {self.initial_part.get_name()} ---")
         """
@@ -594,6 +643,7 @@ class Queue():
         self.queue_strength = None   # add initial condition
         self.transportation_time = transportation_time
         self.freq = freq
+        self.cluster = None
         self.arc_links = arc_links
 
     #======= Main Functions =======
@@ -618,12 +668,17 @@ class Queue():
         return self.capacity
     def get_id(self):
         return self.id
+    def get_cluster(self):
+        return self.cluster
     
     #--- Define Sets
     def set_id(self, id):
         self.id = id
         self.name = "Queue " + str(self.id)
-    
+    def set_cluster(self, cluster):
+        self.cluster = cluster
+
+
     #--- Define verbose
     def verbose(self):
         print("----------------")
