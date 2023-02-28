@@ -233,8 +233,9 @@ class Machine():
                     if self.part_in_machine.get_id() <= self.validator.get_len_TDS() and self.simtype != "qTDS":
                         self.simtype = "TDS"
                     #--- If the current part finish all the cluster that it has
-                    if self.get_cluster() > len(self.part_in_machine.get_all_ptime_TDS()) and self.simtype != "qTDS":
-                        self.simtype = None
+                    if self.part_in_machine.get_all_ptime_TDS() != None:
+                        if self.get_cluster() > len(self.part_in_machine.get_all_ptime_TDS()) and self.simtype != "qTDS":
+                            self.simtype = None
                     
                     """ [OLD: before sync]
                     if self.part_in_machine.get_all_ptime_TDS() != None:

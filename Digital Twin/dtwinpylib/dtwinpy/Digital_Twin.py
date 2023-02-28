@@ -42,9 +42,10 @@ class Digital_Twin():
     
     #--- Run normally the Digital Model and analyze the results
     def run_digital_model(self):
-        if self.digital_model == None:
-            self.digital_model = self.generate_digital_model()
-
+        #--- Always before running re-generate the model, just in case it has some changes
+        self.digital_model = self.generate_digital_model()
+        
+        #--- Run the simulation
         self.digital_model.run()
         self.digital_model.analyze_results()
 

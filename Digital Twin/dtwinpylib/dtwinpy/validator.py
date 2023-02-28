@@ -2,6 +2,7 @@
 from .interfaceDB import Database
 import numpy as np
 import matplotlib.pyplot as plt
+import sqlite3
 
 
 #--- Reload Package
@@ -27,6 +28,13 @@ class Validator():
         # database. That's why we don't initialize it.
         self.real_database = real_database
         self.digital_database = self.digital_model.get_model_database()
+        self.real_database_path = self.real_database.get_database_path()
+
+        #--- Change the name of the table in database if it's digital to real
+        with sqlite3.connect(self.real_database_path) as db:
+            tables = db.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
+            if len(tables) == 1 and tables[0][0] == "digital_log":
+                self.real_database.rename_table("digital_log", "real_log")
 
         #--- Get the components of the simulation
         (self.machines_vector, self.queues_vector) = self.digital_model.get_model_components()
@@ -324,6 +332,10 @@ class Validator():
                 Xs=Xsf
                 break
 
+        i=range(1,len(Xr)+1)
+        plt.plot(i,Xr,color='blue')
+        plt.plot(i,Xs,color='red')
+        plt.show()
         return(Xs)
     # =======================================================================
 
