@@ -233,10 +233,14 @@ class Machine():
                     if self.part_in_machine.get_id() <= self.validator.get_len_TDS() and self.simtype != "qTDS":
                         self.simtype = "TDS"
                     #--- If the current part finish all the cluster that it has
+                    if self.get_cluster() > len(self.part_in_machine.get_all_ptime_TDS()) and self.simtype != "qTDS":
+                        self.simtype = None
+                    
+                    """ [OLD: before sync]
                     if self.part_in_machine.get_all_ptime_TDS() != None:
                         if self.part_in_machine.get_finished_clusters() + 1 > len(self.part_in_machine.get_all_ptime_TDS()) and self.simtype != "qTDS":
                             self.simtype = None
-                        
+                    """
 
                 # ====== Processing Time ======
                 # processing of the part depending on part type
@@ -297,6 +301,7 @@ class Machine():
 
                     #-- Get the current process time
                     # minus 1 because the machine cluster starts with 1 and the position of process time with 0
+
                     current_process_time = self.part_in_machine.get_ptime_TDS(machine_cluster - 1)
 
                     # get the related process time for that part and for this cluster of machine
