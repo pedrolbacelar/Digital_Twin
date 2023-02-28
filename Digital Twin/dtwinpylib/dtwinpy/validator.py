@@ -252,7 +252,7 @@ class Validator():
             ecdf = np.arange(1, (len(Xr_sorted)+1)) / len(Xr_sorted) # calculate ecdf
             return(ecdf)
         # Calculate randomness u
-        def randomness(ecdf,umax):
+        def randomness(ecdf,umax,Xr):
             Xr_sorted = np.sort(Xr)
             u=np.array([])
             for ii in range(len(ecdf)):
@@ -314,15 +314,15 @@ class Validator():
             Xsf=Xs
 
             if N_Parameter==2:  # for distributions with 2 parameters
-                u,pos_one = randomness(ECDF(Xr),umax[ii]) # calculate inverse transform of ecdf.
+                u,pos_one = randomness(ECDF(Xr),umax[ii],Xr) # calculate inverse transform of ecdf.
                 Xs = (dist.ppf(u, loc, scale))    # generate distribution Xs.
 
             if N_Parameter==3:  # for distributions with 3 parameters
-                u,pos_one = randomness(ECDF(Xr),umax[ii]) # calculate inverse transform of ecdf.
+                u,pos_one = randomness(ECDF(Xr),umax[ii],Xr) # calculate inverse transform of ecdf.
                 Xs = (dist.ppf(u, a, loc, scale))    # generate distribution Xs.
 
             if N_Parameter==4:  # for distributions with 4 parameters
-                u,pos_one = randomness(ECDF(Xr),umax[ii]) # calculate inverse transform of ecdf.
+                u,pos_one = randomness(ECDF(Xr),umax[ii],Xr) # calculate inverse transform of ecdf.
                 Xs = (dist.ppf(u, a, b, loc, scale))    # generate distribution Xs.
 
             diff[ii]=abs(Xs[pos_one][0]-Xr[pos_one[0][0]])   # Calculate error in the highest value due to impact of umax
