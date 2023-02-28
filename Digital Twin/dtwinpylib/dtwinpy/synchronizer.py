@@ -25,6 +25,8 @@ class Zone():
         self.NumParts = 0
         self.machine_working = 0
         self.last_started_time = 0
+        self.first_zone_event = True
+        self.event_type = "Started"
 
         #--- Initial Conditions
         # Multiple Queues
@@ -96,11 +98,23 @@ class Zone():
         return self.last_started_time
     def get_machine(self):
         return self.machine
+    def get_Zone_initial(self):
+        return self.Zone_initial
+    def get_first_zone_event(self):
+        return self.first_zone_event
+
     #--- SETs
     def set_zoneInd(self, indicador):
         self.zoneInd = indicador
     def set_last_started_time(self, started_time):
         self.last_started_time = started_time
+    def set_first_zone_event(self, status):
+        self.first_zone_event = status
+    def set_event_type(self, type):
+        self.event_type = type
+    def set_Zone_initial(self, ini):
+        self.Zone_initial = ini
+
 
 class Synchronizer():
     def __init__(self, digital_model, real_database):
@@ -138,6 +152,7 @@ class Synchronizer():
     def positioning_discovery(self):
         #--- Find the Positioning
         for event in self.full_database:
+            
             #--- Extract the important informations
             (time, machine_name, status, queue_name) = (event[0], event[1], event[2], event[4]) 
             
@@ -147,6 +162,14 @@ class Synchronizer():
             current_zone = self.zones_dict[machine_name]
 
             if status == "Finished":
+                #--- Updated the event type
+                current_zone.set_event_type("Finished")
+                #--- Verify if it's the first event:
+                if current_zone.get_first_zone_event() == True:
+                    # It's the first event and the it was finished, so the machine had a part
+                    current_zone.set_Zone_initial(current_zone.get_Zone_initial() + 1)
+                    # already it had in the queue plus one of the machine
+
                 # For the current zone a part was finished, so we increment the Out
                 current_zone.addOut()
                 current_zone.Mfinished()
@@ -169,7 +192,15 @@ class Synchronizer():
             if status == "Started":
                 current_zone.Mstarted()
                 current_zone.set_last_started_time(time)
-        
+
+                #--- Updated the event type
+                current_zone.set_event_type("Started")
+
+            #--- After finishing an event (Started or Finished)
+            # update that this zone it's not in the first event anymore
+            current_zone.set_first_zone_event(False)
+
+
         #--- Assign Tnow according the last event of the real log
         self.Tnow = self.full_database[-1][0]
     

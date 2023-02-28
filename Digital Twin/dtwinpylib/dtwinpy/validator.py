@@ -79,6 +79,13 @@ class Validator():
 
         #--- Extract the unique parts IDs from the real log
         part_ids = self.real_database.get_distinct_values(column= "part_id", table="real_log")
+        
+        #--- If the simulation is not started from the begining the part_ids is not ordered
+        def sort_key(t):
+            return int(t[0].split(' ')[-1])
+
+        part_ids = sorted(part_ids, key=sort_key)
+        
         #--- Create matrix to store trace of process time for each part
         matrix_ptime_TDS = []
         part_matrix_full_trace = []
