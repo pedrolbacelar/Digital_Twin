@@ -248,17 +248,38 @@ class Validator():
         # -----------------------------------------------------
         # Calculate the ECDF
         def ECDF(Xr):
+            if len(Xr) == 25:
+                pass
             Xr_sorted = np.sort(Xr)
             ecdf = np.arange(1, (len(Xr_sorted)+1)) / len(Xr_sorted) # calculate ecdf
             return(ecdf)
         # Calculate randomness u
         def randomness(ecdf,umax,Xr):
             Xr_sorted = np.sort(Xr)
+            
+            """
             u=np.array([])
             for ii in range(len(ecdf)):
+                # BUG: ADDING 2 MORE THAN LEN(ECDF)
                 u=np.append(u,ecdf[np.asarray(np.where(Xr_sorted==Xr[ii]))])
+            """
+
+            u = []
+            for ii in range(len(ecdf)):
+                ecdf_value = None
+                for jj in range(len(Xr_sorted)):
+                    if Xr_sorted[jj] == Xr[ii]:
+                        ecdf_value = ecdf[jj]
+                        break
+                if ecdf_value is not None:
+                    u.append(ecdf_value)
+
+
             # print(len(ecdf))
-            pos_one = np.where(u == 1.0)
+            for i in range(len(u)):
+                if u[i] == 1.0:
+                    pos_one = i
+            #pos_one = np.where(u == 1.0)
             u[pos_one]=umax # change 1 to 0.99 to avoid infinity in dist.ppf function
             return(u,pos_one)
 
@@ -325,7 +346,7 @@ class Validator():
                 u,pos_one = randomness(ECDF(Xr),umax[ii],Xr) # calculate inverse transform of ecdf.
                 Xs = (dist.ppf(u, a, b, loc, scale))    # generate distribution Xs.
 
-            diff[ii]=abs(Xs[pos_one][0]-Xr[pos_one[0][0]])   # Calculate error in the highest value due to impact of umax
+            diff[ii]=abs(Xs[pos_one]-Xr[pos_one])   # Calculate error in the highest value due to impact of umax
             #sse[ii]=np.sum(np.square(Xr-Xs))
             
             if diff[ii]>diff[ii+1]:
@@ -336,6 +357,7 @@ class Validator():
         plt.plot(i,Xr,color='blue')
         plt.plot(i,Xs,color='red')
         plt.show()
+        
         return(Xs)
     # =======================================================================
 
