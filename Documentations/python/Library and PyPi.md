@@ -89,8 +89,22 @@ Some observations:
 
 - After any final change in the code just run: `python setup.py bdist_wheel`
 - To upload the change, just run: `python -m twine upload dist/*`
+- Don't forget to comment the part of the reload when uploading to pypi
 
+```python
+#--- Reload Package
+"""
+import importlib
+import dtwinpylib
+#reload this specifc module to upadte the class
+importlib.reload(dtwinpylib.dtwinpy.digital_model)
+importlib.reload(dtwinpylib.dtwinpy.validator)
+importlib.reload(dtwinpylib.dtwinpy.synchronizer)
+importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
+"""
+```
 
 ## References:
 - https://medium.com/analytics-vidhya/how-to-create-a-python-library-7d5aea80cc3f
 - https://laxmena.com/posts/publish-pip-package
+
