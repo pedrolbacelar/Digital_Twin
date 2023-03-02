@@ -8,6 +8,7 @@ from .components import Machine
 from .components import Queue
 from .components import Generator
 from .components import Terminator
+from .components import Conveyor
 
 #--- Importing Database components
 from .interfaceDB import Database
@@ -114,6 +115,8 @@ class Model():
                 #--- Properties of the selected queues 
                 capacity = 0 # Queue capacity
                 merged_id = "merged_"
+                #--- ASSUMPTION: In a merging queue, the incoming conveyors have the same transportation time
+                transp_time = queues_to_merge[0].get_transp_time()
 
                 #--- Loop through the selected queues to merge to update properties
                 for queue in queues_to_merge:
@@ -121,8 +124,9 @@ class Model():
                     capacity += queue.get_capacity()
                     merged_id += str(queue.get_id())
 
+
                 # ----- Create Merged Queue -----
-                Merged_Queue = Queue(env= self.env, id= merged_id, capacity= capacity)
+                Merged_Queue = Queue(env= self.env, id= merged_id, capacity= capacity, transp_time= transp_time)
                 merged_queues_all.append(Merged_Queue)
                 #-- Set the new merged queue as list in the Queue In
                 machine.set_queue_in([Merged_Queue])
@@ -207,6 +211,29 @@ class Model():
                 for queue in out_queues:
                     queue.set_cluster(next_cluster)
 
+    def create_conveyors(self):
+        #--- Create a global vector of conveyors
+        self.conveyors_vector = []
+        #--- For each machine, assign the right conveyors
+        for machine in self.machines_vector:
+            #--- Each queue out is a conveyor to be use by the machine
+            machine_conveyors = []
+            for queue in machine.get_queue_out():
+                #--- Get the transportation time stored in the queue
+                transp_time = queue.get_transp_time()
+
+                #--- Create the Conveyor
+                current_conveyor = Conveyor(env= self.env, transp_time= transp_time, queue_out= queue)
+
+                #--- Add the current conveyor to the conveyor list of the machine
+                machine_conveyors.append(current_conveyor)
+
+                #--- Add the conveyor in the global vector as well
+                self.conveyors_vector.append(current_conveyor)
+
+            #--- After creating the conveyors for each queue out of this machine
+            #--- Assign the conveyor vector for the machine
+            machine.set_conveyors_out(machine_conveyors)
 
 
     def model_translator(self):
@@ -255,7 +282,7 @@ class Model():
                 queue_id += 1
                 # Create a new Queue object for each arc and add it to the list
                 self.queues_vector.append(Queue(env= self.env, id= queue_id, arc_links= arc['arc'],
-                capacity= arc['capacity'],freq= arc['frequency'],transportation_time= arc['contemp']))
+                capacity= arc['capacity'],freq= arc['frequency'],transp_time= arc['contemp']))
             #====================================================================
 
 
@@ -281,6 +308,11 @@ class Model():
         self.cluster_discovery()
         #====================================================================
 
+        #========================= Conveyors Assigning =========================
+        #--- Create and Assing the conveyor for each Machine base on the Queues
+        self.create_conveyors()
+        
+        #===========================================================================
 
     def run(self):
         print("### ============ Simulation Started ============ ###")
@@ -294,6 +326,10 @@ class Model():
         #--- Initialize each machine process
         for machine in self.machines_vector:
             self.env.process(machine.run())
+
+        #--- Initialize each conveyor process
+        for conveyor in self.conveyors_vector:
+            self.env.process(conveyor.run())
 
         #--- Run the Simulation
         if self.loop_type == "closed":

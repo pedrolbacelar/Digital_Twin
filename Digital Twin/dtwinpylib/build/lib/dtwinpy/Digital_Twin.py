@@ -5,7 +5,7 @@ from .interfaceDB import Database
 from .synchronizer import Synchronizer
 
 #--- Reload Package
-
+"""
 import importlib
 import dtwinpylib
 #reload this specifc module to upadte the class
@@ -13,7 +13,7 @@ importlib.reload(dtwinpylib.dtwinpy.digital_model)
 importlib.reload(dtwinpylib.dtwinpy.validator)
 importlib.reload(dtwinpylib.dtwinpy.synchronizer)
 importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
-
+"""
 
 class Digital_Twin():
     def __init__(self, name, initial= True, until= None, part_type= "A", loop_type= "closed", maxparts = None):
