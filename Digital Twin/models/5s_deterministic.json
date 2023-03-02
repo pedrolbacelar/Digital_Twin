@@ -11,9 +11,9 @@
       ],
       "frequency": 999,
       "capacity": 1,
-      "contemp": 7000,
+      "contemp": 5000,
       "cluster": 1,
-      "worked_time": 0
+      "worked_time": 3903
     },
     {
       "activity": 2,
@@ -27,7 +27,7 @@
       "capacity": 1,
       "contemp": 5000,
       "cluster": 2,
-      "worked_time": 0
+      "worked_time": 3702
     },
     {
       "activity": 3,
@@ -39,7 +39,7 @@
       ],
       "frequency": 999,
       "capacity": 1,
-      "contemp": 5000,
+      "contemp": 3500,
       "cluster": 2,
       "worked_time": 0
     },
@@ -81,7 +81,7 @@
       ],
       "capacity": 10,
       "frequency": 1000,
-      "contemp": 1
+      "contemp": 200
     },
     {
       "arc": [
@@ -90,7 +90,7 @@
       ],
       "capacity": 10,
       "frequency": 1000,
-      "contemp": 1
+      "contemp": 200
     },
     {
       "arc": [
@@ -99,7 +99,7 @@
       ],
       "capacity": 10,
       "frequency": 1000,
-      "contemp": 1
+      "contemp": 100
     },
     {
       "arc": [
@@ -108,7 +108,7 @@
       ],
       "capacity": 10,
       "frequency": 1000,
-      "contemp": 1
+      "contemp": 100
     },
     {
       "arc": [
@@ -117,7 +117,7 @@
       ],
       "capacity": 10,
       "frequency": 1000,
-      "contemp": 1
+      "contemp": 100
     },
     {
       "arc": [
@@ -126,7 +126,7 @@
       ],
       "capacity": 10,
       "frequency": 1000,
-      "contemp": 1
+      "contemp": 300
     }
   ],
   "initial": [

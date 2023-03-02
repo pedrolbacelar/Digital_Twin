@@ -68,8 +68,25 @@ class Zone():
         if self.machine.get_working() == True:
             self_counter += 1
         
+        #--- Check if there is any part in the Conveyor
+        # Since each machie has one queue in and also one conveyor 
+        # delivering a part to that queue, we can do this.
+        
+        #-- Take the conveyors in of that machine
+        machine_conveys_in = self.machine.get_convey_ins()
+
+        #-- Parts being transported within the Conveyor when the Sync was done
+        parts_in_convey_counter = 0
+        # For each conveyor within the machine conveyors ...
+        for conveyor in machine_conveys_in:
+            parts_in_convey = len(conveyor.get_all_items())
+            parts_in_convey_counter += parts_in_convey 
+
+        #--- Update the overall counter of the Zone
+        self_counter += parts_in_convey_counter
+
         if Verbose == True:
-            print(f"[{self.name}] NumParts = {self_counter}, Machine Working = {self.machine.get_working()}")
+            print(f"[{self.name}] NumParts = {self_counter}, Machine Working = {self.machine.get_working()}, Parts in Conveyor = {parts_in_convey_counter}")
 
         #--- Take the last time that a part was started by the machine
         part_started_time = self.machine.get_part_started_time()
@@ -298,7 +315,7 @@ class Synchronizer():
             # ================== Positioning of Parts in Queues ==================
             #--- Loop through the Queues to allocate the parts
             for queue in current_Queues_In:
-                queue_len = queue.get_len()
+                queue_len = queue.get_capacity()
 
                 #-- Check if we have more parts than space in the current queue
                 # ----------- Not happing with Merged Queues Ins -----------
@@ -351,7 +368,7 @@ class Synchronizer():
     def show(self):
         
         #--- Running Self Validation
-        print("=========== Self Validation ===========")
+        print("=========== Self Verification (Digital-Based) ===========")
         for key in self.zones_dict:
             current_zone = self.zones_dict[key]
             zone_NumParts = current_zone.self_validation()
@@ -359,7 +376,7 @@ class Synchronizer():
         
 
         #--- Print the Zones Occupation
-        print("=========== Zones Occupations ===========")
+        print("=========== Zones Occupations (Real-Based) ===========")
         for key in self.zones_dict:
             current_zone = self.zones_dict[key]
             zone_NumParts = current_zone.calculate_parts()

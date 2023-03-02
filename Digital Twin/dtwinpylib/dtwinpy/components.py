@@ -30,6 +30,9 @@ class Part():
         #--- Updated old vector with the new vector
         self.ptime_TDS = new_ptime_TDS
 
+    def calculate_CT(self):
+        self.CT = self.termination_time - self.creation_time
+        
 
     
     #------- Get methods -------
@@ -55,6 +58,9 @@ class Part():
     
     def get_convey_entering_time(self):
         return self.convey_entering_time
+    def get_CT(self):
+        self.calculate_CT()
+        return self.CT
     #------------------------------
 
 
@@ -77,7 +83,11 @@ class Part():
 
 
 class Machine():
-    def __init__(self, env, id, process_time, capacity, terminator, database, worked_time, last_part_id=None, queue_in= None, queue_out= None, conveyors_out = None, blocking_policy= "BBS", freq= None, cluster= None, final_machine = False, loop = "closed", exit = None, simtype = None, ptime_qTDS = None, maxparts= None, initial_part= None):
+    def __init__(self, env, id, process_time, capacity, terminator, database, worked_time,
+        last_part_id=None, queue_in= None, queue_out= None, conveyors_out = None, blocking_policy= "BBS", 
+        freq= None, cluster= None, final_machine = False, loop = "closed", exit = None, simtype = None, 
+        ptime_qTDS = None, maxparts= None, initial_part= None, targeted_part_id= None):
+        
         #-- Main Properties
         self.env = env
         self.id = id
@@ -110,12 +120,14 @@ class Machine():
         self.maxparts = maxparts
         self.working = False
         self.part_started_time = self.env.now
+        self.targeted_part_id = targeted_part_id
 
         #--- Allocation
         self.allocation_counter = 0
         #self.allocation_policy= "first"
         self.allocation_policy= "alternated"
         self.conveyors_out = conveyors_out
+        self.conveyors_in = None
 
         #-- Database Properties
         self.database = database
@@ -387,12 +399,20 @@ class Machine():
                     part_id= self.part_in_machine.get_name(),
                     queue= "---") #There is no queue to put
 
-                    #--- Check to finish the simulation
+                    #--- Check to finish the simulation according to desired amount of parts
                     if self.terminator.get_len_terminated() == self.last_part_id:
                         # we can do this because all the machines were assigned for the same terminator
                         # (the same terminator that we're using for running analysis in the end)
 
                         #--- Terminates the simulations
+                        self.exit.succeed()
+                    
+                    #--- Check to finish the simulation according to a specific part id
+                    if self.part_in_machine.get_id() == self.targeted_part_id:
+                        #-- The targeted part was just finished, the simulation can stop now
+                        #-- This method is useful for RCT calculations for a specific part
+
+                        #--- Terminates the simulation
                         self.exit.succeed()
 
                 # ------------------- CLOSED LOOP -------------------
@@ -514,7 +534,13 @@ class Machine():
                         #--- Terminates the simulations
                         self.exit.succeed()
                         
+                    #--- Check to finish the simulation according to a specific part id
+                    if self.part_in_machine.get_id() == self.targeted_part_id:
+                        #-- The targeted part was just finished, the simulation can stop now
+                        #-- This method is useful for RCT calculations for a specific part
 
+                        #--- Terminates the simulation
+                        self.exit.succeed()
 
 
 
@@ -586,6 +612,8 @@ class Machine():
         return self.cluster
     def get_initial_part(self):
         return self.initial_part
+    def get_convey_ins(self):
+        return self.conveyors_in
 
     #--------- Defining SETs ---------
     def set_queue_in(self, value):
@@ -606,6 +634,8 @@ class Machine():
         self.cluster = cluster
     def set_conveyors_out(self, conveyors_out):
         self.conveyors_out = conveyors_out
+    def set_conveyors_in(self, convey):
+        self.conveyors_in = convey
     
     #--- Special set for queue
     def add_queue_in(self, value):
@@ -779,19 +809,21 @@ class Conveyor():
         return self.convey_store.items
     
     def run(self):
-        # Note: It's better to not use the yield because during the transportation of one
-        # part, another part can already start the process. The yield would make the transportation
-        # unique for that specific part. That's why is better to track tha entry and exit time
-        # of each part individually.
-        # 
-        # The loop of the conveyor get a part in the transportation and check if the first part
-        # already spend time enough. If yes it puts the part in the queue, if not it yield for while
-        # to check again later. If there is no parts in the conveyor, it also yields for a bit 
-        # before checking again.
+        """
+        Note: It's better to not use the yield because during the transportation of one
+        part, another part can already start the process. The yield would make the transportation
+        unique for that specific part. That's why is better to track tha entry and exit time
+        of each part individually.
+        
+        The loop of the conveyor get a part in the transportation and check if the first part
+        already spend time enough. If yes it puts the part in the queue, if not it yield for while
+        to check again later. If there is no parts in the conveyor, it also yields for a bit 
+        before checking again.
 
-        # 1) Just get a part from the queue in if the part arrived in the queue
-        # 2) Create a new process that is able to receive different parts and have a run functions that
-        # take the first part and yields it and after drop it in the corresponded queue
+        1) Just get a part from the queue in if the part arrived in the queue
+        2) Create a new process that is able to receive different parts and have a run functions that
+        take the first part and yields it and after drop it in the corresponded queue
+        """
 
         while True:
             #--- Take all the parts in the conveyor
@@ -820,4 +852,6 @@ class Conveyor():
 
     def get_id(self):
         return self.id()
+    def get_convey_queue(self):
+        return self.queue_out
 # =============================================================================
