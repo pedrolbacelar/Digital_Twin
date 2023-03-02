@@ -14,8 +14,9 @@ importlib.reload(dtwinpylib.dtwinpy.validator)
 importlib.reload(dtwinpylib.dtwinpy.synchronizer)
 importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
 
+
 class Digital_Twin():
-    def __init__(self, name, initial= False, until= None, part_type= "A", loop_type= "closed", maxparts = None):
+    def __init__(self, name, initial= True, until= None, part_type= "A", loop_type= "closed", maxparts = None):
         #--- Model Parameters
         self.name = name
         self.model_path = "models/" + self.name + ".json"
@@ -42,9 +43,10 @@ class Digital_Twin():
     
     #--- Run normally the Digital Model and analyze the results
     def run_digital_model(self):
-        if self.digital_model == None:
-            self.digital_model = self.generate_digital_model()
-
+        #--- Always before running re-generate the model, just in case it has some changes
+        self.digital_model = self.generate_digital_model()
+        
+        #--- Run the simulation
         self.digital_model.run()
         self.digital_model.analyze_results()
 

@@ -1,8 +1,12 @@
 README.md
 setup.py
+dtwinpy/Digital_Twin.py
 dtwinpy/__init__.py
 dtwinpy/components.py
 dtwinpy/digital_model.py
+dtwinpy/interfaceDB.py
+dtwinpy/synchronizer.py
+dtwinpy/validator.py
 dtwinpy.egg-info/PKG-INFO
 dtwinpy.egg-info/SOURCES.txt
 dtwinpy.egg-info/dependency_links.txt

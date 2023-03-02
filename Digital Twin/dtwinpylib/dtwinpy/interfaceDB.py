@@ -54,6 +54,7 @@ class Database():
             event_points = digital_model_DB.execute(f"SELECT * FROM {table}")
             for event_point in event_points:
                 print(event_point)
+            digital_model_DB.commit()
 
     def get_event_table(self):
         return self.event_table
@@ -66,16 +67,22 @@ class Database():
         with sqlite3.connect(self.database_path) as DB:
             return DB.execute(f"SELECT timestamp, activity_type FROM {table} WHERE {column}=?", column_id).fetchall()
 
+    def get_database_path(self):
+        return self.database_path
+    
     def read_store_data(self, table):
         with sqlite3.connect(self.database_path) as digital_model_DB: 
             data_full_trace = digital_model_DB.execute(f"SELECT timestamp, machine_id, activity_type, part_id FROM {table}").fetchall()
+            digital_model_DB.commit()
         return data_full_trace
     
     def read_store_data_all(self, table):
         with sqlite3.connect(self.database_path) as digital_model_DB: 
             data_full_trace = digital_model_DB.execute(f"SELECT timestamp, machine_id, activity_type, part_id, queue FROM {table}").fetchall()
+            digital_model_DB.commit()
         return data_full_trace
 
     def rename_table(self, table_old, table_new):
         with sqlite3.connect(self.database_path) as digital_model_DB: 
             digital_model_DB.execute(f"ALTER TABLE {table_old} RENAME TO {table_new};")
+            digital_model_DB.commit()

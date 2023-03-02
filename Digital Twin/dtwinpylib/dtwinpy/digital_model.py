@@ -8,6 +8,7 @@ from .components import Machine
 from .components import Queue
 from .components import Generator
 from .components import Terminator
+from .components import Conveyor
 
 #--- Importing Database components
 from .interfaceDB import Database
@@ -86,6 +87,155 @@ class Model():
         generator_initial = Generator(env= self.env, loop_type="closed", part_vector= self.initial_parts, queue_vector= self.queues_vector)
         self.queues_vector = generator_initial.allocate_part()
 
+    def merge_queues(self):
+        """
+        Function to merge existing queues in the input of a machines.
+        """
+
+        # 1) Look through all the input queues of all the machines and stop when find
+        # a machine with multiple queues in the input.
+
+        # 2) Record the id of thoses queues and replace it (summing up the properties)
+        # for a new merged queue
+
+        # 3) With the IDs in hands, look through all the output queues of the machines
+        # and if find one of the previous selected queues, replace it for the merged queue
+
+        #--- Loop through all the machines to MERGE input queues
+        queue_to_merge_all = []
+        merged_queues_all = []
+
+        for machine in self.machines_vector:
+            #--- Machine with multiple queues
+            if len(machine.get_queue_in()) > 1:
+                #--- Create the vectors with Queues to be merge
+                queues_to_merge = machine.get_queue_in()
+                queue_to_merge_all.append(queues_to_merge)
+        
+                #--- Properties of the selected queues 
+                capacity = 0 # Queue capacity
+                merged_id = "merged_"
+                #--- ASSUMPTION: In a merging queue, the incoming conveyors have the same transportation time
+                transp_time = queues_to_merge[0].get_transp_time()
+
+                #--- Loop through the selected queues to merge to update properties
+                for queue in queues_to_merge:
+                    #-- Increment Queue Capacity
+                    capacity += queue.get_capacity()
+                    merged_id += str(queue.get_id())
+
+
+                # ----- Create Merged Queue -----
+                Merged_Queue = Queue(env= self.env, id= merged_id, capacity= capacity, transp_time= transp_time)
+                merged_queues_all.append(Merged_Queue)
+                #-- Set the new merged queue as list in the Queue In
+                machine.set_queue_in([Merged_Queue])
+        
+                #--- Loop through the output queues to replace for the merged queue
+                for machine_out in self.machines_vector:
+                    
+                    #--- For each machine, verify if the one of the output queues is between 
+                    # one of the selected queues
+                    new_queues_out = []
+                    
+                    for queue_out in machine_out.get_queue_out():
+                        #-- Keep adding queues out in a new vector
+                        new_queues_out.append(queue_out)
+                        #--- compare the queue with all the selected queues
+                        for queue_merged in queues_to_merge:
+                            #-- This machine has an output queue that was merged
+                            if queue_out.get_name() == queue_merged.get_name():
+                                # Remove this existing queue and replace for the new merged queue
+                                #-- Since this queue was merged, we remove the last added
+                                new_queues_out.pop()
+                                #-- Add the new queue
+                                new_queues_out.append(Merged_Queue)
+                    
+                    #--- Finished checking the queues out of this machines, add the updated queues out
+                    machine_out.set_queue_out(new_queues_out)
+
+
+        #--- From now all the machines should have the correct queues, so update the queue vector
+        updated_queues = []
+        for machine in self.machines_vector:
+            #--- each machine has just one queue input now
+            for queue in machine.get_queue_in():
+                updated_queues.append(queue)
+        
+        #--- Update queue vector
+        self.queues_vector = updated_queues
+
+        #--- Update Queues ID
+        for i in range(len(self.queues_vector)):
+            self.queues_vector[i].set_id(i+1)
+
+    def cluster_discovery(self):
+        # Assumption: The first machines is always not parellized
+
+        for machine in self.machines_vector:
+            #--- Machine's output queues
+            out_queues = machine.get_queue_out()
+            in_queues = machine.get_queue_in()
+
+            #--- First machine, first cluster
+            if machine.get_id() == 1:
+                machine_cluster = 1
+                machine.set_cluster(machine_cluster)
+
+                #-- Increment for the next cluster
+                next_cluster = machine_cluster + 1
+                
+                #-- For each out Queue, set the "next" cluster
+                for queue in out_queues:
+                    queue.set_cluster(next_cluster)
+            
+            #--- Not first, cluster checking by Queues
+            else:
+                # 1. It first look to the property of its queue in (where it has their own cluster counter)
+                # 2. increment the cluster counter
+                # 3. Look for my output queues and assigned the queues as the cluster counter
+
+                #--- If the machine is not the first one, the cluster
+                # is given by the Queue cluster of the input
+                for queue in in_queues:
+                    #--- Take the cluster from the machine queue in
+                    machine_cluster = queue.get_cluster()
+
+                #--- Set the machine cluster
+                machine.set_cluster(machine_cluster)
+                
+                #-- Increment for the next cluster
+                next_cluster = machine_cluster + 1
+                
+                #-- For each out Queue, set the "next" cluster
+                for queue in out_queues:
+                    queue.set_cluster(next_cluster)
+
+    def create_conveyors(self):
+        #--- Create a global vector of conveyors
+        self.conveyors_vector = []
+        #--- For each machine, assign the right conveyors
+        for machine in self.machines_vector:
+            #--- Each queue out is a conveyor to be use by the machine
+            machine_conveyors = []
+            for queue in machine.get_queue_out():
+                #--- Get the transportation time stored in the queue
+                transp_time = queue.get_transp_time()
+
+                #--- Create the Conveyor
+                current_conveyor = Conveyor(env= self.env, transp_time= transp_time, queue_out= queue)
+
+                #--- Add the current conveyor to the conveyor list of the machine
+                machine_conveyors.append(current_conveyor)
+
+                #--- Add the conveyor in the global vector as well
+                self.conveyors_vector.append(current_conveyor)
+
+            #--- After creating the conveyors for each queue out of this machine
+            #--- Assign the conveyor vector for the machine
+            machine.set_conveyors_out(machine_conveyors)
+
+
     def model_translator(self):
         
         #--- Open the json file
@@ -103,10 +253,23 @@ class Model():
             #========================= Create Machines =========================
             # Loop through the nodes in the json data
             for node in data['nodes']:
+                # --- Check if there is any initial part
+                if node["worked_time"] != 0:
+                    #-- Update part ID
+                    self.last_part_id += 1
+
+                    #-- Create the initial part
+                    ## not sure if location matters here ##
+                    ## part created in the past in relation with the current simulation ##
+                    initial_part = Part(id= self.last_part_id, type= "A", location= None, creation_time= - node["worked_time"])
+                else:
+                    initial_part = None
+
                 # Create a new Machine object for each node and add it to the list
                 self.machines_vector.append(Machine(env= self.env, id= node['activity'],freq= node['frequency'],capacity= node['capacity'], 
                 process_time= node['contemp'], database= self.Database, cluster= node['cluster'], last_part_id = self.last_part_id,
-                terminator= self.terminator, loop= self.loop_type, exit= self.exit, maxparts= self.maxparts))
+                terminator= self.terminator, loop= self.loop_type, exit= self.exit, maxparts= self.maxparts,
+                worked_time= node['worked_time'], initial_part= initial_part))
             
             self.machines_vector[-1].set_final_machine(True)
             #====================================================================
@@ -119,7 +282,7 @@ class Model():
                 queue_id += 1
                 # Create a new Queue object for each arc and add it to the list
                 self.queues_vector.append(Queue(env= self.env, id= queue_id, arc_links= arc['arc'],
-                capacity= arc['capacity'],freq= arc['frequency'],transportation_time= arc['contemp']))
+                capacity= arc['capacity'],freq= arc['frequency'],transp_time= arc['contemp']))
             #====================================================================
 
 
@@ -128,6 +291,10 @@ class Model():
             self.queue_allocation()
             #====================================================================
 
+        #========================= Merge Input Queues =========================
+        #--- Merge existing Input Queue and re-assign Output Queues
+        self.merge_queues()
+        #======================================================================
 
         #========================= Initial Allocation ===================
         if self.initial == True:
@@ -135,6 +302,17 @@ class Model():
             self.initial_allocation()
         #====================================================================
 
+
+        #========================= Cluster Discovery =========================
+        #--- Set the cluster for each machine
+        self.cluster_discovery()
+        #====================================================================
+
+        #========================= Conveyors Assigning =========================
+        #--- Create and Assing the conveyor for each Machine base on the Queues
+        self.create_conveyors()
+        
+        #===========================================================================
 
     def run(self):
         print("### ============ Simulation Started ============ ###")
@@ -148,6 +326,10 @@ class Model():
         #--- Initialize each machine process
         for machine in self.machines_vector:
             self.env.process(machine.run())
+
+        #--- Initialize each conveyor process
+        for conveyor in self.conveyors_vector:
+            self.env.process(conveyor.run())
 
         #--- Run the Simulation
         if self.loop_type == "closed":

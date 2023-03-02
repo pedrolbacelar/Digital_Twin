@@ -2,14 +2,15 @@
 from .interfaceDB import Database
 import numpy as np
 import matplotlib.pyplot as plt
+import sqlite3
 
 
 #--- Reload Package
 
-import importlib
+"""import importlib
 import dtwinpylib
 #reload this specifc module to upadte the class
-importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
+importlib.reload(dtwinpylib.dtwinpy.interfaceDB)"""
 
 
 class Validator():
@@ -27,6 +28,13 @@ class Validator():
         # database. That's why we don't initialize it.
         self.real_database = real_database
         self.digital_database = self.digital_model.get_model_database()
+        self.real_database_path = self.real_database.get_database_path()
+
+        #--- Change the name of the table in database if it's digital to real
+        with sqlite3.connect(self.real_database_path) as db:
+            tables = db.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
+            if len(tables) == 1 and tables[0][0] == "digital_log":
+                self.real_database.rename_table("digital_log", "real_log")
 
         #--- Get the components of the simulation
         (self.machines_vector, self.queues_vector) = self.digital_model.get_model_components()
@@ -54,6 +62,16 @@ class Validator():
                 for part in current_parts:
                     part_list.append(part)
         
+        #--- Get the existing parts within operating machines
+        for machine in self.machines_vector:
+            if machine.get_initial_part() != None:
+                part = machine.get_initial_part()
+                part_list.append(part)
+                # Note 1: I can do this because the even the Validator being called after the simulation,
+                # after assigned, we don't change the initial part of a machine
+                # Note 2: In this case, I first add all the parts in the queues and after the parts in the machines
+                # This logic is okay, because the logic for naming parts is also being like that.
+        
         #--- give for each part the ptime_TDS list 
         for part in part_list:
             current_ptime_TDS = self.get_part_TDS(part)
@@ -69,6 +87,13 @@ class Validator():
 
         #--- Extract the unique parts IDs from the real log
         part_ids = self.real_database.get_distinct_values(column= "part_id", table="real_log")
+        
+        #--- If the simulation is not started from the begining the part_ids is not ordered
+        def sort_key(t):
+            return int(t[0].split(' ')[-1])
+
+        part_ids = sorted(part_ids, key=sort_key)
+        
         #--- Create matrix to store trace of process time for each part
         matrix_ptime_TDS = []
         part_matrix_full_trace = []
@@ -103,6 +128,19 @@ class Validator():
                     started_time = None
                     finished_time = None
                     processed_time = None
+                
+                #--- In the case of part that already was in the machine (worked_time)
+                if finished_time != None and started_time == None:
+                    processed_time = finished_time
+
+                    #--- Add event process time to the part trace
+                    part_trace.append(processed_time)
+
+                    #--- reset local started and finished time for the next cycle
+                    started_time = None
+                    finished_time = None
+                    processed_time = None
+
             
             #--- Add part trace to the matrix of all parts traces
             matrix_ptime_TDS.append(part_trace)
@@ -184,6 +222,18 @@ class Validator():
                     started_time = None
                     finished_time = None
                     processed_time = None
+
+                #--- In the case of part that already was in the machine (worked_time)
+                if finished_time != None and started_time == None:
+                    processed_time = finished_time
+
+                    #--- Add event process time to the part trace
+                    machine_trace.append(processed_time)
+
+                    #--- reset local started and finished time for the next cycle
+                    started_time = None
+                    finished_time = None
+                    processed_time = None
             
             #--- Add machine trace to the matrix of all machines traces
             matrix_ptime_qTDS[machine_id[0]] = (machine_trace)
@@ -198,17 +248,38 @@ class Validator():
         # -----------------------------------------------------
         # Calculate the ECDF
         def ECDF(Xr):
+            if len(Xr) == 25:
+                pass
             Xr_sorted = np.sort(Xr)
             ecdf = np.arange(1, (len(Xr_sorted)+1)) / len(Xr_sorted) # calculate ecdf
             return(ecdf)
         # Calculate randomness u
-        def randomness(ecdf,umax):
+        def randomness(ecdf,umax,Xr):
             Xr_sorted = np.sort(Xr)
+            
+            """
             u=np.array([])
             for ii in range(len(ecdf)):
+                # BUG: ADDING 2 MORE THAN LEN(ECDF)
                 u=np.append(u,ecdf[np.asarray(np.where(Xr_sorted==Xr[ii]))])
+            """
+
+            u = []
+            for ii in range(len(ecdf)):
+                ecdf_value = None
+                for jj in range(len(Xr_sorted)):
+                    if Xr_sorted[jj] == Xr[ii]:
+                        ecdf_value = ecdf[jj]
+                        break
+                if ecdf_value is not None:
+                    u.append(ecdf_value)
+
+
             # print(len(ecdf))
-            pos_one = np.where(u == 1.0)
+            for i in range(len(u)):
+                if u[i] == 1.0:
+                    pos_one = i
+            #pos_one = np.where(u == 1.0)
             u[pos_one]=umax # change 1 to 0.99 to avoid infinity in dist.ppf function
             return(u,pos_one)
 
@@ -264,24 +335,29 @@ class Validator():
             Xsf=Xs
 
             if N_Parameter==2:  # for distributions with 2 parameters
-                u,pos_one = randomness(ECDF(Xr),umax[ii]) # calculate inverse transform of ecdf.
+                u,pos_one = randomness(ECDF(Xr),umax[ii],Xr) # calculate inverse transform of ecdf.
                 Xs = (dist.ppf(u, loc, scale))    # generate distribution Xs.
 
             if N_Parameter==3:  # for distributions with 3 parameters
-                u,pos_one = randomness(ECDF(Xr),umax[ii]) # calculate inverse transform of ecdf.
+                u,pos_one = randomness(ECDF(Xr),umax[ii],Xr) # calculate inverse transform of ecdf.
                 Xs = (dist.ppf(u, a, loc, scale))    # generate distribution Xs.
 
             if N_Parameter==4:  # for distributions with 4 parameters
-                u,pos_one = randomness(ECDF(Xr),umax[ii]) # calculate inverse transform of ecdf.
+                u,pos_one = randomness(ECDF(Xr),umax[ii],Xr) # calculate inverse transform of ecdf.
                 Xs = (dist.ppf(u, a, b, loc, scale))    # generate distribution Xs.
 
-            diff[ii]=abs(Xs[pos_one][0]-Xr[pos_one[0][0]])   # Calculate error in the highest value due to impact of umax
+            diff[ii]=abs(Xs[pos_one]-Xr[pos_one])   # Calculate error in the highest value due to impact of umax
             #sse[ii]=np.sum(np.square(Xr-Xs))
             
             if diff[ii]>diff[ii+1]:
                 Xs=Xsf
                 break
 
+        i=range(1,len(Xr)+1)
+        plt.plot(i,Xr,color='blue')
+        plt.plot(i,Xs,color='red')
+        plt.show()
+        
         return(Xs)
     # =======================================================================
 
