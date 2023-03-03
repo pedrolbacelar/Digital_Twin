@@ -145,6 +145,7 @@ class Machine():
         if self.worked_time != 0:
             #-- Part ready to be processed
             self.current_state = "Processing"
+        self.branch = None
 
     def run(self):
     
@@ -462,7 +463,7 @@ class Machine():
                         #--- Increase the counter for the next allocation
                         self.allocation_counter += 1
             
-                    #--- Find the right conveyor
+                        #--- Find the right conveyor
                         for conveyor in self.conveyors_out:
                             if conveyor.id == self.queue_to_put.get_id():
                                 #--- Conveyor of the same selected queue
@@ -617,6 +618,10 @@ class Machine():
         return self.initial_part
     def get_convey_ins(self):
         return self.conveyors_in
+    def get_conveyors_out(self):
+        return self.conveyors_out
+    def get_branch(self):
+        return self.branch
 
     #--------- Defining SETs ---------
     def set_queue_in(self, value):
@@ -639,6 +644,8 @@ class Machine():
         self.conveyors_out = conveyors_out
     def set_conveyors_in(self, convey):
         self.conveyors_in = convey
+    def set_branch(self, branch):
+        self.branch = branch
     
     #--- Special set for queue
     def add_queue_in(self, value):
@@ -675,6 +682,10 @@ class Machine():
         
         #--- Machine Cluster
         print(f"Machine Cluster: {self.get_cluster()}")
+
+        #--- Machine Branching?
+        if self.branch != None:
+            print(f"Branching Machine: {self.branch.get_name()}")
 
         #--- Quasi Trace Driven Simulation
         if self.get_ptime_qTDS() is not None:
@@ -748,8 +759,9 @@ class Queue():
         print(f"Arc links: {self.get_arc_links()}")
         print(f"Capacity: {self.get_capacity()}")
         for part in self.get_all_items():
-            print(f"Parts stored: {part.get_name()}")
-            print(f"Part Processes for Trace Driven Simulation: {part.get_all_ptime_TDS()}")
+            print(f"|-- Parts stored: {part.get_name()}")
+            if part.get_all_ptime_TDS() != None:
+                print(f"Part Processes for Trace Driven Simulation: {part.get_all_ptime_TDS()}")
         print(f"Queue Lenght: {self.get_len()}")
 
 class Generator():
@@ -858,3 +870,30 @@ class Conveyor():
     def get_convey_queue(self):
         return self.queue_out
 # =============================================================================
+
+class Branch():
+    def __init__(self, id, branch_conveyors, branch_machine):
+        self.id= id
+        self.name = f"Branch {self.id} | {branch_machine.get_name()}"
+        self.branch_conveyors = branch_conveyors
+        self.branch_machine = branch_machine
+
+    def branch_decision(self, selected_convey, selected_part):
+        #--- Branch get the right conveyor to put
+        for conveyor in self.branch_conveyors:
+            if conveyor.id == selected_convey.id():
+                #--- Conveyor of the same selected queue
+                conveyor_to_put = conveyor
+                break
+
+        #--- Branch PUT part in the conveyor
+        conveyor_to_put.start_transp(selected_part)
+
+    # ======= GETs =======
+    def get_id(self):
+        return self.id
+    def get_name(self):
+        return self.name
+    
+
+

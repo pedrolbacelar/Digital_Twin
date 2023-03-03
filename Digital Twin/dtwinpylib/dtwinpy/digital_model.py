@@ -9,6 +9,7 @@ from .components import Queue
 from .components import Generator
 from .components import Terminator
 from .components import Conveyor
+from .components import Branch
 
 #--- Importing Database components
 from .interfaceDB import Database
@@ -223,6 +224,45 @@ class Model():
                 #-- For each out Queue, set the "next" cluster
                 for queue in out_queues:
                     queue.set_cluster(next_cluster)
+    def branch_discovery(self):
+        """
+        ## Description
+        This fucntions is able to discovery where are the branch points in the model,
+        create an object for each branch point and assigned it to matching machine.
+        To do so, the function uses self.machines and creates the vector with the branch
+        objects (self.branches). IMPORTANT: This Function should be implemented after
+        the machine object is completedly finished (including the assign of the conveyors).
+        
+        #### TO-DO:
+        1) Loop through the machines
+            2) If a machine has multiple conveyors out (or queues out):
+                3) This is a branching machine
+                4) Create a Branch Object
+                5) Assign the object to the machine 
+        """
+        #--- Global Branch parameters
+        branch_id_counter = 1
+        self.branches = []
+
+        #--- Loop through the machines
+        for machine in self.machines_vector:
+            #--- If a machine has multiple conveyors out-> Branching machine
+            if len(machine.get_conveyors_out()) > 1:
+                #--- Get some properties from the branching machine
+                machine_conveyors_out = machine.get_conveyors_out()
+                machine_name = machine.get_name()
+
+                #--- CREATE Branch point
+                new_branch = Branch(id= branch_id_counter, branch_conveyors= machine_conveyors_out, branch_machine= machine)
+
+                #--- add branch in the machine
+                machine.set_branch(new_branch)
+
+                #--- add branch in the branch vector
+                self.branches.append(new_branch)
+
+                #--- Increase branch counter
+                branch_id_counter += 1
     def create_conveyors(self):
         """
         Create conveyor based on the existing queues and assign them
@@ -351,8 +391,13 @@ class Model():
         #========================= Conveyors Assigning =========================
         #--- Create and Assing the conveyor for each Machine base on the Queues
         self.create_conveyors()
-        
-        #===========================================================================
+        #========================================================================
+
+        #========================= Branch Discovery =========================
+        #--- Discovery Branching machines, create Branch object and assigned it
+        self.branch_discovery()
+        #=====================================================================
+
     # ================================================
 
     # =================== RUNNING ===================

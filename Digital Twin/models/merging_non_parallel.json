@@ -11,7 +11,8 @@
             "frequency": 999,
             "capacity": 1,
             "contemp": ["norm", 5000, 500],
-            "cluster": 1
+            "cluster": 1,
+            "worked_time": 0
         },
         {
             "activity": 2,
@@ -24,7 +25,8 @@
             "frequency": 999,
             "capacity": 1,
             "contemp": ["norm", 3500, 350],
-            "cluster": 2
+            "cluster": 2,
+            "worked_time": 0
         },
         {
             "activity": 3,
@@ -37,7 +39,8 @@
             "frequency": 999,
             "capacity": 1,
             "contemp": ["norm", 3500, 350],
-            "cluster": 2
+            "cluster": 2,
+            "worked_time": 0
         },
         {
             "activity": 4,
@@ -50,7 +53,8 @@
             "frequency": 999,
             "capacity": 1,
             "contemp": ["norm", 5000, 400],
-            "cluster": 2
+            "cluster": 2,
+            "worked_time": 0
         },
         {
             "activity": 5,
@@ -63,7 +67,8 @@
             "frequency": 999,
             "capacity": 1,
             "contemp": ["norm", 2000, 200],
-            "cluster": 2
+            "cluster": 2,
+            "worked_time": 0
         },
         {
             "activity": 6,
@@ -76,7 +81,8 @@
             "frequency": 999,
             "capacity": 1,
             "contemp": ["norm", 2000, 200],
-            "cluster": 2
+            "cluster": 2,
+            "worked_time": 0
         },
         {
             "activity": 7,
@@ -89,7 +95,8 @@
             "frequency": 999,
             "capacity": 1,
             "contemp": ["norm", 2000, 200],
-            "cluster": 2
+            "cluster": 2,
+            "worked_time": 0
         }
 
     ],
