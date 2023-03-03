@@ -686,6 +686,8 @@ class Machine():
         #--- Machine Branching?
         if self.branch != None:
             print(f"Branching Machine: {self.branch.get_name()}")
+            for conveyor in self.branch.get_conveyors():
+                print(f"|-- {conveyor.get_name()}")
 
         #--- Quasi Trace Driven Simulation
         if self.get_ptime_qTDS() is not None:
@@ -869,6 +871,8 @@ class Conveyor():
         return self.id()
     def get_convey_queue(self):
         return self.queue_out
+    def get_name(self):
+        return self.name
 # =============================================================================
 
 class Branch():
@@ -894,6 +898,7 @@ class Branch():
         return self.id
     def get_name(self):
         return self.name
-    
+    def get_conveyors(self):
+        return self.branch_conveyors
 
 

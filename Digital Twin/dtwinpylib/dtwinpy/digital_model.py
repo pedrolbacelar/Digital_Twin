@@ -250,7 +250,6 @@ class Model():
             if len(machine.get_conveyors_out()) > 1:
                 #--- Get some properties from the branching machine
                 machine_conveyors_out = machine.get_conveyors_out()
-                machine_name = machine.get_name()
 
                 #--- CREATE Branch point
                 new_branch = Branch(id= branch_id_counter, branch_conveyors= machine_conveyors_out, branch_machine= machine)
@@ -628,6 +627,8 @@ class Model():
         return self.Database
     def get_model_path(self):
         return self.model_path
+    def get_branches(self):
+        return self.branches
     # ==============================================
 
     def verbose(self):

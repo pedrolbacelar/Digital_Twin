@@ -29,4 +29,28 @@ class Sever():
     the most optimized path.
 
     """
-    def __init__(self):
+    def __init__(self, name, digital_model):
+        self.name = name
+        self.digital_model = digital_model
+    
+    def get_branch_choices(self):
+        #--- Get the Branches objects
+        branches = self.digital_model.get_branches()
+
+        #--- branches_choices
+        branches_choices = []
+
+        #--- For each branch, get the choices (conveyors)
+        for branch in branches:
+            #-- Get Conveyors of the branch
+            current_branch_choices = branch.get_conveyors()
+
+            #-- Add conveyors choice of the branch to the global choice
+            branches_choices.append(current_branch_choices)
+
+        return branches_choices
+
+
+    def generate_path_scenarios(self):
+        #--- Get all the branches choices in the digital model
+        
