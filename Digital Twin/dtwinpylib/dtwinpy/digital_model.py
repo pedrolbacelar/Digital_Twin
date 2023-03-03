@@ -299,7 +299,9 @@ class Model():
                     #-- Create the initial part
                     ## not sure if location matters here ##
                     ## part created in the past in relation with the current simulation ##
-                    initial_part = Part(id= self.last_part_id, type= "A", location= None, creation_time= - node["worked_time"])
+                    # ASSUMPTION: In terms of RCT, it's better to just consider the remaining time for production
+                    # So, consider creation time= 0...
+                    initial_part = Part(id= self.last_part_id, type= "A", location= None, creation_time= 0)
                 else:
                     initial_part = None
 
@@ -566,7 +568,9 @@ class Model():
 
                     #--- Return the batch RCT and the batch itself
                     print(f"> RCT for Batch of {batch} parts: {last_part_RCT}")
-                    print(f">> Parts in the batch: {batch_parts}")
+                    print(f"> Parts in the batch:")
+                    for part in batch_parts:
+                        print(f"|-- {part.get_name()}")
                     return (last_part_RCT)
 
             print(f"[ERROR] Number of parts in batch higher than the number of parts simulated")

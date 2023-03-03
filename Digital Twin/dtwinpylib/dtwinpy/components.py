@@ -529,18 +529,21 @@ class Machine():
                         conveyor_to_put.start_transp(new_part_produced)
                         flag_allocated_part = True
 
+
+                        #--- Check to finish the simulation according to a specific part id
+                        if self.part_in_machine.get_id() == self.targeted_part_id:
+                            #-- The targeted part was just finished, the simulation can stop now
+                            #-- This method is useful for RCT calculations for a specific part
+
+                            #--- Terminates the simulation
+                            self.exit.succeed()
+
                     #--- Check max number of parts to be produced in the simulation
                     if self.maxparts != None and self.terminator.get_len_terminated() == self.maxparts:
                         #--- Terminates the simulations
                         self.exit.succeed()
                         
-                    #--- Check to finish the simulation according to a specific part id
-                    if self.part_in_machine.get_id() == self.targeted_part_id:
-                        #-- The targeted part was just finished, the simulation can stop now
-                        #-- This method is useful for RCT calculations for a specific part
-
-                        #--- Terminates the simulation
-                        self.exit.succeed()
+                    
 
 
 
