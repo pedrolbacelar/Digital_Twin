@@ -13,7 +13,7 @@
       "capacity": 1,
       "contemp": 5000,
       "cluster": 1,
-      "worked_time": 3903
+      "worked_time": 0
     },
     {
       "activity": 2,
@@ -27,7 +27,7 @@
       "capacity": 1,
       "contemp": 5000,
       "cluster": 2,
-      "worked_time": 3702
+      "worked_time": 0
     },
     {
       "activity": 3,
@@ -130,7 +130,7 @@
     }
   ],
   "initial": [
-    3,
+    5,
     0,
     0,
     0,

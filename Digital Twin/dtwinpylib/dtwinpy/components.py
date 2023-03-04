@@ -21,6 +21,7 @@ class Part():
 
         #--- Conveyor
         self.convey_entering_time = None
+        self.branching_path = None
 
     def quick_TDS_fix(self, current_cluster):
         #--- Count the number of theoretical finished clusters
@@ -61,6 +62,8 @@ class Part():
     def get_CT(self):
         self.calculate_CT()
         return self.CT
+    def get_branching_path(self):
+        return self.branching_path
     #------------------------------
 
 
@@ -128,6 +131,8 @@ class Machine():
         self.allocation_counter = 0
         #self.allocation_policy= "first"
         self.allocation_policy= "alternated"
+        #--- Save the old policy before becoming a branching
+        self.old_policy = self.allocation_policy
         self.conveyors_out = conveyors_out
         self.conveyors_in = None
 
@@ -152,9 +157,6 @@ class Machine():
     def run(self):
     
         while True:
-            if self.part_in_machine != None:
-                if self.part_in_machine.get_name() == "Part 21" and self.env.now== 310000:
-                    pass
             
             ##### ============== State Machine  ==============
 
@@ -424,8 +426,21 @@ class Machine():
                     # All closed loop cases
                     # Open Loop cases that are not final machines
 
+                    # ------------------ Branching Policy Check ------------------
+                    #--- Take the list of paths (conveyors) 
+                    part_paths = self.part_in_machine.get_branching_path() #list of conveyors selected
+
+                    #--- Check if it's a branching manchine and if the part is with paths assigned
+                    if self.branch != None and part_paths != None:
+                        #--- change policy
+                        self.allocation_policy = "branching"
+                        
+                    else:
+                        #--- Go back to the default policy
+                        self.allocation_policy = self.old_policy
+
                     # ------------------ Choosing the Next Queue ------------------
-                    
+
                     # ---------------- First Queue Free Policy ----------------
                     if self.allocation_policy == "first":
                         for queue in self.queue_out:
@@ -472,6 +487,17 @@ class Machine():
                                 conveyor_to_put = conveyor
                                 break
 
+                    # ---------------- Branching Policy ----------------
+                    if self.allocation_policy == "branching":
+                        #--- Between the existing out conveyors of the machine, search for
+                        # one present also in the path of the part and selected it.
+                        conveyor_to_put = self.branch.branch_decision(self.part_in_machine)
+
+                        #--- Find the rigth queue to put
+                        for queue in self.queue_out:
+                            if conveyor_to_put.id == queue.get_id():
+                                #-- Found the queue that the part is going
+                                self.queue_to_put = queue
                     #-------------------------------------------------------------
 
                     #--- Queue Allocated (Update digital_log)
@@ -648,6 +674,9 @@ class Machine():
         self.conveyors_in = convey
     def set_branch(self, branch):
         self.branch = branch
+    def set_targeted_part_id(self, target_id):
+        self.targeted_part_id = target_id
+
     
     #--- Special set for queue
     def add_queue_in(self, value):
@@ -885,17 +914,22 @@ class Branch():
         self.branch_machine = branch_machine
         self.branch_queue_in = branch_queue_in
 
-    def branch_decision(self, selected_convey, selected_part):
-        #--- Branch get the right conveyor to put
-        for conveyor in self.branch_conveyors:
-            if conveyor.id == selected_convey.id():
-                #--- Conveyor of the same selected queue
-                conveyor_to_put = conveyor
-                break
+    def branch_decision(self, part_to_put):
+        #--- Between the machine option of conveyors to put, is there one 
+        # that matches with one of options assigned for the part path?
+        
+        #--- Look through the conveyors of the machine
+        for machine_conveyor in self.branch_machine.get_conveyors_out():
+            #--- Look through the conveyor available for the part
+            for part_conveyors in part_to_put.get_branching_path():
+                if machine_conveyor.id == part_conveyors.id:
+                    #--- Found a conveyor within of the parts paths available in the conveyors of the machine
+                    conveyor_to_put = machine_conveyor
+                    break
 
         #--- Branch PUT part in the conveyor
-        conveyor_to_put.start_transp(selected_part)
-
+        return conveyor_to_put
+        
     # ======= GETs =======
     def get_id(self):
         return self.id

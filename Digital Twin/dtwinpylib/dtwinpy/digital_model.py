@@ -424,7 +424,7 @@ class Model():
 
         #--- Run the Simulation
         if self.loop_type == "closed":
-            if self.maxparts != None:
+            if self.maxparts != None or self.targeted_part_id != None:
                 self.env.run(until= self.exit)
             else:
                 self.env.run(until= self.until)
@@ -630,6 +630,13 @@ class Model():
         return self.model_path
     def get_branches(self):
         return self.branches
+    def get_all_parts(self):
+        self.parts_vector = []
+        for queue in self.queues_vector:
+            parts_in_queue = queue.get_all_items()
+            for part in parts_in_queue:
+                self.parts_vector.append(part)
+        return self.parts_vector
     # ==============================================
 
     def verbose(self):

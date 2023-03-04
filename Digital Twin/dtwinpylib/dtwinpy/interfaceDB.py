@@ -86,3 +86,7 @@ class Database():
         with sqlite3.connect(self.database_path) as digital_model_DB: 
             digital_model_DB.execute(f"ALTER TABLE {table_old} RENAME TO {table_new};")
             digital_model_DB.commit()
+
+    def read_part_path(self, partid, table):
+        with sqlite3.connect(self.database_path) as DB:
+            return DB.execute(f"SELECT * FROM {table} WHERE part_id=?", partid).fetchall()

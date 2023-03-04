@@ -1,4 +1,4 @@
-class Sever():
+class Service_Handler():
     """
     ## Description
     The server is responsible for executing the external services of
@@ -29,12 +29,14 @@ class Sever():
     the most optimized path.
 
     """
-    def __init__(self, name, digital_model):
+    def __init__(self, name, generate_digital_model):
         self.name = name
-        self.digital_model = digital_model
+        self.generate_digital_model = generate_digital_model
+        self.digital_model = generate_digital_model(verbose= False)
 
-        #--- Get the Branches objects
+        #--- Get the components from the digital model
         self.branches = self.digital_model.get_branches()
+        (self.machines_vector, self.queues_vector) = self.digital_model.get_model_components()
     
     def get_branch_choices(self):
         """
@@ -55,11 +57,35 @@ class Sever():
             #-- Add conveyors choice of the branch to the global choice
             branches_choices.append(current_branch_choices)
 
-        print(f"Branches Choices {branches_choices}")
         return branches_choices
 
+    def get_parts_making_decisions(self, queue_position = 2):
+        """
+        This functions look through digital model and search for parts within
+        queues input of branching machines and see if there is any part in the
+        right position for calculations (queue_position). This Queue Position is a
+        position within a queue that is required to the Digital Twin have enough
+        time to the calculation, that's why it's an input. As default, the
+        queue_position is 2 (the second position of the queue, not the 3° position)
+        """
+        parts_making_decisions = []
 
-    def generate_path_scenarios(self):
+        #--- For each existing branching point
+        for branch in self.branches:
+            #--- Get Queues In of the branching point
+            branch_queues_in = branch.get_branch_queue_in()
+            #--- For each queue in of the branches queues (ideally there is just one queue in)
+            for queue in branch_queues_in:
+                #-- Check if there is a part in the queue_position
+                parts_in_queue = queue.get_all_items()
+
+                #-- Check if the queue has a part in the right position
+                if len(parts_in_queue) >= queue_position - 1:
+                    parts_making_decisions.append(parts_in_queue[queue_position - 1])
+
+        return parts_making_decisions
+
+    def generate_path_scenarios(self, verbose = False):
         """
         ## Description
         This function generate the path scenarios based on combinations of 
@@ -89,13 +115,25 @@ class Sever():
 
         #--- Generate the path scenarios based on the combination of branch choices
         path_scenarios = generate_combinations(branches_choices)
+
+        #--- Show the paths generated
+        if verbose == True:
+            print("====== Paths Created ======")
+            i = 1
+            for path in path_scenarios:
+                print(f"---- Path {i} ----")
+                for convey in path:
+                    print(convey.get_name())
+                
+                i += 1
+            print("========================")
         return path_scenarios
     
     def assign_parts(self, SelecPath, path_scenarios, SelecPart = None):
         """
         ## Description
         This function is able to look into the existing parts in the simulation 
-        and assign to it of them the paths to execute the simulation. The function
+        and assign to each of them the paths to execute the simulation. The function
         select the parts waiting in the queue before branching points. For each branch point
         a set of copy of the same part is created for each possible path. The output of 
         this is a dictionary that give the copy parts for each branch point. This dictionary will
@@ -103,7 +141,7 @@ class Sever():
         running. The trick part here is when we have more complex system where it's possible
         to have multiple parts in the decision making point.
 
-        ## TO-DO:
+        #### TO-DO:
         1) get the path scenarios
         2) Loop through each branch point
             3) Look the branch queue in if there is any part in first queue position take it
@@ -167,7 +205,7 @@ class Sever():
         #--- Return the parts that were in branching decision to be possible to calculate their RCT
         return parts_in_branching_dm
     
-    def run_RCT_service(self, approach):
+    def run_RCT_service(self, queue_position= 1, verbose= False):
         """
         ## Description
         This run method is one of the service related to the decision making based on the 
@@ -185,7 +223,59 @@ class Sever():
             - for each part that were in branchin DM, store the RCT for each path 
                 - Maybe a matrix, each line for a part and each collunm for a simulation
                 - Or in dicitonary...
+
+        ##### Approach 2
+        1) Get all the possible paths
+        2) Get all the parts in Branching Points
+        3) For each part in Branching Point ...
+            4) For each possible path ...
+                5) Assign to that part the current path
+                6) Simulated
+                7) Get the RCT 
+                8) Stored it in a dict, where the key is the part name and the data is
+                a vector where each element of the vector is the RCT for a path.
+                Thus, following the same order as simulate ( ordered of path)
+        9) Call a function to analyse the RCTs from the dict (RCT check)
+            9.1) The function should compare the RCTs value and see if it's higher than
+            a threshold
+            9.2) If higher, return the choosen path
+        10) Future: Send the choosen path to the machines of the parts
         """
+        #--- Get all possible combination of path based on branching
+        possible_pathes = self.generate_path_scenarios(verbose= verbose)
 
+        #--- Get parts in positions of making decisions
+        parts_making_decisions = self.get_parts_making_decisions(queue_position= queue_position)
 
-        
+        #--- For each part, let's simulate all the scenarios
+        for part_id in range(len(parts_making_decisions)):
+            part = parts_making_decisions[part_id]
+
+            #--- For each existing path scenario
+            path_counter = 1
+            for path_scenario in possible_pathes:
+                #--- Before assigning a new path and run a simulation, it's necessary to recreate the model (this generate new components / objects)
+                self.digital_model = self.generate_digital_model(targeted_part_id= part.id, verbose= False)
+
+                #--- Get Parts from the Digital Model
+                current_parts_vector = self.digital_model.get_all_parts()
+
+                #--- Assign to that part the current path scenario being analysed 
+                for current_part in current_parts_vector:
+                    if current_part.get_id() == part_id + 1:
+                        current_part.set_branching_path(path_scenario)
+                        part_being_simulated = current_part
+
+                #--- Show the paths
+                if verbose == True:
+                    print(f"====================================== Running Scenario for {part.get_name()} | Path {path_counter} ======================================")
+                    print(f"--- Showing Path for {part_being_simulated.get_name()} ---")
+                    for convey in part_being_simulated.get_branching_path():
+                        print(f"|-- {convey.get_name()}")
+                    print("---")
+
+                #--- Run the simulation
+                self.digital_model.run()
+
+                #-- Increment the counter
+                path_counter += 1

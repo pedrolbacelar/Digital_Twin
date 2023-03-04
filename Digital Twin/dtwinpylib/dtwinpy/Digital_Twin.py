@@ -3,6 +3,7 @@ from .digital_model import Model
 from .validator import Validator
 from .interfaceDB import Database
 from .synchronizer import Synchronizer
+from .services import Service_Handler
 
 #--- Reload Package
 
@@ -56,9 +57,10 @@ class Digital_Twin():
         return self.digital_model
     
     #--- Run normally the Digital Model and analyze the results
-    def run_digital_model(self, plot= True, maxparts = None, targeted_part_id = None, verbose= True):
-        #--- Always before running re-generate the model, just in case it has some changes
-        self.digital_model = self.generate_digital_model(maxparts= maxparts, targeted_part_id= targeted_part_id, verbose= verbose)
+    def run_digital_model(self, plot= True, maxparts = None, targeted_part_id = None, verbose= True, generate_model = True):
+        if generate_model == True:
+            #--- Always before running re-generate the model, just in case it has some changes
+            self.digital_model = self.generate_digital_model(maxparts= maxparts, targeted_part_id= targeted_part_id, verbose= verbose)
         
         #--- Run the simulation
         self.digital_model.run()
@@ -121,7 +123,8 @@ class Digital_Twin():
         synchronizer.run(repositioning= repositioning)
 
     #--- Run RCT Services
-    def run_RCT_services(self, part_id = None, batch = None):
+    def run_RCT_services(self, verbose= False):
+        """
         print("============ Running RCT Services ============")
         #--- Run the Digital Model for the current picture of the system
         if part_id != None and batch == None:
@@ -131,3 +134,9 @@ class Digital_Twin():
 
         #--- Calculate the RCT for the given request
         self.digital_model.calculate_RCT(part_id_selected= part_id, batch= batch)
+        """
+        #--- Create RCT Handler
+        RCT_Service = Service_Handler(name= "RCT", generate_digital_model= self.generate_digital_model)
+        RCT_Service.run_RCT_service(verbose=verbose)
+
+        
