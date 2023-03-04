@@ -79,6 +79,8 @@ class Part():
         self.ptime_TDS = ptime_TDS
     def set_convey_entering_time(self, time):
         self.convey_entering_time = time
+    def set_branching_path(self, branching_path):
+        self.branching_path = branching_path
     #------------------------------
 
 
@@ -876,11 +878,12 @@ class Conveyor():
 # =============================================================================
 
 class Branch():
-    def __init__(self, id, branch_conveyors, branch_machine):
+    def __init__(self, id, branch_conveyors, branch_machine, branch_queue_in):
         self.id= id
         self.name = f"Branch {self.id} | {branch_machine.get_name()}"
         self.branch_conveyors = branch_conveyors
         self.branch_machine = branch_machine
+        self.branch_queue_in = branch_queue_in
 
     def branch_decision(self, selected_convey, selected_part):
         #--- Branch get the right conveyor to put
@@ -900,5 +903,7 @@ class Branch():
         return self.name
     def get_conveyors(self):
         return self.branch_conveyors
+    def get_branch_queue_in(self):
+        return self.branch_queue_in
 
 

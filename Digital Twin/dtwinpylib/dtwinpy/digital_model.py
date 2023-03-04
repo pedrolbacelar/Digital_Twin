@@ -250,9 +250,10 @@ class Model():
             if len(machine.get_conveyors_out()) > 1:
                 #--- Get some properties from the branching machine
                 machine_conveyors_out = machine.get_conveyors_out()
+                machine_queues_in = machine.get_queue_in()
 
                 #--- CREATE Branch point
-                new_branch = Branch(id= branch_id_counter, branch_conveyors= machine_conveyors_out, branch_machine= machine)
+                new_branch = Branch(id= branch_id_counter, branch_conveyors= machine_conveyors_out, branch_machine= machine, branch_queue_in=machine_queues_in)
 
                 #--- add branch in the machine
                 machine.set_branch(new_branch)
