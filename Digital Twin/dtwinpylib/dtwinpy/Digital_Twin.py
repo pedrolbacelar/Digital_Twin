@@ -8,6 +8,7 @@ from .services import Service_Handler
 #--- Reload Package
 
 import importlib
+import shutil
 import dtwinpylib
 #reload this specifc module to upadte the class
 importlib.reload(dtwinpylib.dtwinpy.digital_model)
@@ -31,7 +32,7 @@ class Digital_Twin():
         #--- Database
         self.database_path = "databases/digital_" + self.name + "_db.db"
         self.real_database_path = "databases/real_" + self.name + "_db.db"
-        self.real_database = Database(self.real_database_path, "real_log")
+        self.real_database = Database(self.real_database_path, "real_log")        
         
 
     #--- Create the Digital Model
@@ -71,11 +72,15 @@ class Digital_Twin():
 
     
     #--- Run the Validation
-    def run_validation(self):
+    def run_validation(self, copied_realDB= False):
         
         # ================== Trace Driven Simulation (TDS) ==================
         #--- (re)generate the Digital Model (reset)
         self.digital_model = self.generate_digital_model()
+
+        #--- Copied the Digital into the Real Databse
+        if copied_realDB == True:
+            shutil.copy2(self.database_path, self.real_database_path)
 
         #--- Create the Logic Validator 
         validator_logic = Validator(digital_model= self.digital_model, simtype="TDS", real_database= self.real_database)
@@ -112,9 +117,13 @@ class Digital_Twin():
         # ========================================================================
 
     #--- Run Synchronization
-    def run_sync(self, repositioning = True):
+    def run_sync(self, repositioning = True, copied_realDB= False):
         #--- Make sure the model is updated
         self.generate_digital_model()
+
+        #--- Copied the Digital into the Real Databse
+        if copied_realDB == True:
+            shutil.copy2(self.database_path, self.real_database_path)
 
         #--- Create the synchronizer
         synchronizer = Synchronizer(digital_model= self.digital_model, real_database= self.real_database)

@@ -1,4 +1,5 @@
 import sqlite3
+import shutil
 
 class Database():
     def __init__(self, database_path, event_table):

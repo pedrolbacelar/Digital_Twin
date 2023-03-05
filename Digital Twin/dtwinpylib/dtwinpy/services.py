@@ -1,3 +1,5 @@
+from matplotlib import pyplot as plt
+
 class Service_Handler():
     """
     ## Description
@@ -205,6 +207,221 @@ class Service_Handler():
         #--- Return the parts that were in branching decision to be possible to calculate their RCT
         return parts_in_branching_dm
     
+    def simulate_paths(self,possible_pathes, parts_making_decisions, verbose= False):
+        #--- Dictionary to store parts and its cycle time
+        rct_dict = {}
+
+        #--- For each part, let's simulate all the scenarios
+        for part_id in range(len(parts_making_decisions)):
+            part = parts_making_decisions[part_id]
+
+            #--- For each existing path scenario
+            path_counter = 1
+
+            #--- Vector with RCT of each simulation
+            rct_vector = []
+
+            #--- Simulaion AS IS
+            print(f"====================================== Simulation AS IS for {part.get_name()} ======================================")
+            self.digital_model = self.generate_digital_model(targeted_part_id= part.id, verbose= False)
+            self.digital_model.run()
+            #- Get the RCT for the Simulation AS IS
+            part_rct = self.digital_model.calculate_RCT(part_id_selected= part.id)
+            rct_vector.append(part_rct)
+
+            for path_scenario in possible_pathes:
+                #--- Before assigning a new path and run a simulation, it's necessary to recreate the model (this generate new components / objects)
+                self.digital_model = self.generate_digital_model(targeted_part_id= part.id, verbose= False)
+
+                #--- Get Parts from the Digital Model
+                current_parts_vector = self.digital_model.get_all_parts()
+
+                #--- Assign to that part the current path scenario being analysed 
+                for current_part in current_parts_vector:
+                    if current_part.get_id() == part_id + 1:
+                        current_part.set_branching_path(path_scenario)
+                        part_being_simulated = current_part
+
+                #--- Show the paths
+                if verbose == True:
+                    print(f"====================================== Running Scenario for {part.get_name()} | Path {path_counter} ======================================")
+                    print(f"--- Showing Path for {part_being_simulated.get_name()} ---")
+                    for convey in part_being_simulated.get_branching_path():
+                        print(f"|-- {convey.get_name()}")
+                    print("---")
+
+                #--- Run the simulation
+                self.digital_model.run()
+
+                #--- Get the RCT for that path simulated
+                part_rct = self.digital_model.calculate_RCT(part_id_selected= part_being_simulated.get_id())
+
+                #--- Store the RCT of that simulation
+                rct_vector.append(part_rct)
+
+                #-- Increment the counter
+                path_counter += 1
+            
+            #--- After finishing all the scenarios for that part, store RCT of each path
+            rct_dict[part_being_simulated.get_name()] = rct_vector
+
+        if verbose==True:
+            print("____________________________________________")
+            print("------ RCT Services Results: ------")
+            for key in rct_dict:
+                print(f"{key}: {rct_dict[key]}")
+
+            print("------ Plot Results ------")
+            #-- Count the number of scenarios
+            x_scenarios = [0]
+            for i in range(len(possible_pathes)):
+                x_scenarios.append(i + 1)
+
+            plt.title("Remaining Cycle Time for each path")
+            plt.xlabel("Path Scenarios and Parts")
+            plt.ylabel("Remaing Cycle Time")
+
+            width = 0.4
+            delta_x = width + 0.01
+            for key in rct_dict:
+                plt.bar(x_scenarios, rct_dict[key], width= width, label= key)
+
+                for i in range(len(x_scenarios)):
+                    x_scenarios[i] += delta_x 
+            plt.legend()
+            plt.show()
+
+            plt.title("Max and Min RCT for each part")
+            plt.xlabel("Parts")
+            plt.ylabel("Remaing Cycle Time")
+            vectors = []
+            labels = []
+            for key in rct_dict:
+                vectors.append(rct_dict[key])
+                labels.append(key)
+            plt.boxplot(vectors, labels=labels)
+            plt.legend()
+            plt.show()
+
+            print("____________________________________________")
+        
+        #--- Give back the dict with the RCTs for each part
+        return rct_dict
+
+    def RCT_check(self, rct_dict, rct_threshold, possible_pathes, verbose= False):
+        """
+        This function calculates the efficiency of each path comparing the path
+        with the worst path. It can be seen as the gain of choosing that path.
+        Thus, the worst path has 0% of gain, and the other path has something bigger.
+        If the gain of the best path is not higher than the rct_threshold, than doesn't
+        make sense to change the policy of the system (because both path are quite the same).
+
+        TO-DO:
+        1) Do the following calculation for each Part making a decision
+            2) find the max RCT and store it
+            3) Loop through all the RCT
+                4) Calculate RCT indicator (RCTi / RCTmax)
+                5) Calculate the gain 1 - RCTindicator
+                6) Store this in a new dict (gain_dict)
+            7) Look to the higher gain and compare with the threshold
+        """
+        #--- Create the gain dictionary
+        gain_dict = {}
+
+        #--- Create the feedback dictionary
+        feeback_dict = {}
+
+        #--- For each part making a decision
+        for key in rct_dict:
+            #--- Create the feedback flag
+            flag_feedback = False
+            path_to_implement = 0
+
+            #--- RCT of this part for each path
+            rcts_paths = rct_dict[key]
+
+            #--- Find the highest RCT for that part
+            ASIS_RCT = rcts_paths[0]
+
+            #--- Create the gain vector
+            gain_vect = []
+
+            #--- For each RCT of that part
+            for rct in rcts_paths:
+                #--- Calculate the RCT Indicator (how close it's from the worst scenario)
+                rct_indicator = rct / ASIS_RCT
+
+                #--- Calculate the RCT Gain (how far it's from the worst scenario)
+                rct_gain = 1 - rct_indicator
+
+                #--- Store this gain into the gain vector
+                gain_vect.append(rct_gain)
+
+            #--- Compare the higher gain with the threshold
+            highets_gain = max(gain_vect)
+            
+            if highets_gain >= rct_threshold:
+                #-- Rise the feedback flag
+                flag_feedback = True
+                #-- Take note of the optimized path
+                path_to_implement = gain_vect.index(highets_gain) 
+
+            #--- Update Dictionaries
+            gain_dict[key] = gain_vect
+            feeback_dict[key] = (flag_feedback, path_to_implement, highets_gain)
+
+        #--- Plotting
+        if verbose == True:
+            plt.title("Gain of each path compared to the normal (AS-IS) path")
+            plt.xlabel("Paths")
+            plt.ylabel("Gain")
+
+            # Create a list of markers
+            markers = ['o', 's', '^', 'd', 'v', 'p', '*', 'x', '+']
+
+            # Create a vector of datas to be plotted (y)
+            datasets = []
+            labels = []
+            for key in gain_dict:
+                datasets.append(gain_dict[key])
+                labels.append(key)
+            # Count Paths (x)
+            x_data = []
+            for i in range(len(datasets[0])):
+                x_data.append(f"Path {i}")
+            # Plot the data using different markers for each dataset
+
+            for i, y in enumerate(datasets):
+                marker = markers[i % len(markers)]
+                plt.plot(x_data, y, marker=marker, label= labels[i], linestyle= '')
+            
+            plt.axhline(rct_threshold, color='red', linestyle='--', label='RCT Threshold')
+
+            plt.legend()
+            plt.show()
+
+            #--- Printing the findings
+            for key in feeback_dict:
+                flag = feeback_dict[key][0]
+                path_index = feeback_dict[key][1]
+                highets_gain = feeback_dict[key][2]
+
+                if flag == True:
+                    print()
+                    print(f"!!!!!!!!! Optimized Path Found for {key} !!!!!!!!!")
+                    print(f"> Best Path: Path {path_index}")
+                    print(f"> Gain: {format(highets_gain * 100, '.3f')} %") 
+                    print("> Path:")
+                    for convey in possible_pathes[path_index - 1]:
+                        print(f"|- {convey.get_name()}")
+                
+                else:
+                    print(f"----- No Path found with gain higher than {rct_threshold * 100}% -----")
+            
+        #--- Return the feedback flag and the chosen path index (dictionary)
+        return feeback_dict[key]
+
+
     def run_RCT_service(self, queue_position= 1, verbose= False):
         """
         ## Description
@@ -247,35 +464,10 @@ class Service_Handler():
         #--- Get parts in positions of making decisions
         parts_making_decisions = self.get_parts_making_decisions(queue_position= queue_position)
 
-        #--- For each part, let's simulate all the scenarios
-        for part_id in range(len(parts_making_decisions)):
-            part = parts_making_decisions[part_id]
+        #--- Simulate for each path
+        rct_dict = self.simulate_paths(possible_pathes= possible_pathes, parts_making_decisions= parts_making_decisions, verbose= verbose)
 
-            #--- For each existing path scenario
-            path_counter = 1
-            for path_scenario in possible_pathes:
-                #--- Before assigning a new path and run a simulation, it's necessary to recreate the model (this generate new components / objects)
-                self.digital_model = self.generate_digital_model(targeted_part_id= part.id, verbose= False)
+        #--- Check if there are a big difference between choices
+        feedback_dict = self.RCT_check(rct_dict= rct_dict, rct_threshold= 0.1,possible_pathes = possible_pathes, verbose=verbose)
 
-                #--- Get Parts from the Digital Model
-                current_parts_vector = self.digital_model.get_all_parts()
-
-                #--- Assign to that part the current path scenario being analysed 
-                for current_part in current_parts_vector:
-                    if current_part.get_id() == part_id + 1:
-                        current_part.set_branching_path(path_scenario)
-                        part_being_simulated = current_part
-
-                #--- Show the paths
-                if verbose == True:
-                    print(f"====================================== Running Scenario for {part.get_name()} | Path {path_counter} ======================================")
-                    print(f"--- Showing Path for {part_being_simulated.get_name()} ---")
-                    for convey in part_being_simulated.get_branching_path():
-                        print(f"|-- {convey.get_name()}")
-                    print("---")
-
-                #--- Run the simulation
-                self.digital_model.run()
-
-                #-- Increment the counter
-                path_counter += 1
+        #--- FUTURE FEEDBACK: Send the chosen path to the rigth machine

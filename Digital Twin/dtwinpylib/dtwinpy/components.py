@@ -427,6 +427,7 @@ class Machine():
                     # Open Loop cases that are not final machines
 
                     # ------------------ Branching Policy Check ------------------
+
                     #--- Take the list of paths (conveyors) 
                     part_paths = self.part_in_machine.get_branching_path() #list of conveyors selected
 
@@ -926,7 +927,7 @@ class Branch():
                     #--- Found a conveyor within of the parts paths available in the conveyors of the machine
                     conveyor_to_put = machine_conveyor
                     break
-
+        
         #--- Branch PUT part in the conveyor
         return conveyor_to_put
         
