@@ -93,14 +93,15 @@ class Validator():
         for part in initial_parts:
             for queue in self.queues_vector:
                 # If the numerical location of the part if the same as the id of the queue
-                if part.get_location == queue.get_id() - 1:
+                if part.get_location() == queue.get_id() - 1:
                     part.set_part_queue(queue)
                     break
 
         for part in initial_parts:
             #--- For parts in queues we know the cluster, for parts within machines it's solved internally
             part_queue = part.get_part_queue()
-            if part_queue != None:
+            # If the part is within a Queue and is not in the first queue
+            if part_queue != None and part_queue.get_id() != 1:
                 part_cluster = part_queue.get_cluster()
                 part.quick_TDS_fix(part_cluster)
         
