@@ -32,7 +32,7 @@ class Digital_Twin():
         #--- Database
         self.database_path = "databases/digital_" + self.name + "_db.db"
         self.real_database_path = "databases/real_" + self.name + "_db.db"
-        self.real_database = Database(self.real_database_path, "real_log")        
+        #self.real_database = Database(self.real_database_path, "real_log")        
         
 
     #--- Create the Digital Model
@@ -83,7 +83,7 @@ class Digital_Twin():
             shutil.copy2(self.database_path, self.real_database_path)
 
         #--- Create the Logic Validator 
-        validator_logic = Validator(digital_model= self.digital_model, simtype="TDS", real_database= self.real_database)
+        validator_logic = Validator(digital_model= self.digital_model, simtype="TDS", real_database_path= self.real_database_path)
         
         #--- IMPROVE: give the object validator for the machine to be able to update the ptime_TDS for new parts
         #--- Get the components of the simulation
@@ -95,7 +95,7 @@ class Digital_Twin():
         validator_logic.allocate()
 
         #--- Run the TDS
-        validator_logic.run()
+        (lcss_logic, lcss_time_logic, lcss_indicator_logic) = validator_logic.run()
 
         # ========================================================================
 
@@ -106,15 +106,20 @@ class Digital_Twin():
         self.digital_model = self.generate_digital_model()
 
         #--- Create the Input Validator
-        validator_input = Validator(digital_model=self.digital_model, simtype="qTDS", real_database= self.real_database)
+        validator_input = Validator(digital_model=self.digital_model, simtype="qTDS", real_database_path= self.real_database_path)
 
         #--- Allocate the traces
         validator_input.allocate()
 
         #--- Run the qTDS
-        validator_input.run()
+        (lcss_input, lcss_time_input, lcss_indicator_input) = validator_input.run()
 
         # ========================================================================
+
+        print("_______________________ Validation Results _______________________")
+        print(f"> LCSS indicator for LOGIC: {lcss_indicator_logic}")
+        print(f"> LCSS indicator for INPUT: {lcss_indicator_input}")
+        print("__________________________________________________________________")
 
     #--- Run Synchronization
     def run_sync(self, repositioning = True, copied_realDB= False):

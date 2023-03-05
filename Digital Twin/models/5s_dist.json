@@ -25,7 +25,7 @@
       ],
       "frequency": 999,
       "capacity": 1,
-      "contemp": ["norm", 5000, 200],
+      "contemp": ["norm", 15000, 200],
       "cluster": 2,
       "worked_time": 0
     },

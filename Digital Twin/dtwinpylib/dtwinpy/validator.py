@@ -14,7 +14,7 @@ importlib.reload(dtwinpylib.dtwinpy.interfaceDB)"""
 
 
 class Validator():
-    def __init__(self, digital_model, simtype, real_database):
+    def __init__(self, digital_model, simtype, real_database_path):
         self.digital_model = digital_model
         self.simtype = simtype
         # qTDS: each row is the list of process time for each part
@@ -26,7 +26,7 @@ class Validator():
         # The real database is going to be create by the broker,
         # here we're just getting the object that point to that
         # database. That's why we don't initialize it.
-        self.real_database = real_database
+        self.real_database = Database(database_path=real_database_path, event_table= "real_log")
         self.digital_database = self.digital_model.get_model_database()
         self.real_database_path = self.real_database.get_database_path()
 
@@ -73,9 +73,36 @@ class Validator():
                 # This logic is okay, because the logic for naming parts is also being like that.
         
         #--- give for each part the ptime_TDS list 
+        # TODO: Maybe use dictionaries to get pricesly the parts
         for part in part_list:
             current_ptime_TDS = self.get_part_TDS(part)
             part.set_ptime_TDS(current_ptime_TDS)
+
+        #--- Extra adjust for initial parts (parts in WIP) already in middle of the simulation
+        # Since this parts are already in the simulation, the TDS generated
+        # is not aligned with the number of cluster. So let's say I started in 
+        # cluster 2 and the system has 4 cluster. My TDS will have only 3 elements
+        # (c2,c3,c4). But in cluster 2 i will take in element in position 2, so c3. 
+        # To fix that we put some extra 0 in the beginning equivalent to the number
+        # of cluster that I already been through
+        
+        #--- Get all initial parts from the simulation
+        initial_parts = self.digital_model.get_all_parts()
+
+        #--- Assign the queue object to the part
+        for part in initial_parts:
+            for queue in self.queues_vector:
+                # If the numerical location of the part if the same as the id of the queue
+                if part.get_location == queue.get_id() - 1:
+                    part.set_part_queue(queue)
+                    break
+
+        for part in initial_parts:
+            #--- For parts in queues we know the cluster, for parts within machines it's solved internally
+            part_queue = part.get_part_queue()
+            if part_queue != None:
+                part_cluster = part_queue.get_cluster()
+                part.quick_TDS_fix(part_cluster)
         
         #--- Set the simulation type for all the machines
         for machine in self.machines_vector:
@@ -172,14 +199,22 @@ class Validator():
                 if machine_id[0] == self.machines_vector[i].get_name():
                     machine = self.machines_vector[i]
 
-                    #--- Set the type of Simulation
-                    machine.set_simtype("qTDS")
+                    machine_process_time = machine.get_process_time()
+                    #--- Dealing with Distribution Machines
+                    if type(machine_process_time) == list:
+                        #--- Set the type of Simulation
+                        machine.set_simtype("qTDS")
 
-                    #--- Get the related list of process time for that machine
-                    current_ptime_qTDS = self.matrix_ptime_qTDS[machine.get_name()]
+                        #--- Get the related list of process time for that machine
+                        current_ptime_qTDS = self.matrix_ptime_qTDS[machine.get_name()]
 
-                    #--- Assign the list of processes time
-                    machine.set_ptime_qTDS(current_ptime_qTDS)
+                        #--- Assign the list of processes time
+                        machine.set_ptime_qTDS(current_ptime_qTDS)
+
+                    #--- Dealing with Deterministic Machines
+                    else:
+                        #--- Don't assign nothing, because the comparasion will directly
+                        pass
 
                     break
 
@@ -473,8 +508,15 @@ class Validator():
                         self.matrix_ptime_qTDS[machine.get_name()] = (Xs_vector)
                     
                     else:
-                        Xs_vector = Xr_matrix[machine.get_name()]
-                        self.matrix_ptime_qTDS[machine.get_name()] = (Xs_vector)
+                        #--- WRONG!!! This bellow implementation is wrong. The goal here is not to copy and paste
+                        # the process time from the real into the digital machines. We're using it just to get the
+                        # the randmness to generate new data using the current distribution parameters of the digital
+                        # machines... But in the case that it's deterministic (not a list) we can't just copy from the real!
+                        # we need just to run the simulation and compare the final sequences....
+                        
+                        #Xs_vector = Xr_matrix[machine.get_name()]
+                        #self.matrix_ptime_qTDS[machine.get_name()] = (Xs_vector)
+                        pass
 
                     break
 
@@ -533,6 +575,8 @@ class Validator():
             
             print("=========================================================")
 
+            return((lcss, lcss_time, lcss_indicator))
+
         if self.simtype == "qTDS":
             #--- Run Quasi Trace Driven Simulation
             print("============ Running quasi Trace Driven Simulation ============")
@@ -541,7 +585,7 @@ class Validator():
             #--- Generate output event sequence from the digital database
             (Ys_time, Ys_event) = self.generate_event_sequence(database= self.digital_database, table= "digital_log")
             
-            #--- Generate output event sequence from the digital database
+            #--- Generate output event sequence from the real database
             (Yr_time, Yr_event) = self.generate_event_sequence(database= self.real_database, table= "real_log")
 
             #--- Compare Event Sequence
@@ -554,6 +598,8 @@ class Validator():
 
 
             print("===============================================================")
+
+            return((lcss, lcss_time, lcss_indicator))
     # =======================================================================
 
 

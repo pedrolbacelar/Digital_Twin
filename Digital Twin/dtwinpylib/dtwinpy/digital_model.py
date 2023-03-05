@@ -95,6 +95,7 @@ class Model():
 
         generator_initial = Generator(env= self.env, loop_type="closed", part_vector= self.initial_parts, queue_vector= self.queues_vector)
         self.queues_vector = generator_initial.allocate_part()
+
     def merge_queues(self):
         """
         Function to merge existing queues in the input of a machines.
