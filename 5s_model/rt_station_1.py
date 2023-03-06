@@ -1,8 +1,19 @@
 #!/usr/bin/env python3
 
-#--- you send the start message to initiate the whole system.
-#--- import required packages
 
+#-- you send the start message to initiate the whole system.
+#-- The station sends machine_id, activity_type, queue_id to database by mqtt using trace topic
+#-- Processing trace includes loading and unloading time inside the processing period.
+#-- unloading time is considered to be as a part of tranportation time.
+#-- expected mqtt from part_id: {"machine_id":"1","part_id":"12345"}
+#-- expected mqtt from RCT-server: {"machine_id":"1","part_id":"12345","policy":"2"}
+#-- trace mqtt published: {"machine_id" : "1", "activity_type":"start","queue_id":"1"}
+#-- default dispatch policy is alternating. machine initiates with station 2.
+#-- blocking condition: BAS
+#-- failures are not included
+#-- processing times are deterministic
+
+#--- import required packages
 import paho.mqtt.client as mqtt
 import json
 #import datetime
@@ -36,15 +47,16 @@ pusher_speed = 400
 pos_neutral = 0
 pos_extend = 180
 
+#--- process time of station excluding the loading and unloading time
 process_time = 4    # advised to have no less than 5s of gap between two parts in the downstream conveyor to not have problems with pusher.
 
 system_status = "stop"
-advice = "--"  # advised control policy for the pusher
-advice_list = ["default"]
+advice_list = dict()
 station_status = "idle"
 start_status = 0
 stop_status = 0
 advice_status = 0
+current_station = "3"   # we start with 2. to change to 2, we initaite it as 3
 print("Station 1 program Activated")
 
 #--- main functions
@@ -53,15 +65,14 @@ def on_connect(client, userdata, flags, rc):
     #--- subscribe topics
     client.subscribe(topic = "system_status")
     client.subscribe(topic = "RCT-server")
+    client.subscribe(topic = "part_id")
 
 def on_message(client, userdata, msg):
     # define global variables
     global system_status
-    global advice
-    global advice_status
     global start_status
     global stop_status
-
+    global current_part_id
     # print(msg.payload)
     print(str(msg.payload.decode("utf-8")))     #-- to print the message string
 
@@ -78,10 +89,18 @@ def on_message(client, userdata, msg):
     #--- RCT-server
     #--- payload expected: a. station_2 b. station_3
     if msg.topic == "RCT-server":
-        advice = str(msg.payload.decode("utf-8"))
-        advice_status = 1
-        print("on message, advice :", advice)
-        # when releasing a part, variable for next part (first part in the queue) is assigned and made ready to write
+        message = json.loads(msg.payload.decode("utf-8"))
+        if message["macihne_id"] == "1":    # we enter the policy advice into json dictionay for future use. You can send the part policy whenever you want.
+            advice_list[message["part_id"]] = message["policy"]
+            print("on message, advice :-", message["part_id"], " : ", advice_list[message["part_id"]])
+
+
+    if msg.topic == "part_id":      # listening to current part id for dispath policy
+        message = json.loads(msg.payload.decode("utf-8"))
+        if message["machine_id"] == 1:
+            current_part_id = message["part_id"]
+
+        
         
 client = mqtt.Client()
 client.connect("192.168.0.50",1883,60) # verify the IP address before connect
@@ -103,10 +122,12 @@ try:
 
             if queue_sensor.value() > 1 and station_status == "idle":
                 pusher.run_forever(speed_sp=pusher_speed)
+                payload = {"machine_id" : "1", "activity_type":"start","queue_id":"1"}
+                client.publish(topic = "trace", payload= json.dumps(payload))
                 sleep(1)
                 pusher.stop(stop_action='coast')
                 sleep(1)
-                pusher.run_forever(speed_sp=-pusher_speed)
+                pusher.run_forever(speed_sp = -pusher_speed)
                 sleep(1)
                 pusher.stop(stop_action='coast')
                 station_status = "busy"
@@ -117,17 +138,26 @@ try:
                 
                 sleep(process_time)
 
-                station.run_forever(speed_sp = -station_speed)
-                #--- publish topics
-                print(advice_list[len(advice_list)-2])
-                payload ={"part_type" : "1", "policy":advice_list[len(advice_list)-2]}
-                client.publish(topic = "dispatch_policy", payload= json.dumps(payload))
-                print("in loop, advice_status: ", advice_status)
-                if advice_status > 0:
-                    advice_list[len(advice_list)-1] = advice
-                    advice_status = 0
-                station_status = "idle"
-                sleep(3)
+                if blocking_sensor.value() < 4:
+                    #--- dispatch the part from the station
+                    station.run_forever(speed_sp = -station_speed)
+
+                    #--- policy assignment #--- defualts to: alternating policy
+                    if current_part_id in advice_list:
+                        current_station = advice_list[current_part_id]
+                    elif current_station ==  "2":
+                        current_station = "3"
+                    elif current_station == "3":
+                        current_station = "2"
+
+                    #--- unloading time. Also a part of processing time.
+                    sleep(3)    #--- delay for the part to move to grey conveyor.
+
+                    #--- publish topics
+                    payload ={"machine_id" : "1", "activity_type":"finish", "queue_id":current_station}
+                    client.publish(topic = "trace", payload= json.dumps(payload))
+                    print("current part proceeding to station ", current_station)
+                    station_status = "idle"
 
         elif system_status == "stop" and stop_status > 0:
             conveyor.stop(stop_action = 'coast')

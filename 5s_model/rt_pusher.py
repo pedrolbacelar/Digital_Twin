@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+#--- dispatch policy is always send by the station 1
+#--- dispatch plicy is send by the station, when the part leaves the station
+
 #--- import required packages
 
 import paho.mqtt.client as mqtt
@@ -36,7 +39,7 @@ print("pusher program Activated")
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
     client.subscribe(topic = "system_status")
-    client.subscribe(topic = "dispatch_policy")
+    client.subscribe(topic = "trace")
 
 #--- manipulation of subscribed message data
 def on_message(client, userdata, msg):
@@ -59,13 +62,13 @@ def on_message(client, userdata, msg):
             print("Pusher is stoped")
 
     #--- part dispatch policy
-    #--- payload expected a. {"part_num":"1","policy":"default"}
-    #--- payload expected b. {"part_num":"1","policy":"station_2"}
-    #--- payload expected c. {"part_num":"1","policy":"station_3"}
-    if msg.topic == "dispatch_policy":
+    #--- payload expected a. {"part_id":"1","policy":"2"}
+    #--- payload expected b. {"part_id":"1","policy":"3"}
+    if msg.topic == "tarce":
         message = json.loads(msg.payload.decode("utf-8"))
-        part_count += 1
-        policy.append(message["policy"])
+        if message["machine_id"] == 1:
+            part_count += 1
+            policy.append(message["policy"])
         
 
 
@@ -98,32 +101,18 @@ try:
     while True:
         if system_status == "start":
             if part_count > 0:
-                #--- default policy
-                if sensor.value() > 1 and policy[len(policy) - part_count] == "default":
-                    if next_station == "station_2":
-                        open_station_2()
-                        part_count -= 1
-                        print("default2")
-                        next_station = "station_3"
-                    
-                    elif next_station == "station_3":
-                        open_station_3()
-                        part_count -= 1
-                        print("default3")
-                        next_station = "station_2"
-
                 #--- policy: towards station 2
-                elif sensor.value() > 1 and policy[len(policy) - part_count] == "station_2":
+                if sensor.value() > 1 and policy[len(policy) - part_count] == "station_2":
                     open_station_2()
                     part_count -= 1
-                    print("policy2")
+                    print("policy to 2")
                     next_station = "station_3"
 
                 #--- policy: towards station 3
                 elif sensor.value() > 1 and policy[len(policy) - part_count] == "station_3":
                     open_station_3()
                     part_count -= 1
-                    print("policy3")
+                    print("policy to 3")
                     next_station = "station_2"
 
 except KeyboardInterrupt:
