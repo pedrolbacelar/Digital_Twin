@@ -12,6 +12,7 @@
 #-- blocking condition: BAS
 #-- failures are not included
 #-- processing times are deterministic
+#-- part is recieved is the updated part number and not the RFID Tag ID.
 
 #--- import required packages
 import paho.mqtt.client as mqtt
@@ -157,7 +158,10 @@ try:
                     payload ={"machine_id" : "1", "activity_type":"finish", "queue_id":current_station}
                     client.publish(topic = "trace", payload= json.dumps(payload))
                     print("current part proceeding to station ", current_station)
-                    station_status = "idle"
+                    
+                    # delete the part policy from the list so that the policy is not repeated during a default condition.
+                    del advice_list[current_part_id]
+                    station_status = "idle" # set status to idle for allowing the next part
 
         elif system_status == "stop" and stop_status > 0:
             conveyor.stop(stop_action = 'coast')
