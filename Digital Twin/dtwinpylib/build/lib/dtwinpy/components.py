@@ -7,7 +7,7 @@ from scipy.stats import lognorm
 
 
 class Part():
-    def __init__(self, id, type, location, creation_time, termination_time = None, ptime_TDS = None):
+    def __init__(self, id, type, location, creation_time, termination_time = None, ptime_TDS = None, part_queue = None):
         self.id = id
         self.name = "Part " + str(self.id)
         self.type = type
@@ -18,6 +18,11 @@ class Part():
         #--- (quasi) Trace Driven Simulation (qTDS or TDS)
         self.ptime_TDS = ptime_TDS # process time for Trace Driven Simulation
         self.finished_clusters = 0
+        self.part_queue = part_queue
+
+        #--- Conveyor
+        self.convey_entering_time = None
+        self.branching_path = None
 
     def quick_TDS_fix(self, current_cluster):
         #--- Count the number of theoretical finished clusters
@@ -27,6 +32,9 @@ class Part():
         #--- Updated old vector with the new vector
         self.ptime_TDS = new_ptime_TDS
 
+    def calculate_CT(self):
+        self.CT = self.termination_time - self.creation_time
+        
 
     
     #------- Get methods -------
@@ -49,7 +57,16 @@ class Part():
         return self.ptime_TDS[cluster]
     def get_finished_clusters(self):
         return self.finished_clusters
+    def get_part_queue(self):
+        return self.part_queue
     
+    def get_convey_entering_time(self):
+        return self.convey_entering_time
+    def get_CT(self):
+        self.calculate_CT()
+        return self.CT
+    def get_branching_path(self):
+        return self.branching_path
     #------------------------------
 
 
@@ -66,11 +83,21 @@ class Part():
         self.finished_clusters = finished_cluster
     def set_ptime_TDS(self, ptime_TDS):
         self.ptime_TDS = ptime_TDS
+    def set_convey_entering_time(self, time):
+        self.convey_entering_time = time
+    def set_branching_path(self, branching_path):
+        self.branching_path = branching_path
+    def set_part_queue(self, queue):
+        self.part_queue = queue
     #------------------------------
 
 
 class Machine():
-    def __init__(self, env, id, process_time, capacity, terminator, database, worked_time, last_part_id=None, queue_in= None, queue_out= None, blocking_policy= "BBS", freq= None, cluster= None, final_machine = False, loop = "closed", exit = None, simtype = None, ptime_qTDS = None, maxparts= None, initial_part= None):
+    def __init__(self, env, id, process_time, capacity, terminator, database, worked_time,
+        last_part_id=None, queue_in= None, queue_out= None, conveyors_out = None, blocking_policy= "BBS", 
+        freq= None, cluster= None, final_machine = False, loop = "closed", exit = None, simtype = None, 
+        ptime_qTDS = None, maxparts= None, initial_part= None, targeted_part_id= None):
+        
         #-- Main Properties
         self.env = env
         self.id = id
@@ -103,11 +130,16 @@ class Machine():
         self.maxparts = maxparts
         self.working = False
         self.part_started_time = self.env.now
+        self.targeted_part_id = targeted_part_id
 
         #--- Allocation
         self.allocation_counter = 0
         #self.allocation_policy= "first"
         self.allocation_policy= "alternated"
+        #--- Save the old policy before becoming a branching
+        self.old_policy = self.allocation_policy
+        self.conveyors_out = conveyors_out
+        self.conveyors_in = None
 
         #-- Database Properties
         self.database = database
@@ -125,19 +157,11 @@ class Machine():
         if self.worked_time != 0:
             #-- Part ready to be processed
             self.current_state = "Processing"
-
-        
-
-            
-
-
+        self.branch = None
 
     def run(self):
     
         while True:
-            if self.part_in_machine != None:
-                if self.part_in_machine.get_name() == "Part 21" and self.env.now== 310000:
-                    pass
             
             ##### ============== State Machine  ==============
 
@@ -385,12 +409,20 @@ class Machine():
                     part_id= self.part_in_machine.get_name(),
                     queue= "---") #There is no queue to put
 
-                    #--- Check to finish the simulation
+                    #--- Check to finish the simulation according to desired amount of parts
                     if self.terminator.get_len_terminated() == self.last_part_id:
                         # we can do this because all the machines were assigned for the same terminator
                         # (the same terminator that we're using for running analysis in the end)
 
                         #--- Terminates the simulations
+                        self.exit.succeed()
+                    
+                    #--- Check to finish the simulation according to a specific part id
+                    if self.part_in_machine.get_id() == self.targeted_part_id:
+                        #-- The targeted part was just finished, the simulation can stop now
+                        #-- This method is useful for RCT calculations for a specific part
+
+                        #--- Terminates the simulation
                         self.exit.succeed()
 
                 # ------------------- CLOSED LOOP -------------------
@@ -399,8 +431,22 @@ class Machine():
                     # All closed loop cases
                     # Open Loop cases that are not final machines
 
+                    # ------------------ Branching Policy Check ------------------
+
+                    #--- Take the list of paths (conveyors) 
+                    part_paths = self.part_in_machine.get_branching_path() #list of conveyors selected
+
+                    #--- Check if it's a branching manchine and if the part is with paths assigned
+                    if self.branch != None and part_paths != None:
+                        #--- change policy
+                        self.allocation_policy = "branching"
+                        
+                    else:
+                        #--- Go back to the default policy
+                        self.allocation_policy = self.old_policy
+
                     # ------------------ Choosing the Next Queue ------------------
-                    
+
                     # ---------------- First Queue Free Policy ----------------
                     if self.allocation_policy == "first":
                         for queue in self.queue_out:
@@ -419,85 +465,155 @@ class Machine():
 
                     # ---------------- Alternating Policy ----------------
                     if self.allocation_policy == "alternated":
+                        if self.name == "Machine 1" and self.part_in_machine.get_name() == "Part 7":
+                            pass
                         #--- Select the Queue based on the counter
                         queue_selected = self.queue_out[self.allocation_counter]
 
                         # Loop through next queue in the perspective of the counter
                         for i in range(self.allocation_counter, len(self.queue_out)):
+                            flag_allocated_queue = False # Trying again, hope it's not full
+                                
                             #--- Selected Queue is full
-                            if queue_selected.get_len() >= queue_selected.get_capacity():
-                                queue_selected = self.queue_out[self.allocation_counter + i]
+                            """OLD
+                            if queue_selected.get_len() >= queue_selected.get_capacity() and flag_full == False:
+                                #queue_selected = self.queue_out[self.allocation_counter + i]
+                            """
+                            #--- Select the current Queue to check
+                            queue_selected = self.queue_out[i]
 
                             #--- Selected Queue is available to receive an input
                             if queue_selected.get_len() < queue_selected.get_capacity():
+                                flag_allocated_queue = True
+                                last_allocation_counter = i
                                 self.queue_to_put = queue_selected
                                 break
+                            
+                            #--- No queue chosen and already look to all the queues (all full)
+                            if flag_allocated_queue == False and i+1 == len(self.queue_out):
+                                #-- Wait to check again later
+                                yield self.env.timeout(self.waiting)
 
-                        #--- Reset the counter if it's at maximum
-                        if self.allocation_counter >= (len(self.queue_out) - 1):
-                            self.allocation_counter = -1 # minus 1 because we're going to increase 1 anyways
+                                #-- Reset the i and also the allocation to check the queues again from the begining
+                                self.allocation_counter = 0
+                                i = 0
 
                         #--- Increase the counter for the next allocation
-                        self.allocation_counter += 1
+                        self.allocation_counter = last_allocation_counter +  1
+
+                        #--- Reset the counter if it's at maximum
+                        if self.allocation_counter > (len(self.queue_out) - 1):
+                            self.allocation_counter = 0 # minus 1 because we're going to increase 1 anyways
             
+                        #--- Find the right conveyor
+                        for conveyor in self.conveyors_out:
+                            if conveyor.id == self.queue_to_put.get_id():
+                                #--- Conveyor of the same selected queue
+                                conveyor_to_put = conveyor
+                                break
+
+                    # ---------------- Branching Policy ----------------
+                    if self.allocation_policy == "branching":
+                        #--- Between the existing out conveyors of the machine, search for
+                        # one present also in the path of the part and selected it.
+                        conveyor_to_put = self.branch.branch_decision(self.part_in_machine)
+
+                        #--- Find the rigth queue to put
+                        for queue in self.queue_out:
+                            if conveyor_to_put.id == queue.get_id():
+                                #-- Found the queue that the part is going
+                                self.queue_to_put = queue
                     #-------------------------------------------------------------
 
-                    #--- Queue Allocated (Update digital_log)
-                    # obs: makes senses to take the time just after the allocation, because in the model becuase the model generation works like that
-                    self.database.write_event(self.database.get_event_table(),
-                    timestamp= self.env.now,
-                    machine_id= self.name,
-                    activity_type= "Finished",
-                    part_id= self.part_in_machine.get_name(),
-                    queue= self.queue_to_put.get_name()) 
+                    #--- After finishing the process I add into the database
+                    # (I don't wait for the next queue be available, because the machine
+                    # follows the Blocking After Service policy)
+                    
+                    # TODO: But if the part is waiting for the queue be free,
+                    # it will pass here multiple times and will write multiple times
+                    # into the database. So you need to verify if that actions was
+                    # already taken by the machine, if yes you don't write again.
 
-                    #--- Evaluate if the machine is the last machine in the process or not
-                    if self.final_machine == False:
-                        # Open and Closed loop included (that are not final machines)
-                        #--- Put the part in the next queue as usual
-                        self.queue_to_put.put(self.part_in_machine)
-                        print(f'Time: {self.env.now} - [{self.name}] put {self.part_in_machine.get_name()} in {self.queue_to_put.name} (capacity = {self.queue_to_put.get_len()})')
+
+                    #------------ Check if the Queue is not full --------------
+                    #--- Queue Selected Full
+                    if self.queue_to_put.get_len() < self.queue_to_put.get_capacity():
                         flag_allocated_part = True
+                    
+                    #--- Queue Not Full
+                    if flag_allocated_part == True:
+                        #--- Queue Allocated (Update digital_log)
+                        # obs: makes senses to take the time just after the allocation, because in the model becuase the model generation works like that
+                        self.database.write_event(self.database.get_event_table(),
+                        timestamp= self.env.now,
+                        machine_id= self.name,
+                        activity_type= "Finished",
+                        part_id= self.part_in_machine.get_name(),
+                        queue= self.queue_to_put.get_name()) 
 
+                        #--- Evaluate if the machine is the last machine in the process or not
+                        if self.final_machine == False:
+                            # Open and Closed loop included (that are not final machines)
+                            
+                            ###### (Old) Before Conveyors ######
+                            """
+                            #--- Put the part in the next queue as usual
+                            self.queue_to_put.put(self.part_in_machine)
+                            print(f'Time: {self.env.now} - [{self.name}] put {self.part_in_machine.get_name()} in {self.queue_to_put.name} (capacity = {self.queue_to_put.get_len()})')
+                            flag_allocated_part = True
+                            """
+
+                            #--- Put the part in the rigth conveyor
+                            conveyor_to_put.start_transp(self.part_in_machine)
+                            flag_allocated_part = True
+                            
+
+                        if self.final_machine == True and self.loop == "closed":
+                            #--- Terminate
+                            self.terminator.terminate_part(self.part_in_machine)
+                            print(f'Time: {self.env.now} - [Terminator] xxx {self.part_in_machine.name} terminated xxx')
+                            
+                            
+                            #--- Replace part
+                            self.last_part_id += 1   
+                            new_part_produced = Part(id= self.last_part_id, type= self.part_in_machine.get_type(), location= 0, creation_time= self.env.now)
+                            print(f'Time: {self.env.now} - [Terminator] {new_part_produced.name} replaced')
+                            
+                            #---- Trace Driven Simulation (TDS) ----
+                            # Assign the related Trace for the new part
+                            # Here I don't change the type of simulation, just assign a trace for a part
+                            # if that part exists in the given traces, changing the status I alsways do in
+                            # in the begining.
+                            if self.validator != None:
+                                #--- More parts being created than the existing parts in the TDS
+                                if new_part_produced.get_id() <= self.validator.get_len_TDS():
+                                    # if the new part belongs to the given traced parts
+                                    current_TDS = self.validator.get_part_TDS(new_part_produced)
+                                    new_part_produced.set_ptime_TDS(current_TDS)
+                                    
+                            #------------------------------------
+
+                            #--- Put the part to the next Queue
+                            #self.queue_to_put.put(new_part_produced) #before conveyors
+                            
+                            #--- Put the part in the rigth conveyor
+                            conveyor_to_put.start_transp(new_part_produced)
+                            flag_allocated_part = True
+
+
+                            #--- Check to finish the simulation according to a specific part id
+                            if self.part_in_machine.get_id() == self.targeted_part_id:
+                                #-- The targeted part was just finished, the simulation can stop now
+                                #-- This method is useful for RCT calculations for a specific part
+
+                                #--- Terminates the simulation
+                                self.exit.succeed()
+
+                        #--- Check max number of parts to be produced in the simulation
+                        if self.maxparts != None and self.terminator.get_len_terminated() == self.maxparts:
+                            #--- Terminates the simulations
+                            self.exit.succeed()
                         
-
-                    if self.final_machine == True and self.loop == "closed":
-                        #--- Terminate
-                        self.terminator.terminate_part(self.part_in_machine)
-                        print(f'Time: {self.env.now} - [Terminator] xxx {self.part_in_machine.name} terminated xxx')
-                        
-                        
-                        #--- Replace part
-                        self.last_part_id += 1   
-                        new_part_produced = Part(id= self.last_part_id, type= self.part_in_machine.get_type(), location= 0, creation_time= self.env.now)
-                        print(f'Time: {self.env.now} - [Terminator] {new_part_produced.name} replaced')
-                        
-                        #---- Trace Driven Simulation (TDS) ----
-                        # Assign the related Trace for the new part
-                        # Here I don't change the type of simulation, just assign a trace for a part
-                        # if that part exists in the given traces, changing the status I alsways do in
-                        # in the begining.
-                        if self.validator != None:
-                            #--- More parts being created than the existing parts in the TDS
-                            if new_part_produced.get_id() <= self.validator.get_len_TDS():
-                                # if the new part belongs to the given traced parts
-                                current_TDS = self.validator.get_part_TDS(new_part_produced)
-                                new_part_produced.set_ptime_TDS(current_TDS)
-                                
-                        #------------------------------------
-
-                        #--- Put the part to the next Queue
-                        self.queue_to_put.put(new_part_produced)
-                        flag_allocated_part = True
-
-                    #--- Check max number of parts to be produced in the simulation
-                    if self.maxparts != None and self.terminator.get_len_terminated() == self.maxparts:
-                        #--- Terminates the simulations
-                        self.exit.succeed()
-                        
-
-
-
 
                 # ============ Finished Action ============
 
@@ -523,6 +639,7 @@ class Machine():
                     queue= self.queue_to_put.get_name()) 
                     self.current_state = "Idle"
                     """
+                    
                     yield self.env.timeout(1)
                     self.current_state = "Allocating"      
             # ==========================================================
@@ -567,6 +684,12 @@ class Machine():
         return self.cluster
     def get_initial_part(self):
         return self.initial_part
+    def get_convey_ins(self):
+        return self.conveyors_in
+    def get_conveyors_out(self):
+        return self.conveyors_out
+    def get_branch(self):
+        return self.branch
 
     #--------- Defining SETs ---------
     def set_queue_in(self, value):
@@ -585,6 +708,15 @@ class Machine():
         self.validator = validator
     def set_cluster(self, cluster):
         self.cluster = cluster
+    def set_conveyors_out(self, conveyors_out):
+        self.conveyors_out = conveyors_out
+    def set_conveyors_in(self, convey):
+        self.conveyors_in = convey
+    def set_branch(self, branch):
+        self.branch = branch
+    def set_targeted_part_id(self, target_id):
+        self.targeted_part_id = target_id
+
     
     #--- Special set for queue
     def add_queue_in(self, value):
@@ -622,6 +754,12 @@ class Machine():
         #--- Machine Cluster
         print(f"Machine Cluster: {self.get_cluster()}")
 
+        #--- Machine Branching?
+        if self.branch != None:
+            print(f"Branching Machine: {self.branch.get_name()}")
+            for conveyor in self.branch.get_conveyors():
+                print(f"|-- {conveyor.get_name()}")
+
         #--- Quasi Trace Driven Simulation
         if self.get_ptime_qTDS() is not None:
             print("---Process Time for quasi Trace Driven Simulation---")
@@ -640,14 +778,14 @@ class Machine():
 
 
 class Queue():
-    def __init__(self, env, id, capacity, arc_links= None, transportation_time= None, freq= None):
+    def __init__(self, env, id, capacity, arc_links= None, transp_time= None, freq= None):
         self.env = env
         self.id = id
         self.name = "Queue " + str(self.id)
         self.store = simpy.Store(env, capacity=capacity)
         self.capacity = capacity
         self.queue_strength = None   # add initial condition
-        self.transportation_time = transportation_time
+        self.transp_time = transp_time
         self.freq = freq
         self.cluster = None
         self.arc_links = arc_links
@@ -676,6 +814,8 @@ class Queue():
         return self.id
     def get_cluster(self):
         return self.cluster
+    def get_transp_time(self):
+        return self.transp_time
     
     #--- Define Sets
     def set_id(self, id):
@@ -692,8 +832,9 @@ class Queue():
         print(f"Arc links: {self.get_arc_links()}")
         print(f"Capacity: {self.get_capacity()}")
         for part in self.get_all_items():
-            print(f"Parts stored: {part.get_name()}")
-            print(f"Part Processes for Trace Driven Simulation: {part.get_all_ptime_TDS()}")
+            print(f"|-- Parts stored: {part.get_name()}")
+            if part.get_all_ptime_TDS() != None:
+                print(f"Part Processes for Trace Driven Simulation: {part.get_all_ptime_TDS()}")
         print(f"Queue Lenght: {self.get_len()}")
 
 class Generator():
@@ -727,3 +868,116 @@ class Terminator():
         return self.store.items
     def get_len_terminated(self):
         return len(self.store.items)
+
+
+# ========================= Conveyor Class =========================
+class Conveyor():
+    def __init__(self, env, transp_time, queue_out):
+        self.name = "Conveyor towards " + queue_out.get_name()
+        self.id = queue_out.get_id()
+        self.transp_time = transp_time
+        self.queue_out = queue_out
+        self.env = env
+        self.convey_store = simpy.Store(env= self.env)
+        self.wait = 1
+        self.flag_part_transported = False
+    
+    def start_transp(self, part):
+        #--- Add a part in the conveyor
+        print(f"Time: {self.env.now} - [{self.name}] GOT {part.get_name()}")
+        part.set_convey_entering_time(self.env.now) 
+        self.convey_store.put(part)
+    
+    def finish_transp(self):
+        #--- Remove a part from the conveyor
+
+        return self.convey_store.get()
+    
+    def get_all_items(self):
+        return self.convey_store.items
+    
+    def run(self):
+        """
+        Note: It's better to not use the yield because during the transportation of one
+        part, another part can already start the process. The yield would make the transportation
+        unique for that specific part. That's why is better to track tha entry and exit time
+        of each part individually.
+        
+        The loop of the conveyor get a part in the transportation and check if the first part
+        already spend time enough. If yes it puts the part in the queue, if not it yield for while
+        to check again later. If there is no parts in the conveyor, it also yields for a bit 
+        before checking again.
+
+        1) Just get a part from the queue in if the part arrived in the queue
+        2) Create a new process that is able to receive different parts and have a run functions that
+        take the first part and yields it and after drop it in the corresponded queue
+        """
+
+        while True:
+            #--- Take all the parts in the conveyor
+            parts_in_conveyor = self.get_all_items()
+
+            #--- If there is any part in the conveyor
+            if len(parts_in_conveyor) > 0:
+                #--- Select the first part that arrived
+                first_part = parts_in_conveyor[0]
+
+                #--- Calculate the amount of time that the part spend in the conveyor
+                started_time = first_part.get_convey_entering_time()
+                current_time = self.env.now
+                transported_time = current_time - started_time
+
+                #--- Check if the part already spend enough time in transportation
+                if transported_time >= self.transp_time:
+                    #--- Transportation finished, PUT part to the Queue
+                    print(f"Time: {self.env.now} - [{self.name}] PUT {first_part.get_name()} in the {self.queue_out.get_name()}") 
+                    self.finish_transp()
+                    self.queue_out.put(first_part)
+                
+            
+            # --- Anyways, wait a bit before checking again
+            yield self.env.timeout(self.wait)
+
+    def get_id(self):
+        return self.id()
+    def get_convey_queue(self):
+        return self.queue_out
+    def get_name(self):
+        return self.name
+# =============================================================================
+
+class Branch():
+    def __init__(self, id, branch_conveyors, branch_machine, branch_queue_in):
+        self.id= id
+        self.name = f"Branch {self.id} | {branch_machine.get_name()}"
+        self.branch_conveyors = branch_conveyors
+        self.branch_machine = branch_machine
+        self.branch_queue_in = branch_queue_in
+
+    def branch_decision(self, part_to_put):
+        #--- Between the machine option of conveyors to put, is there one 
+        # that matches with one of options assigned for the part path?
+        
+        #--- Look through the conveyors of the machine
+        for machine_conveyor in self.branch_machine.get_conveyors_out():
+            #--- Look through the conveyor available for the part
+            for part_conveyors in part_to_put.get_branching_path():
+                if machine_conveyor.id == part_conveyors.id:
+                    #--- Found a conveyor within of the parts paths available in the conveyors of the machine
+                    conveyor_to_put = machine_conveyor
+                    break
+        
+        #--- Branch PUT part in the conveyor
+        return conveyor_to_put
+        
+    # ======= GETs =======
+    def get_id(self):
+        return self.id
+    def get_name(self):
+        return self.name
+    def get_conveyors(self):
+        return self.branch_conveyors
+    def get_branch_queue_in(self):
+        return self.branch_queue_in
+
+

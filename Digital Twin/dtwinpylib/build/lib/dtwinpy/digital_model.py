@@ -8,6 +8,8 @@ from .components import Machine
 from .components import Queue
 from .components import Generator
 from .components import Terminator
+from .components import Conveyor
+from .components import Branch
 
 #--- Importing Database components
 from .interfaceDB import Database
@@ -25,7 +27,7 @@ importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
 
 #--- Class Model
 class Model():
-    def __init__(self, name, model_path, database_path, initial= False, until= None, part_type= "A", loop_type= "closed", maxparts = None):
+    def __init__(self, name, model_path, database_path, initial= False, until= None, part_type= "A", loop_type= "closed", maxparts = None, targeted_part_id= None):
         #-- Main Model Properties
         self.name = name
         self.model_path = model_path
@@ -33,6 +35,7 @@ class Model():
         self.until = until
         self.exit = self.env.event()
         self.maxparts = maxparts
+        self.targeted_part_id = targeted_part_id
 
         #-- Database Properties
         self.database_path = database_path
@@ -55,8 +58,12 @@ class Model():
         # Link the Terminator
         self.terminator = Terminator(env= self.env, loop_type= "closed")
 
-
+    # ==================== SETTING FUNCTIONS ====================
     def queue_allocation(self):
+        """
+        Allocate each queue for the right machine base on the 
+        arcs configurations from the json model
+        """
         #Loop through each queue
         for queue in self.queues_vector:
             current_links = queue.get_arc_links()
@@ -69,9 +76,12 @@ class Model():
             self.machines_vector[arc_start].add_queue_out(queue) #add current queue
 
             #Arc endind point (going in of the next machine) -> Queue In
-            self.machines_vector[arc_end].add_queue_in(queue) #add current queue
-        
+            self.machines_vector[arc_end].add_queue_in(queue) #add current queue      
     def initial_allocation(self):
+        """
+        Allocate the Working in Progress (WIP) parts of the beginning 
+        of the simulation in each respective queue
+        """
         with open(self.model_path) as json_file:
             # Load the json data
             data = json.load(json_file)
@@ -85,14 +95,6 @@ class Model():
 
         generator_initial = Generator(env= self.env, loop_type="closed", part_vector= self.initial_parts, queue_vector= self.queues_vector)
         self.queues_vector = generator_initial.allocate_part()
-
-        #--- Assign the queue object to the part
-        for part in self.initial_parts:
-            for queue in self.queues_vector:
-                # If the numerical location of the part if the same as the id of the queue
-                if part.get_location == queue.get_id() - 1:
-                    part.set_part_queue(queue)
-                    break
 
     def merge_queues(self):
         """
@@ -122,6 +124,8 @@ class Model():
                 #--- Properties of the selected queues 
                 capacity = 0 # Queue capacity
                 merged_id = "merged_"
+                #--- ASSUMPTION: In a merging queue, the incoming conveyors have the same transportation time
+                transp_time = queues_to_merge[0].get_transp_time()
 
                 #--- Loop through the selected queues to merge to update properties
                 for queue in queues_to_merge:
@@ -129,8 +133,9 @@ class Model():
                     capacity += queue.get_capacity()
                     merged_id += str(queue.get_id())
 
+
                 # ----- Create Merged Queue -----
-                Merged_Queue = Queue(env= self.env, id= merged_id, capacity= capacity)
+                Merged_Queue = Queue(env= self.env, id= merged_id, capacity= capacity, transp_time= transp_time)
                 merged_queues_all.append(Merged_Queue)
                 #-- Set the new merged queue as list in the Queue In
                 machine.set_queue_in([Merged_Queue])
@@ -172,9 +177,15 @@ class Model():
         #--- Update Queues ID
         for i in range(len(self.queues_vector)):
             self.queues_vector[i].set_id(i+1)
-
     def cluster_discovery(self):
-        # Assumption: The first machines is always not parellized
+        """
+        Discovery the cluster of each machine and assign it for the
+        related machine. Is important for a machine to know in each 
+        cluster it belongs for Trace Driven Simulations that starts 
+        with parts in the middle of the layout, such as inside of 
+        working machines or not in the first queue.
+        """
+        # ASSUMPTION: The first machines is always not parellized
 
         for machine in self.machines_vector:
             #--- Machine's output queues
@@ -214,11 +225,98 @@ class Model():
                 #-- For each out Queue, set the "next" cluster
                 for queue in out_queues:
                     queue.set_cluster(next_cluster)
-
-
-
-    def model_translator(self):
+    def branch_discovery(self):
+        """
+        ## Description
+        This fucntions is able to discovery where are the branch points in the model,
+        create an object for each branch point and assigned it to matching machine.
+        To do so, the function uses self.machines and creates the vector with the branch
+        objects (self.branches). IMPORTANT: This Function should be implemented after
+        the machine object is completedly finished (including the assign of the conveyors).
         
+        #### TO-DO:
+        1) Loop through the machines
+            2) If a machine has multiple conveyors out (or queues out):
+                3) This is a branching machine
+                4) Create a Branch Object
+                5) Assign the object to the machine 
+        """
+        #--- Global Branch parameters
+        branch_id_counter = 1
+        self.branches = []
+
+        #--- Loop through the machines
+        for machine in self.machines_vector:
+            #--- If a machine has multiple conveyors out-> Branching machine
+            if len(machine.get_conveyors_out()) > 1:
+                #--- Get some properties from the branching machine
+                machine_conveyors_out = machine.get_conveyors_out()
+                machine_queues_in = machine.get_queue_in()
+
+                #--- CREATE Branch point
+                new_branch = Branch(id= branch_id_counter, branch_conveyors= machine_conveyors_out, branch_machine= machine, branch_queue_in=machine_queues_in)
+
+                #--- add branch in the machine
+                machine.set_branch(new_branch)
+
+                #--- add branch in the branch vector
+                self.branches.append(new_branch)
+
+                #--- Increase branch counter
+                branch_id_counter += 1
+    def create_conveyors(self):
+        """
+        Create conveyor based on the existing queues and assign them
+        to the related machine. This is important because the machine will 
+        first add the part in the conveyor and the conveyor (after the transportation time)
+        will add the part to the queue related to the conveyor.
+        """
+        #--- Create a global vector of conveyors
+        self.conveyors_vector = []
+        #--- For each machine, assign the right conveyors
+        for machine in self.machines_vector:
+            #--- Each queue out is a conveyor to be use by the machine
+            machine_conveyors = []
+            for queue in machine.get_queue_out():
+                #--- Get the transportation time stored in the queue
+                transp_time = queue.get_transp_time()
+
+                #--- Create the Conveyor
+                current_conveyor = Conveyor(env= self.env, transp_time= transp_time, queue_out= queue)
+
+                #--- Add the current conveyor to the conveyor list of the machine
+                machine_conveyors.append(current_conveyor)
+
+                #--- Add the conveyor in the global vector as well
+                self.conveyors_vector.append(current_conveyor)
+
+            #--- After creating the conveyors for each queue out of this machine
+            #--- Assign the conveyor vector for the machine
+            machine.set_conveyors_out(machine_conveyors)
+
+        #--- Assign the Conveyors In for a machine by matching conveyors queue and machine queue in
+        # For each machine ...
+        for machine in self.machines_vector:
+            # Look through all the existing conveyors ...
+            for conveyor in self.conveyors_vector:
+                # Find a conveyor that is delivering to the machine queue in
+                convey_queue = conveyor.get_convey_queue()
+                machine_queue_in = machine.get_queue_in()[0]
+                machine_conveyors_in = []
+
+                # Check if they have the same queue
+                if convey_queue.get_id() == machine_queue_in.get_id():
+                    machine_conveyors_in.append(conveyor)
+                
+            machine.set_conveyors_in(machine_conveyors_in)
+                
+    # =======================================================
+
+    # ================== TRANSLATOR ==================
+    def model_translator(self):
+        """
+        THE model trasnlator
+        """
         #--- Open the json file
         with open(self.model_path) as json_file:
             #========================= Setup =========================
@@ -242,7 +340,9 @@ class Model():
                     #-- Create the initial part
                     ## not sure if location matters here ##
                     ## part created in the past in relation with the current simulation ##
-                    initial_part = Part(id= self.last_part_id, type= "A", location= None, creation_time= - node["worked_time"])
+                    # ASSUMPTION: In terms of RCT, it's better to just consider the remaining time for production
+                    # So, consider creation time= 0...
+                    initial_part = Part(id= self.last_part_id, type= "A", location= None, creation_time= 0)
                 else:
                     initial_part = None
 
@@ -250,7 +350,7 @@ class Model():
                 self.machines_vector.append(Machine(env= self.env, id= node['activity'],freq= node['frequency'],capacity= node['capacity'], 
                 process_time= node['contemp'], database= self.Database, cluster= node['cluster'], last_part_id = self.last_part_id,
                 terminator= self.terminator, loop= self.loop_type, exit= self.exit, maxparts= self.maxparts,
-                worked_time= node['worked_time'], initial_part= initial_part))
+                worked_time= node['worked_time'], initial_part= initial_part, targeted_part_id= self.targeted_part_id))
             
             self.machines_vector[-1].set_final_machine(True)
             #====================================================================
@@ -263,7 +363,7 @@ class Model():
                 queue_id += 1
                 # Create a new Queue object for each arc and add it to the list
                 self.queues_vector.append(Queue(env= self.env, id= queue_id, arc_links= arc['arc'],
-                capacity= arc['capacity'],freq= arc['frequency'],transportation_time= arc['contemp']))
+                capacity= arc['capacity'],freq= arc['frequency'],transp_time= arc['contemp']))
             #====================================================================
 
 
@@ -289,8 +389,24 @@ class Model():
         self.cluster_discovery()
         #====================================================================
 
+        #========================= Conveyors Assigning =========================
+        #--- Create and Assing the conveyor for each Machine base on the Queues
+        self.create_conveyors()
+        #========================================================================
 
+        #========================= Branch Discovery =========================
+        #--- Discovery Branching machines, create Branch object and assigned it
+        self.branch_discovery()
+        #=====================================================================
+
+    # ================================================
+
+    # =================== RUNNING ===================
     def run(self):
+        """
+        Run the digital model simulation. Here is where the stop conditions and 
+        simpy processes are set.
+        """
         print("### ============ Simulation Started ============ ###")
         # ==== DataBase Management ====
         #-- Clean database
@@ -303,9 +419,13 @@ class Model():
         for machine in self.machines_vector:
             self.env.process(machine.run())
 
+        #--- Initialize each conveyor process
+        for conveyor in self.conveyors_vector:
+            self.env.process(conveyor.run())
+
         #--- Run the Simulation
         if self.loop_type == "closed":
-            if self.maxparts != None:
+            if self.maxparts != None or self.targeted_part_id != None:
                 self.env.run(until= self.exit)
             else:
                 self.env.run(until= self.until)
@@ -316,9 +436,14 @@ class Model():
         self.Database.read_all_events(self.event_table)
 
         print("### ============ Simulation Done ============ ###")
+    # ===============================================
 
-
+    # ================== ANALYSES ==================
     def analyze_results(self, options = ["all"]):
+        """
+        Get the parts finalized and stored in the Terminator and make some
+        analyses such as cycle time, throughput and also plot some graphs
+        """
         #--- Get the finished Parts and each Time
         parts_finished = self.terminator.get_all_items()
         #--- Number of finished parts in the simulation
@@ -424,13 +549,96 @@ class Model():
             
         print("##########################")
         """
+    def calculate_RCT(self, part_id_selected= None, batch= None):
+        """
+        DESCRIPTION:
+        Function to calculate the RCT of a part or a batch for a given scenario
+        (current status of the model.json). The function uses the results of the
+        simulation stored in the Terminator. If part_id is given the function 
+        calculate the RCT for the id of the part given. If batch is given, the 
+        function calculate the amount of time (RCT) needed to finished the first
+        number of parts given. The function return the RCT. 
+        TO-DO:
+        # 1) Indentify if it's to calculate for a part or for a batch
+        # 2) If part, search in the Terminator the part given by the id
+            # 2.1) return the cycle time needed for that part
+        # 3) If batch, count in the terminator until achive the requested number of
+        parts. Take as RCT the cycle time of the last part
 
+        NOTES:
+        # n1) We don't need to stop the simulation when the selected part is finish, because
+        since we're calculating the CT for a specifc time we just need to run the simulation for
+        the amount of parts of the ID selected plus some error. This is adjust outside of the RCT 
+        calculation
+
+        Backlog:
+        # b1) Before batch: Maybe the user will like to know the amount of time need
+        to finish a certain number of parts after another amount of parts were already
+        finished. Thus, the RCT of batch after previous batch is done. So let's say
+        I want to calculate the RCT to produce 7 parts, after being finished with 3 parts.
+            # b1.1) For that we would need to receive this new variable before_batch and
+            take from starts count in the terminator only after the before_batch.
+        
+        # b2) Run the simulation precisely until the resquested part(s) is finished, not more than
+        that. Thus, reducing the computational waste
+        """
+        #--- Get the finished Parts in the ordered that was finished
+        parts_finished = self.terminator.get_all_items()
+        
+        #--- Part ID calculation resquested
+        if part_id_selected != None and batch == None:
+            print(f"> Predicting RCT for Part {part_id_selected}...")
+            #--- Loop through the finalized parts
+            for part in parts_finished:
+                #--- Check if the current part is the selected part
+                if part.get_id() == part_id_selected:
+                    part_RCT = part.get_CT()
+                    print(f"> RCT for Part {part_id_selected}: {part_RCT}")
+                    return part_RCT
+                
+            print(f"[ERROR] Part {part_id_selected} not fund as finished in the simulation")
+
+        #--- Bacth calculation resquested
+        if part_id_selected == None and batch != None:
+            print(f"> Predicting RCT for Batch of {batch} parts...")
+            batch_parts = []
+            #--- Loop until get the amount needed of parts
+            for i in range(len(parts_finished)):
+                #--- Add parts in the batch 
+                batch_parts.append(parts_finished[i])
+
+                #--- Stop adding when achive the desire amount
+                if (i+1) == batch: # i starts in 0, batch starts in 1
+                    last_part = batch_parts[-1]
+                    last_part_RCT = last_part.get_CT()
+
+                    #--- Return the batch RCT and the batch itself
+                    print(f"> RCT for Batch of {batch} parts: {last_part_RCT}")
+                    print(f"> Parts in the batch:")
+                    for part in batch_parts:
+                        print(f"|-- {part.get_name()}")
+                    return (last_part_RCT)
+
+            print(f"[ERROR] Number of parts in batch higher than the number of parts simulated")
+    # ==============================================
+
+    # ================= GETS =======================
     def get_model_components(self):
         return (self.machines_vector, self.queues_vector)
     def get_model_database(self):
         return self.Database
     def get_model_path(self):
         return self.model_path
+    def get_branches(self):
+        return self.branches
+    def get_all_parts(self):
+        self.parts_vector = []
+        for queue in self.queues_vector:
+            parts_in_queue = queue.get_all_items()
+            for part in parts_in_queue:
+                self.parts_vector.append(part)
+        return self.parts_vector
+    # ==============================================
 
     def verbose(self):
         print(f"==========  Reading the Model: {self.name}  ==========")

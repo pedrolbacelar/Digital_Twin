@@ -6,19 +6,18 @@ from .synchronizer import Synchronizer
 from .services import Service_Handler
 
 #--- Reload Package
-
-import importlib
 import shutil
+"""import importlib
 import dtwinpylib
 #reload this specifc module to upadte the class
 importlib.reload(dtwinpylib.dtwinpy.digital_model)
 importlib.reload(dtwinpylib.dtwinpy.validator)
 importlib.reload(dtwinpylib.dtwinpy.synchronizer)
-importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
+importlib.reload(dtwinpylib.dtwinpy.interfaceDB)"""
 
 
 class Digital_Twin():
-    def __init__(self, name, initial= True, until= None, part_type= "A", loop_type= "closed", maxparts = None):
+    def __init__(self, name, initial= True, targeted_part_id= None, until= None, part_type= "A", loop_type= "closed", maxparts = None):
         #--- Model Parameters
         self.name = name
         self.model_path = "models/" + self.name + ".json"
@@ -28,6 +27,7 @@ class Digital_Twin():
         self.loop_type = "closed"
         self.digital_model = None
         self.maxparts = maxparts
+        self.targeted_part_id = targeted_part_id
 
         #--- Database
         self.database_path = "databases/digital_" + self.name + "_db.db"
@@ -41,8 +41,13 @@ class Digital_Twin():
         if maxparts == None:
             maxparts = self.maxparts
 
-        #--- Update the global maxparts
+        #--- If the target conditions doesn't exist, assign it
+        if targeted_part_id == None:
+            targeted_part_id = self.targeted_part_id
+
+        #--- Update the global maxparts and target part
         self.maxparts = maxparts
+        self.targeted_part_id = targeted_part_id
         
         #--- Create the digital model with all the properties
         self.digital_model = Model(name= self.name,model_path= self.model_path, 
@@ -131,7 +136,7 @@ class Digital_Twin():
             shutil.copy2(self.database_path, self.real_database_path)
 
         #--- Create the synchronizer
-        synchronizer = Synchronizer(digital_model= self.digital_model, real_database= self.real_database)
+        synchronizer = Synchronizer(digital_model= self.digital_model, real_database_path= self.real_database_path)
 
         #--- Run the synchronizer (positioning)
         synchronizer.run(repositioning= repositioning)

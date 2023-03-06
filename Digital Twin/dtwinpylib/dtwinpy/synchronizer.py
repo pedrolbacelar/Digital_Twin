@@ -1,15 +1,16 @@
 #--- Import DT Features
 from .validator import Validator
+from .interfaceDB import Database
 import json
 import sqlite3
 
 #--- Reload Package
 
-import importlib
+"""import importlib
 import dtwinpylib
 #reload this specifc module to upadte the class
 importlib.reload(dtwinpylib.dtwinpy.validator)
-
+"""
 
 
 class Zone():
@@ -134,15 +135,17 @@ class Zone():
 
 
 class Synchronizer():
-    def __init__(self, digital_model, real_database):
+    def __init__(self, digital_model, real_database_path):
         #--- Basic Information
         self.digital_model = digital_model
         self.zones_dict = {}
         self.Tnow = 0
 
         #--- Database
-        self.real_database = real_database
-        self.real_database_path = self.real_database.get_database_path()
+        #self.real_database = real_database
+        self.real_database_path = real_database_path
+        self.real_database = Database(database_path=real_database_path, event_table= "real_log")
+
         with sqlite3.connect(self.real_database_path) as db:
             tables = db.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
             if len(tables) == 1 and tables[0][0] == "digital_log":
@@ -223,7 +226,7 @@ class Synchronizer():
     
     def sync_TDS(self):
         print("======================= Running TDS for Sync =======================")
-        validator_sync = Validator(digital_model= self.digital_model, simtype= "TDS", real_database= self.real_database)
+        validator_sync = Validator(digital_model= self.digital_model, simtype= "TDS", real_database_path= self.real_database_path)
 
         #-------- Runnin TDS --------
         # (same implementation used in logic validation)
@@ -290,7 +293,7 @@ class Synchronizer():
 
                 #--- Calculate the Delta T between the last started time of the machine and
                 # the current time of the real world (Tnow)
-                Delta_T_started = self.Tnow - current_zone.get_last_started_time()
+                Delta_T_started = self.Tnow - current_zone.get_last_started_time() # TODO: GET also the last started Part!
 
                 #--- Positioning a part within the working machine
                 # ============= Update Model.json =============
@@ -300,8 +303,8 @@ class Synchronizer():
                     #--- For each machine (node)
                     for node in data['nodes']:
                         if node['activity'] == current_machine.get_id():
-                            node['worked_time'] = Delta_T_started
-
+                            node['worked_time'] = Delta_T_started # TODO: Put also the name of the Part being processed
+ 
                             #---- Write Back the Changes
                             # Move the file pointer to the beginning of the file
                             model_file.seek(0)
@@ -329,7 +332,7 @@ class Synchronizer():
                         
                         # Where should I positioned the part? 
                         #=====================================
-                        data['initial'][queue.get_id() - 1] = parts_to_allocate
+                        data['initial'][queue.get_id() - 1] = parts_to_allocate # TODO: PUT a list of Parts Name
                         #=====================================
 
                         # Move the file pointer to the beginning of the file
@@ -351,7 +354,7 @@ class Synchronizer():
                         data = json.load(model_file)
                         
                         #=====================================
-                        data['initial'][queue.get_id() - 1] = parts_in_queues
+                        data['initial'][queue.get_id() - 1] = parts_in_queues # TODO: PUT a list of Parts Name
                         #=====================================
 
                         # Move the file pointer to the beginning of the file
