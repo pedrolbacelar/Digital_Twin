@@ -11,6 +11,20 @@ class Database():
             if len(tables) == 1 and tables[0][0] == "digital_log":
                 self.rename_table("digital_log", "real_log")
 
+        #--- When create the object, already create the database and table if doesn't exist
+        with sqlite3.connect(self.database_path) as digital_model_DB:
+            digital_model_DB.execute(f"""
+            CREATE TABLE IF NOT EXISTS {self.event_table} (
+                event_id INTEGER PRIMARY KEY,
+                timestamp INTEGER,
+                machine_id TEXT,
+                activity_type TEXT,
+                part_id TEXT,
+                queue TEXT
+            )
+            """)
+
+            digital_model_DB.commit()
 
     
     def initialize(self, table):
@@ -40,12 +54,12 @@ class Database():
     def write_event(self, table, timestamp, machine_id, activity_type, part_id, queue):
         #--- Write the given evento into the the database
         
-        with sqlite3.connect(self.database_path) as digital_model_DB: 
-            digital_model_DB.execute(f"""
+        with sqlite3.connect(self.database_path) as DB: 
+            DB.execute(f"""
             INSERT INTO {table} (timestamp, machine_id, activity_type, part_id, queue)
             VALUES (?, ?, ?, ?, ?)""", (timestamp, machine_id, activity_type, part_id, queue))
 
-            digital_model_DB.commit()
+            DB.commit()
 
     def read_all_events(self, table):
         #--- Read all the events from the given table
@@ -91,3 +105,12 @@ class Database():
     def read_part_path(self, partid, table):
         with sqlite3.connect(self.database_path) as DB:
             return DB.execute(f"SELECT * FROM {table} WHERE part_id=?", partid).fetchall()
+
+    def findLine_2conditions(self, table, column1, column2, condition1, condition2):
+        with sqlite3.connect(self.database_path) as DB:
+            return DB.execute(f"SELECT event_id FROM {table} WHERE {column1}=? AND {column2}= ?", (condition1, condition2)).fetchall()
+        
+    def update_column(self, table, column, line_id, new_value):
+        with sqlite3.connect(self.database_path) as DB:
+            DB.execute(f"UPDATE {table} SET {column} = ? WHERE event_id = ?", (new_value, line_id))
+            DB.commit()

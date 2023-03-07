@@ -5,15 +5,16 @@ from .interfaceDB import Database
 from .synchronizer import Synchronizer
 from .services import Service_Handler
 
-#--- Reload Package
 import shutil
-"""import importlib
+
+#--- Reload Package
+import importlib
 import dtwinpylib
 #reload this specifc module to upadte the class
 importlib.reload(dtwinpylib.dtwinpy.digital_model)
 importlib.reload(dtwinpylib.dtwinpy.validator)
 importlib.reload(dtwinpylib.dtwinpy.synchronizer)
-importlib.reload(dtwinpylib.dtwinpy.interfaceDB)"""
+importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
 
 
 class Digital_Twin():
