@@ -185,7 +185,12 @@ Updated on: 01/02/2023
 - Throughput and system time are primary performance indicators.
 - Failures are not considered for the simulation. It could be considered for synchronisation of Machine states.
   </details>
-
+  
+ 
+ <details>
+  <summary>Branching and Path Simulation</summary>
+- Branching machines don't have common output queues, each branching machines has a different output queue.
+  So there is no case where branch 1 has as output conveyors [convey1, convey2] and other conveyor [convey1, convey3]
 
 
 
