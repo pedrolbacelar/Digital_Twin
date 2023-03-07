@@ -64,11 +64,11 @@ def on_message(client, userdata, msg):
     #--- part dispatch policy
     #--- payload expected a. {"part_id":"1","policy":"2"}
     #--- payload expected b. {"part_id":"1","policy":"3"}
-    if msg.topic == "tarce":
+    if msg.topic == "trace":
         message = json.loads(msg.payload.decode("utf-8"))
-        if message["machine_id"] == 1:
+        if message["machine_id"] == "1" and message["status"] == "Finished":
             part_count += 1
-            policy.append(message["policy"])
+            policy.append(message["queue_id"])
         
 
 

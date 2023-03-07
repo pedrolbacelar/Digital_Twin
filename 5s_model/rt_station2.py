@@ -29,8 +29,8 @@ queue_sensor=ColorSensor(INPUT_2)
 queue_sensor.mode='COL-COLOR'
 blocking_sensor_1=ColorSensor(INPUT_3)
 blocking_sensor_1.mode='COL-COLOR'
-blocking_sensor_2=ColorSensor(INPUT_4)
-blocking_sensor_2.mode='COL-COLOR'
+# blocking_sensor_2=ColorSensor(INPUT_4)
+# blocking_sensor_2.mode='COL-COLOR'
 
 colors=('unknown','black','blue','green','yellow','red','white','brown')
 
@@ -142,7 +142,7 @@ try:
                 
                 sleep(process_time)
 
-                if blocking_sensor_1.value() < 4 and blocking_sensor_2.value() < 4:
+                if blocking_sensor_1.value() < 4:
                     #--- dispatch the part from the station
                     station.run_forever(speed_sp = -station_speed)
 
