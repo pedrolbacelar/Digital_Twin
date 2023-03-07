@@ -342,7 +342,7 @@ class Model():
                     ## part created in the past in relation with the current simulation ##
                     # ASSUMPTION: In terms of RCT, it's better to just consider the remaining time for production
                     # So, consider creation time= 0...
-                    initial_part = Part(id= self.last_part_id, type= "A", location= None, creation_time= 0)
+                    initial_part = Part(id= self.last_part_id, type= "A", location= None, creation_time= 0) # TODO: Create the part id according to the tuple of worked time
                 else:
                     initial_part = None
 
