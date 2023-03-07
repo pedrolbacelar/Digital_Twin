@@ -15,7 +15,7 @@ import dtwinpylib
 importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
 
 class Broker_Manager():
-    def __init__(self, ip_address, real_database_path, port= 1883, keepalive= 60, topics = ['trace', 'part_id', 'RCT-server'], client = None):
+    def __init__(self, ip_address, real_database_path, port= 1883, keepalive= 60, topics = ['trace', 'part_id', 'RCT_server'], client = None):
         #--- Connect to the Broker
         self.ip_address= ip_address
         self.port = port
@@ -144,15 +144,15 @@ class Broker_Manager():
         print(f"{current_time_str} | Topic: {message_topic} | Payload Received: {message_translated}")
 
         # -------------- Topic: 'traces' --------------
-        if message_topic == 'traces':
+        if message_topic == 'trace':
             self.traces_handler(message_translated, current_timestamp)
 
         # -------------- Topic: 'part_id' --------------
         if message_topic == 'part_id':
             self.part_id_handler(message_translated)
 
-        # -------------- Topic: 'RCT-server' -------------
-        if message_topic == 'RCT-server':
+        # -------------- Topic: 'RCT_server' -------------
+        if message_topic == 'RCT_server':
             self.rct_handler(message_translated)
 
     def connect(self):
@@ -204,7 +204,7 @@ class Broker_Manager():
         self.client.loop_stop()
         self.client.disconnect()
 
-    def publishing(self, machine_id, part_id, queue_id, topic= "RCT-server"):
+    def publishing(self, machine_id, part_id, queue_id, topic= "RCT_server"):
         """
         This is a simple function to publish a topic into the Broker
         """

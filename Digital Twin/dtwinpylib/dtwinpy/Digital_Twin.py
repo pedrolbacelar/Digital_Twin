@@ -4,7 +4,9 @@ from .validator import Validator
 from .interfaceDB import Database
 from .synchronizer import Synchronizer
 from .services import Service_Handler
+from .broker_manager import Broker_Manager
 
+#--- Common Libraries
 import shutil
 
 #--- Reload Package
@@ -34,8 +36,24 @@ class Digital_Twin():
         self.database_path = "databases/digital_" + self.name + "_db.db"
         self.real_database_path = "databases/real_" + self.name + "_db.db"
         #self.real_database = Database(self.real_database_path, "real_log")        
-        
 
+    #--- Initiate Broker 
+    def initiate_broker(self, ip_address, port= 1883, keepalive= 60, topics_sub = ['trace', 'part_id', 'RCT_server'], topic_pub= 'RCT_server', client = None):
+        #--- Take the global features
+        self.ip_address = ip_address
+        self.topic_pub = topic_pub
+
+        #--- Create the Broker Manager
+        self.broker_manager = Broker_Manager(
+            ip_address= self.ip_address,
+            real_database_path= self.real_database_path,
+            port= port,
+            keepalive= keepalive,
+            topics= topics_sub
+        )
+
+        return self.broker_manager
+        
     #--- Create the Digital Model
     def generate_digital_model(self, maxparts= None, verbose= True, targeted_part_id = None):
         #--- if the functions don't receive nothing, use the default of the Digital Twin
@@ -75,8 +93,7 @@ class Digital_Twin():
         #--- Plot Results
         if plot == True:
             self.digital_model.analyze_results()
-
-    
+ 
     #--- Run the Validation
     def run_validation(self, copied_realDB= False):
         

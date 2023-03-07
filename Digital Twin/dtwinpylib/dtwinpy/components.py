@@ -91,7 +91,6 @@ class Part():
         self.part_queue = queue
     #------------------------------
 
-
 class Machine():
     def __init__(self, env, id, process_time, capacity, terminator, database, worked_time,
         last_part_id=None, queue_in= None, queue_out= None, conveyors_out = None, blocking_policy= "BBS", 
@@ -775,8 +774,6 @@ class Machine():
         print("----------------")
         """
         
-
-
 class Queue():
     def __init__(self, env, id, capacity, arc_links= None, transp_time= None, freq= None):
         self.env = env
@@ -979,5 +976,6 @@ class Branch():
         return self.branch_conveyors
     def get_branch_queue_in(self):
         return self.branch_queue_in
-
+    def get_branch_machine(self):
+        return self.branch_machine
 

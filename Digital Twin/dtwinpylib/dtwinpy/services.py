@@ -1,4 +1,10 @@
+#--- Import DT Features
+from .broker_manager import Broker_Manager
+
+#--- Common Libraries
 from matplotlib import pyplot as plt
+import re
+
 
 class Service_Handler():
     """
@@ -31,14 +37,16 @@ class Service_Handler():
     the most optimized path.
 
     """
-    def __init__(self, name, generate_digital_model):
+    def __init__(self, name, generate_digital_model, broker_manager):
         self.name = name
         self.generate_digital_model = generate_digital_model
         self.digital_model = generate_digital_model(verbose= False)
+        self.broker_manager = broker_manager
 
         #--- Get the components from the digital model
         self.branches = self.digital_model.get_branches()
         (self.machines_vector, self.queues_vector) = self.digital_model.get_model_components()
+        self.part_vector = self.digital_model.get_all_parts()
     
     def get_branch_choices(self):
         """
@@ -316,6 +324,12 @@ class Service_Handler():
         If the gain of the best path is not higher than the rct_threshold, than doesn't
         make sense to change the policy of the system (because both path are quite the same).
 
+        feedback format:
+        {
+            'Part 1': (feedback_flag, [conveyor 1, conveyor 3, ...], gain)
+            'Part 2': (feedback_flag, [conveyor 2, conveyor 4, ...], gain)
+        }
+
         TO-DO:
         1) Do the following calculation for each Part making a decision
             2) find the max RCT and store it
@@ -421,7 +435,77 @@ class Service_Handler():
         #--- Return the feedback flag and the chosen path index (dictionary)
         return feeback_dict[key]
 
+    def publish_feedback(self, feedback_dict):
+        """
+        This function is able to take the feedback dictionary with the instructions of the most optimized
+        path for the parts taking decision and send it to the right machine in the physical system.
 
+        feedback format:
+        {
+            'Part 1': (feedback_flag, [conveyor 1, conveyor 3, ...], gain)
+            'Part 2': (feedback_flag, [conveyor 2, conveyor 4, ...], gain)
+        }
+
+        TO-DO:
+        1) Change the feedback format. For each part:
+            1.0) Check if the flag to implement is True
+            1.1) For each conveyor
+                1.1.1) Find the unique branch machine correlated to it and take not of the id
+                1.1.2) Now the format should be like:
+                {'Part 1': [(convey 2, machine 1), (convey 5, machine 3), ...]}
+        2) For each part, use the publishing function to pass the machine_id, part_id, and queue_id (convey id)
+        """
+        #---- Changing the feedback format
+        #--- Loop through each part in the feedback dictionary
+        for part_name in feedback_dict:
+            #--- Get the part id from the string
+            part_id = re.findall(r'\d+', part_name)[0]
+
+            #--- Extract information from the dictionary
+            feedback_flag = feedback_dict[part_name][0]
+            path_to_implement = feedback_dict[part_name][1]
+            gain = feedback_dict[part_name][2]
+
+            #--- Check if the flag says to change the path or keep as usual
+            if feedback_flag == True:
+
+                #--- Find the location of the current part
+                for part in self.part_vector:
+                    #-- Found the part
+                    if part.get_id() == part_id:
+                        #-- Get location
+                        part_location = part.get_location()
+                
+                #--- Find the branch based on the Queue ID
+                for branch in self.branches:
+                    branch_queue_ins = branch.get_branch_queue_in()
+                    branch_machine = branch.get_branch_machine()
+
+                    for branch_queue_in in branch_queue_ins:
+                        #--- Found a branch that has our part
+                        if branch_queue_in.get_id() - 1 ==  part_location:
+                            #--- Found a branch with the unique convey, so take the machine id of that branch
+                            machine_selected = branch_machine
+
+                #---- Prepare the payload
+                #--- Since the feedback is only for the rigth next branching machine,
+                # we just care about the  conveyor in which the path selected
+                machine_id = machine_selected.get_id()
+                queue_id = path_to_implement[part_location].id
+                # part_id already there
+
+                #--- Send the MQTT publish payload
+                self.broker_manager.publishing(
+                    machine_id= machine_id, 
+                    part_id= part_id, 
+                    queue_id= queue_id, 
+                    topic= "RCT_server"
+                )
+
+            else:
+                pass
+
+            
     def run_RCT_service(self, queue_position= 1, verbose= False):
         """
         ## Description
@@ -470,4 +554,5 @@ class Service_Handler():
         #--- Check if there are a big difference between choices
         feedback_dict = self.RCT_check(rct_dict= rct_dict, rct_threshold= 0.1,possible_pathes = possible_pathes, verbose=verbose)
 
-        #--- FUTURE FEEDBACK: Send the chosen path to the rigth machine
+        #--- Send the chosen path to the rigth machine
+        self.publish_feedback(feedback_dict= feedback_dict)
