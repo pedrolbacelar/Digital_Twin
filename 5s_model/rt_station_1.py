@@ -58,6 +58,7 @@ start_status = 0
 stop_status = 0
 advice_status = 0
 current_station = "3"   # we start with 2. to change to 2, we initaite it as 3
+current_part_id = "000"
 print("Station 1 program Activated")
 
 #--- main functions
@@ -98,7 +99,7 @@ def on_message(client, userdata, msg):
 
     if msg.topic == "part_id":      # listening to current part id for dispath policy
         message = json.loads(msg.payload.decode("utf-8"))
-        if message["machine_id"] == 1:
+        if message["machine_id"] == "1":
             current_part_id = message["part_id"]
 
         
@@ -116,26 +117,25 @@ try:
             station.run_forever(speed_sp = -station_speed)
             if start_status > 0:
                 pusher.run_forever(speed_sp=-pusher_speed)
-                sleep(1)
+                sleep(0.8)
                 pusher.stop(stop_action='coast')
                 start_status = 0
                 print("Station 1 is started")
 
             if queue_sensor.value() > 1 and station_status == "idle":
                 pusher.run_forever(speed_sp=pusher_speed)
-                payload = {"machine_id" : "1", "activity_type":"start","queue_id":"1"}
+                payload = {"machine_id" : "1", "status":"started","part_id":"0","queue_id":"1"}
                 client.publish(topic = "trace", payload= json.dumps(payload))
-                sleep(1)
+                sleep(0.8)
                 pusher.stop(stop_action='coast')
                 sleep(1)
                 pusher.run_forever(speed_sp = -pusher_speed)
-                sleep(1)
+                sleep(0.8)
                 pusher.stop(stop_action='coast')
                 station_status = "busy"
                 
             if station_sensor.value() > 4:
                 station.stop(stop_action = 'hold')
-                advice_list.append("default")
                 
                 sleep(process_time)
 
@@ -155,19 +155,20 @@ try:
                     sleep(3)    #--- delay for the part to move to grey conveyor.
 
                     #--- publish topics
-                    payload ={"machine_id" : "1", "activity_type":"finish", "queue_id":current_station}
+                    payload ={"machine_id" : "1", "status":"finished","part_id":current_part_id, "queue_id":current_station}
                     client.publish(topic = "trace", payload= json.dumps(payload))
-                    print("current part proceeding to station ", current_station)
+                    print(current_part_id," proceeding to station ", current_station)
                     
                     # delete the part policy from the list so that the policy is not repeated during a default condition.
-                    del advice_list[current_part_id]
+                    if current_part_id in advice_list:
+                        del advice_list[current_part_id]
                     station_status = "idle" # set status to idle for allowing the next part
 
         elif system_status == "stop" and stop_status > 0:
             conveyor.stop(stop_action = 'coast')
             station.stop(stop_action = 'coast')
             pusher.run_forever(speed_sp=pusher_speed)
-            sleep(1)
+            sleep(0.8)
             pusher.stop(stop_action='coast')
             stop_status = 0
             print("Station 1 is stopped")
