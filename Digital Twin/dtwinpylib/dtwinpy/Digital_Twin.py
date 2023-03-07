@@ -173,7 +173,9 @@ class Digital_Twin():
         self.digital_model.calculate_RCT(part_id_selected= part_id, batch= batch)
         """
         #--- Create RCT Handler
-        RCT_Service = Service_Handler(name= "RCT", generate_digital_model= self.generate_digital_model)
+        
+        RCT_Service = Service_Handler(name= "RCT", generate_digital_model= self.generate_digital_model, broker_manager= self.broker_manager)
         RCT_Service.run_RCT_service(verbose=verbose)
+        
 
         

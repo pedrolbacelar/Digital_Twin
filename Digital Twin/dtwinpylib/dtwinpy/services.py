@@ -4,6 +4,7 @@ from .broker_manager import Broker_Manager
 #--- Common Libraries
 from matplotlib import pyplot as plt
 import re
+from time import sleep
 
 
 class Service_Handler():
@@ -433,17 +434,16 @@ class Service_Handler():
                     print(f"----- No Path found with gain higher than {rct_threshold * 100}% -----")
             
         #--- Return the feedback flag and the chosen path index (dictionary)
-        return feeback_dict[key]
+        return feeback_dict
 
-    def publish_feedback(self, feedback_dict):
+    def publish_feedback(self, feedback_dict, possible_pathes):
         """
         This function is able to take the feedback dictionary with the instructions of the most optimized
         path for the parts taking decision and send it to the right machine in the physical system.
 
         feedback format:
         {
-            'Part 1': (feedback_flag, [conveyor 1, conveyor 3, ...], gain)
-            'Part 2': (feedback_flag, [conveyor 2, conveyor 4, ...], gain)
+            'Part 1': (feedback_flag, chosen_path (int), gain)
         }
 
         TO-DO:
@@ -458,52 +458,60 @@ class Service_Handler():
         #---- Changing the feedback format
         #--- Loop through each part in the feedback dictionary
         for part_name in feedback_dict:
+            print(f"Trying to publish: {part_name}")
             #--- Get the part id from the string
-            part_id = re.findall(r'\d+', part_name)[0]
+            part_id = int(re.findall(r'\d+', part_name)[0])
 
             #--- Extract information from the dictionary
             feedback_flag = feedback_dict[part_name][0]
             path_to_implement = feedback_dict[part_name][1]
             gain = feedback_dict[part_name][2]
 
+            #--- Find the path
+            selected_path = possible_pathes[path_to_implement - 1]
+
             #--- Check if the flag says to change the path or keep as usual
             if feedback_flag == True:
 
                 #--- Find the location of the current part
+                part_location = None
                 for part in self.part_vector:
                     #-- Found the part
                     if part.get_id() == part_id:
                         #-- Get location
                         part_location = part.get_location()
-                
-                #--- Find the branch based on the Queue ID
-                for branch in self.branches:
-                    branch_queue_ins = branch.get_branch_queue_in()
-                    branch_machine = branch.get_branch_machine()
+                if part_location != None:
+                    #--- Find the branch based on the Queue ID
+                    for branch in self.branches:
+                        branch_queue_ins = branch.get_branch_queue_in()
+                        branch_machine = branch.get_branch_machine()
 
-                    for branch_queue_in in branch_queue_ins:
-                        #--- Found a branch that has our part
-                        if branch_queue_in.get_id() - 1 ==  part_location:
-                            #--- Found a branch with the unique convey, so take the machine id of that branch
-                            machine_selected = branch_machine
+                        for branch_queue_in in branch_queue_ins:
+                            #--- Found a branch that has our part
+                            if branch_queue_in.get_id() - 1 ==  part_location:
+                                #--- Found a branch with the unique convey, so take the machine id of that branch
+                                machine_selected = branch_machine
 
-                #---- Prepare the payload
-                #--- Since the feedback is only for the rigth next branching machine,
-                # we just care about the  conveyor in which the path selected
-                machine_id = machine_selected.get_id()
-                queue_id = path_to_implement[part_location].id
-                # part_id already there
+                    #---- Prepare the payload
+                    #--- Since the feedback is only for the rigth next branching machine,
+                    # we just care about the  conveyor in which the path selected
+                    machine_id = machine_selected.get_id()
+                    queue_id = selected_path[part_location].id
+                    # part_id already there
 
-                #--- Send the MQTT publish payload
-                self.broker_manager.publishing(
-                    machine_id= machine_id, 
-                    part_id= part_id, 
-                    queue_id= queue_id, 
-                    topic= "RCT_server"
-                )
+                    #--- Send the MQTT publish payload
+                    self.broker_manager.publishing(
+                        machine_id= machine_id, 
+                        part_id= part_id, 
+                        queue_id= queue_id, 
+                        topic= "RCT_server"
+                    )
 
-            else:
-                pass
+                    #--- Wait a little before sending the next MQTT message to no lose it
+                    print("sleeping...")
+                    sleep(1)
+                    print("waking up!")
+
 
             
     def run_RCT_service(self, queue_position= 1, verbose= False):
@@ -555,4 +563,4 @@ class Service_Handler():
         feedback_dict = self.RCT_check(rct_dict= rct_dict, rct_threshold= 0.1,possible_pathes = possible_pathes, verbose=verbose)
 
         #--- Send the chosen path to the rigth machine
-        self.publish_feedback(feedback_dict= feedback_dict)
+        self.publish_feedback(feedback_dict= feedback_dict, possible_pathes= possible_pathes)
