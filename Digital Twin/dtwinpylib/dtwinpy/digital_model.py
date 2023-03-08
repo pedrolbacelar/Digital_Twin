@@ -165,6 +165,15 @@ class Model():
                     #--- Add the part to the global vector of parts
                     self.all_part_in_model.append(initial_part)
 
+                    #--- Get the worked time value
+                    if type(node['worked_time']) == list:
+                        worked_time= node['worked_time'][0]
+                    else:
+                        worked_time = node['worked_time']
+
+                    #--- Assign the Worked Time into the machine
+                    machine.set_worked_time(worked_time)
+
     # ----- Find the part with highest id -----
     def find_last_part_id(self):
         """
@@ -183,7 +192,7 @@ class Model():
                 highest_id = part_id
 
         #--- Assign the last part id with the highest value
-        self.last_part_id = highest_id
+        self.last_part_id = int(''.join(filter(str.isdigit, highest_id)))
 
         #--- Assign the last part id to all the machines
         for machine in self.machines_vector:
@@ -460,7 +469,7 @@ class Model():
                 self.machines_vector.append(Machine(env= self.env, id= node['activity'],freq= node['frequency'],capacity= node['capacity'], 
                 process_time= node['contemp'], database= self.Database, cluster= node['cluster'],
                 terminator= self.terminator, loop= self.loop_type, exit= self.exit, maxparts= self.maxparts,
-                worked_time= node['worked_time'], targeted_part_id= self.targeted_part_id))
+                targeted_part_id= self.targeted_part_id))
             
             self.machines_vector[-1].set_final_machine(True)
             #====================================================================

@@ -92,7 +92,7 @@ class Part():
     #------------------------------
 
 class Machine():
-    def __init__(self, env, id, process_time, capacity, terminator, database, worked_time,
+    def __init__(self, env, id, process_time, capacity, terminator, database, worked_time= 0,
         last_part_id=None, queue_in= None, queue_out= None, conveyors_out = None, blocking_policy= "BBS", 
         freq= None, cluster= None, final_machine = False, loop = "closed", exit = None, simtype = None, 
         ptime_qTDS = None, maxparts= None, initial_part= None, targeted_part_id= None):
@@ -719,7 +719,13 @@ class Machine():
         self.last_part_id = id
     def set_initial_part(self, part):
         self.initial_part = part
-    
+    def set_worked_time(self, value):
+        self.worked_time = value
+        
+        if self.worked_time != 0:
+            #-- Part ready to be processed
+            self.current_state = "Processing"
+
     #--- Special set for queue
     def add_queue_in(self, value):
         if self.queue_in is None:
