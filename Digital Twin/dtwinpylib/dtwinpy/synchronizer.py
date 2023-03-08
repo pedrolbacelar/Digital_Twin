@@ -29,6 +29,10 @@ class Zone():
         self.first_zone_event = True
         self.event_type = "Started"
 
+        #--- Storing Parts ID
+        self.parts_ids_in_queue = []
+        self.parts_ids_in_machine = []
+
         #--- Initial Conditions
         # Multiple Queues
         if len(self.queue_list) > 1:
@@ -43,19 +47,47 @@ class Zone():
             self.Zone_initial = queue.get_len()
     
     #--- A part entered the Zone
-    def addIn(self):
+    def addIn(self, part_id):
         self.inZone += 1
+        
+        #--- Everytime a part is ADD to the zone we add it to the queue
+        self.parts_ids_in_queue.append(part_id)
+
     #--- A part leaves the Zone
-    def addOut(self):
+    def addOut(self, part_id):
         self.outZone += 1
+
+        #--- Everytime a part is REMOVE to the zone we add it to the queue
+        """if self.get_first_zone_event() == False and len(self.parts_ids_in_queue)>0:
+            #--- I just remove if is not the first event (Finished). If something never
+            # entered the zone and it's leaveing, I don't care about it.
+            self.parts_ids_in_queue.remove(part_id)
+        """
     def calculate_parts(self):
         #--- Calculate the number of parts in the machine considering the initial conditions and the delta changes
         self.NumParts = (self.Zone_initial + self.inZone - self.outZone) 
         return  self.NumParts
-    def Mstarted(self):
+    def Mstarted(self, part_id):
         self.machine_working += 1
-    def Mfinished(self):
+
+        #--- ADD the part into the machine vector everytime the machine starts processing
+        self.parts_ids_in_machine.append(part_id)
+
+        #--- REMOVE from the previous Queue (following the order of the simulation)
+        #--- Everytime a part is REMOVE to the zone we add it to the queue
+        if self.get_first_zone_event() == False and len(self.parts_ids_in_queue)>0:
+            #--- I just remove if is not the first event (Finished). If something never
+            # entered the zone and it's leaveing, I don't care about it.
+            self.parts_ids_in_queue.remove(part_id)
+        
+    def Mfinished(self, part_id):
         self.machine_working -= 1
+
+        #--- REMOVE the part from the machine vector everytime the machine finished the processing
+        if self.get_first_zone_event() == False and len(self.parts_ids_in_machine)>0:
+            #--- I just remove if is not the first event (Finished). If something never
+            # entered the zone and it's leaveing, I don't care about it.
+            self.parts_ids_in_machine.remove(part_id)
     
 
     def self_validation(self, Verbose = True):
@@ -120,6 +152,10 @@ class Zone():
         return self.Zone_initial
     def get_first_zone_event(self):
         return self.first_zone_event
+    def get_part_id_in_queue(self):
+        return self.parts_ids_in_queue
+    def get_part_id_in_machine(self):
+        return self.parts_ids_in_machine
 
     #--- SETs
     def set_zoneInd(self, indicador):
@@ -132,7 +168,6 @@ class Zone():
         self.event_type = type
     def set_Zone_initial(self, ini):
         self.Zone_initial = ini
-
 
 class Synchronizer():
     def __init__(self, digital_model, real_database_path):
@@ -170,16 +205,30 @@ class Synchronizer():
             self.zones_dict[machine_name] = new_zone
                 
     def positioning_discovery(self):
+
         #--- Find the Positioning
         for event in self.full_database:
             
             #--- Extract the important informations
-            (time, machine_name, status, queue_name) = (event[0], event[1], event[2], event[4]) 
+            (time, machine_name, status, part_id, queue_name) = (event[0], event[1], event[2], event[3], event[4]) 
             
+            #--- Tracking the last part id
+            #>>>>>>>>>>>>>>>>>> ASSUMPTION: The highest ID of the part is within the traces being analyzed <<<<<<<<<<<<<<<<<<<
+            highest_id = part_id
+            if highest_id < part_id:
+                #--- Update the highest id
+                highest_id = part_id
+
             # We just care about the events with status "Finished",
             # because this in the only moment when we subtract some part from the current
             # zone and add it to the next zone
             current_zone = self.zones_dict[machine_name]
+
+            #--- Figure out what machine object it's
+            for machine in self.machines_vector:
+                if machine.get_name() == machine_name:
+                    #-- Found it!
+                    machine_obj = machine
 
             if status == "Finished":
                 #--- Updated the event type
@@ -191,8 +240,8 @@ class Synchronizer():
                     # already it had in the queue plus one of the machine
 
                 # For the current zone a part was finished, so we increment the Out
-                current_zone.addOut()
-                current_zone.Mfinished()
+                current_zone.addOut(part_id)
+                current_zone.Mfinished(part_id)
 
                 #--- Discovery in which zone the part was putted based on the queues and machines
                 for key in self.zones_dict:
@@ -205,20 +254,41 @@ class Synchronizer():
                         #--- Found a zone if the selected next queue
                         if queue.get_name() == queue_name:
                             next_zone = zone
-                        
-                #--- For the next zone, increment the In since we're adding a part to that zone
-                next_zone.addIn()
+                
+                #--- Before Assigned the part for the next zone, check if the machine is final machine ---
+                if machine_obj.get_final_machine() == True:
+                    #--- Increment the ID of the new part going back to the system
+                    part_id_int = int(''.join(filter(str.isdigit, part_id)))
+                    new_part_id = f"Part {part_id_int + 1}"
+                    
+                    #--- Add to the next zone
+                    next_zone.addIn(new_part_id)
+
+                    #-- Update the highest_id
+                    highest_id = new_part_id
+
+                #--- Machines that are not the final machine
+                else:
+                    #--- For the next zone, increment the In since we're adding a part to that zone
+                    next_zone.addIn(part_id)
 
             if status == "Started":
-                current_zone.Mstarted()
+                #--- Set first event as false, because if it's started, it means that it took some part
+                # from a Queue and we are not in the case where the first trace of the machine is finish becuase
+                # it had already a part inside
+                current_zone.set_first_zone_event(False)
+
+                #--- Update starter counter and flags
+                current_zone.Mstarted(part_id)
                 current_zone.set_last_started_time(time)
 
                 #--- Updated the event type
                 current_zone.set_event_type("Started")
 
+            #--- OLD
             #--- After finishing an event (Started or Finished)
             # update that this zone it's not in the first event anymore
-            current_zone.set_first_zone_event(False)
+            #current_zone.set_first_zone_event(False)
 
 
         #--- Assign Tnow according the last event of the real log
@@ -283,6 +353,15 @@ class Synchronizer():
             current_Queues_In = current_zone.get_queue_list()
             current_machine = current_zone.get_machine()
 
+            #--- Get the ID of the parts
+            #-- Parts within the queue
+            parts_id_in_queues = current_zone.get_part_id_in_queue()
+
+            #-- Parts within the machine
+            if len(current_zone.get_part_id_in_machine()) > 0:
+                parts_id_in_machine = current_zone.get_part_id_in_machine()[0]
+            else:
+                parts_id_in_machine = 0
 
             #--- Verify if the Zone is working or not
             if current_zone.get_machine_working() == True:
@@ -303,7 +382,7 @@ class Synchronizer():
                     #--- For each machine (node)
                     for node in data['nodes']:
                         if node['activity'] == current_machine.get_id():
-                            node['worked_time'] = Delta_T_started # TODO: Put also the name of the Part being processed
+                            node['worked_time'] = (Delta_T_started, parts_id_in_machine) 
  
                             #---- Write Back the Changes
                             # Move the file pointer to the beginning of the file
@@ -332,7 +411,11 @@ class Synchronizer():
                         
                         # Where should I positioned the part? 
                         #=====================================
-                        data['initial'][queue.get_id() - 1] = parts_to_allocate # TODO: PUT a list of Parts Name
+                        #-- OLD without the ID, just quantity
+                        #data['initial'][queue.get_id() - 1] = parts_to_allocate
+
+                        #-- NEW with part id
+                        data['initial'][queue.get_id() - 1] = parts_id_in_queues
                         #=====================================
 
                         # Move the file pointer to the beginning of the file
@@ -354,7 +437,10 @@ class Synchronizer():
                         data = json.load(model_file)
                         
                         #=====================================
-                        data['initial'][queue.get_id() - 1] = parts_in_queues # TODO: PUT a list of Parts Name
+                        #-- OLD without the ID, just quantity
+                        #data['initial'][queue.get_id() - 1] = parts_to_allocate
+
+                        data['initial'][queue.get_id() - 1] = parts_id_in_queues
                         #=====================================
 
                         # Move the file pointer to the beginning of the file
