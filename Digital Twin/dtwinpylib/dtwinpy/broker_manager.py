@@ -73,8 +73,12 @@ class Broker_Manager():
         current_time_str = current_time.strftime("%d %B %Y %H:%M:%S")
 
         #--- Read the message
+        """"
         machine_id = f"Machine {(message_translated['machine_id'])}"
         part_id = f"Part {message_translated['part_id']}"
+        """
+        machine_id = 'Machine 1'
+        part_id= message_translated
 
         #--- Search in the database for line id of the given machine with 0 in the part id
         line_id_ltuple = self.real_database.findLine_2conditions(
@@ -126,7 +130,7 @@ class Broker_Manager():
 
     def on_message(self,client, userdata, message):
         #--- Decode the message received from the MQTT
-        message_decoded = message.payload.decode()
+        message_decoded = str(message.payload.decode())
 
         #--- Message Topic
         message_topic = message.topic
@@ -136,20 +140,24 @@ class Broker_Manager():
         current_time = datetime.datetime.now()
         current_time_str = current_time.strftime("%d %B %Y %H:%M:%S")
 
-
-        #--- Convert the message received in to a dictionary
-        message_translated = json.loads(message_decoded)
-        
-        #--- Print the payload received
-        print(f"{current_time_str} | Topic: {message_topic} | Payload Received: {message_translated}")
-
         # -------------- Topic: 'traces' --------------
         if message_topic == 'trace':
+
+            #--- Convert the message received in to a dictionary
+            message_translated = json.loads(message_decoded)
+            
+            #--- Print the payload received
+            print(f"{current_time_str} | Topic: {message_topic} | Payload Received: {message_translated}")
+
+
             self.traces_handler(message_translated, current_timestamp)
 
         # -------------- Topic: 'part_id' --------------
         if message_topic == 'part_id':
-            self.part_id_handler(message_translated)
+            #--- Print the payload received
+            print(f"{current_time_str} | Topic: {message_topic} | Payload Received: {message_decoded}")
+
+            self.part_id_handler(message_decoded)
 
         # -------------- Topic: 'RCT_server' -------------
         if message_topic == 'RCT_server':

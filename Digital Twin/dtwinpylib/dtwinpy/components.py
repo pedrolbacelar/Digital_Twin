@@ -715,7 +715,10 @@ class Machine():
         self.branch = branch
     def set_targeted_part_id(self, target_id):
         self.targeted_part_id = target_id
-
+    def set_last_part_id(self, id):
+        self.last_part_id = id
+    def set_initial_part(self, part):
+        self.initial_part = part
     
     #--- Special set for queue
     def add_queue_in(self, value):
