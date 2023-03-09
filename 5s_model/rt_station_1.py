@@ -20,36 +20,36 @@ import json
 #import datetime
 import time
 from time import sleep
-from ev3dev.ev3 import *
+# from ev3dev.ev3 import *
 
-#--- declaring optical sensors
-station_sensor=ColorSensor(INPUT_1)
-station_sensor.mode='COL-COLOR'
-queue_sensor=ColorSensor(INPUT_2)
-queue_sensor.mode='COL-COLOR'
-blocking_sensor_1=ColorSensor(INPUT_3)
-blocking_sensor_1.mode='COL-COLOR'
-blocking_sensor_2=ColorSensor(INPUT_4)
-blocking_sensor_2.mode='COL-COLOR'
+# #--- declaring optical sensors
+# station_sensor=ColorSensor(INPUT_1)
+# station_sensor.mode='COL-COLOR'
+# queue_sensor=ColorSensor(INPUT_2)
+# queue_sensor.mode='COL-COLOR'
+# blocking_sensor_1=ColorSensor(INPUT_3)
+# blocking_sensor_1.mode='COL-COLOR'
+# blocking_sensor_2=ColorSensor(INPUT_4)
+# blocking_sensor_2.mode='COL-COLOR'
 
 colors=('unknown','black','blue','green','yellow','red','white','brown')
 
-#--- initializing station
-pusher = MediumMotor('outD')
-pusher.reset()
-pos_neutral = 0
-pusher_speed = 400
+# #--- initializing station
+# pusher = MediumMotor('outD')
+# pusher.reset()
+# pos_neutral = 0
+# pusher_speed = 400
 st_num = "1"
 
-conveyor = LargeMotor('outA')
-station = LargeMotor ('outC')
+# conveyor = LargeMotor('outA')
+# station = LargeMotor ('outC')
 
-#--- declaring variables
-conveyor_speed = 300
-station_speed = 100
-pusher_speed = 400
-pos_neutral = 0
-pos_extend = 180
+# #--- declaring variables
+# conveyor_speed = 300
+# station_speed = 100
+# pusher_speed = 400
+# pos_neutral = 0
+# pos_extend = 180
 
 #--- process time of station excluding the loading and unloading time
 process_time = 4    # advised to have no less than 5s of gap between two parts in the downstream conveyor to not have problems with pusher.
@@ -93,91 +93,95 @@ def on_message(client, userdata, msg):
 
     #--- RCT-server
     #--- payload expected: a. station_2 b. station_3
-    if msg.topic == "RCT-server":
+    if msg.topic == "RCT_server":
         message = json.loads(msg.payload.decode("utf-8"))
         if message["macihne_id"] == st_num:    # we enter the policy advice into json dictionay for future use. You can send the part policy whenever you want.
-            advice_list[message["part_id"]] = message["policy"]
+            advice_list[message["part_id"]] = message["queue_id"]
             print("MQTT advice for station ",st_num," is :", message["part_id"], " : ", advice_list[message["part_id"]])
 
 
     if msg.topic == "part_id":      # listening to current part id for dispath policy
-        message = json.loads(msg.payload.decode("utf-8"))
-        if message["machine_id"] == st_num:
-            current_part_id = message["part_id"]
-
+        # message = json.loads(msg.payload.decode("utf-8"))
+        message = str(msg.payload.decode("utf-8"))
+        # if message["machine_id"] == st_num:
+              # current_part_id = message["part_id"]
+        current_part_id = message
         
         
 client = mqtt.Client()
-client.connect("192.168.0.50",1883,60) # verify the IP address before connect
+# client.connect("192.168.0.50",1883,60) # verify the IP address before connect
+client.connect("127.0.0.1",1883,60) # verify the IP address before connect
 client.on_connect = on_connect
 client.on_message = on_message
 
 client.loop_start()
 try:
     while True:
-        if system_status == "start":
-            conveyor.run_forever(speed_sp = -conveyor_speed)
-            station.run_forever(speed_sp = -station_speed)
-            if start_status > 0:
-                pusher.run_forever(speed_sp=-pusher_speed)
-                sleep(0.8)
-                pusher.stop(stop_action='coast')
-                start_status = 0
-                print("Station 1 is started")
+        # if system_status == "start":
+            # conveyor.run_forever(speed_sp = -conveyor_speed)
+            # station.run_forever(speed_sp = -station_speed)
+            # if start_status > 0:
+                # pusher.run_forever(speed_sp=-pusher_speed)
+                # sleep(0.8)
+                # pusher.stop(stop_action='coast')
+                # start_status = 0
+                # print("Station 1 is started")
 
-            if queue_sensor.value() > 1 and station_status == "idle":
-                pusher.run_forever(speed_sp=pusher_speed)
-                payload = {"machine_id" : st_num, "status":"Started","part_id":"0","queue_id":"1"}
-                client.publish(topic = "trace", payload= json.dumps(payload))
-                sleep(0.8)
-                pusher.stop(stop_action='coast')
-                sleep(1)
-                pusher.run_forever(speed_sp = -pusher_speed)
-                sleep(0.8)
-                pusher.stop(stop_action='coast')
-                station_status = "busy"
+            # if queue_sensor.value() > 1 and station_status == "idle":
+                # pusher.run_forever(speed_sp=pusher_speed)
+        payload = {"machine_id" : st_num, "status":"Started","part_id":"0","queue_id":"1"}
+        client.publish(topic = "trace", payload= json.dumps(payload))
+        sleep(5)
+                # pusher.stop(stop_action='coast')
+                # sleep(1)
+                # pusher.run_forever(speed_sp = -pusher_speed)
+                # sleep(0.8)
+                # pusher.stop(stop_action='coast')
+                # station_status = "busy"
                 
-            if station_sensor.value() > 4:
-                station.stop(stop_action = 'hold')
+            # if station_sensor.value() > 4:
+            #     station.stop(stop_action = 'hold')
                 
-                sleep(process_time)
+            #     sleep(process_time)
 
-                if blocking_sensor_1.value() < 4 and blocking_sensor_2.value() < 4:
-                    #--- dispatch the part from the station
-                    station.run_forever(speed_sp = -station_speed)
+            #     if blocking_sensor_1.value() < 4 and blocking_sensor_2.value() < 4:
+            #         #--- dispatch the part from the station
+            #         station.run_forever(speed_sp = -station_speed)
 
-                    #--- policy assignment #--- defualts to: alternating policy
-                    if current_part_id in advice_list:
-                        current_station = advice_list[current_part_id]
-                    elif current_station ==  "2":
-                        current_station = "3"
-                    elif current_station == "3":
-                        current_station = "2"
+        #--- policy assignment #--- defualts to: alternating policy
+        if current_part_id in advice_list:
+            current_station = advice_list[current_part_id]
+        elif current_station ==  "2":
+            current_station = "3"
+        elif current_station == "3":
+            current_station = "2"
 
-                    #--- unloading time. Also a part of processing time.
-                    sleep(3)    #--- delay for the part to move to grey conveyor.
+        #--- unloading time. Also a part of processing time.
+        sleep(3)    #--- delay for the part to move to grey conveyor.
 
-                    #--- publish topics
-                    payload ={"machine_id" : st_num, "status":"Finished","part_id":current_part_id, "queue_id":current_station}
-                    client.publish(topic = "trace", payload= json.dumps(payload))
-                    print(current_part_id," proceeding to station ", current_station)
-                    
-                    # delete the part policy from the list so that the policy is not repeated during a default condition.
-                    if current_part_id in advice_list:
-                        del advice_list[current_part_id]
-                    station_status = "idle" # set status to idle for allowing the next part
+        #--- publish topics
+        payload ={"machine_id" : st_num, "status":"Finished","part_id":current_part_id, "queue_id":current_station}
+        client.publish(topic = "trace", payload= json.dumps(payload))
+        print(current_part_id," proceeding to station ", current_station)
 
-        elif system_status == "stop" and stop_status > 0:
-            conveyor.stop(stop_action = 'coast')
-            station.stop(stop_action = 'coast')
-            pusher.run_forever(speed_sp=pusher_speed)
-            sleep(0.8)
-            pusher.stop(stop_action='coast')
-            stop_status = 0
-            print("Station ",st_num," is stopped")
+        current_part_id = "000"
+        
+        # delete the part policy from the list so that the policy is not repeated during a default condition.
+        if current_part_id in advice_list:
+            del advice_list[current_part_id]
+        station_status = "idle" # set status to idle for allowing the next part
+
+        # elif system_status == "stop" and stop_status > 0:
+        #     conveyor.stop(stop_action = 'coast')
+        #     station.stop(stop_action = 'coast')
+        #     pusher.run_forever(speed_sp=pusher_speed)
+        sleep(3)
+        #     pusher.stop(stop_action='coast')
+        #     stop_status = 0
+        #     print("Station ",st_num," is stopped")
 
 except KeyboardInterrupt:
     print('INTERRUPTED FROM PC')
-    conveyor.stop(stop_action = 'coast')
-    station.stop(stop_action = 'coast')
-    print('Station ",st_num," program is killed.')
+    # conveyor.stop(stop_action = 'coast')
+    # station.stop(stop_action = 'coast')
+    # print('Station ',st_num,' program is killed.')

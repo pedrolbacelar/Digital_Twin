@@ -36,16 +36,16 @@ colors=('unknown','black','blue','green','yellow','red','white','brown')
 pusher = MediumMotor('outD')
 pusher.reset()
 pos_neutral = 0
-pusher_speed = -400
-st_num = "2"
+pusher_speed = 400
+st_num = "5"
 
 conveyor = LargeMotor('outA')
 station = LargeMotor ('outC')
 
 #--- declaring variables
 conveyor_speed = 300
-station_speed = -100
-pusher_speed = -400
+station_speed = 100
+pusher_speed = 400
 pos_neutral = 0
 pos_extend = 180
 
@@ -178,4 +178,4 @@ except KeyboardInterrupt:
     print('INTERRUPTED FROM PC')
     conveyor.stop(stop_action = 'coast')
     station.stop(stop_action = 'coast')
-    print('Station ',st_num,' program is killed.')
+    print('Station ,st_num, program is killed.')
