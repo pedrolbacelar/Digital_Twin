@@ -117,6 +117,7 @@ class Machine():
         self.allocated_part = False
         self.new_part = False
         self.flag_finished = False
+        self.flag_stop = False
         self.current_state = "Idle"
         self.queue_to_get = None
         self.queue_to_put = None
@@ -725,6 +726,8 @@ class Machine():
         if self.worked_time != 0:
             #-- Part ready to be processed
             self.current_state = "Processing"
+    def set_stop(self, value):
+        self.flag_stop = value
 
     #--- Special set for queue
     def add_queue_in(self, value):

@@ -18,7 +18,7 @@ factory_ip_address = "192.168.0.50"
 database_path = "databases/RFID_test.db"
 
 #--- Create the Broker Manager
-broker_manager = Broker_Manager(ip_address= ip, real_database_path= database_path)
+broker_manager = Broker_Manager(ip_address= factory_ip_address, real_database_path= database_path)
 
 #--- Run Broker
 broker_manager.run()
