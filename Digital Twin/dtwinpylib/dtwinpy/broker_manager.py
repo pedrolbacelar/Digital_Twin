@@ -111,6 +111,22 @@ class Broker_Manager():
         """
         pass
         
+    def translate_message(self, message):
+        """
+        This function receives the message from the MQTT and translate it into a dictionary.
+        """
+        #--- Decode the message received from the MQTT
+        message_decoded = str(message.payload.decode())
+
+        #--- Replace ' to "
+        message_replaced = message_decoded.replace("'", "\"")
+
+        print(f"Message raplaced: {message_replaced}")
+
+        #--- Convert the message received in to a dictionary
+        message_translated = json.loads(message_replaced)
+
+        return message_translated
 
     def on_connect(self, client, userdata, flags, rc):
         #--- Little drama
@@ -129,35 +145,28 @@ class Broker_Manager():
             print(f"|-- '{topic}'")
 
     def on_message(self,client, userdata, message):
-        #--- Decode the message received from the MQTT
-        message_decoded = str(message.payload.decode())
-
         #--- Message Topic
         message_topic = message.topic
+
+        #--- Translate the message into a Dictionary
+        message_translated = self.translate_message(message)
 
         #--- Get the timestemp and translate it
         current_timestamp = datetime.datetime.now().timestamp()
         current_time = datetime.datetime.now()
         current_time_str = current_time.strftime("%d %B %Y %H:%M:%S")
 
+        #--- Print the payload received
+        print(f"{current_time_str} | Topic: {message_topic} | Payload Received: {message_translated}")
+
+
         # -------------- Topic: 'traces' --------------
         if message_topic == 'trace':
-
-            #--- Convert the message received in to a dictionary
-            message_translated = json.loads(message_decoded)
-            
-            #--- Print the payload received
-            print(f"{current_time_str} | Topic: {message_topic} | Payload Received: {message_translated}")
-
-
             self.traces_handler(message_translated, current_timestamp)
 
         # -------------- Topic: 'part_id' --------------
         if message_topic == 'part_id':
-            #--- Print the payload received
-            print(f"{current_time_str} | Topic: {message_topic} | Payload Received: {message_decoded}")
-
-            self.part_id_handler(message_decoded)
+            self.part_id_handler(message_translated)
 
         # -------------- Topic: 'RCT_server' -------------
         if message_topic == 'RCT_server':
