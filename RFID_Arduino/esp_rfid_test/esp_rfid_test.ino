@@ -99,14 +99,17 @@ void loop() {
   if (rfid.uid.uidByte[0] != nuidPICC[0] || 
     rfid.uid.uidByte[1] != nuidPICC[1] || 
     rfid.uid.uidByte[2] != nuidPICC[2] || 
-    rfid.uid.uidByte[3] != nuidPICC[3] ) {
+    rfid.uid.uidByte[3] != nuidPICC[3] ) 
+    {
     Serial.println();    
     Serial.println(F("New card"));
 
 
     // Store NUID into nuidPICC array
-    for (byte i = 0; i < 4; i++) {
+    for (byte i = 0; i < 4; i++) 
+    {
       nuidPICC[i] = rfid.uid.uidByte[i];
+
     }
 
     String RFID_ID = printDec(rfid.uid.uidByte, rfid.uid.size);
@@ -116,33 +119,35 @@ void loop() {
     //String current_id;
     //current_id = String(part_id);
 
-
+    for (int c = 0; c < 4; c++)
+    {
     if (RFID_ID == "22019510149")
     {
-      client.publish("part_id", "1");
+      client.publish("part_id", "{'machine_id':'3','part_id':'1'}");
       }
     else if (RFID_ID == "1889810149")
     {
-      client.publish("part_id", "2");
+      client.publish("part_id", "{'machine_id':'3','part_id':'2'}");
     }
     else if (RFID_ID == "2049810149")
     {
-      client.publish("part_id", "3");
+      client.publish("part_id", "{'machine_id':'3','part_id':'3'}");
       }
     else if (RFID_ID == "2209210149")
     {
-      client.publish("part_id", "4");
+      client.publish("part_id", "{'machine_id':'3','part_id':'4'}");
       }
     else if (RFID_ID == "20419710149")
     {
-      client.publish("part_id", "5");
+      client.publish("part_id", "{'machine_id':'3','part_id':'5'}");
       }
     else 
     {
-      client.publish("part_id", "unknown part");
+      client.publish("part_id", "{'machine_id':'3','part_id':'111'}");
       }
     
-    
+    delay(500);
+    }
     //count += 1;
   }
   else Serial.println(F("Card repeated."));
