@@ -27,15 +27,18 @@ importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
 
 #--- Class Model
 class Model():
-    def __init__(self, name, model_path, database_path, initial= False, until= None, part_type= "A", loop_type= "closed", maxparts = None, targeted_part_id= None):
+    def __init__(self, name, model_path, database_path, initial= False, until= None, part_type= "A", loop_type= "closed", maxparts = None, targeted_part_id= None, targeted_machine_id= None):
         #-- Main Model Properties
         self.name = name
         self.model_path = model_path
         self.env = simpy.Environment()
+
+        #--- Stop conditions
         self.until = until
         self.exit = self.env.event()
         self.maxparts = maxparts
         self.targeted_part_id = targeted_part_id
+        self.targeted_machine_id = targeted_machine_id
 
         #-- Database Properties
         self.database_path = database_path
@@ -418,7 +421,19 @@ class Model():
                     machine_conveyors_in.append(conveyor)
                 
             machine.set_conveyors_in(machine_conveyors_in)
-                
+
+    # ----- Stopd condition in a specific machine -----
+    def setting_stop_machines(self):
+        """
+        For the specific selected machine (targeted_machine_id) specify what is the id of the
+        part that the machine shoudl stop when it arrives. 
+        """
+        #--- For each existing machine
+        for machine in self.machines_vector:
+            #--- If the machines has the same ID of the selected machine
+            if machine.get_id() == self.targeted_machine_id:
+                #--- Tells for that specific machine for which part id it should stop
+                machine.set_stop_for_id(self.targeted_part_id)
     # =======================================================
 
     # ================== TRANSLATOR ==================
@@ -506,6 +521,9 @@ class Model():
 
         # --- Discover the last part id and assign to the machines
         self.find_last_part_id()
+
+        # --- Setting the part id to stop the simulation for the right machine
+        self.setting_stop_machines()
         #====================================================================
 
 
@@ -573,109 +591,96 @@ class Model():
         """
         #--- Get the finished Parts and each Time
         parts_finished = self.terminator.get_all_items()
-        #--- Number of finished parts in the simulation
-        number_parts = len(parts_finished)
 
-        #--- create empty lists
-        parts_finished_time = []
-        parts_finished_id = []
-        parts_finished_id_ASIS = []
-        parts_creation_time = []
+        if len(parts_finished) != 0:
+            #--- Number of finished parts in the simulation
+            number_parts = len(parts_finished)
 
-        #---Create the list with parts ID
-        for part in parts_finished:
-            parts_finished_id.append(part.get_id())
-            parts_finished_id_ASIS.append(part.get_id())
-        
-        #--- Sort the list in ascending
-        parts_finished_id.sort()
+            #--- create empty lists
+            parts_finished_time = []
+            parts_finished_id = []
+            parts_finished_id_ASIS = []
+            parts_creation_time = []
 
-        #--- Adjust the sort of other variables following the ID sort
-        for id in parts_finished_id:
+            #---Create the list with parts ID
             for part in parts_finished:
-                if part.get_id() == id:
-                    parts_finished_time.append(part.get_termination())
-                    parts_creation_time.append(part.get_creation())
-                    break
+                parts_finished_id.append(part.get_id())
+                parts_finished_id_ASIS.append(part.get_id())
             
+            #--- Sort the list in ascending
+            parts_finished_id.sort()
 
-        print("================ Running Analysis ================")
-        print(f"Number of Parts finished: {len(parts_finished)}")
-        print(f"Total time of Simulation: {parts_finished[-1].get_termination()}")
-        #print(f"List of IDs (AS IS): {parts_finished_id_ASIS}")
-        #print(f"List of IDs (sorted): {parts_finished_id}")
-
-        def plot_finished():
-            plt.plot(parts_finished_id, parts_finished_time, '-o')
-            plt.title("Lead Time per Part ID")
-            plt.xlabel("Parts ID")
-            plt.ylabel("Finish Time")
-            plt.show()
-            plt.savefig(f"figures/{self.name}_plot_finished.png")
-
-        #-- Function to calculate the throughput
-        def throughput():
-            th = number_parts / parts_finished[-1].get_termination()
-            print(f">>> System Throughput: {th} [parts / time unit] ")
-
-            return th
-        #-- Function to calculate the average cycle time
-        def avg_cycle_time():
-            sum_ct = 0
-            parts_cycle_time = []
-            for i in range(number_parts):
-                #-- calculate individual CT
-                parts_cycle_time.append(parts_finished_time[i] - parts_creation_time[i])
-                #-- Sum up every CT
-                sum_ct += parts_cycle_time[i]
-
-            #-- Print cycle time of each part
-            #print(">>> Cycle Time of each part:")
-            #print(parts_cycle_time)
+            #--- Adjust the sort of other variables following the ID sort
+            for id in parts_finished_id:
+                for part in parts_finished:
+                    if part.get_id() == id:
+                        parts_finished_time.append(part.get_termination())
+                        parts_creation_time.append(part.get_creation())
+                        break
                 
-            #-- Maximum and Minimum CT
-            max_CT = max(parts_cycle_time)
-            min_CT = min(parts_cycle_time)
-            print(f"- Maximum Cycle Time: {max_CT}")
-            print(f"- Minimum Cycle Time: {min_CT}")
 
-            #-- Avereage Cycle Time
-            avg_CT = sum_ct / number_parts
-            print(f">>> Average system cycle time: {avg_CT} [time unit]***")
+            print("================ Running Analysis ================")
+            print(f"Number of Parts finished: {len(parts_finished)}")
+            print(f"Total time of Simulation: {parts_finished[-1].get_termination()}")
+            #print(f"List of IDs (AS IS): {parts_finished_id_ASIS}")
+            #print(f"List of IDs (sorted): {parts_finished_id}")
 
-            #-- Plot the Cycle Time for each Part
-            plt.plot(parts_finished_id,parts_cycle_time, '-x')
-            plt.title("Cycle Time per Part ID")
-            plt.xlabel("Parts ID")
-            plt.ylabel("Cycle Time")
-            plt.show()
-            plt.savefig(f"figures/{self.name}_cycle_time.png")           
+            def plot_finished():
+                plt.plot(parts_finished_id, parts_finished_time, '-o')
+                plt.title("Lead Time per Part ID")
+                plt.xlabel("Parts ID")
+                plt.ylabel("Finish Time")
+                plt.show()
+                plt.savefig(f"figures/{self.name}_plot_finished.png")
 
-            return avg_CT
+            #-- Function to calculate the throughput
+            def throughput():
+                th = number_parts / parts_finished[-1].get_termination()
+                print(f">>> System Throughput: {th} [parts / time unit] ")
 
-        #--- Running everything
-        plot_finished()
-        avg_cycle_time()
-        throughput()
+                return th
+            #-- Function to calculate the average cycle time
+            def avg_cycle_time():
+                sum_ct = 0
+                parts_cycle_time = []
+                for i in range(number_parts):
+                    #-- calculate individual CT
+                    parts_cycle_time.append(parts_finished_time[i] - parts_creation_time[i])
+                    #-- Sum up every CT
+                    sum_ct += parts_cycle_time[i]
 
-        """
-        #--- Run selected analysis
-        if options[0] == "all":
-            print("-- All Analysis Selected --")
-            options = ["plot_finished", "throughput", "avg_cycle_time"]
+                #-- Print cycle time of each part
+                #print(">>> Cycle Time of each part:")
+                #print(parts_cycle_time)
+                    
+                #-- Maximum and Minimum CT
+                max_CT = max(parts_cycle_time)
+                min_CT = min(parts_cycle_time)
+                print(f"- Maximum Cycle Time: {max_CT}")
+                print(f"- Minimum Cycle Time: {min_CT}")
 
-        for option in options:
-            if option == "plot_finished":
-                plot_finished()
-            if option == "throughput":
-                return throughput()
-            if option == "avg_cycle_time":
-                return avg_cycle_time()
-            if option == "read_database":
-                self.Database.read_all_events(self.event_table)
-            
-        print("##########################")
-        """
+                #-- Avereage Cycle Time
+                avg_CT = sum_ct / number_parts
+                print(f">>> Average system cycle time: {avg_CT} [time unit]***")
+
+                #-- Plot the Cycle Time for each Part
+                plt.plot(parts_finished_id,parts_cycle_time, '-x')
+                plt.title("Cycle Time per Part ID")
+                plt.xlabel("Parts ID")
+                plt.ylabel("Cycle Time")
+                plt.show()
+                plt.savefig(f"figures/{self.name}_cycle_time.png")           
+
+                return avg_CT
+
+            #--- Running everything
+            plot_finished()
+            avg_cycle_time()
+            throughput()
+        
+        else:
+            print("[ERROR][digital_model.py / analyze_result()] No parts finished in the simulation")
+        
     
     # ----- Calculate the RCT from the previous simulation -----
     def calculate_RCT(self, part_id_selected= None, batch= None):

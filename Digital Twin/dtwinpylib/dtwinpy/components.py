@@ -117,7 +117,7 @@ class Machine():
         self.allocated_part = False
         self.new_part = False
         self.flag_finished = False
-        self.flag_stop = False
+        self.flag_stop_for_id = False
         self.current_state = "Idle"
         self.queue_to_get = None
         self.queue_to_put = None
@@ -525,15 +525,6 @@ class Machine():
                                 self.queue_to_put = queue
                     #-------------------------------------------------------------
 
-                    #--- After finishing the process I add into the database
-                    # (I don't wait for the next queue be available, because the machine
-                    # follows the Blocking After Service policy)
-                    
-                    # TODO: But if the part is waiting for the queue be free,
-                    # it will pass here multiple times and will write multiple times
-                    # into the database. So you need to verify if that actions was
-                    # already taken by the machine, if yes you don't write again.
-
 
                     #------------ Check if the Queue is not full --------------
                     #--- Queue Selected Full
@@ -566,7 +557,12 @@ class Machine():
                             #--- Put the part in the rigth conveyor
                             conveyor_to_put.start_transp(self.part_in_machine)
                             flag_allocated_part = True
-                            
+
+                            # ------- STOP Machine condition -------
+                            # --- If the machine was set to stop the simulation when finish up this part:
+                            if self.flag_stop_for_id == self.part_in_machine.get_id():
+                                #--- Terminates the simulation
+                                self.exit.succeed()
 
                         if self.final_machine == True and self.loop == "closed":
                             #--- Terminate
@@ -726,8 +722,8 @@ class Machine():
         if self.worked_time != 0:
             #-- Part ready to be processed
             self.current_state = "Processing"
-    def set_stop(self, value):
-        self.flag_stop = value
+    def set_stop_for_id(self, part_id):
+        self.flag_stop_for_id = part_id
 
     #--- Special set for queue
     def add_queue_in(self, value):

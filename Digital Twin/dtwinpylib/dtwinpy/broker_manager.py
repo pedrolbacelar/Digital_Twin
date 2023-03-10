@@ -73,12 +73,11 @@ class Broker_Manager():
         current_time_str = current_time.strftime("%d %B %Y %H:%M:%S")
 
         #--- Read the message
-        """"
+        
         machine_id = f"Machine {(message_translated['machine_id'])}"
         part_id = f"Part {message_translated['part_id']}"
-        """
-        machine_id = 'Machine 1'
-        part_id= message_translated
+        
+        
 
         #--- Search in the database for line id of the given machine with 0 in the part id
         line_id_ltuple = self.real_database.findLine_2conditions(
@@ -121,7 +120,7 @@ class Broker_Manager():
         #--- Replace ' to "
         message_replaced = message_decoded.replace("'", "\"")
 
-        print(f"Message raplaced: {message_replaced}")
+        #print(f"Message raplaced: {message_replaced}")
 
         #--- Convert the message received in to a dictionary
         message_translated = json.loads(message_replaced)

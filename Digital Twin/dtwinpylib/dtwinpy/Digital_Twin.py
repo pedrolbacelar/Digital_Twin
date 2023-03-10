@@ -20,7 +20,7 @@ importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
 
 
 class Digital_Twin():
-    def __init__(self, name, initial= True, targeted_part_id= None, until= None, part_type= "A", loop_type= "closed", maxparts = None):
+    def __init__(self, name, initial= True, targeted_part_id= None, targeted_machine_id= None, until= None, part_type= "A", loop_type= "closed", maxparts = None):
         #--- Model Parameters
         self.name = name
         self.model_path = "models/" + self.name + ".json"
@@ -29,8 +29,11 @@ class Digital_Twin():
         self.part_type = "A"
         self.loop_type = "closed"
         self.digital_model = None
+
+        #--- Simulation stop conditions
         self.maxparts = maxparts
         self.targeted_part_id = targeted_part_id
+        self.targeted_machine_id = targeted_machine_id
 
         #--- Database
         self.database_path = "databases/digital_" + self.name + "_db.db"
@@ -55,7 +58,7 @@ class Digital_Twin():
         return self.broker_manager
         
     #--- Create the Digital Model
-    def generate_digital_model(self, maxparts= None, verbose= True, targeted_part_id = None):
+    def generate_digital_model(self, maxparts= None, verbose= True, targeted_part_id = None, targeted_machine_id= None):
         #--- if the functions don't receive nothing, use the default of the Digital Twin
         if maxparts == None:
             maxparts = self.maxparts
@@ -64,14 +67,19 @@ class Digital_Twin():
         if targeted_part_id == None:
             targeted_part_id = self.targeted_part_id
 
+        if targeted_machine_id == None:
+            targeted_machine_id = self.targeted_machine_id
+
         #--- Update the global maxparts and target part
         self.maxparts = maxparts
         self.targeted_part_id = targeted_part_id
+        self.targeted_machine_id = targeted_machine_id
         
         #--- Create the digital model with all the properties
         self.digital_model = Model(name= self.name,model_path= self.model_path, 
             database_path= self.database_path, until= self.until, initial= self.initial, 
-            loop_type= self.loop_type, maxparts= maxparts,targeted_part_id=targeted_part_id)
+            loop_type= self.loop_type, maxparts= maxparts,targeted_part_id=targeted_part_id,
+            targeted_machine_id= self.targeted_machine_id)
         
         #--- Translate the digital model
         self.digital_model.model_translator()
@@ -82,10 +90,25 @@ class Digital_Twin():
         return self.digital_model
     
     #--- Run normally the Digital Model and analyze the results
-    def run_digital_model(self, plot= True, maxparts = None, targeted_part_id = None, verbose= True, generate_model = True):
+    def run_digital_model(self, plot= True, maxparts = None, targeted_part_id = None, targeted_machine_id= None, verbose= True, generate_model = True):
         if generate_model == True:
+            if maxparts == None:
+                maxparts = self.maxparts
+
+            #--- If the target conditions doesn't exist, assign it
+            if targeted_part_id == None:
+                targeted_part_id = self.targeted_part_id
+
+            if targeted_machine_id == None:
+                targeted_machine_id = self.targeted_machine_id
+
+            #--- Update the global maxparts and target part
+            self.maxparts = maxparts
+            self.targeted_part_id = targeted_part_id
+            self.targeted_machine_id = targeted_machine_id
+
             #--- Always before running re-generate the model, just in case it has some changes
-            self.digital_model = self.generate_digital_model(maxparts= maxparts, targeted_part_id= targeted_part_id, verbose= verbose)
+            self.digital_model = self.generate_digital_model(maxparts= self.maxparts, targeted_part_id= self.targeted_part_id, targeted_machine_id= self.targeted_machine_id, verbose= verbose)
         
         #--- Run the simulation
         self.digital_model.run()
