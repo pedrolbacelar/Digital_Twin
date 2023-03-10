@@ -1,4 +1,5 @@
 {
     "board": "esp32:esp32:esp32doit-devkit-v1",
-    "port": "COM9"
+    "port": "COM9",
+    "sketch": "RFID_Arduino\\esp_rfid_test\\esp_rfid_test.ino"
 }
