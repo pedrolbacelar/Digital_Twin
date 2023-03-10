@@ -15,7 +15,7 @@ import dtwinpylib
 importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
 
 class Broker_Manager():
-    def __init__(self, ip_address, real_database_path, port= 1883, keepalive= 60, topics = ['trace', 'part_id', 'RCT_server'], client = None):
+    def __init__(self, ip_address, real_database_path, ID_database_path, port= 1883, keepalive= 60, topics = ['trace', 'part_id', 'RCT_server'], client = None):
         #--- Connect to the Broker
         self.ip_address= ip_address
         self.port = port
@@ -27,12 +27,64 @@ class Broker_Manager():
         if client == None:
             #--- Create the client object
             self.client = mqtt.Client()
+        self.UID_to_PID_dict = {}
+        self.PID_to_UID_dict = {}
+        self.PID_counter = 1
 
         #--- Database
         self.real_database_path = real_database_path
+        self.ID_database_path = ID_database_path
         self.real_database = Database(database_path= self.real_database_path, event_table= "real_log")
+        self.ID_database = Database(database_path= self.ID_database_path, event_table= "ID")
 
-    def traces_handler(self, message_translated, current_timestamp):
+    def part_ID_creator(self, unique_ID, current_time_str):
+        """
+        This function takes a UID (unique ID of a RFID sticker) and creates a Part ID number (PID). This function
+        is only used by the first machine of the system. If a UID repears it re-assign it a new PID.
+
+        TODO:
+        1) Add the UID into the dictionary (if it already exists it just re-assign the value)
+        2) Increase the PID counter
+        """
+        #--- Add the UID with the current PID counter in the dictionary
+        self.UID_to_PID_dict[unique_ID] = f"Part {self.PID_counter}"
+
+        #----- Add the PID with the current UID to the dictionary
+        self.PID_to_UID_dict[f"Part {self.PID_counter}"] = unique_ID
+
+        #----- Add the PID and UID into the PID_UID database
+        self.ID_database.add_UID_partid(
+            table_name= "ID",
+            uid= unique_ID,
+            partid= f"Part {self.PID_counter}",
+            current_time_str= current_time_str
+
+        )
+
+        #--- Increase the part id counter
+        self.PID_counter += 1
+    
+        #--- DEBUGING
+        """for key in self.UID_to_PID_dict:
+            print(f"{key} | {self.UID_to_PID_dict[key]}")"""
+    
+    def part_ID_translator(self, unique_ID):
+        """
+        This function takes a UID and searches in the PID dictionary for the related PID. The function returns
+        this PID. This is used for all the machines.
+        """
+
+        #--- Searches in the dictionary for the related PID to the UID and return it
+        try:
+            part_id = self.UID_to_PID_dict[unique_ID]
+            return part_id
+        except KeyError:
+            print(f"[BROKER][broker_manager.py/part_ID_translator()] Unique ID '{unique_ID}' not found in the Dictionary!")
+            print("printing the dicitionary....")
+            for key in self.UID_to_PID_dict:
+                print(f"{key} | {self.UID_to_PID_dict[key]}")
+    
+    def traces_handler(self, message_translated, current_timestamp, current_time_str):
         """
         This functions is used when a MQTT message of the topic 'traces' is received by the broker.
         The functions simply need to take the message and write it into the database. Note: When it's
@@ -45,11 +97,31 @@ class Broker_Manager():
         #--- Get each part of the message
         machine_id = f"Machine {(message_translated['machine_id'])}"
         status = message_translated['status']
-        part_id = f"Part {message_translated['part_id']}"
+        unique_id = message_translated['part_id']
         queue_id = f"Queue {(message_translated['queue_id'])}"
 
+        if status == "Finished":
+            #--- When the machine sends a finished trace, it sends the UID that it read from the RFID reader
+            try: 
+                #--- Translate the given UID in the related PID
+                part_id = self.part_ID_translator(unique_id)
+            except KeyError:
+                #--- ERROR: unique_ID was not found in the dictionary
+                print(f"[ERROR][broker_manager.py/traces_handler()] The Unique ID {unique_id} was not found in the PID dictionary")
+                print("printing the current dictionary....")
+                for key in self.UID_to_PID_dict:
+                    print(f"{key} | {self.UID_to_PID_dict[key]}")
+                print("If this is not the Machine 1 handling the first part, STOP THE SIMULATION")
+        
+        if status == "Started":
+            #--- When a machine sends Started, it didn't have the time yet to read the RFID, so it assigns Part 0
+            # this id is going to be replaced by the topic 'part_id'
+            part_id = "Part 0"
+
         #--- Write the information into the real database
-        self.real_database.write_event('real_log', current_timestamp, machine_id, status, part_id, queue_id)
+        self.real_database.write_event('real_log', current_timestamp, machine_id, status, part_id, queue_id, current_time_str)
+
+
 
     def part_id_handler(self, message_translated):
         """
@@ -70,14 +142,22 @@ class Broker_Manager():
         """
         #--- Take the current time
         current_time = datetime.datetime.now()
-        current_time_str = current_time.strftime("%d %B %Y %H:%M:%S")
+        current_time_str = current_time.strftime("%d %B %H:%M:%S")
 
         #--- Read the message
         
         machine_id = f"Machine {(message_translated['machine_id'])}"
-        part_id = f"Part {message_translated['part_id']}"
+        unique_ID = message_translated['part_id']
         
-        
+        #--- If machine 1, (re)create the PID for that given UID
+        if machine_id == "Machine 1":
+            #--- Create the PID related to the UID and assign it in the PID dict
+            self.part_ID_creator(unique_ID, current_time_str)
+
+        #--- For all the machines (including machine 1)
+        # Take the corresponded PID of the given UID
+        part_id = self.part_ID_translator(unique_ID)
+
 
         #--- Search in the database for line id of the given machine with 0 in the part id
         line_id_ltuple = self.real_database.findLine_2conditions(
@@ -153,7 +233,7 @@ class Broker_Manager():
         #--- Get the timestemp and translate it
         current_timestamp = datetime.datetime.now().timestamp()
         current_time = datetime.datetime.now()
-        current_time_str = current_time.strftime("%d %B %Y %H:%M:%S")
+        current_time_str = current_time.strftime("%d %B %H:%M:%S")
 
         #--- Print the payload received
         print(f"{current_time_str} | Topic: {message_topic} | Payload Received: {message_translated}")
@@ -161,7 +241,7 @@ class Broker_Manager():
 
         # -------------- Topic: 'traces' --------------
         if message_topic == 'trace':
-            self.traces_handler(message_translated, current_timestamp)
+            self.traces_handler(message_translated, current_timestamp, current_time_str)
 
         # -------------- Topic: 'part_id' --------------
         if message_topic == 'part_id':
@@ -227,19 +307,25 @@ class Broker_Manager():
         #--- Make the connection with the Broker
         self.client.connect(self.ip_address, self.port, self.keepalive)
 
-        #--- Create the payload
+        #--- Create the payload variables
         machineid = machine_id
         partid = part_id
         queueid = queue_id
 
+        #--- Inverse translation: Take the part id number and return the UID
+        unique_ID = self.ID_database.get_PID(
+            table_name= "ID",
+            partid= f"Part {partid}"
+        )
+
+        #--- Create the payload
         payload= {
             "machine_id": machineid,
-            "part_id": partid,
+            "part_id": unique_ID,
             "queue_id": queueid
         }
 
         #--- Translate the payload
-
         payload_translated = json.dumps(payload)
 
         #--- Publish the payload
@@ -250,7 +336,7 @@ class Broker_Manager():
 
         #--- Take the current time
         current_time = datetime.datetime.now()
-        current_time_str = current_time.strftime("%d %B %Y %H:%M:%S")
+        current_time_str = current_time.strftime("%d %B %H:%M:%S")
 
         #--- Print the payload received
         print(f"[BROKER] {current_time_str} | Topic: {topic} | Payload Published: {payload_translated}")

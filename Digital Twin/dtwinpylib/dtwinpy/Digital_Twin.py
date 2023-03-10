@@ -8,6 +8,7 @@ from .broker_manager import Broker_Manager
 
 #--- Common Libraries
 import shutil
+import os
 
 #--- Reload Package
 import importlib
@@ -20,36 +21,87 @@ importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
 
 
 class Digital_Twin():
-    def __init__(self, name, initial= True, targeted_part_id= None, targeted_machine_id= None, until= None, part_type= "A", loop_type= "closed", maxparts = None):
+    def __init__(self, name, model_path= None, initial= True, targeted_part_id= None, targeted_machine_id= None, until= None, digital_database_path= None, real_database_path= None, ID_database_path= None, part_type= "A", loop_type= "closed", maxparts = None):
         #--- Model Parameters
         self.name = name
-        self.model_path = "models/" + self.name + ".json"
-        self.initial = initial
-        self.until = until
         self.part_type = "A"
         self.loop_type = "closed"
         self.digital_model = None
-
+        self.initial = initial
+    
         #--- Simulation stop conditions
+        self.until = until
         self.maxparts = maxparts
         self.targeted_part_id = targeted_part_id
         self.targeted_machine_id = targeted_machine_id
 
-        #--- Database
-        self.database_path = "databases/digital_" + self.name + "_db.db"
-        self.real_database_path = "databases/real_" + self.name + "_db.db"
+        #--- Model and Figure path
+        if not os.path.exists(f"figures"):
+            os.makedirs(f"figures/")
+
+        if model_path == None:
+            # If folder doesn't exist, creates folder
+            if not os.path.exists(f"models"):
+                os.makedirs(f"models/")
+                
+            # Model Path default
+            self.model_path = "models/" + self.name + ".json"
+        else:
+            self.model_path = model_path
+
+        # --------------- Database ----------------
+        # Digital Database path assign
+        if digital_database_path == None:
+            # If folder doesn't exist, creates folder
+            if not os.path.exists(f"databases/{self.name}"):
+                os.makedirs(f"databases/{self.name}")
+            
+            # Assign database path
+            self.database_path = f"databases/{self.name}/digital_database.db"
+        else:
+            self.database_path = digital_database_path
+        
+        # Real Database path assign
+        if real_database_path == None:
+            # If folder doesn't exist, creates folder
+            if not os.path.exists(f"databases/{self.name}"):
+                os.makedirs(f"databases/{self.name}")
+            
+            # Assign database path
+            self.real_database_path = f"databases/{self.name}/real_database.db"
+        else:
+            self.real_database_path = real_database_path
+        
+        # ID database path assign
+        if ID_database_path == None:
+            # If folder doesn't exist, creates folder
+            if not os.path.exists(f"databases/{self.name}"):
+                os.makedirs(f"databases/{self.name}")
+            
+            # Assign database path
+            self.ID_database_path = f"databases/{self.name}/ID_database.db"
+        else:
+            self.ID_database_path = ID_database_path
+        # ------------------------------------------
+
+        
+        #self.database_path = "databases/digital_" + self.name + "_db.db"
+        #self.real_database_path = "databases/real_" + self.name + "_db.db"
         #self.real_database = Database(self.real_database_path, "real_log")        
 
     #--- Initiate Broker 
-    def initiate_broker(self, ip_address, port= 1883, keepalive= 60, topics_sub = ['trace', 'part_id', 'RCT_server'], topic_pub= 'RCT_server', client = None):
+    def initiate_broker(self, ip_address, ID_database_path= None, port= 1883, keepalive= 60, topics_sub = ['trace', 'part_id', 'RCT_server'], topic_pub= 'RCT_server', client = None):
         #--- Take the global features
         self.ip_address = ip_address
         self.topic_pub = topic_pub
-
+        if ID_database_path == None:
+            ID_database_path = self.ID_database_path
+        
         #--- Create the Broker Manager
         self.broker_manager = Broker_Manager(
             ip_address= self.ip_address,
             real_database_path= self.real_database_path,
+            ID_database_path= ID_database_path,
             port= port,
             keepalive= keepalive,
             topics= topics_sub

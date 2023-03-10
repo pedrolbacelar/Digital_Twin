@@ -113,25 +113,31 @@ class Model():
         queue_index = 0
         for queue_parts in data['initial']:
             #--- For each part within the queue being analyzed
-            for part_in_queue in queue_parts:
-                #--- Extract the part id
-                part_name = part_in_queue
-                part_id = int(''.join(filter(str.isdigit, part_name)))
+            try:
+                for part_in_queue in queue_parts:
+                    #--- Extract the part id
+                    part_name = part_in_queue
+                    part_id = int(''.join(filter(str.isdigit, part_name)))
 
-                #--- Create the Part object
-                part_created = Part(id= part_id, type= self.part_type, location= queue_index, creation_time=0)
+                    #--- Create the Part object
+                    part_created = Part(id= part_id, type= self.part_type, location= queue_index, creation_time=0)
 
-                #--- Assign the created parts in the vector for initial parts (not used anymore)
-                self.initial_parts.append(part_created)
+                    #--- Assign the created parts in the vector for initial parts (not used anymore)
+                    self.initial_parts.append(part_created)
 
-                #--- Find the right queue according to the index
-                queue = self.queues_vector[queue_index]
+                    #--- Find the right queue according to the index
+                    queue = self.queues_vector[queue_index]
 
-                #--- Assign the part into the queue
-                queue.put(part_created)
+                    #--- Assign the part into the queue
+                    queue.put(part_created)
 
-                #--- Add the part to the global vector of parts
-                self.all_part_in_model.append(part_created)
+                    #--- Add the part to the global vector of parts
+                    self.all_part_in_model.append(part_created)
+                    
+            except TypeError:
+                print(f"[ERROR][digital_model.py/initial_allocation()] Initial conditions of Queue {queue_index} is not a vector!")
+                print("Assign Queue as empty...")
+
 
             #--- Update the queue_index to go for the next queue
             queue_index += 1

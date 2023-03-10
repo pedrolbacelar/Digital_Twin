@@ -12,19 +12,50 @@ class Database():
                 self.rename_table("digital_log", "real_log")
 
         #--- When create the object, already create the database and table if doesn't exist
-        with sqlite3.connect(self.database_path) as digital_model_DB:
-            digital_model_DB.execute(f"""
-            CREATE TABLE IF NOT EXISTS {self.event_table} (
-                event_id INTEGER PRIMARY KEY,
-                timestamp INTEGER,
-                machine_id TEXT,
-                activity_type TEXT,
-                part_id TEXT,
-                queue TEXT
-            )
-            """)
+        if event_table == "real_log":
+            with sqlite3.connect(self.database_path) as digital_model_DB:
+                digital_model_DB.execute(f"""
+                CREATE TABLE IF NOT EXISTS {self.event_table} (
+                    event_id INTEGER PRIMARY KEY,
+                    timestamp INTEGER,
+                    machine_id TEXT,
+                    activity_type TEXT,
+                    part_id TEXT,
+                    queue TEXT,
+                    current_time_str
+                )
+                """)
 
-            digital_model_DB.commit()
+                digital_model_DB.commit()
+
+        if event_table == "digital_log":
+            with sqlite3.connect(self.database_path) as digital_model_DB:
+                digital_model_DB.execute(f"""
+                CREATE TABLE IF NOT EXISTS {self.event_table} (
+                    event_id INTEGER PRIMARY KEY,
+                    timestamp INTEGER,
+                    machine_id TEXT,
+                    activity_type TEXT,
+                    part_id TEXT,
+                    queue TEXT
+                )
+                """)
+
+                digital_model_DB.commit()
+
+
+        if event_table == "ID":
+            with sqlite3.connect(self.database_path) as db:
+                db.execute(f"""
+                CREATE TABLE IF NOT EXISTS {self.event_table} (
+                    line_id INTEGER PRIMARY KEY,
+                    UID TEXT,
+                    PID TEXT,
+                    current_time_str TEXT
+                )
+                """)
+
+                db.commit()
 
     
     def initialize(self, table):
@@ -37,7 +68,8 @@ class Database():
                 machine_id TEXT,
                 activity_type TEXT,
                 part_id TEXT,
-                queue TEXT
+                queue TEXT,
+                current_time_str TEXT
             )
             """)
 
@@ -51,15 +83,23 @@ class Database():
             digital_model_DB.commit()
 
 
-    def write_event(self, table, timestamp, machine_id, activity_type, part_id, queue):
+    def write_event(self, table, timestamp, machine_id, activity_type, part_id, queue, current_time_str= None):
         #--- Write the given evento into the the database
         
         with sqlite3.connect(self.database_path) as DB: 
-            DB.execute(f"""
-            INSERT INTO {table} (timestamp, machine_id, activity_type, part_id, queue)
-            VALUES (?, ?, ?, ?, ?)""", (timestamp, machine_id, activity_type, part_id, queue))
+            if table == "real_log":
+                DB.execute(f"""
+                INSERT INTO {table} (timestamp, machine_id, activity_type, part_id, queue, current_time_str)
+                VALUES (?, ?, ?, ?, ?, ?)""", (timestamp, machine_id, activity_type, part_id, queue, current_time_str))
+
+            if table == "digital_log":
+                DB.execute(f"""
+                INSERT INTO {table} (timestamp, machine_id, activity_type, part_id, queue)
+                VALUES (?, ?, ?, ?, ?)""", (timestamp, machine_id, activity_type, part_id, queue))
 
             DB.commit()
+    
+    
 
     def read_all_events(self, table):
         #--- Read all the events from the given table
@@ -114,3 +154,28 @@ class Database():
         with sqlite3.connect(self.database_path) as DB:
             DB.execute(f"UPDATE {table} SET {column} = ? WHERE event_id = ?", (new_value, line_id))
             DB.commit()
+
+    # --------- Function to add a UID and partid to the table ---------
+    def add_UID_partid(self, table_name, uid, partid, current_time_str):
+        with sqlite3.connect(self.database_path) as DB:
+            # Check if UID already exists in table
+            result = DB.execute(f"SELECT UID FROM {table_name} WHERE UID = ?", (uid,)).fetchone()
+            if result is None:
+                # UID does not exist in table, so insert new row
+                DB.execute(f"INSERT INTO {table_name} (UID, PID, current_time_str) VALUES (?, ?, ?)", (uid, partid, current_time_str))
+            else:
+                # UID already exists in table, so update existing row
+                DB.execute(f"UPDATE {table_name} SET PID = ? WHERE UID = ?", (partid, uid))
+            DB.commit()
+    
+    # --------- Function to retrieve PID for a given partid ---------
+    def get_PID(self, table_name, partid):
+        with sqlite3.connect(self.database_path) as DB:
+            result = DB.execute(f"SELECT UID FROM {table_name} WHERE PID = ?", (partid,)).fetchone()
+            if result is None:
+                #--- [ERROR] Part ID not stored in dictionary
+                print(f"[ERROR][interfaceDB.py/get_PID()] The part id '{partid}' was not found in the database: '{self.database_path}'")
+                print("Sending a generic UID: {x}")
+                return "x"
+            else:
+                return result[0]

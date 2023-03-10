@@ -496,7 +496,7 @@ class Service_Handler():
                     #--- Since the feedback is only for the rigth next branching machine,
                     # we just care about the  conveyor in which the path selected
                     machine_id = machine_selected.get_id()
-                    queue_id = selected_path[part_location].id
+                    queue_id = str(selected_path[part_location].id)
                     # part_id already there
 
                     #--- Send the MQTT publish payload
