@@ -30,6 +30,7 @@ class Broker_Manager():
         self.UID_to_PID_dict = {}
         self.PID_to_UID_dict = {}
         self.PID_counter = 1
+        self.old_UID = 0
 
         #--- Database
         self.real_database_path = real_database_path
@@ -152,7 +153,9 @@ class Broker_Manager():
         #--- If machine 1, (re)create the PID for that given UID
         if machine_id == "Machine 1":
             #--- Create the PID related to the UID and assign it in the PID dict
-            self.part_ID_creator(unique_ID, current_time_str)
+            if self.old_UID != unique_ID:
+                self.part_ID_creator(unique_ID, current_time_str)
+                self.old_UID = unique_ID
 
         #--- For all the machines (including machine 1)
         # Take the corresponded PID of the given UID
