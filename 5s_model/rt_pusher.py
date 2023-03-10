@@ -68,6 +68,7 @@ def on_message(client, userdata, msg):
         message = json.loads(msg.payload.decode("utf-8"))
         if message["machine_id"] == "1" and message["status"] == "Finished":
             part_count += 1
+            print("in message",part_count)
             policy.append(message["queue_id"])
         
 
@@ -102,14 +103,14 @@ try:
         if system_status == "start":
             if part_count > 0:
                 #--- policy: towards station 2
-                if sensor.value() > 1 and policy[len(policy) - part_count] == "station_2":
+                if sensor.value() > 3 and policy[len(policy) - part_count] == "2":
                     open_station_2()
                     part_count -= 1
                     print("policy to 2")
                     next_station = "station_3"
 
                 #--- policy: towards station 3
-                elif sensor.value() > 1 and policy[len(policy) - part_count] == "station_3":
+                elif sensor.value() > 3 and policy[len(policy) - part_count] == "3":
                     open_station_3()
                     part_count -= 1
                     print("policy to 3")

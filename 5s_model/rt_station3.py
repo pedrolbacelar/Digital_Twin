@@ -49,7 +49,7 @@ pusher = MediumMotor('outD')
 pusher.reset()
 pos_neutral = 0
 pusher_speed = 400
-st_num = "3"      #--- change st_num for each code depending on the machine_id
+
 
 conveyor = LargeMotor('outA')
 station = LargeMotor ('outC')
