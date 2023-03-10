@@ -51,7 +51,7 @@ PubSubClient client(wifiClient);
 #define SS_PIN 5
 #define RST_PIN 22
 
-MFRC522 rfid(SS_PIN, RST_PIN); // Instance of the class
+MFRC522 rfid(SS_PIN, RST_PIN);  // Instance of the class
 
 MFRC522::MIFARE_Key key;
 
@@ -61,31 +61,26 @@ byte nuidPICC[4];
 // counter variable
 int count = 1;
 
-void setup()
-{
+void setup() {
   Serial.begin(115200);
-  SPI.begin();     // Init SPI bus
-  rfid.PCD_Init(); // Init MFRC522
+  SPI.begin();      // Init SPI bus
+  rfid.PCD_Init();  // Init MFRC522
 
-  for (byte i = 0; i < 6; i++)
-  {
+  for (byte i = 0; i < 6; i++) {
     key.keyByte[i] = 0xFF;
   }
 
   // initiating wifi
   WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED)
-  {
+  while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
   }
   client.setServer(mqtt_server, 1883);
   Serial.println(F("This code scan the MIFARE Classsic NUID."));
 }
 
-void loop()
-{
-  if (!client.connected())
-  {
+void loop() {
+  if (!client.connected()) {
     Serial.println("not connected");
     reconnect();
   }
@@ -99,35 +94,33 @@ void loop()
   if (!rfid.PICC_ReadCardSerial())
     return;
 
-  if (rfid.uid.uidByte[0] != nuidPICC[0] ||
-      rfid.uid.uidByte[1] != nuidPICC[1] ||
-      rfid.uid.uidByte[2] != nuidPICC[2] ||
-      rfid.uid.uidByte[3] != nuidPICC[3])
-  {
+  if (rfid.uid.uidByte[0] != nuidPICC[0] || rfid.uid.uidByte[1] != nuidPICC[1] || rfid.uid.uidByte[2] != nuidPICC[2] || rfid.uid.uidByte[3] != nuidPICC[3]) {
     Serial.println();
     Serial.println(F("New card"));
 
     // Store NUID into nuidPICC array
-    for (byte i = 0; i < 4; i++)
-    {
+    for (byte i = 0; i < 4; i++) {
       nuidPICC[i] = rfid.uid.uidByte[i];
     }
 
+    // ---------------------- WITHOUT VARIABLE ----------------------
+
+    // String RFID_ID = printDec(rfid.uid.uidByte, rfid.uid.size);
+    // Serial.println(RFID_ID);
+
+    // ----------------------- WITH VARIABLE -----------------------
     String RFID_ID = printDec(rfid.uid.uidByte, rfid.uid.size);
     Serial.println(RFID_ID);
-    // int part_id = count;
-    // Serial.println(part_id);
-    // String current_id;
-    // current_id = String(part_id);
-
-    //--- Copy the String RFID
-    String RFID_ID_dict = "{'machine_id':'1','part_id':"+"'"+RFID_ID+"'"+"}";
-    //--- Define the array of chars
+    String RFID_ID_dict = "{'machine_id':'1','part_id':";
+    RFID_ID_dict.concat("'");
+    RFID_ID_dict.concat(RFID_ID);
+    RFID_ID_dict.concat("'");
+    RFID_ID_dict.concat("}");
     char payload[RFID_ID_dict.length() + 1];
-
-    //--- Convert a string into a array of chars
     RFID_ID_dict.toCharArray(payload, sizeof(payload));
-    client.publish("part_id",RFID_ID_dict)
+    client.publish("part_id", payload);
+
+    //--------------------------------------------------------------
 
     // switch (RFID_ID)
     // {
@@ -184,53 +177,44 @@ void loop()
     //   //count += 1;
     // }
 
-    else Serial.println(F("Card repeated."));
+  } else Serial.println(F("Card repeated."));
 
-    // Halt PICC
-    rfid.PICC_HaltA();
+  // Halt PICC
+  rfid.PICC_HaltA();
 
-    // Stop encryption on PCD
-    rfid.PCD_StopCrypto1();
-  }
-
-  void reconnect()
-  {
-    while (!client.connected())
-    {
-      Serial.print("inside reconnect");
-      if (client.connect("esp32_client"))
-      {
-        Serial.println("if client collect");
-        // publish Hello
-        send_message();
-      }
-      else
-      {
-        delay(5000);
-      }
-    }
-  }
-
-  void send_message()
-  {
-    // publish a message to an MQTT topic
-    client.publish("test_topic", "Hello from ESP32!");
-    Serial.println("mqtt verification test");
-  }
-
-  String printDec(byte * buffer, byte bufferSize)
-  {
-    String result = "";
-    for (byte i = 0; i < bufferSize; i++)
-    {
-      result += (String)buffer[i];
-    }
-    return result;
-    // for (byte i = 0; i < bufferSize; i++) {
-    //   Serial.print(buffer[i] < 0x10 ? " 0" : " ");
-    //   Serial.print(buffer[i], DEC);
-    //   Serial.print((int)buffer[i]);
-    // }
-  }
-
+  // Stop encryption on PCD
+  rfid.PCD_StopCrypto1();
 }
+
+void reconnect() {
+  while (!client.connected()) {
+    Serial.print("inside reconnect");
+    if (client.connect("esp32_client")) {
+      Serial.println("if client collect");
+      // publish Hello
+      send_message();
+    } else {
+      delay(5000);
+    }
+  }
+}
+
+void send_message() {
+  // publish a message to an MQTT topic
+  client.publish("test_topic", "Hello from ESP32!");
+  Serial.println("mqtt verification test");
+}
+
+String printDec(byte *buffer, byte bufferSize) {
+  String result = "";
+  for (byte i = 0; i < bufferSize; i++) {
+    result += (String)buffer[i];
+  }
+  return result;
+  // for (byte i = 0; i < bufferSize; i++) {
+  //   Serial.print(buffer[i] < 0x10 ? " 0" : " ");
+  //   Serial.print(buffer[i], DEC);
+  //   Serial.print((int)buffer[i]);
+  // }
+}
+
