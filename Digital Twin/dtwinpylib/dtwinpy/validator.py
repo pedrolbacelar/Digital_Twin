@@ -7,10 +7,10 @@ import sqlite3
 
 #--- Reload Package
 
-"""import importlib
+import importlib
 import dtwinpylib
 #reload this specifc module to upadte the class
-importlib.reload(dtwinpylib.dtwinpy.interfaceDB)"""
+importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
 
 
 class Validator():

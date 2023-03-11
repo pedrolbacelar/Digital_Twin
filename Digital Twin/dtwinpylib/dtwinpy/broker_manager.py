@@ -120,7 +120,7 @@ class Broker_Manager():
             part_id = "Part 0"
 
         #--- Write the information into the real database
-        self.real_database.write_event('real_log', current_timestamp, machine_id, status, part_id, queue_id, current_time_str)
+        self.real_database.write_event('real_log', 0, machine_id, status, part_id, queue_id, current_time_str, current_timestamp)
 
 
 

@@ -27,10 +27,7 @@
       "capacity": 1,
       "contemp": 20000,
       "cluster": 2,
-      "worked_time": [
-        5202,
-        "Part 1"
-      ]
+      "worked_time": 0
     },
     {
       "activity": 3,
@@ -136,7 +133,9 @@
     [
       "Part 3"
     ],
-    [],
+    [
+      "Part 1"
+    ],
     [],
     [],
     []

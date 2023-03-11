@@ -2,9 +2,14 @@ import sqlite3
 import shutil
 
 class Database():
-    def __init__(self, database_path, event_table):
+    def __init__(self, database_path, event_table, start_time = None, end_time= None):
         self.database_path = database_path
         self.event_table = event_table
+
+        #--- This both parameters are used to constrain the traces from the real log
+        self.start_time = start_time
+        self.end_time = end_time
+
 
         with sqlite3.connect(self.database_path) as db:
             tables = db.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
@@ -22,7 +27,8 @@ class Database():
                     activity_type TEXT,
                     part_id TEXT,
                     queue TEXT,
-                    current_time_str
+                    current_time_str TEXT,
+                    timestamp_real INTEGER
                 )
                 """)
 
@@ -69,7 +75,8 @@ class Database():
                 activity_type TEXT,
                 part_id TEXT,
                 queue TEXT,
-                current_time_str TEXT
+                current_time_str TEXT,
+                timestamp_real INTEGER
             )
             """)
 
@@ -83,14 +90,14 @@ class Database():
             digital_model_DB.commit()
 
 
-    def write_event(self, table, timestamp, machine_id, activity_type, part_id, queue, current_time_str= None):
+    def write_event(self, table, timestamp, machine_id, activity_type, part_id, queue, current_time_str= None, timestamp_real= None):
         #--- Write the given evento into the the database
         
         with sqlite3.connect(self.database_path) as DB: 
             if table == "real_log":
                 DB.execute(f"""
-                INSERT INTO {table} (timestamp, machine_id, activity_type, part_id, queue, current_time_str)
-                VALUES (?, ?, ?, ?, ?, ?)""", (timestamp, machine_id, activity_type, part_id, queue, current_time_str))
+                INSERT INTO {table} (timestamp, machine_id, activity_type, part_id, queue, current_time_str, timestamp_real)
+                VALUES (?, ?, ?, ?, ?, ?, ?)""", (0, machine_id, activity_type, part_id, queue, current_time_str, timestamp_real))
 
             if table == "digital_log":
                 DB.execute(f"""
@@ -106,7 +113,10 @@ class Database():
         
         print(f"=== Reading all the events from table: {table} ===")
         with sqlite3.connect(self.database_path) as digital_model_DB:
-            event_points = digital_model_DB.execute(f"SELECT * FROM {table}")
+            if self.start_time != None and self.end_time != None:
+                event_points = digital_model_DB.execute(f"SELECT * FROM {table} WHERE timestamp_real >= ? AND timestamp_real <= ?", (self.start_time, self.end_time))
+            else:
+                event_points = digital_model_DB.execute(f"SELECT * FROM {table}")
             for event_point in event_points:
                 print(event_point)
             digital_model_DB.commit()
@@ -116,24 +126,39 @@ class Database():
 
     def get_distinct_values(self, column, table):
         with sqlite3.connect(self.database_path) as DB:
-            return DB.execute(f"SELECT DISTINCT {column} FROM {table}").fetchall()
+            if self.start_time != None and self.end_time != None:
+                return DB.execute(f"SELECT DISTINCT {column} FROM {table} WHERE timestamp_real >= ? AND timestamp_real <= ?", (self.start_time, self.end_time)).fetchall()
+
+            else:
+                return DB.execute(f"SELECT DISTINCT {column} FROM {table}").fetchall()
 
     def get_time_activity_of_column(self, column, column_id, table):
         with sqlite3.connect(self.database_path) as DB:
-            return DB.execute(f"SELECT timestamp, activity_type FROM {table} WHERE {column}=?", column_id).fetchall()
+            if self.start_time != None and self.end_time != None:
+                return DB.execute(f"SELECT timestamp, activity_type FROM {table} WHERE {column}=? AND timestamp_real >= ? AND timestamp_real <= ?", (column_id, self.start_time, self.end_time)).fetchall()
+            else:
+                return DB.execute(f"SELECT timestamp, activity_type FROM {table} WHERE {column}=?", column_id).fetchall()
 
     def get_database_path(self):
         return self.database_path
     
     def read_store_data(self, table):
         with sqlite3.connect(self.database_path) as digital_model_DB: 
-            data_full_trace = digital_model_DB.execute(f"SELECT timestamp, machine_id, activity_type, part_id FROM {table}").fetchall()
+            if self.start_time != None and self.end_time != None:
+                data_full_trace = digital_model_DB.execute(f"SELECT timestamp, machine_id, activity_type, part_id FROM {table} WHERE timestamp_real >= ? AND timestamp_real <= ?", (self.start_time, self.end_time)).fetchall()
+            else:
+                data_full_trace = digital_model_DB.execute(f"SELECT timestamp, machine_id, activity_type, part_id FROM {table}").fetchall()
+ 
             digital_model_DB.commit()
         return data_full_trace
     
     def read_store_data_all(self, table):
         with sqlite3.connect(self.database_path) as digital_model_DB: 
-            data_full_trace = digital_model_DB.execute(f"SELECT timestamp, machine_id, activity_type, part_id, queue FROM {table}").fetchall()
+            if self.start_time != None and self.end_time != None:
+                data_full_trace = digital_model_DB.execute(f"SELECT timestamp, machine_id, activity_type, part_id, queue FROM {table} WHERE timestamp_real >= ? AND timestamp_real <= ?", (self.start_time, self.end_time)).fetchall()
+            else:
+                data_full_trace = digital_model_DB.execute(f"SELECT timestamp, machine_id, activity_type, part_id, queue FROM {table}").fetchall()
+        
             digital_model_DB.commit()
         return data_full_trace
 
@@ -144,12 +169,21 @@ class Database():
 
     def read_part_path(self, partid, table):
         with sqlite3.connect(self.database_path) as DB:
-            return DB.execute(f"SELECT * FROM {table} WHERE part_id=?", partid).fetchall()
+            if self.start_time != None and self.end_time != None:
+                return DB.execute(f"SELECT * FROM {table} WHERE part_id=? AND timestamp_real >= ? AND timestamp_real <= ?", (partid, self.start_time, self.end_time)).fetchall()
+
+            else:
+                return DB.execute(f"SELECT * FROM {table} WHERE part_id=?", partid).fetchall()
+
 
     def findLine_2conditions(self, table, column1, column2, condition1, condition2):
         with sqlite3.connect(self.database_path) as DB:
-            return DB.execute(f"SELECT event_id FROM {table} WHERE {column1}=? AND {column2}= ?", (condition1, condition2)).fetchall()
-        
+            if self.start_time != None and self.end_time != None:
+                return DB.execute(f"SELECT event_id FROM {table} WHERE {column1}=? AND {column2}= ? AND timestamp_real >= ? AND timestamp_real <= ?", (condition1, condition2, self.start_time, self.end_time)).fetchall()
+            else:
+                return DB.execute(f"SELECT event_id FROM {table} WHERE {column1}=? AND {column2}= ? ", (condition1, condition2)).fetchall()
+
+
     def update_column(self, table, column, line_id, new_value):
         with sqlite3.connect(self.database_path) as DB:
             DB.execute(f"UPDATE {table} SET {column} = ? WHERE event_id = ?", (new_value, line_id))
