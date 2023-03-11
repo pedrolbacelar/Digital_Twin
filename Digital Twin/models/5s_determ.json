@@ -11,9 +11,12 @@
       ],
       "frequency": 999,
       "capacity": 1,
-      "contemp": 4000,
+      "contemp": 10000,
       "cluster": 1,
-      "worked_time": 0
+      "worked_time": [
+        5403,
+        "Part 4"
+      ]
     },
     {
       "activity": 2,
@@ -25,7 +28,7 @@
       ],
       "frequency": 999,
       "capacity": 1,
-      "contemp": 20000,
+      "contemp": 10000,
       "cluster": 2,
       "worked_time": 0
     },
@@ -41,7 +44,10 @@
       "capacity": 1,
       "contemp": 7000,
       "cluster": 2,
-      "worked_time": 0
+      "worked_time": [
+        5202,
+        "Part 3"
+      ]
     },
     {
       "activity": 4,
@@ -79,7 +85,7 @@
         1,
         2
       ],
-      "capacity": 1,
+      "capacity": 10,
       "frequency": 1000,
       "contemp": 200
     },
@@ -88,7 +94,7 @@
         1,
         3
       ],
-      "capacity": 1,
+      "capacity": 10,
       "frequency": 1000,
       "contemp": 200
     },
@@ -97,7 +103,7 @@
         2,
         4
       ],
-      "capacity": 1,
+      "capacity": 10,
       "frequency": 1000,
       "contemp": 100
     },
@@ -106,7 +112,7 @@
         3,
         4
       ],
-      "capacity": 1,
+      "capacity": 10,
       "frequency": 1000,
       "contemp": 100
     },
@@ -115,7 +121,7 @@
         4,
         5
       ],
-      "capacity": 1,
+      "capacity": 10,
       "frequency": 1000,
       "contemp": 100
     },
@@ -124,18 +130,16 @@
         5,
         1
       ],
-      "capacity": 3,
+      "capacity": 10,
       "frequency": 1000,
       "contemp": 300
     }
   ],
   "initial": [
     [
-      "Part 3"
+      "Part 5"
     ],
-    [
-      "Part 1"
-    ],
+    [],
     [],
     [],
     []

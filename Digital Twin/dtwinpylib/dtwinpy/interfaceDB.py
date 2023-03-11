@@ -173,7 +173,7 @@ class Database():
                 return DB.execute(f"SELECT * FROM {table} WHERE part_id=? AND timestamp_real >= ? AND timestamp_real <= ?", (partid, self.start_time, self.end_time)).fetchall()
 
             else:
-                return DB.execute(f"SELECT * FROM {table} WHERE part_id=?", partid).fetchall()
+                return DB.execute(f"SELECT * FROM {table} WHERE part_id=?", (partid,)).fetchall()
 
 
     def findLine_2conditions(self, table, column1, column2, condition1, condition2):

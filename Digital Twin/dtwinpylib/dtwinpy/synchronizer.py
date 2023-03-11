@@ -1,20 +1,24 @@
 #--- Import DT Features
 from .validator import Validator
 from .interfaceDB import Database
+from .helper import Helper
+
+#--- Normal database
 import json
 import sqlite3
 
 #--- Reload Package
 
-"""import importlib
+import importlib
 import dtwinpylib
 #reload this specifc module to upadte the class
 importlib.reload(dtwinpylib.dtwinpy.validator)
-"""
+
 
 
 class Zone():
     def __init__(self, machine, queue_list):
+        self.help = Helper()
         self.name = "Zone of " + machine.get_name()
         self.machine = machine
         self.queue_list = queue_list
@@ -33,19 +37,36 @@ class Zone():
         self.parts_ids_in_queue = []
         self.parts_ids_in_machine = []
 
-        #--- Initial Conditions
+        #---------- Initial Conditions ----------
         # Multiple Queues
         if len(self.queue_list) > 1:
             ini_count = 0
             for queue in self.queue_list:
                 ini_count += queue.get_len()
-            self.Zone_initial = ini_count
-        
+                
+                #-- Initial counter
+                self.Zone_initial = ini_count
+
+                #-- Initial conditions of the parts already in the Queue
+                initial_parts_in_queue = queue.get_all_items()
+                for part in initial_parts_in_queue:
+                    self.parts_ids_in_queue.append(part.get_name())
+
         # Single Queue
         if len(self.queue_list) == 1:
             queue = self.queue_list[0]
             self.Zone_initial = queue.get_len()
-    
+
+            #-- Initial conditions of the parts already in the Queue
+            initial_parts_in_queue = queue.get_all_items()
+            for part in initial_parts_in_queue:
+                self.parts_ids_in_queue.append(part.get_name())
+
+        #--- Initial Condition machine
+        if self.machine.get_initial_part() != None:
+            initial_part = self.machine.get_initial_part()
+            self.parts_ids_in_machine.append(initial_part.get_name())
+
     #--- A part entered the Zone
     def addIn(self, part_id):
         self.inZone += 1
@@ -75,19 +96,32 @@ class Zone():
 
         #--- REMOVE from the previous Queue (following the order of the simulation)
         #--- Everytime a part is REMOVE to the zone we add it to the queue
-        if self.get_first_zone_event() == False and len(self.parts_ids_in_queue)>0:
+        # OLD: if self.get_first_zone_event() == False and len(self.parts_ids_in_queue)>0:
+        #--- Moda a caralha
+        if part_id in self.parts_ids_in_queue:
             #--- I just remove if is not the first event (Finished). If something never
             # entered the zone and it's leaveing, I don't care about it.
             self.parts_ids_in_queue.remove(part_id)
-        
+        else:
+            self.help.printer(f"[WARNING][synchronizer.py/Mstarted()] {part_id} was not found in elements vector of the queue", "yellow")
+            #print(f"[WARNING][synchronizer.py/Mstarted()] {part_id} was not found in elements vector of the queue")
+            print("This might happen if the element is an initial part. If that not the case, CHECK IT OUT!")
+            print(f"printing the list of parts in the queue: {self.parts_ids_in_queue}")
+    
     def Mfinished(self, part_id):
         self.machine_working -= 1
 
-        #--- REMOVE the part from the machine vector everytime the machine finished the processing
+        """#--- REMOVE the part from the machine vector everytime the machine finished the processing
         if self.get_first_zone_event() == False and len(self.parts_ids_in_machine)>0:
             #--- I just remove if is not the first event (Finished). If something never
             # entered the zone and it's leaveing, I don't care about it.
+            self.parts_ids_in_machine.remove(part_id)"""
+        
+        if part_id in self.parts_ids_in_machine:
             self.parts_ids_in_machine.remove(part_id)
+        else:
+            self.help.printer(f"[WARNING][synchronizer.py/Mstarted()] {part_id} was not found in elements vector of the machine", "yellow")
+
     
 
     def self_validation(self, Verbose = True):
@@ -110,6 +144,7 @@ class Zone():
 
         #-- Parts being transported within the Conveyor when the Sync was done
         parts_in_convey_counter = 0
+
         # For each conveyor within the machine conveyors ...
         for conveyor in machine_conveys_in:
             parts_in_convey = len(conveyor.get_all_items())
@@ -192,6 +227,14 @@ class Synchronizer():
         #--- Digital Model
         (self.machines_vector, self.queues_vector) = self.digital_model.get_model_components()
         
+        #--- Last part id according to the digital model
+        # Assuming that no parts were added into the system or removed, this assumption works fine
+        # But if some part was added to the system, the sync will create repetitive part.
+        # If some part were removed of the system, we're going to have it stuck in some queue.
+        # Given that, ASSUMPTION: No parts are ADD or REMOVE from the system
+
+        self.last_part_id = self.machines_vector[-1].get_last_part_id()
+
     def create_zones(self):
         for machine in self.machines_vector:
             #--- Basic information from the machine
@@ -211,13 +254,6 @@ class Synchronizer():
             
             #--- Extract the important informations
             (time, machine_name, status, part_id, queue_name) = (event[0], event[1], event[2], event[3], event[4]) 
-            
-            #--- Tracking the last part id
-            #>>>>>>>>>>>>>>>>>> ASSUMPTION: The highest ID of the part is within the traces being analyzed <<<<<<<<<<<<<<<<<<<
-            highest_id = part_id
-            if highest_id < part_id:
-                #--- Update the highest id
-                highest_id = part_id
 
             # We just care about the events with status "Finished",
             # because this in the only moment when we subtract some part from the current
@@ -257,15 +293,14 @@ class Synchronizer():
                 
                 #--- Before Assigned the part for the next zone, check if the machine is final machine ---
                 if machine_obj.get_final_machine() == True:
+                    # [OLD]
                     #--- Increment the ID of the new part going back to the system
-                    part_id_int = int(''.join(filter(str.isdigit, part_id)))
-                    new_part_id = f"Part {part_id_int + 1}"
+                    self.last_part_id += 1
+                    new_part_id = f"Part {self.last_part_id}"
                     
                     #--- Add to the next zone
                     next_zone.addIn(new_part_id)
 
-                    #-- Update the highest_id
-                    highest_id = new_part_id
 
                 #--- Machines that are not the final machine
                 else:
@@ -277,13 +312,14 @@ class Synchronizer():
                 # from a Queue and we are not in the case where the first trace of the machine is finish becuase
                 # it had already a part inside
                 current_zone.set_first_zone_event(False)
-
+                
                 #--- Update starter counter and flags
                 current_zone.Mstarted(part_id)
                 current_zone.set_last_started_time(time)
 
                 #--- Updated the event type
                 current_zone.set_event_type("Started")
+
 
             #--- OLD
             #--- After finishing an event (Started or Finished)
@@ -372,7 +408,10 @@ class Synchronizer():
 
                 #--- Calculate the Delta T between the last started time of the machine and
                 # the current time of the real world (Tnow)
-                Delta_T_started = self.Tnow - current_zone.get_last_started_time() # TODO: GET also the last started Part!
+                Delta_T_started = self.Tnow - current_zone.get_last_started_time() 
+                
+                #- Avoid the case when the machine is working, but rigth just received the part
+                if Delta_T_started == 0: Delta_T_started = 10
 
                 #--- Positioning a part within the working machine
                 # ============= Update Model.json =============

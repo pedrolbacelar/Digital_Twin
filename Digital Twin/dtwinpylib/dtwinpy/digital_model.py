@@ -13,6 +13,7 @@ from .components import Branch
 
 #--- Importing Database components
 from .interfaceDB import Database
+from .helper import Helper
 
 #--- Reload Package
 
@@ -27,18 +28,19 @@ importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
 
 #--- Class Model
 class Model():
-    def __init__(self, name, model_path, database_path, initial= False, until= None, part_type= "A", loop_type= "closed", maxparts = None, targeted_part_id= None, targeted_machine_id= None):
+    def __init__(self, name, model_path, database_path, initial= False, until= None, part_type= "A", loop_type= "closed", maxparts = None, targeted_part_id= None, targeted_cluster= None):
         #-- Main Model Properties
         self.name = name
         self.model_path = model_path
         self.env = simpy.Environment()
+        self.helper = Helper()
 
         #--- Stop conditions
         self.until = until
         self.exit = self.env.event()
         self.maxparts = maxparts
         self.targeted_part_id = targeted_part_id
-        self.targeted_machine_id = targeted_machine_id
+        self.targeted_cluster = targeted_cluster
 
         #-- Database Properties
         self.database_path = database_path
@@ -190,18 +192,19 @@ class Model():
         for the part with the highest ID to be the last_part_id.
         """
         #--- Started id
-        highest_id = "Part 0"
+        highest_id = 0
         
         #--- For all the parts in the model
         for part in self.all_part_in_model:
-            part_id = part.get_name()
+            part_id = part.get_id()
 
             #--- If the current part id is higher than the last highest value, we have a new high value
             if part_id > highest_id:
                 highest_id = part_id
 
         #--- Assign the last part id with the highest value
-        self.last_part_id = int(''.join(filter(str.isdigit, highest_id)))
+        #self.last_part_id = int(''.join(filter(str.isdigit, highest_id)))
+        self.last_part_id = highest_id
 
         #--- Assign the last part id to all the machines
         for machine in self.machines_vector:
@@ -431,13 +434,13 @@ class Model():
     # ----- Stopd condition in a specific machine -----
     def setting_stop_machines(self):
         """
-        For the specific selected machine (targeted_machine_id) specify what is the id of the
+        For the specific selected machine (targeted_cluster) specify what is the id of the
         part that the machine shoudl stop when it arrives. 
         """
         #--- For each existing machine
         for machine in self.machines_vector:
             #--- If the machines has the same ID of the selected machine
-            if machine.get_id() == self.targeted_machine_id:
+            if machine.get_cluster() == self.targeted_cluster:
                 #--- Tells for that specific machine for which part id it should stop
                 machine.set_stop_for_id(self.targeted_part_id)
     # =======================================================
@@ -528,8 +531,7 @@ class Model():
         # --- Discover the last part id and assign to the machines
         self.find_last_part_id()
 
-        # --- Setting the part id to stop the simulation for the right machine
-        self.setting_stop_machines()
+        
         #====================================================================
 
 
@@ -547,6 +549,11 @@ class Model():
         #--- Discovery Branching machines, create Branch object and assigned it
         self.branch_discovery()
         #=====================================================================
+
+        #========================== Setting Targeted Part ID ==================
+        # --- Setting the part id to stop the simulation for the right machine
+        self.setting_stop_machines()
+        #======================================================================
 
     # ================================================
 
@@ -685,7 +692,7 @@ class Model():
             throughput()
         
         else:
-            print("[ERROR][digital_model.py / analyze_result()] No parts finished in the simulation")
+            self.helper.printer("[WARNING][digital_model.py / analyze_result()] No parts finished in the simulation", "yellow")
         
     
     # ----- Calculate the RCT from the previous simulation -----

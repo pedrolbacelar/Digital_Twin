@@ -557,7 +557,8 @@ class Machine():
                             #--- Put the part in the rigth conveyor
                             conveyor_to_put.start_transp(self.part_in_machine)
                             flag_allocated_part = True
-
+                            
+                            
                             # ------- STOP Machine condition -------
                             # --- If the machine was set to stop the simulation when finish up this part:
                             if self.flag_stop_for_id == self.part_in_machine.get_id():
@@ -686,7 +687,8 @@ class Machine():
         return self.conveyors_out
     def get_branch(self):
         return self.branch
-
+    def get_last_part_id(self):
+        return self.last_part_id
     #--------- Defining SETs ---------
     def set_queue_in(self, value):
         self.queue_in = value
