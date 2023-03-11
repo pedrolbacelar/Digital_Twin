@@ -16,26 +16,29 @@ from .interfaceDB import Database
 
 #--- Reload Package
 
-"""import importlib
+import importlib
 import dtwinpylib
 #reload this specifc module to upadte the class
 importlib.reload(dtwinpylib.dtwinpy.components)
 importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
 # This is different from when you're importing the package direct because here the module has the same
 # name as the library, so we start importing from the library root for the software understand that we are 
-# importing the folder and not the library"""
+# importing the folder and not the library
 
 #--- Class Model
 class Model():
-    def __init__(self, name, model_path, database_path, initial= False, until= None, part_type= "A", loop_type= "closed", maxparts = None, targeted_part_id= None):
+    def __init__(self, name, model_path, database_path, initial= False, until= None, part_type= "A", loop_type= "closed", maxparts = None, targeted_part_id= None, targeted_machine_id= None):
         #-- Main Model Properties
         self.name = name
         self.model_path = model_path
         self.env = simpy.Environment()
+
+        #--- Stop conditions
         self.until = until
         self.exit = self.env.event()
         self.maxparts = maxparts
         self.targeted_part_id = targeted_part_id
+        self.targeted_machine_id = targeted_machine_id
 
         #-- Database Properties
         self.database_path = database_path
@@ -47,6 +50,8 @@ class Model():
         self.part_type = part_type       
         self.initial = initial
         self.last_part_id = 0
+        self.all_part_in_model = []
+
 
         #--- Vectors to store main components
         # Create an empty list to store Machine objects
@@ -59,6 +64,8 @@ class Model():
         self.terminator = Terminator(env= self.env, loop_type= "closed")
 
     # ==================== SETTING FUNCTIONS ====================
+
+    # ----- Link the Queues with the Machines -----
     def queue_allocation(self):
         """
         Allocate each queue for the right machine base on the 
@@ -77,6 +84,8 @@ class Model():
 
             #Arc endind point (going in of the next machine) -> Queue In
             self.machines_vector[arc_end].add_queue_in(queue) #add current queue      
+    
+    # ----- Allocate the initial parts into the Queues ----- 
     def initial_allocation(self):
         """
         Allocate the Working in Progress (WIP) parts of the beginning 
@@ -86,16 +95,119 @@ class Model():
             # Load the json data
             data = json.load(json_file)
 
+        """
+            #### OLD: before syncing be assigning the ids
             #Create the initial parts
             part_id = 1
             for n_queues in range(len(data['initial'])):
                 for n_parts in range(data['initial'][n_queues]):
                     self.initial_parts.append(Part(id= part_id, type= self.part_type, location=n_queues, creation_time=0))
                     part_id += 1
-
+            
         generator_initial = Generator(env= self.env, loop_type="closed", part_vector= self.initial_parts, queue_vector= self.queues_vector)
         self.queues_vector = generator_initial.allocate_part()
+        """
 
+        #--- New Implementation with the IDs already assigned
+        #--- For each queue look for assigned part ids
+        queue_index = 0
+        for queue_parts in data['initial']:
+            #--- For each part within the queue being analyzed
+            try:
+                for part_in_queue in queue_parts:
+                    #--- Extract the part id
+                    part_name = part_in_queue
+                    part_id = int(''.join(filter(str.isdigit, part_name)))
+
+                    #--- Create the Part object
+                    part_created = Part(id= part_id, type= self.part_type, location= queue_index, creation_time=0)
+
+                    #--- Assign the created parts in the vector for initial parts (not used anymore)
+                    self.initial_parts.append(part_created)
+
+                    #--- Find the right queue according to the index
+                    queue = self.queues_vector[queue_index]
+
+                    #--- Assign the part into the queue
+                    queue.put(part_created)
+
+                    #--- Add the part to the global vector of parts
+                    self.all_part_in_model.append(part_created)
+                    
+            except TypeError:
+                print(f"[ERROR][digital_model.py/initial_allocation()] Initial conditions of Queue {queue_index} is not a vector!")
+                print("Assign Queue as empty...")
+
+
+            #--- Update the queue_index to go for the next queue
+            queue_index += 1
+
+    # ----- Find parts alreayd working within machine -----
+    def discovery_working_parts(self):
+
+        #--- Open the json file
+        with open(self.model_path) as json_file:
+            #--- Import json data
+            data = json.load(json_file)
+
+            #--- For each node in the simulation
+            for node in data['nodes']:
+                # --- Check if there is any initial part
+                if node["worked_time"] != 0:
+                    #-- Create the initial part
+                    ## not sure if location matters here ##
+                    ## part created in the past in relation with the current simulation ##
+                    # ASSUMPTION: In terms of RCT, it's better to just consider the remaining time for production
+                    # So, consider creation time= 0...
+                    
+                    #--- Get the part id assigned
+                    part_name = node["worked_time"][1]
+                    part_id= int(''.join(filter(str.isdigit, part_name)))
+                    initial_part = Part(id= part_id, type= "A", location= None, creation_time= 0) 
+
+                    #--- Get the right machine
+                    machine = self.machines_vector[(node["activity"] - 1)]
+
+                    #--- Assign the part to the rigth machine
+                    machine.set_initial_part(initial_part)
+
+                    #--- Add the part to the global vector of parts
+                    self.all_part_in_model.append(initial_part)
+
+                    #--- Get the worked time value
+                    if type(node['worked_time']) == list:
+                        worked_time= node['worked_time'][0]
+                    else:
+                        worked_time = node['worked_time']
+
+                    #--- Assign the Worked Time into the machine
+                    machine.set_worked_time(worked_time)
+
+    # ----- Find the part with highest id -----
+    def find_last_part_id(self):
+        """
+        This function looks through all the parts in the simulation and searches
+        for the part with the highest ID to be the last_part_id.
+        """
+        #--- Started id
+        highest_id = "Part 0"
+        
+        #--- For all the parts in the model
+        for part in self.all_part_in_model:
+            part_id = part.get_name()
+
+            #--- If the current part id is higher than the last highest value, we have a new high value
+            if part_id > highest_id:
+                highest_id = part_id
+
+        #--- Assign the last part id with the highest value
+        self.last_part_id = int(''.join(filter(str.isdigit, highest_id)))
+
+        #--- Assign the last part id to all the machines
+        for machine in self.machines_vector:
+            machine.set_last_part_id(self.last_part_id)
+
+    # ----- Merge overlaping queues in the input of machines -----
     def merge_queues(self):
         """
         Function to merge existing queues in the input of a machines.
@@ -177,6 +289,8 @@ class Model():
         #--- Update Queues ID
         for i in range(len(self.queues_vector)):
             self.queues_vector[i].set_id(i+1)
+    
+    # ----- Identify the clusters and assign into the machines -----
     def cluster_discovery(self):
         """
         Discovery the cluster of each machine and assign it for the
@@ -225,6 +339,8 @@ class Model():
                 #-- For each out Queue, set the "next" cluster
                 for queue in out_queues:
                     queue.set_cluster(next_cluster)
+    
+    # ----- Identify the branching machines -----
     def branch_discovery(self):
         """
         ## Description
@@ -264,6 +380,8 @@ class Model():
 
                 #--- Increase branch counter
                 branch_id_counter += 1
+    
+    # ----- Create conveyors objects -----
     def create_conveyors(self):
         """
         Create conveyor based on the existing queues and assign them
@@ -309,7 +427,19 @@ class Model():
                     machine_conveyors_in.append(conveyor)
                 
             machine.set_conveyors_in(machine_conveyors_in)
-                
+
+    # ----- Stopd condition in a specific machine -----
+    def setting_stop_machines(self):
+        """
+        For the specific selected machine (targeted_machine_id) specify what is the id of the
+        part that the machine shoudl stop when it arrives. 
+        """
+        #--- For each existing machine
+        for machine in self.machines_vector:
+            #--- If the machines has the same ID of the selected machine
+            if machine.get_id() == self.targeted_machine_id:
+                #--- Tells for that specific machine for which part id it should stop
+                machine.set_stop_for_id(self.targeted_part_id)
     # =======================================================
 
     # ================== TRANSLATOR ==================
@@ -320,17 +450,24 @@ class Model():
         #--- Open the json file
         with open(self.model_path) as json_file:
             #========================= Setup =========================
-            #--- Load the json data
+            #--- Import json data
             data = json.load(json_file)
+
+            """ OLD: BEFORE ID ASSIGNED BY SYNC
+            #--- Load the json data
+            
             if self.initial == True:
                 #--- Calculate the number of part initially in the model
                 for i in range(len(data['initial'])):
                     self.last_part_id += data['initial'][i]
+            """
+            
             #====================================================================
 
 
             #========================= Create Machines =========================
             # Loop through the nodes in the json data
+            """ OLD: BEFORE ID ASSIGNED BY SYNC
             for node in data['nodes']:
                 # --- Check if there is any initial part
                 if node["worked_time"] != 0:
@@ -343,14 +480,17 @@ class Model():
                     # ASSUMPTION: In terms of RCT, it's better to just consider the remaining time for production
                     # So, consider creation time= 0...
                     initial_part = Part(id= self.last_part_id, type= "A", location= None, creation_time= 0) # TODO: Create the part id according to the tuple of worked time
+                
                 else:
                     initial_part = None
-
+            
+            """
+            for node in data['nodes']:
                 # Create a new Machine object for each node and add it to the list
                 self.machines_vector.append(Machine(env= self.env, id= node['activity'],freq= node['frequency'],capacity= node['capacity'], 
-                process_time= node['contemp'], database= self.Database, cluster= node['cluster'], last_part_id = self.last_part_id,
+                process_time= node['contemp'], database= self.Database, cluster= node['cluster'],
                 terminator= self.terminator, loop= self.loop_type, exit= self.exit, maxparts= self.maxparts,
-                worked_time= node['worked_time'], initial_part= initial_part, targeted_part_id= self.targeted_part_id))
+                targeted_part_id= self.targeted_part_id))
             
             self.machines_vector[-1].set_final_machine(True)
             #====================================================================
@@ -381,6 +521,15 @@ class Model():
         if self.initial == True:
             #--- Allocate the initial Parts for each Queue
             self.initial_allocation()
+
+        # --- Discover parts already being processed by machines and create them 
+        self.discovery_working_parts()
+
+        # --- Discover the last part id and assign to the machines
+        self.find_last_part_id()
+
+        # --- Setting the part id to stop the simulation for the right machine
+        self.setting_stop_machines()
         #====================================================================
 
 
@@ -439,6 +588,8 @@ class Model():
     # ===============================================
 
     # ================== ANALYSES ==================
+
+    # ----- Calculate Cycle Time and Plot -----
     def analyze_results(self, options = ["all"]):
         """
         Get the parts finalized and stored in the Terminator and make some
@@ -446,109 +597,98 @@ class Model():
         """
         #--- Get the finished Parts and each Time
         parts_finished = self.terminator.get_all_items()
-        #--- Number of finished parts in the simulation
-        number_parts = len(parts_finished)
 
-        #--- create empty lists
-        parts_finished_time = []
-        parts_finished_id = []
-        parts_finished_id_ASIS = []
-        parts_creation_time = []
+        if len(parts_finished) != 0:
+            #--- Number of finished parts in the simulation
+            number_parts = len(parts_finished)
 
-        #---Create the list with parts ID
-        for part in parts_finished:
-            parts_finished_id.append(part.get_id())
-            parts_finished_id_ASIS.append(part.get_id())
-        
-        #--- Sort the list in ascending
-        parts_finished_id.sort()
+            #--- create empty lists
+            parts_finished_time = []
+            parts_finished_id = []
+            parts_finished_id_ASIS = []
+            parts_creation_time = []
 
-        #--- Adjust the sort of other variables following the ID sort
-        for id in parts_finished_id:
+            #---Create the list with parts ID
             for part in parts_finished:
-                if part.get_id() == id:
-                    parts_finished_time.append(part.get_termination())
-                    parts_creation_time.append(part.get_creation())
-                    break
+                parts_finished_id.append(part.get_id())
+                parts_finished_id_ASIS.append(part.get_id())
             
+            #--- Sort the list in ascending
+            parts_finished_id.sort()
 
-        print("================ Running Analysis ================")
-        print(f"Number of Parts finished: {len(parts_finished)}")
-        print(f"Total time of Simulation: {parts_finished[-1].get_termination()}")
-        #print(f"List of IDs (AS IS): {parts_finished_id_ASIS}")
-        #print(f"List of IDs (sorted): {parts_finished_id}")
-
-        def plot_finished():
-            plt.plot(parts_finished_id, parts_finished_time, '-o')
-            plt.title("Lead Time per Part ID")
-            plt.xlabel("Parts ID")
-            plt.ylabel("Finish Time")
-            plt.show()
-            plt.savefig(f"figures/{self.name}_plot_finished.png")
-
-        #-- Function to calculate the throughput
-        def throughput():
-            th = number_parts / parts_finished[-1].get_termination()
-            print(f">>> System Throughput: {th} [parts / time unit] ")
-
-            return th
-        #-- Function to calculate the average cycle time
-        def avg_cycle_time():
-            sum_ct = 0
-            parts_cycle_time = []
-            for i in range(number_parts):
-                #-- calculate individual CT
-                parts_cycle_time.append(parts_finished_time[i] - parts_creation_time[i])
-                #-- Sum up every CT
-                sum_ct += parts_cycle_time[i]
-
-            #-- Print cycle time of each part
-            #print(">>> Cycle Time of each part:")
-            #print(parts_cycle_time)
+            #--- Adjust the sort of other variables following the ID sort
+            for id in parts_finished_id:
+                for part in parts_finished:
+                    if part.get_id() == id:
+                        parts_finished_time.append(part.get_termination())
+                        parts_creation_time.append(part.get_creation())
+                        break
                 
-            #-- Maximum and Minimum CT
-            max_CT = max(parts_cycle_time)
-            min_CT = min(parts_cycle_time)
-            print(f"- Maximum Cycle Time: {max_CT}")
-            print(f"- Minimum Cycle Time: {min_CT}")
 
-            #-- Avereage Cycle Time
-            avg_CT = sum_ct / number_parts
-            print(f">>> Average system cycle time: {avg_CT} [time unit]***")
+            print("================ Running Analysis ================")
+            print(f"Number of Parts finished: {len(parts_finished)}")
+            print(f"Total time of Simulation: {parts_finished[-1].get_termination()}")
+            #print(f"List of IDs (AS IS): {parts_finished_id_ASIS}")
+            #print(f"List of IDs (sorted): {parts_finished_id}")
 
-            #-- Plot the Cycle Time for each Part
-            plt.plot(parts_finished_id,parts_cycle_time, '-x')
-            plt.title("Cycle Time per Part ID")
-            plt.xlabel("Parts ID")
-            plt.ylabel("Cycle Time")
-            plt.show()
-            plt.savefig(f"figures/{self.name}_cycle_time.png")           
+            def plot_finished():
+                plt.plot(parts_finished_id, parts_finished_time, '-o')
+                plt.title("Lead Time per Part ID")
+                plt.xlabel("Parts ID")
+                plt.ylabel("Finish Time")
+                plt.show()
+                plt.savefig(f"figures/{self.name}_plot_finished.png")
 
-            return avg_CT
+            #-- Function to calculate the throughput
+            def throughput():
+                th = number_parts / parts_finished[-1].get_termination()
+                print(f">>> System Throughput: {th} [parts / time unit] ")
 
-        #--- Running everything
-        plot_finished()
-        avg_cycle_time()
-        throughput()
+                return th
+            #-- Function to calculate the average cycle time
+            def avg_cycle_time():
+                sum_ct = 0
+                parts_cycle_time = []
+                for i in range(number_parts):
+                    #-- calculate individual CT
+                    parts_cycle_time.append(parts_finished_time[i] - parts_creation_time[i])
+                    #-- Sum up every CT
+                    sum_ct += parts_cycle_time[i]
 
-        """
-        #--- Run selected analysis
-        if options[0] == "all":
-            print("-- All Analysis Selected --")
-            options = ["plot_finished", "throughput", "avg_cycle_time"]
+                #-- Print cycle time of each part
+                #print(">>> Cycle Time of each part:")
+                #print(parts_cycle_time)
+                    
+                #-- Maximum and Minimum CT
+                max_CT = max(parts_cycle_time)
+                min_CT = min(parts_cycle_time)
+                print(f"- Maximum Cycle Time: {max_CT}")
+                print(f"- Minimum Cycle Time: {min_CT}")
 
-        for option in options:
-            if option == "plot_finished":
-                plot_finished()
-            if option == "throughput":
-                return throughput()
-            if option == "avg_cycle_time":
-                return avg_cycle_time()
-            if option == "read_database":
-                self.Database.read_all_events(self.event_table)
-            
-        print("##########################")
-        """
+                #-- Avereage Cycle Time
+                avg_CT = sum_ct / number_parts
+                print(f">>> Average system cycle time: {avg_CT} [time unit]***")
+
+                #-- Plot the Cycle Time for each Part
+                plt.plot(parts_finished_id,parts_cycle_time, '-x')
+                plt.title("Cycle Time per Part ID")
+                plt.xlabel("Parts ID")
+                plt.ylabel("Cycle Time")
+                plt.show()
+                plt.savefig(f"figures/{self.name}_cycle_time.png")           
+
+                return avg_CT
+
+            #--- Running everything
+            plot_finished()
+            avg_cycle_time()
+            throughput()
+        
+        else:
+            print("[ERROR][digital_model.py / analyze_result()] No parts finished in the simulation")
+        
+    
+    # ----- Calculate the RCT from the previous simulation -----
     def calculate_RCT(self, part_id_selected= None, batch= None):
         """
         DESCRIPTION:

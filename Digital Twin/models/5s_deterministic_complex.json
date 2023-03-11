@@ -38,7 +38,7 @@
             ],
             "frequency": 999,
             "capacity": 1,
-            "contemp": ["norm", 3500, 350],
+            "contemp": ["norm", 1026, 350],
             "cluster": 2,
             "worked_time": 0
         },
@@ -184,12 +184,12 @@
         }
     ],
     "initial":[
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7
+        ["Part 1"],
+        ["Part 2"],
+        [],
+        [],
+        [],
+        [],
+        []
     ]
 }
