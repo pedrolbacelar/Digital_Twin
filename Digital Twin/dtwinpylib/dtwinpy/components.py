@@ -162,7 +162,8 @@ class Machine():
     def run(self):
     
         while True:
-            
+            if self.id == 1:
+                pass
             ##### ============== State Machine  ==============
 
             # =================== Idle State ===================
@@ -465,7 +466,7 @@ class Machine():
 
                     # ---------------- Alternating Policy ----------------
                     if self.allocation_policy == "alternated":
-                        if self.name == "Machine 1" and self.part_in_machine.get_name() == "Part 7":
+                        if self.id == 1:
                             pass
                         #--- Select the Queue based on the counter
                         queue_selected = self.queue_out[self.allocation_counter]
@@ -500,6 +501,8 @@ class Machine():
 
                         #--- Increase the counter for the next allocation
                         self.allocation_counter = last_allocation_counter +  1
+                        
+                        
 
                         #--- Reset the counter if it's at maximum
                         if self.allocation_counter > (len(self.queue_out) - 1):
@@ -689,6 +692,10 @@ class Machine():
         return self.branch
     def get_last_part_id(self):
         return self.last_part_id
+    def get_worked_time(self):
+        return self.worked_time
+    def get_allocation_counter(self):
+        return self.allocation_counter
     #--------- Defining SETs ---------
     def set_queue_in(self, value):
         self.queue_in = value
@@ -726,7 +733,8 @@ class Machine():
             self.current_state = "Processing"
     def set_stop_for_id(self, part_id):
         self.flag_stop_for_id = part_id
-
+    def set_allocation_counter(self, counter):
+        self.allocation_counter = counter
     #--- Special set for queue
     def add_queue_in(self, value):
         if self.queue_in is None:

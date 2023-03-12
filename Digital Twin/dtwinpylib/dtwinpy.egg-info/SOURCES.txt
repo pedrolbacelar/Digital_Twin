@@ -2,9 +2,10 @@ README.md
 setup.py
 dtwinpy/Digital_Twin.py
 dtwinpy/__init__.py
-dtwinpy/broker.py
+dtwinpy/broker_manager.py
 dtwinpy/components.py
 dtwinpy/digital_model.py
+dtwinpy/helper.py
 dtwinpy/interfaceDB.py
 dtwinpy/services.py
 dtwinpy/synchronizer.py

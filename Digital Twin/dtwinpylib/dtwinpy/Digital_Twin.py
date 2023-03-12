@@ -5,23 +5,28 @@ from .interfaceDB import Database
 from .synchronizer import Synchronizer
 from .services import Service_Handler
 from .broker_manager import Broker_Manager
+from .helper import Helper
 
 #--- Common Libraries
 import shutil
 import os
+import datetime
+from time import sleep
 
-#--- Reload Package
+"""#--- Reload Package
 import importlib
 import dtwinpylib
-#reload this specifc module to upadte the class
 importlib.reload(dtwinpylib.dtwinpy.digital_model)
 importlib.reload(dtwinpylib.dtwinpy.validator)
 importlib.reload(dtwinpylib.dtwinpy.synchronizer)
 importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
+importlib.reload(dtwinpylib.dtwinpy.helper)"""
+
 
 
 class Digital_Twin():
-    def __init__(self, name, model_path= None, initial= True, targeted_part_id= None, targeted_cluster= None, until= None, digital_database_path= None, real_database_path= None, ID_database_path= None, part_type= "A", loop_type= "closed", maxparts = None):
+    def __init__(self, name, model_path= None, initial= True, targeted_part_id= None, targeted_cluster= None, until= None, digital_database_path= None, real_database_path= None, ID_database_path= None, Freq_Sync= 1000, Freq_Valid= 10000, part_type= "A", loop_type= "closed", maxparts = None):
+        self.helper = Helper()
         #--- Model Parameters
         self.name = name
         self.part_type = "A"
@@ -34,6 +39,16 @@ class Digital_Twin():
         self.maxparts = maxparts
         self.targeted_part_id = targeted_part_id
         self.targeted_cluster = targeted_cluster
+
+        #--- Frequencies
+        # Time in secs!
+        self.Freq_Sync = Freq_Sync
+        self.Freq_Valid = Freq_Valid
+        (initial_time_str, initial_timestamp) = self.helper.get_time_now()
+        self.next_Tsync = initial_timestamp + self.Freq_Sync
+        self.next_Tvalid = initial_timestamp + self.Freq_Valid
+
+        
 
         #--- Model and Figure path
         if not os.path.exists(f"figures"):
@@ -84,10 +99,11 @@ class Digital_Twin():
             self.ID_database_path = ID_database_path
         # ------------------------------------------
 
-        
-        #self.database_path = "databases/digital_" + self.name + "_db.db"
-        #self.real_database_path = "databases/real_" + self.name + "_db.db"
-        #self.real_database = Database(self.real_database_path, "real_log")        
+        self.helper.printer(f"Digital Twin '{self.name}' created sucessfully at {initial_time_str}", 'green')       
+        print(f"--- printing databases paths ---")
+        print(f"Digital Database: '{self.database_path}'")
+        print(f"Real Database: '{self.real_database_path}'")
+        print(f"ID Database: '{self.ID_database_path}'")
 
     #--- Initiate Broker 
     def initiate_broker(self, ip_address, ID_database_path= None, port= 1883, keepalive= 60, topics_sub = ['trace', 'part_id', 'RCT_server'], topic_pub= 'RCT_server', client = None):
@@ -231,7 +247,8 @@ class Digital_Twin():
             try:
                 os.remove(self.real_database_path)
             except FileNotFoundError:
-                print("The file you are trying to delete does not exist.")
+                self.helper.printer(f"[WARNING][Digital_Twin.py/run_sync()] The file '{self.real_database_path}' does not exist")
+                print(f"copying file {self.database_path} in the path {self.real_database_path}")
 
             #--- copy
             shutil.copy2(self.database_path, self.real_database_path)
@@ -259,6 +276,67 @@ class Digital_Twin():
         
         RCT_Service = Service_Handler(name= "RCT", generate_digital_model= self.generate_digital_model, broker_manager= self.broker_manager)
         RCT_Service.run_RCT_service(verbose=verbose)
-        
+
+    #--- Internal Services (Synchronization and Validation)    
+    def Internal_Services(self):
+        pass
+
+    #--- External Services (RCT Services and Feedback)
+    def External_Services(self):
+        pass
+
+    def run(self):
+        """
+        ## Architecture
+        ----- For more details, please check the paper: DOI 0.00.000.0 -----
+
+        #### Sequence of Actions in Loop 
+
+        -------------------- Internal Services --------------------
+        1. Run Sync with a certain frequency (Freq_sync)
+            1.1 Down Flag_Synchronized -> False | time_to_synchronize -> True
+            1.2 Run Sync
+                1.2.1 API: Send Occupation and Indicators
+            1.3 Rise Flag_Synchronized -> True | time_to_synchronize -> False
+        2. Run Validation with a frequency (Freq_valid) multiple of Freq_sync
+            2.1 time_to_validate -> True
+            2.2 Run Validation
+                2.2.1 If valid: Flag_Validation -> True
+                2.2.2 If not valid: Flag_Validation -> False
+                2.2.3 API: Send Indicators
+            2.3 time_to_validate -> False
+        ------------------------------------------------------------
+
+        -------------------- External Services --------------------
+        3. Run RCT Service matching Freq_Sync
+            3.1 If Flag_Synchronized == True and Flag_Validation == True:
+                3.1.1 Run RCT Services
+                3.1.2 Implement the Feedback
+        ------------------------------------------------------------
+
+        extra: Clean the memory!
+        """
+
+        try: 
+            while True:
+                #--- Take the current time
+                (time_str, timestamp) = self.helper.get_time_now()
+
+                #--- Check if it's time to Sync
+                if timestamp >= self.next_Tsync:
+                    #-- Rise the Flag to Sync
+
+                    pass
+
+                #--- Check if it's time to Validate
+                if timestamp >= self.next_Tvalid:
+                    # Validate
+                    pass
+
+
+
+        except KeyboardInterrupt:
+            self.helper(f"The Digital Twin named as {self.name} was killed manually", 'red')
+
 
         

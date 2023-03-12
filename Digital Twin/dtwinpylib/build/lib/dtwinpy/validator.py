@@ -1,5 +1,8 @@
 #--- Importing Database components
 from .interfaceDB import Database
+from .helper import Helper
+
+#--- Common Libraries
 import numpy as np
 import matplotlib.pyplot as plt
 import sqlite3
@@ -15,6 +18,7 @@ importlib.reload(dtwinpylib.dtwinpy.interfaceDB)"""
 
 class Validator():
     def __init__(self, digital_model, simtype, real_database_path):
+        self.helper = Helper()
         self.digital_model = digital_model
         self.simtype = simtype
         # qTDS: each row is the list of process time for each part
@@ -43,14 +47,26 @@ class Validator():
     # ======================= TRACE DRIVEN SIMULATION ======================= 
     #--- For a specific part ID return the related vector of ptime_TDS
     def get_part_TDS(self, part):
-        return self.matrix_ptime_TDS[part.get_id() - 1]
-    
+        """
+        This function receives a part object and look into the dictionary of parts traces
+        in order to get the correct trace of that part.
+        """
+        try:
+            return self.matrix_ptime_TDS[part.get_name()]
+        except KeyError:
+            self.helper.printer(f"[WARNING][validator.py/get_part_TDS()] Trying to get the trace of {part.get_name()}, but no traces was created for that part", "yellow")
+            print("If you're running a short simulation, it's possible that the part was in the simulation, but didn't had time to appear in the trace, otherwise CHECK IT OUT")
+
     #--- Get the number of parts given in the TDS
     def get_len_TDS(self):
         return len(self.matrix_ptime_TDS)
     
     #--- Initial Setup of TDS
     def set_TDS(self):
+        """
+        This function is responsible to take the traces of each part extracted from the real log and
+        add it for the respective part. 
+        """
         #--- List for all parts in the simulation
         part_list = []
         #--- Get the existing parts already allocated in the Queues
@@ -67,16 +83,19 @@ class Validator():
             if machine.get_initial_part() != None:
                 part = machine.get_initial_part()
                 part_list.append(part)
-                # Note 1: I can do this because the even the Validator being called after the simulation,
+                # Note 1: I can do this because the Validator is being called after the simulation,
                 # after assigned, we don't change the initial part of a machine
-                # Note 2: In this case, I first add all the parts in the queues and after the parts in the machines
-                # This logic is okay, because the logic for naming parts is also being like that.
+                
         
         #--- give for each part the ptime_TDS list 
-        # TODO: Maybe use dictionaries to get pricesly the parts
         for part in part_list:
             current_ptime_TDS = self.get_part_TDS(part)
             part.set_ptime_TDS(current_ptime_TDS)
+
+        #--- Set the simulation type for all the machines
+        for machine in self.machines_vector:
+            #--- Set the type of Simulation
+            machine.set_simtype("TDS")
 
         #--- Extra adjust for initial parts (parts in WIP) already in middle of the simulation
         # Since this parts are already in the simulation, the TDS generated
@@ -84,7 +103,13 @@ class Validator():
         # cluster 2 and the system has 4 cluster. My TDS will have only 3 elements
         # (c2,c3,c4). But in cluster 2 i will take in element in position 2, so c3. 
         # To fix that we put some extra 0 in the beginning equivalent to the number
-        # of cluster that I already been through
+        # of cluster that I already been through.
+        #
+        # This fix is only for parts that are positionated in Queues, because the parts
+        # that are inside of machine are already going to have their own quick fix. We do
+        # all of this just to get the rigth queue, and based on the queue figure out the 
+        # the cluster of machine. Here I don't need to have the dictionary, because I'm
+        # changing each part at time.
         
         #--- Get all initial parts from the simulation
         initial_parts = self.digital_model.get_all_parts()
@@ -105,13 +130,16 @@ class Validator():
                 part_cluster = part_queue.get_cluster()
                 part.quick_TDS_fix(part_cluster)
         
-        #--- Set the simulation type for all the machines
-        for machine in self.machines_vector:
-            #--- Set the type of Simulation
-            machine.set_simtype("TDS")
 
     #--- Generate the traces of TDS based on the real Event Log
     def generate_TDS_traces(self):
+        """
+        This function is used to create the traces of each part. By 'traces' we mean the process
+        time that each part takes for each cluster of machine in the simulation. For that the function
+        read the selected session of the database and look for the specific path that a part took. Finally
+        the function adds this path in a dictionary that has as key the part name and as value the vector
+        with the path.
+        """
 
         #--- Extract the unique parts IDs from the real log
         part_ids = self.real_database.get_distinct_values(column= "part_id", table="real_log")
@@ -123,7 +151,8 @@ class Validator():
         part_ids = sorted(part_ids, key=sort_key)
         
         #--- Create matrix to store trace of process time for each part
-        matrix_ptime_TDS = []
+        #[OLD] matrix_ptime_TDS = [] 
+        matrix_ptime_TDS = {}
         part_matrix_full_trace = []
 
         #--- Loop for each part of the simulation
@@ -138,6 +167,7 @@ class Validator():
             processed_time = None
             part_trace = []
 
+            #--- For each event in the path of each part
             for event in part_full_trace:
                 #--- Extract the Started and Finished time
                 if event[1] == 'Started':
@@ -157,7 +187,7 @@ class Validator():
                     finished_time = None
                     processed_time = None
                 
-                #--- In the case of part that already was in the machine (worked_time)
+                #--- AVOID: In the case of part that already was in the machine (worked_time)
                 if finished_time != None and started_time == None:
                     processed_time = finished_time
 
@@ -171,7 +201,8 @@ class Validator():
 
             
             #--- Add part trace to the matrix of all parts traces
-            matrix_ptime_TDS.append(part_trace)
+            #[OLD] matrix_ptime_TDS.append(part_trace)
+            matrix_ptime_TDS[part_id[0]] = part_trace
             
         #--- Return the matrix of traces
         return matrix_ptime_TDS
@@ -534,15 +565,6 @@ class Validator():
         #-- generate Xr = Xs
         self.matrix_ptime_TDS= self.generate_TDS_traces()
 
-        # --------- Interface ----------
-        print("=== matrix_ptime_qTDS ===")
-        for key in self.matrix_ptime_qTDS:
-            print(f"{key}: {self.matrix_ptime_qTDS[key]}")
-
-        print("=== matrix_ptime_TDS ===")
-        for j in range(len(self.matrix_ptime_TDS)):
-            print(f"Part {j+1}: {self.matrix_ptime_TDS[j]}")
-
         #--- Setup initial Traces
         if self.simtype == "TDS":
             #--- Set the TDS for each part
@@ -551,6 +573,23 @@ class Validator():
         if self.simtype == "qTDS":
             #--- Set the qTDS for each machine and also the simtype
             self.set_qTDS()
+
+        # --------- Interface ----------
+        print("-----------------------------------------------------------------------------------------")
+        print("=== matrix_ptime_qTDS ===")
+        if len(self.matrix_ptime_qTDS) == 0:
+            print("[VALIDATOR] Simulation Deterministic - No correlation of randoness needed")
+        else:
+            for key in self.matrix_ptime_qTDS:
+                print(f"{key}: {self.matrix_ptime_qTDS[key]}")
+        
+        print()
+
+        print("=== matrix_ptime_TDS ===")
+        for key in self.matrix_ptime_TDS:
+            print(f"{key}: {self.matrix_ptime_TDS[key]}")
+            # [OLD] print(f"Part {j+1}: {self.matrix_ptime_TDS[j]}")
+        print("-----------------------------------------------------------------------------------------")
 
     def run(self):
 

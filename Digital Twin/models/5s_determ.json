@@ -14,9 +14,10 @@
       "contemp": 10000,
       "cluster": 1,
       "worked_time": [
-        5403,
-        "Part 4"
-      ]
+        10,
+        "Part 2"
+      ],
+      "allocation_counter": 1
     },
     {
       "activity": 2,
@@ -44,10 +45,7 @@
       "capacity": 1,
       "contemp": 7000,
       "cluster": 2,
-      "worked_time": [
-        5202,
-        "Part 3"
-      ]
+      "worked_time": 0
     },
     {
       "activity": 4,
@@ -137,9 +135,11 @@
   ],
   "initial": [
     [
-      "Part 5"
+      "Part 3"
     ],
-    [],
+    [
+      "Part 1"
+    ],
     [],
     [],
     []

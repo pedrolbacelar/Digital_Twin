@@ -49,6 +49,8 @@ class Service_Handler():
         (self.machines_vector, self.queues_vector) = self.digital_model.get_model_components()
         self.part_vector = self.digital_model.get_all_parts()
     
+    # ============================== RCT Service ==============================
+    # ---------- Return a vector with all the branches choices ----------
     def get_branch_choices(self):
         """
         Function to return a vector with all the branches choices. 
@@ -70,6 +72,7 @@ class Service_Handler():
 
         return branches_choices
 
+    # ---------- Return a vector with all the parts making decisions ----------
     def get_parts_making_decisions(self, queue_position = 2):
         """
         This functions look through digital model and search for parts within
@@ -96,6 +99,7 @@ class Service_Handler():
 
         return parts_making_decisions
 
+    # ---------- Return the combination of path scenarios ----------
     def generate_path_scenarios(self, verbose = False):
         """
         ## Description
@@ -140,6 +144,7 @@ class Service_Handler():
             print("========================")
         return path_scenarios
     
+    # ---------- (AVOID) Assign the paths to the parts ----------
     def assign_parts(self, SelecPath, path_scenarios, SelecPart = None):
         """
         ## Description
@@ -216,6 +221,7 @@ class Service_Handler():
         #--- Return the parts that were in branching decision to be possible to calculate their RCT
         return parts_in_branching_dm
     
+    # ---------- Simulate all the scenarios ----------
     def simulate_paths(self,possible_pathes, parts_making_decisions, verbose= False):
         #--- Dictionary to store parts and its cycle time
         rct_dict = {}
@@ -317,6 +323,7 @@ class Service_Handler():
         #--- Give back the dict with the RCTs for each part
         return rct_dict
 
+    # ---------- Calculate the efficiency of each path ----------
     def RCT_check(self, rct_dict, rct_threshold, possible_pathes, verbose= False):
         """
         This function calculates the efficiency of each path comparing the path
@@ -436,6 +443,7 @@ class Service_Handler():
         #--- Return the feedback flag and the chosen path index (dictionary)
         return feeback_dict
 
+    # ---------- Publish the feedback through MQTT ----------
     def publish_feedback(self, feedback_dict, possible_pathes):
         """
         This function is able to take the feedback dictionary with the instructions of the most optimized
@@ -512,8 +520,7 @@ class Service_Handler():
                     sleep(1)
                     print("waking up!")
 
-
-            
+    # ---------------------- RCT Service ----------------------    
     def run_RCT_service(self, queue_position= 1, verbose= False):
         """
         ## Description
@@ -564,3 +571,9 @@ class Service_Handler():
 
         #--- Send the chosen path to the rigth machine
         self.publish_feedback(feedback_dict= feedback_dict, possible_pathes= possible_pathes)
+    
+    # =================================================================================
+
+    # ================================== RCT Tracking ==================================
+
+    

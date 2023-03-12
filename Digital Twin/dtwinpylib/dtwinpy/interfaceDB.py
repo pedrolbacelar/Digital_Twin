@@ -10,16 +10,17 @@ class Database():
         self.start_time = start_time
         self.end_time = end_time
 
-
-        with sqlite3.connect(self.database_path) as db:
-            tables = db.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
-            if len(tables) == 1 and tables[0][0] == "digital_log":
-                self.rename_table("digital_log", "real_log")
-
         #--- When create the object, already create the database and table if doesn't exist
         if event_table == "real_log":
-            with sqlite3.connect(self.database_path) as digital_model_DB:
-                digital_model_DB.execute(f"""
+            #--- Check if exist a 'digital_log' (in case of copied databases)
+            with sqlite3.connect(self.database_path) as db:
+                tables = db.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
+                if len(tables) == 1 and tables[0][0] == "digital_log":
+                    self.rename_table("digital_log", "real_log")
+                    
+            #--- Check to create the table
+            with sqlite3.connect(self.database_path) as db:
+                db.execute(f"""
                 CREATE TABLE IF NOT EXISTS {self.event_table} (
                     event_id INTEGER PRIMARY KEY,
                     timestamp INTEGER,
@@ -32,7 +33,7 @@ class Database():
                 )
                 """)
 
-                digital_model_DB.commit()
+                db.commit()
 
         if event_table == "digital_log":
             with sqlite3.connect(self.database_path) as digital_model_DB:

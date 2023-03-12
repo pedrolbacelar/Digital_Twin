@@ -91,9 +91,8 @@ class Part():
         self.part_queue = queue
     #------------------------------
 
-
 class Machine():
-    def __init__(self, env, id, process_time, capacity, terminator, database, worked_time,
+    def __init__(self, env, id, process_time, capacity, terminator, database, worked_time= 0,
         last_part_id=None, queue_in= None, queue_out= None, conveyors_out = None, blocking_policy= "BBS", 
         freq= None, cluster= None, final_machine = False, loop = "closed", exit = None, simtype = None, 
         ptime_qTDS = None, maxparts= None, initial_part= None, targeted_part_id= None):
@@ -118,6 +117,7 @@ class Machine():
         self.allocated_part = False
         self.new_part = False
         self.flag_finished = False
+        self.flag_stop_for_id = False
         self.current_state = "Idle"
         self.queue_to_get = None
         self.queue_to_put = None
@@ -162,7 +162,8 @@ class Machine():
     def run(self):
     
         while True:
-            
+            if self.id == 1:
+                pass
             ##### ============== State Machine  ==============
 
             # =================== Idle State ===================
@@ -465,7 +466,7 @@ class Machine():
 
                     # ---------------- Alternating Policy ----------------
                     if self.allocation_policy == "alternated":
-                        if self.name == "Machine 1" and self.part_in_machine.get_name() == "Part 7":
+                        if self.id == 1:
                             pass
                         #--- Select the Queue based on the counter
                         queue_selected = self.queue_out[self.allocation_counter]
@@ -500,6 +501,8 @@ class Machine():
 
                         #--- Increase the counter for the next allocation
                         self.allocation_counter = last_allocation_counter +  1
+                        
+                        
 
                         #--- Reset the counter if it's at maximum
                         if self.allocation_counter > (len(self.queue_out) - 1):
@@ -524,15 +527,6 @@ class Machine():
                                 #-- Found the queue that the part is going
                                 self.queue_to_put = queue
                     #-------------------------------------------------------------
-
-                    #--- After finishing the process I add into the database
-                    # (I don't wait for the next queue be available, because the machine
-                    # follows the Blocking After Service policy)
-                    
-                    # TODO: But if the part is waiting for the queue be free,
-                    # it will pass here multiple times and will write multiple times
-                    # into the database. So you need to verify if that actions was
-                    # already taken by the machine, if yes you don't write again.
 
 
                     #------------ Check if the Queue is not full --------------
@@ -567,6 +561,12 @@ class Machine():
                             conveyor_to_put.start_transp(self.part_in_machine)
                             flag_allocated_part = True
                             
+                            
+                            # ------- STOP Machine condition -------
+                            # --- If the machine was set to stop the simulation when finish up this part:
+                            if self.flag_stop_for_id == self.part_in_machine.get_id():
+                                #--- Terminates the simulation
+                                self.exit.succeed()
 
                         if self.final_machine == True and self.loop == "closed":
                             #--- Terminate
@@ -690,7 +690,12 @@ class Machine():
         return self.conveyors_out
     def get_branch(self):
         return self.branch
-
+    def get_last_part_id(self):
+        return self.last_part_id
+    def get_worked_time(self):
+        return self.worked_time
+    def get_allocation_counter(self):
+        return self.allocation_counter
     #--------- Defining SETs ---------
     def set_queue_in(self, value):
         self.queue_in = value
@@ -716,8 +721,20 @@ class Machine():
         self.branch = branch
     def set_targeted_part_id(self, target_id):
         self.targeted_part_id = target_id
-
-    
+    def set_last_part_id(self, id):
+        self.last_part_id = id
+    def set_initial_part(self, part):
+        self.initial_part = part
+    def set_worked_time(self, value):
+        self.worked_time = value
+        
+        if self.worked_time != 0:
+            #-- Part ready to be processed
+            self.current_state = "Processing"
+    def set_stop_for_id(self, part_id):
+        self.flag_stop_for_id = part_id
+    def set_allocation_counter(self, counter):
+        self.allocation_counter = counter
     #--- Special set for queue
     def add_queue_in(self, value):
         if self.queue_in is None:
@@ -775,8 +792,6 @@ class Machine():
         print("----------------")
         """
         
-
-
 class Queue():
     def __init__(self, env, id, capacity, arc_links= None, transp_time= None, freq= None):
         self.env = env
@@ -979,5 +994,6 @@ class Branch():
         return self.branch_conveyors
     def get_branch_queue_in(self):
         return self.branch_queue_in
-
+    def get_branch_machine(self):
+        return self.branch_machine
 

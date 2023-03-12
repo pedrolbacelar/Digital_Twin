@@ -17,11 +17,11 @@ from .helper import Helper
 
 #--- Reload Package
 
-import importlib
+"""import importlib
 import dtwinpylib
 #reload this specifc module to upadte the class
 importlib.reload(dtwinpylib.dtwinpy.components)
-importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
+importlib.reload(dtwinpylib.dtwinpy.interfaceDB)"""
 # This is different from when you're importing the package direct because here the module has the same
 # name as the library, so we start importing from the library root for the software understand that we are 
 # importing the folder and not the library
@@ -443,6 +443,65 @@ class Model():
             if machine.get_cluster() == self.targeted_cluster:
                 #--- Tells for that specific machine for which part id it should stop
                 machine.set_stop_for_id(self.targeted_part_id)
+    
+    # ----- Getting and updating the model with last allocation counter -----
+    def changing_allocation_counter(self):
+        """
+        This function is used after a simulation is runned. The goal here is to get the last
+        alternating policy used by branching machines and set it for that machine. Thus, in this way,
+        when the machine starts the simulation again it's going to remember what was the last selected machine.
+        """
+        #--- For each branching machine (where the allocation policy make sense)
+        for branch in self.branches:
+            machine = branch.get_branch_machine()
+
+            #--- Get the last allocation counter of that machine
+            last_allocation_counter = machine.get_allocation_counter()
+
+            #--- Set in the model this allocation for that machine
+            #--- Open the json file
+            with open(self.model_path, 'r+') as model_file:
+                #--- Import json data
+                data = json.load(model_file)
+                for node in data['nodes']:
+                    #--- Macth the node with the current machine
+                    if node['activity'] == machine.get_id():
+                        # Found the right machine
+                        node['allocation_counter'] = last_allocation_counter
+
+                        #---- Write Back the Changes
+                        # Move the file pointer to the beginning of the file
+                        model_file.seek(0)
+                        # Write the modified data back to the file
+                        json.dump(data, model_file)
+                        # Truncate any remaining data in the file
+                        model_file.truncate()
+    
+    # ----- Setting the last allocation counter for branching machines -----
+    def setting_allocation_counter(self):
+        """
+        This function is used before the simulation. It reads the json model and updated
+        for branching machine the last value used in the alternation policy for allocation counter
+        """
+        #--- For each branching machine (where the allocation policy make sense)
+        for branch in self.branches:
+            machine = branch.get_branch_machine()
+
+            #--- Open the json file
+            with open(self.model_path) as model_file:
+                #--- Import json data
+                data = json.load(model_file)
+                for node in data['nodes']:
+                    #--- Macth the node with the current machine
+                    if node['activity'] == machine.get_id():
+                        # Found the right machine
+                        #-- Get the counter from the model
+                        allocation_counter = node['allocation_counter']
+                        
+                        #-- Set the counter into the machine
+                        machine.set_allocation_counter(allocation_counter)
+
+
     # =======================================================
 
     # ================== TRANSLATOR ==================
@@ -555,6 +614,11 @@ class Model():
         self.setting_stop_machines()
         #======================================================================
 
+        #========================== Setting Allocation Counter ================
+        # --- Setting the last allocation counter for branching machines
+        self.setting_allocation_counter()
+        #======================================================================
+
     # ================================================
 
     # =================== RUNNING ===================
@@ -592,6 +656,13 @@ class Model():
         self.Database.read_all_events(self.event_table)
 
         print("### ============ Simulation Done ============ ###")
+
+        # Note: Since we run multiple internal simulations, like TDS and qTDS, we can not
+        # change the model json for ever run. Only Sync and Model update should be allowed
+        # to change the model!
+
+        #--- Getting the last allocation counter of the branching machines and updating the json file
+        #self.changing_allocation_counter()
     # ===============================================
 
     # ================== ANALYSES ==================
@@ -605,7 +676,7 @@ class Model():
         #--- Get the finished Parts and each Time
         parts_finished = self.terminator.get_all_items()
 
-        if len(parts_finished) != 0:
+        if len(parts_finished) >= 3:
             #--- Number of finished parts in the simulation
             number_parts = len(parts_finished)
 
@@ -692,7 +763,7 @@ class Model():
             throughput()
         
         else:
-            self.helper.printer("[WARNING][digital_model.py / analyze_result()] No parts finished in the simulation", "yellow")
+            self.helper.printer("[WARNING][digital_model.py / analyze_result()] No parts finished in the simulation or less than 2", "yellow")
         
     
     # ----- Calculate the RCT from the previous simulation -----

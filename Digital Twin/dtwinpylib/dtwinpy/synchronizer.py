@@ -9,10 +9,10 @@ import sqlite3
 
 #--- Reload Package
 
-import importlib
+"""import importlib
 import dtwinpylib
 #reload this specifc module to upadte the class
-importlib.reload(dtwinpylib.dtwinpy.validator)
+importlib.reload(dtwinpylib.dtwinpy.validator)"""
 
 
 
@@ -30,6 +30,7 @@ class Zone():
         self.NumParts = 0
         self.machine_working = 0
         self.last_started_time = 0
+        self.flag_initial_working = False
         self.first_zone_event = True
         self.event_type = "Started"
 
@@ -64,8 +65,23 @@ class Zone():
 
         #--- Initial Condition machine
         if self.machine.get_initial_part() != None:
+            #-- Add a part in the list of parts workings
             initial_part = self.machine.get_initial_part()
             self.parts_ids_in_machine.append(initial_part.get_name())
+
+            #-- Increment the counter to let it know that we started with a part working
+            self.machine_working = 1
+
+            #-- Set the last time that the machine started working 
+            self.last_started_time = self.machine.get_worked_time()
+
+            #-- Rase the flag that this machine started the simulation with a part
+            self.flag_initial_working = True
+
+            #-- Increment the initial condition indicator
+            self.Zone_initial += 1
+
+
 
     #--- A part entered the Zone
     def addIn(self, part_id):
@@ -73,6 +89,12 @@ class Zone():
         
         #--- Everytime a part is ADD to the zone we add it to the queue
         self.parts_ids_in_queue.append(part_id)
+
+        print("----")
+        print(f"After Added {part_id} in queue")
+        print(f"{self.get_name()} | parts_ids_in_queue: {self.parts_ids_in_queue}")
+        print(f"{self.get_name()} | parts_ids_in_machine: {self.parts_ids_in_machine}")
+
 
     #--- A part leaves the Zone
     def addOut(self, part_id):
@@ -108,7 +130,17 @@ class Zone():
             print("This might happen if the element is an initial part. If that not the case, CHECK IT OUT!")
             print(f"printing the list of parts in the queue: {self.parts_ids_in_queue}")
     
+
+        print("----")
+        print(f"After MStarted {part_id} in queue")
+        print(f"{self.get_name()} | parts_ids_in_queue: {self.parts_ids_in_queue}")
+        print(f"{self.get_name()} | parts_ids_in_machine: {self.parts_ids_in_machine}")
     def Mfinished(self, part_id):
+        #-- In the case that this was the part that the machine started the simulation
+        if self.flag_initial_working == True:
+            self.flag_initial_working = False
+        
+        #-- Decrease the machine counter
         self.machine_working -= 1
 
         """#--- REMOVE the part from the machine vector everytime the machine finished the processing
@@ -121,6 +153,11 @@ class Zone():
             self.parts_ids_in_machine.remove(part_id)
         else:
             self.help.printer(f"[WARNING][synchronizer.py/Mstarted()] {part_id} was not found in elements vector of the machine", "yellow")
+
+        print("----")
+        print(f"After MFinished {part_id} in queue")
+        print(f"{self.get_name()} | parts_ids_in_queue: {self.parts_ids_in_queue}")
+        print(f"{self.get_name()} | parts_ids_in_machine: {self.parts_ids_in_machine}")
 
     
 
@@ -191,7 +228,8 @@ class Zone():
         return self.parts_ids_in_queue
     def get_part_id_in_machine(self):
         return self.parts_ids_in_machine
-
+    def get_flag_initial_working(self):
+        return self.flag_initial_working
     #--- SETs
     def set_zoneInd(self, indicador):
         self.zoneInd = indicador
@@ -214,13 +252,7 @@ class Synchronizer():
         #--- Database
         #self.real_database = real_database
         self.real_database_path = real_database_path
-        self.real_database = Database(database_path=real_database_path, event_table= "real_log")
-
-        with sqlite3.connect(self.real_database_path) as db:
-            tables = db.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
-            if len(tables) == 1 and tables[0][0] == "digital_log":
-                self.real_database.rename_table("digital_log", "real_log")
-        
+        self.real_database = Database(database_path=real_database_path, event_table= "real_log")        
         self.full_database = self.real_database.read_store_data_all("real_log")
         
 
@@ -249,6 +281,16 @@ class Synchronizer():
                 
     def positioning_discovery(self):
 
+        #--- DEBUGGIN - Big picture after calculations
+        print("-----------------------------------------------------------------")
+        print("Big picture BEFORE calculations")
+        for key in self.zones_dict:
+            zone = self.zones_dict[key]
+            print(f"--- {zone.get_name()} ---")
+            print(f"Parts in queue: {zone.get_part_id_in_queue()}")
+            print(f"Part in machine: {zone.get_part_id_in_machine()}")
+        print("-----------------------------------------------------------------")
+
         #--- Find the Positioning
         for event in self.full_database:
             
@@ -272,8 +314,11 @@ class Synchronizer():
                 #--- Verify if it's the first event:
                 if current_zone.get_first_zone_event() == True:
                     # It's the first event and the it was finished, so the machine had a part
-                    current_zone.set_Zone_initial(current_zone.get_Zone_initial() + 1)
+                    # [OLD]current_zone.set_Zone_initial(current_zone.get_Zone_initial() + 1)
                     # already it had in the queue plus one of the machine
+                    # Theorically this condition is already been done when creating the zones
+                    # because now we check if the machine had a part in it.
+                    pass
 
                 # For the current zone a part was finished, so we increment the Out
                 current_zone.addOut(part_id)
@@ -329,7 +374,19 @@ class Synchronizer():
 
         #--- Assign Tnow according the last event of the real log
         self.Tnow = self.full_database[-1][0]
-    
+
+        #--- DEBUGGIN - Big picture after calculations
+        print("-----------------------------------------------------------------")
+        print("Big picture AFTER calculations")
+        for key in self.zones_dict:
+            zone = self.zones_dict[key]
+            print(f"--- {zone.get_name()} ---")
+            print(f"Parts in queue: {zone.get_part_id_in_queue()}")
+            print(f"Part in machine: {zone.get_part_id_in_machine()}")
+            print(f"Zone is Working? {zone.get_machine_working()}")
+        print("-----------------------------------------------------------------")
+
+
     def sync_TDS(self):
         print("======================= Running TDS for Sync =======================")
         validator_sync = Validator(digital_model= self.digital_model, simtype= "TDS", real_database_path= self.real_database_path)
@@ -408,9 +465,15 @@ class Synchronizer():
 
                 #--- Calculate the Delta T between the last started time of the machine and
                 # the current time of the real world (Tnow)
-                Delta_T_started = self.Tnow - current_zone.get_last_started_time() 
+
+                #-- Case when the zone didn't finished the part that it already started producing
+                if current_zone.get_flag_initial_working() == True:
+                    Delta_T_started = self.Tnow + current_zone.get_last_started_time()
+                #-- Case when the machine started a part in the middle of the simulation
+                if current_zone.get_flag_initial_working() == False:
+                    Delta_T_started = self.Tnow - current_zone.get_last_started_time() 
                 
-                #- Avoid the case when the machine is working, but rigth just received the part
+                #- Avoid the case when the machine is working and just received the part
                 if Delta_T_started == 0: Delta_T_started = 10
 
                 #--- Positioning a part within the working machine
@@ -422,6 +485,27 @@ class Synchronizer():
                     for node in data['nodes']:
                         if node['activity'] == current_machine.get_id():
                             node['worked_time'] = (Delta_T_started, parts_id_in_machine) 
+ 
+                            #---- Write Back the Changes
+                            # Move the file pointer to the beginning of the file
+                            model_file.seek(0)
+                            # Write the modified data back to the file
+                            json.dump(data, model_file)
+                            # Truncate any remaining data in the file
+                            model_file.truncate()
+
+                            break
+
+            #--- If the Zone is not working, assign zero anyways to clear previous work
+            if current_zone.get_machine_working() == False:
+                # ============= Update Model.json =============
+                model_path = self.digital_model.get_model_path()
+                with open(model_path, 'r+') as model_file:
+                    data = json.load(model_file)
+                    #--- For each machine (node)
+                    for node in data['nodes']:
+                        if node['activity'] == current_machine.get_id():
+                            node['worked_time'] = 0
  
                             #---- Write Back the Changes
                             # Move the file pointer to the beginning of the file
@@ -528,7 +612,11 @@ class Synchronizer():
 
         #--- Aligment (re-positioning)
         if repositioning == True:
+            #--- Change the positioning of the parts in the json model
             self.sync_aligment()
+
+            #--- Change the allocation counter of the branching machine in the json model
+            self.digital_model.changing_allocation_counter()
 
         #--- Show the results
         self.show()
