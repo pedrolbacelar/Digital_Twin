@@ -2,7 +2,7 @@ import sqlite3
 import shutil
 
 class Database():
-    def __init__(self, database_path, event_table, start_time = None, end_time= None):
+    def __init__(self, database_path, event_table, start_time = None, end_time= None, copied_realDB= False):
         self.database_path = database_path
         self.event_table = event_table
 
@@ -34,6 +34,37 @@ class Database():
                 """)
 
                 db.commit()
+
+            #--- Copy the timestamp to timestamp_real
+            if copied_realDB == True:
+                with sqlite3.connect(self.database_path) as db:
+                    first_time = db.execute("SELECT * FROM real_log").fetchall()
+                    #--- The timestamp need to have something to you to copy it
+                    if first_time[0][-1] == None:
+                        db.execute("UPDATE real_log SET timestamp_real = timestamp")
+                        db.execute("UPDATE real_log SET timestamp = ?", (None,))
+                        db.commit
+
+            #--- Update timestamp according to the relative time
+            if start_time != None and end_time != None:
+                with sqlite3.connect(self.database_path) as db:
+                    first_time = db.execute("SELECT * FROM real_log").fetchall()
+                    #--- The timestamp need to have something to you to copy it (only for virtual tests)
+                    if first_time[0][-1] == None:
+                        db.execute("UPDATE real_log SET timestamp_real = timestamp")
+
+                    rows = db.execute("SELECT * FROM real_log WHERE timestamp_real >= ? AND timestamp_real <= ?", (start_time, end_time)).fetchall()
+                    # Loop through the selected rows and update the timestamp column with relative values
+                    start_timestamp = rows[0][-1]
+                    for row in rows:
+                        timestamp_real = row[-1]  
+                        relative_timestamp = timestamp_real - start_timestamp
+                        db.execute("UPDATE real_log SET timestamp = ? WHERE timestamp_real = ?", (relative_timestamp, timestamp_real))
+
+                    # Commit the changes and close the database connection
+                    db.commit()
+
+            
 
         if event_table == "digital_log":
             with sqlite3.connect(self.database_path) as digital_model_DB:
@@ -138,7 +169,7 @@ class Database():
             if self.start_time != None and self.end_time != None:
                 return DB.execute(f"SELECT timestamp, activity_type FROM {table} WHERE {column}=? AND timestamp_real >= ? AND timestamp_real <= ?", (column_id, self.start_time, self.end_time)).fetchall()
             else:
-                return DB.execute(f"SELECT timestamp, activity_type FROM {table} WHERE {column}=?", column_id).fetchall()
+                return DB.execute(f"SELECT timestamp, activity_type FROM {table} WHERE {column}=?", (column_id,)).fetchall()
 
     def get_database_path(self):
         return self.database_path

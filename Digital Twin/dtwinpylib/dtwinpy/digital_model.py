@@ -17,11 +17,11 @@ from .helper import Helper
 
 #--- Reload Package
 
-"""import importlib
+import importlib
 import dtwinpylib
 #reload this specifc module to upadte the class
 importlib.reload(dtwinpylib.dtwinpy.components)
-importlib.reload(dtwinpylib.dtwinpy.interfaceDB)"""
+importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
 # This is different from when you're importing the package direct because here the module has the same
 # name as the library, so we start importing from the library root for the software understand that we are 
 # importing the folder and not the library

@@ -9,10 +9,10 @@ import sqlite3
 
 #--- Reload Package
 
-"""import importlib
+import importlib
 import dtwinpylib
 #reload this specifc module to upadte the class
-importlib.reload(dtwinpylib.dtwinpy.validator)"""
+importlib.reload(dtwinpylib.dtwinpy.validator)
 
 
 
@@ -243,16 +243,19 @@ class Zone():
         self.Zone_initial = ini
 
 class Synchronizer():
-    def __init__(self, digital_model, real_database_path):
+    def __init__(self, digital_model, real_database_path, start_time, end_time, copied_realDB = False):
         #--- Basic Information
         self.digital_model = digital_model
         self.zones_dict = {}
         self.Tnow = 0
+        self.start_time = start_time
+        self.end_time = end_time
+        self.copied_realDB = copied_realDB
 
         #--- Database
         #self.real_database = real_database
         self.real_database_path = real_database_path
-        self.real_database = Database(database_path=real_database_path, event_table= "real_log")        
+        self.real_database = Database(database_path=real_database_path, event_table= "real_log", start_time= start_time, end_time= end_time, copied_realDB= copied_realDB)        
         self.full_database = self.real_database.read_store_data_all("real_log")
         
 
@@ -389,7 +392,7 @@ class Synchronizer():
 
     def sync_TDS(self):
         print("======================= Running TDS for Sync =======================")
-        validator_sync = Validator(digital_model= self.digital_model, simtype= "TDS", real_database_path= self.real_database_path)
+        validator_sync = Validator(digital_model= self.digital_model, simtype= "TDS", real_database_path= self.real_database_path, start_time= self.start_time, end_time= self.end_time, copied_realDB=self.copied_realDB)
 
         #-------- Runnin TDS --------
         # (same implementation used in logic validation)

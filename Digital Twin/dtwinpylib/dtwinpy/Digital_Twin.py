@@ -13,19 +13,19 @@ import os
 import datetime
 from time import sleep
 
-"""#--- Reload Package
+#--- Reload Package
 import importlib
 import dtwinpylib
 importlib.reload(dtwinpylib.dtwinpy.digital_model)
 importlib.reload(dtwinpylib.dtwinpy.validator)
 importlib.reload(dtwinpylib.dtwinpy.synchronizer)
 importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
-importlib.reload(dtwinpylib.dtwinpy.helper)"""
+importlib.reload(dtwinpylib.dtwinpy.helper)
 
 
 
 class Digital_Twin():
-    def __init__(self, name, model_path= None, initial= True, targeted_part_id= None, targeted_cluster= None, until= None, digital_database_path= None, real_database_path= None, ID_database_path= None, Freq_Sync= 1000, Freq_Valid= 10000, part_type= "A", loop_type= "closed", maxparts = None):
+    def __init__(self, name, copied_realDB= False,model_path= None, initial= True, targeted_part_id= None, targeted_cluster= None, until= None, digital_database_path= None, real_database_path= None, ID_database_path= None, Freq_Sync= 1000, Freq_Valid= 10000, Freq_Service = None, part_type= "A", loop_type= "closed", maxparts = None):
         self.helper = Helper()
         #--- Model Parameters
         self.name = name
@@ -33,6 +33,7 @@ class Digital_Twin():
         self.loop_type = "closed"
         self.digital_model = None
         self.initial = initial
+        self.copied_realDB = copied_realDB
     
         #--- Simulation stop conditions
         self.until = until
@@ -41,12 +42,34 @@ class Digital_Twin():
         self.targeted_cluster = targeted_cluster
 
         #--- Frequencies
-        # Time in secs!
         self.Freq_Sync = Freq_Sync
         self.Freq_Valid = Freq_Valid
+        self.Freq_Service = self.Freq_Sync
+
+
+        #--- Time intervals
         (initial_time_str, initial_timestamp) = self.helper.get_time_now()
+        self.current_timestamp = initial_timestamp
+
         self.next_Tsync = initial_timestamp + self.Freq_Sync
+        self.last_Tsync = initial_timestamp
+
         self.next_Tvalid = initial_timestamp + self.Freq_Valid
+        self.last_Tvalid = initial_timestamp
+
+        self.next_Tserv = initial_timestamp + self.Freq_Service
+        self.last_Tserv = initial_timestamp
+
+        #--- Flags the integration
+        self.flag_time_to_synchronize = False
+        self.flag_time_to_validate = False
+        self.flag_time_to_rct_service = False
+
+        self.flag_Validated = False
+        self.flag_synchronized = False
+        self.flag_rct_served = False
+
+
 
         
 
@@ -126,7 +149,7 @@ class Digital_Twin():
         return self.broker_manager
         
     #--- Create the Digital Model
-    def generate_digital_model(self, maxparts= None, verbose= True, targeted_part_id = None, targeted_cluster= None):
+    def generate_digital_model(self, until= None, maxparts= None, verbose= True, targeted_part_id = None, targeted_cluster= None):
         #--- if the functions don't receive nothing, use the default of the Digital Twin
         if maxparts == None:
             maxparts = self.maxparts
@@ -138,10 +161,14 @@ class Digital_Twin():
         if targeted_cluster == None:
             targeted_cluster = self.targeted_cluster
 
+        if until == None:
+            until= self.until
+
         #--- Update the global maxparts and target part
         self.maxparts = maxparts
         self.targeted_part_id = targeted_part_id
         self.targeted_cluster = targeted_cluster
+        self.until = until
         
         #--- Create the digital model with all the properties
         self.digital_model = Model(name= self.name,model_path= self.model_path, 
@@ -158,7 +185,7 @@ class Digital_Twin():
         return self.digital_model
     
     #--- Run normally the Digital Model and analyze the results
-    def run_digital_model(self, plot= True, maxparts = None, targeted_part_id = None, targeted_cluster= None, verbose= True, generate_model = True):
+    def run_digital_model(self, plot= True, maxparts = None, until = None, targeted_part_id = None, targeted_cluster= None, verbose= True, generate_model = True):
         if generate_model == True:
             if maxparts == None:
                 maxparts = self.maxparts
@@ -170,13 +197,16 @@ class Digital_Twin():
             if targeted_cluster == None:
                 targeted_cluster = self.targeted_cluster
 
+            if until == None:
+                until = self.until
             #--- Update the global maxparts and target part
             self.maxparts = maxparts
             self.targeted_part_id = targeted_part_id
             self.targeted_cluster = targeted_cluster
+            self.until = until
 
             #--- Always before running re-generate the model, just in case it has some changes
-            self.digital_model = self.generate_digital_model(maxparts= self.maxparts, targeted_part_id= self.targeted_part_id, targeted_cluster= self.targeted_cluster, verbose= verbose)
+            self.digital_model = self.generate_digital_model(until= self.until, maxparts= self.maxparts, targeted_part_id= self.targeted_part_id, targeted_cluster= self.targeted_cluster, verbose= verbose)
         
         #--- Run the simulation
         self.digital_model.run()
@@ -186,7 +216,7 @@ class Digital_Twin():
             self.digital_model.analyze_results()
  
     #--- Run the Validation
-    def run_validation(self, copied_realDB= False, verbose= False):
+    def run_validation(self, copied_realDB= False, verbose= False, start_time= None, end_time= None):
         
         # ================== Trace Driven Simulation (TDS) ==================
         #--- (re)generate the Digital Model (reset)
@@ -197,7 +227,7 @@ class Digital_Twin():
             shutil.copy2(self.database_path, self.real_database_path)
 
         #--- Create the Logic Validator 
-        validator_logic = Validator(digital_model= self.digital_model, simtype="TDS", real_database_path= self.real_database_path)
+        validator_logic = Validator(digital_model= self.digital_model, simtype="TDS", real_database_path= self.real_database_path, start_time= start_time, end_time= end_time, copied_realDB= self.copied_realDB)
         
         #--- IMPROVE: give the object validator for the machine to be able to update the ptime_TDS for new parts
         #--- Get the components of the simulation
@@ -220,7 +250,7 @@ class Digital_Twin():
         self.digital_model = self.generate_digital_model(verbose= verbose)
 
         #--- Create the Input Validator
-        validator_input = Validator(digital_model=self.digital_model, simtype="qTDS", real_database_path= self.real_database_path)
+        validator_input = Validator(digital_model=self.digital_model, simtype="qTDS", real_database_path= self.real_database_path, start_time= start_time, end_time= end_time, copied_realDB= self.copied_realDB)
 
         #--- Allocate the traces
         validator_input.allocate()
@@ -236,12 +266,12 @@ class Digital_Twin():
         print("__________________________________________________________________")
 
     #--- Run Synchronization
-    def run_sync(self, repositioning = True, copied_realDB= False):
+    def run_sync(self, repositioning = True, start_time= None, end_time= None):
         #--- Make sure the model is updated
         self.generate_digital_model()
 
         #--- Copied the Digital into the Real Databse
-        if copied_realDB == True:
+        if self.copied_realDB == True:
             
             #--- before copying, we delete the previous one
             try:
@@ -254,7 +284,7 @@ class Digital_Twin():
             shutil.copy2(self.database_path, self.real_database_path)
 
         #--- Create the synchronizer
-        synchronizer = Synchronizer(digital_model= self.digital_model, real_database_path= self.real_database_path)
+        synchronizer = Synchronizer(digital_model= self.digital_model, real_database_path= self.real_database_path, start_time= start_time, end_time= end_time, copied_realDB= self.copied_realDB)
 
         #--- Run the synchronizer (positioning)
         synchronizer.run(repositioning= repositioning)
@@ -279,11 +309,129 @@ class Digital_Twin():
 
     #--- Internal Services (Synchronization and Validation)    
     def Internal_Services(self):
-        pass
+        
+        # ====================== Running Synchronization ======================
+        if self.flag_time_to_synchronize:
+            # --- User Interface
+            (current_time_str, ) = self.helper.get_time_now()
+            self.helper(f"{current_time_str} |[Internal Service] Starting Synchronization", 'blue')
+
+            # --- Update Start and End time
+            start_time = self.last_Tsync
+            end_time = self.next_Tsync
+
+            # -------------- Run Synchronization --------------
+            #self.run_sync(copied_realDB= self.copied_realDB, start_time= start_time, end_time= end_time)
+            # -------------------------------------------------
+
+            sleep(2)
+
+            # --- Send data through API
+            # API
+
+
+            # --------------------- AFTER SERVICES SETTINGS ---------------------
+            # --- Validation just finish, so not time to validate anymore
+            self.flag_time_to_synchronize = False
+
+            # --- Adjust WHEN WAS the last validation (just happened)
+            self.last_Tsync = self.next_Tsync
+
+            # --- Adjust WHEN WILL be the next validation
+            self.next_Tsync = self.current_timestamp + self.Freq_Sync
+
+            # --- User Interface
+            (current_time_str, ) = self.helper.get_time_now()
+            nexttime = datetime.datetime.fromtimestamp(self.next_Tsync).strftime("%d %B %H:%M:%S")
+            self.helper(f"{current_time_str} |[Internal Service] System Synchronized. Next Sync: {nexttime}", 'blue')
+        
+        # ====================== Running Validation ======================
+        if  self.flag_time_to_validate:
+            # --- User Interface
+            (current_time_str, x) = self.helper.get_time_now()
+            self.helper(f"{current_time_str} |[Internal Service] Starting Validation", 'blue')
+
+
+            # --- Update Start and End time
+            start_time = self.last_Tsync
+            end_time = self.next_Tsync
+
+            # -------------- Run Validation --------------
+            #self.run_validation(copied_realDB= self.copied_realDB, start_time= start_time, end_time= end_time)
+            # -------------------------------------------------
+
+            sleep(2)
+
+            # --- Send data through API
+            # API
+
+            # --------------------- AFTER SERVICES SETTINGS ---------------------
+            # --- Validation just finish, so not time to validate anymore
+            self.flag_time_to_validate = False
+
+            # --- Adjust WHEN WAS the last validation (just happened)
+            self.last_Tvalid = self.next_Tvalid
+
+            # --- Adjust WHEN WILL be the next validation
+            self.next_Tvalid = self.current_timestamp + self.Freq_Valid
+
+            # --- User Interface
+            (current_time_str, x) = self.helper.get_time_now()
+            nexttime = datetime.datetime.fromtimestamp(self.next_Tvalid).strftime("%d %B %H:%M:%S")
+            self.helper(f"{current_time_str} |[Internal Service] System Validated. Next Validation: {nexttime}", 'blue')
+
 
     #--- External Services (RCT Services and Feedback)
     def External_Services(self):
-        pass
+
+        # ====================== Running Synchronization ======================
+        if self.flag_time_to_rct_service:
+            # --- User Interface
+            (current_time_str, x) = self.helper.get_time_now()
+            self.helper(f"{current_time_str} |[External Service] Starting RCT Service", 'blue')
+
+
+            # RUN Service
+            sleep(2)
+
+            # --------------------- AFTER SERVICES SETTINGS ---------------------
+            # --- Validation just finish, so not time to validate anymore
+            self.flag_time_to_rct_service = False
+
+            # --- Adjust WHEN WAS the last validation (just happened)
+            self.last_Tserv = self.next_Tserv
+
+            # --- Adjust WHEN WILL be the next validation
+            self.next_Tserv = self.current_timestamp + self.Freq_Service
+
+            # --- User Interface
+            (current_time_str, x) = self.helper.get_time_now()
+            nexttime = datetime.datetime.fromtimestamp(self.next_Tserv).strftime("%d %B %H:%M:%S")
+            self.helper(f"{current_time_str} |[External Service] System RCT completed. Next Service: {nexttime}", 'blue')
+
+
+
+    def Update_time_flags(self):
+        #--- Take the current time
+        (time_str, timestamp) = self.helper.get_time_now()
+        self.current_timestamp = timestamp
+
+        #--- Check if it's time to Sync
+        if timestamp >= self.next_Tsync:
+            #-- Rise Time to Sync
+            self.flag_time_to_synchronize = True
+            self.flag_time_to_rct_service = True
+
+        #--- Check if it's time to Validate
+        if timestamp >= self.next_Tvalid:
+            #-- Rise Time to Validate
+            self.flag_time_to_validate = True
+
+        #--- Check if it's time to Serve
+        if timestamp >= self.next_Tserv:
+            #-- Rise Time to Serve
+            self.flag_time_to_rct_service = True
+
 
     def run(self):
         """
@@ -319,21 +467,15 @@ class Digital_Twin():
 
         try: 
             while True:
-                #--- Take the current time
-                (time_str, timestamp) = self.helper.get_time_now()
+                
+                #--- Update the flags of time to know when to Sync, Validate and Run Services
+                self.Update_time_flags()
 
-                #--- Check if it's time to Sync
-                if timestamp >= self.next_Tsync:
-                    #-- Rise the Flag to Sync
+                #--- Run the Internal Services (Synchronization and Validation)
+                self.Internal_Services()
 
-                    pass
-
-                #--- Check if it's time to Validate
-                if timestamp >= self.next_Tvalid:
-                    # Validate
-                    pass
-
-
+                #--- Run the External Services (RCT path prediction)
+                self.External_Services()
 
         except KeyboardInterrupt:
             self.helper(f"The Digital Twin named as {self.name} was killed manually", 'red')

@@ -10,14 +10,14 @@ import sqlite3
 
 #--- Reload Package
 
-"""import importlib
+import importlib
 import dtwinpylib
 #reload this specifc module to upadte the class
-importlib.reload(dtwinpylib.dtwinpy.interfaceDB)"""
+importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
 
 
 class Validator():
-    def __init__(self, digital_model, simtype, real_database_path):
+    def __init__(self, digital_model, simtype, real_database_path, start_time, end_time, copied_realDB= False):
         self.helper = Helper()
         self.digital_model = digital_model
         self.simtype = simtype
@@ -25,12 +25,13 @@ class Validator():
         self.matrix_ptime_qTDS = None 
         # TDS: each row is the list of process time for each machine
         self.matrix_ptime_TDS = None
+        self.copied_realDB = copied_realDB
 
         #--- Database
         # The real database is going to be create by the broker,
         # here we're just getting the object that point to that
         # database. That's why we don't initialize it.
-        self.real_database = Database(database_path=real_database_path, event_table= "real_log")
+        self.real_database = Database(database_path=real_database_path, event_table= "real_log", start_time=start_time, end_time=end_time, copied_realDB= copied_realDB)
         self.digital_database = self.digital_model.get_model_database()
         self.real_database_path = self.real_database.get_database_path()
 
@@ -158,7 +159,7 @@ class Validator():
         #--- Loop for each part of the simulation
         for part_id in part_ids:
             #--- Get the full trace for each part
-            part_full_trace = self.real_database.get_time_activity_of_column(column= "part_id", table="real_log", column_id= part_id)
+            part_full_trace = self.real_database.get_time_activity_of_column(column= "part_id", table="real_log", column_id= part_id[0])
             part_matrix_full_trace.append(part_full_trace)
 
             #--- Initiate as blank values
@@ -262,7 +263,7 @@ class Validator():
         #--- Loop for each part of the simulation
         for machine_id in machines_ids:
             #--- Get the full trace for each machine
-            machine_full_trace = self.real_database.get_time_activity_of_column(column= "machine_id", table="real_log", column_id=machine_id)
+            machine_full_trace = self.real_database.get_time_activity_of_column(column= "machine_id", table="real_log", column_id=machine_id[0])
             machine_matrix_full_trace.append(machine_full_trace)
 
             #--- Initiate as blank values
