@@ -25,7 +25,7 @@ ID_database_path = f"databases/{name}/ID_database.db"
 ip = alex_phone
 
 try:
-    broker_manager = Broker_Manager(ip_address= ip, real_database_path= real_database_path, ID_database_path= ID_database_path)
+    broker_manager = Broker_Manager(ip_address= factory_ip_address, real_database_path= real_database_path, ID_database_path= ID_database_path)
     #--- Run Broker
     broker_manager.run()
 
