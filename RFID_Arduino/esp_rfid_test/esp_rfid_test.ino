@@ -22,10 +22,11 @@ const char *ssid = "THE FACTORY - ROUTER 2";
 const char *password = "legofactory";
 const char *mqtt_server = "192.168.0.50";
 
+
 // my pc credentials
-//const char* ssid = "Galaxy A22DB0F";
-//const char* password = "tpqv9051";
-//const char* mqtt_server = "192.168.15.41";
+// const char* ssid = "Galaxy A22DB0F";
+// const char* password = "tpqv9051";
+// const char* mqtt_server = "192.168.15.70";
 // ##################################################################################
 
 
@@ -52,6 +53,8 @@ MFRC522::MIFARE_Key key;
 byte nuidPICC[4];
 // -----------------------------------------
 
+// setting mqtt client id
+String clientId = "ESP32-" + WiFi.macAddress();
 // -------------------------------------- xxxxxxxxx -------------------------------------------------
 
 void setup() {
@@ -140,7 +143,7 @@ void loop()
 void reconnect() {
   while (!client.connected()) {
     Serial.print("inside reconnect");
-    if (client.connect("esp32_client")) {
+    if (client.connect(clientId.c_str())) {
       Serial.println("if client collect");
       // publish Hello
       send_message();
