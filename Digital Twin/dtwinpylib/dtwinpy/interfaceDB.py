@@ -1,8 +1,11 @@
+from .helper import Helper
+
 import sqlite3
 import shutil
 
 class Database():
     def __init__(self, database_path, event_table, start_time = None, end_time= None, copied_realDB= False):
+        self.helper = Helper()
         self.database_path = database_path
         self.event_table = event_table
 
@@ -35,11 +38,13 @@ class Database():
 
                 db.commit()
 
+            """
             if copied_realDB == True:
                 #--- Copy the timestamp to timestamp_real
                 self.copy_timestamp_to_timestamp_real()
+            """
 
-            
+            # ------- Update the relative time -------
             if start_time != None and end_time != None:
                 #--- Adjust the start time to always starts with a event 'start'
                 self.update_start_time()
@@ -142,6 +147,27 @@ class Database():
             line_id = None
 
         conn.close()
+
+    def update_real_time_now(self):
+        (time_str, timestamp_now) = self.helper.get_time_now()
+        with sqlite3.connect(self.database_path) as db:
+            timestamp_real = db.execute(f"""SELECT timestamp_real FROM real_log""").fetchall()
+            for timestamp in timestamp_real:
+                #--- add the current real timestamp to the virtual timestamp
+                timestamp = timestamp[0]
+                timestamp_updated = timestamp + timestamp_now
+                timestamp_updated = int(timestamp_updated)
+
+                #--- Update in the database
+                db.execute("UPDATE real_log SET timestamp_real = ? WHERE timestamp_real = ?", (timestamp_updated, timestamp))
+
+            #-- Commit all the changes
+            db.commit()
+
+    def get_current_durantion(self):
+        current_durantion = self.end_time - self.start_time
+        return current_durantion
+
 
     def initialize(self, table):
         with sqlite3.connect(self.database_path) as digital_model_DB:

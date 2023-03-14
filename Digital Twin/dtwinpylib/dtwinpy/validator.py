@@ -607,7 +607,7 @@ class Validator():
             (Yr_time, Yr_event) = self.generate_event_sequence(database= self.real_database, table= "real_log")
             
             #--- Compare Event Sequence
-            (lcss, lcss_time, lcss_indicator) = self.LCSS(Sequence1= Ys_event, Sequence1_time= Ys_time, Sequence2= Yr_event, Sequence2_time= Yr_time, delta_t=100)
+            (lcss, lcss_time, lcss_indicator) = self.LCSS(Sequence1= Ys_event, Sequence1_time= Ys_time, Sequence2= Yr_event, Sequence2_time= Yr_time, delta_t=10)
             print("--- LCSS Sequence ---")
             print(lcss)
             print("--- LCSS Time ---")
@@ -630,7 +630,7 @@ class Validator():
             (Yr_time, Yr_event) = self.generate_event_sequence(database= self.real_database, table= "real_log")
 
             #--- Compare Event Sequence
-            (lcss, lcss_time, lcss_indicator) = self.LCSS(Sequence1= Ys_event, Sequence1_time= Ys_time, Sequence2= Yr_event, Sequence2_time= Yr_time, delta_t=2000)
+            (lcss, lcss_time, lcss_indicator) = self.LCSS(Sequence1= Ys_event, Sequence1_time= Ys_time, Sequence2= Yr_event, Sequence2_time= Yr_time, delta_t=20)
             print("--- LCSS Sequence ---")
             print(lcss)
             print("--- LCSS Time ---")

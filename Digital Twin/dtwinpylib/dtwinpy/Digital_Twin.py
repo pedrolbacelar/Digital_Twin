@@ -47,7 +47,7 @@ class Digital_Twin():
         self.Freq_Sync = Freq_Sync
         self.Freq_Valid = Freq_Valid
         self.Freq_Service = self.Freq_Sync
-        self.interfaceAPI = interfaceAPI()
+        #self.interfaceAPI = interfaceAPI()
 
 
         #--- Time intervals
@@ -73,8 +73,6 @@ class Digital_Twin():
         self.flag_rct_served = False
 
 
-
-        
 
         #--- Model and Figure path
         if not os.path.exists(f"figures"):
@@ -123,6 +121,28 @@ class Digital_Twin():
             self.ID_database_path = f"databases/{self.name}/ID_database.db"
         else:
             self.ID_database_path = ID_database_path
+        
+        if self.copied_realDB == True:
+            #--- Update the timestamp ---
+
+            #--- before copying, we delete the previous one
+            try:
+                os.remove(self.real_database_path)
+            except FileNotFoundError:
+                self.helper.printer(f"[WARNING][Digital_Twin.py/init()] The file '{self.real_database_path}' does not exist")
+                print(f"copying file {self.database_path} in the path {self.real_database_path}")
+
+            #--- Copy the whole database
+            shutil.copy2(self.database_path, self.real_database_path)
+
+            #--- Create a temporary real db object for initial fix
+            temporary_real_database = Database(database_path= self.real_database_path, event_table= 'real_log', copied_realDB= True)
+
+            #--- Copy the column timestamp into timestamp_real and clean the previous one
+            temporary_real_database.copy_timestamp_to_timestamp_real()
+
+            #--- Update the timestamp according to the current real time
+            temporary_real_database.update_real_time_now()
         # ------------------------------------------
 
         self.helper.printer(f"Digital Twin '{self.name}' created sucessfully at {initial_time_str}", 'green')       
@@ -225,10 +245,12 @@ class Digital_Twin():
         #--- (re)generate the Digital Model (reset)
         self.digital_model = self.generate_digital_model(verbose= verbose)
 
+        """[OLD] Now we do this when creating the digital twin
         #--- Copied the Digital into the Real Databse
         if copied_realDB == True:
             shutil.copy2(self.database_path, self.real_database_path)
-
+        """
+        
         #--- Create the Logic Validator 
         validator_logic = Validator(digital_model= self.digital_model, simtype="TDS", real_database_path= self.real_database_path, start_time= start_time, end_time= end_time, copied_realDB= self.copied_realDB)
         
@@ -269,11 +291,16 @@ class Digital_Twin():
         print("__________________________________________________________________")
 
     #--- Run Synchronization
-    def run_sync(self, repositioning = True, start_time= None, end_time= None):
+    def run_sync(self, repositioning = True, start_time= None, end_time= None, copied_realDB= False):
+        #--- Update the duration of the simulation in case that none of other parameters was give
+        # (also for that you need to have start and end time)
+        if (self.maxparts == None and self.targeted_part_id == None) and (self.)
+        
         #--- Make sure the model is updated
         self.generate_digital_model()
 
         #--- Copied the Digital into the Real Databse
+        """[OLD] Now we do this when creating the digital twin
         if self.copied_realDB == True:
             
             #--- before copying, we delete the previous one
@@ -285,6 +312,7 @@ class Digital_Twin():
 
             #--- copy
             shutil.copy2(self.database_path, self.real_database_path)
+        """
 
         #--- Create the synchronizer
         synchronizer = Synchronizer(digital_model= self.digital_model, real_database_path= self.real_database_path, start_time= start_time, end_time= end_time, copied_realDB= self.copied_realDB)
@@ -322,15 +350,18 @@ class Digital_Twin():
             # --- Update Start and End time
             start_time = self.last_Tsync
             end_time = self.next_Tsync
+            
 
             # -------------- Run Synchronization --------------
-            #self.run_sync(copied_realDB= self.copied_realDB, start_time= start_time, end_time= end_time)
+            self.run_sync(copied_realDB= self.copied_realDB, start_time= start_time, end_time= end_time)
             # -------------------------------------------------
 
-            sleep(2)
+            
 
             # --- Send data through API
             # API
+            """
+            sleep(2)
             random_machines = [random.randint(0, 1) for _ in range(5)]
             for machine in random_machines:
                 if machine == 0: machine = False
@@ -352,6 +383,7 @@ class Digital_Twin():
                 queue_4= random_queues[3],
                 queue_5= random_queues[4],asset_id="7da127f5a566408db16e0aeace5181e9"
             )
+            """
             
 
 
@@ -382,17 +414,19 @@ class Digital_Twin():
             end_time = self.next_Tsync
 
             # -------------- Run Validation --------------
-            #self.run_validation(copied_realDB= self.copied_realDB, start_time= start_time, end_time= end_time)
+            self.run_validation(copied_realDB= self.copied_realDB, start_time= start_time, end_time= end_time)
             # -------------------------------------------------
 
-            sleep(2)
+            
 
             # --- Send data through API
             # API
+            """
+            sleep(2)
             random_logic_indicator = random.uniform(0.85, 0.95)
             random_input_indicator = random.uniform(0.75, 0.95)
             self.interfaceAPI.indicator(logic= random_logic_indicator, input= random_input_indicator)
-
+            """
 
             # --------------------- AFTER SERVICES SETTINGS ---------------------
             # --- Validation just finish, so not time to validate anymore
@@ -421,14 +455,16 @@ class Digital_Twin():
 
 
             # RUN Service
+            """
             sleep(2)
-
             part_id =  random.randint(1, 10)
             quque_id = random.randint(2, 3)
             path_1 = random.uniform(10000, 15000)
             path_2 = random.uniform(12000, 19000)
 
             self.interfaceAPI.RCT_server(part_id= part_id, path_1= path_1, path_2= path_2, queue_id= quque_id)
+            """
+
 
             # --------------------- AFTER SERVICES SETTINGS ---------------------
             # --- Validation just finish, so not time to validate anymore
@@ -445,8 +481,7 @@ class Digital_Twin():
             nexttime = datetime.datetime.fromtimestamp(self.next_Tserv).strftime("%d %B %H:%M:%S")
             self.helper.printer(f"{current_time_str} |[External Service] System RCT completed. Next Service: {nexttime}", 'yellow')
 
-
-
+    #--- Update Flags of time
     def Update_time_flags(self):
         #--- Take the current time
         (time_str, timestamp) = self.helper.get_time_now()
