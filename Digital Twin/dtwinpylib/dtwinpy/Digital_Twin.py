@@ -6,12 +6,14 @@ from .synchronizer import Synchronizer
 from .services import Service_Handler
 from .broker_manager import Broker_Manager
 from .helper import Helper
+from .interfaceAPI import interfaceAPI
 
 #--- Common Libraries
 import shutil
 import os
 import datetime
 from time import sleep
+import random
 
 #--- Reload Package
 import importlib
@@ -45,6 +47,7 @@ class Digital_Twin():
         self.Freq_Sync = Freq_Sync
         self.Freq_Valid = Freq_Valid
         self.Freq_Service = self.Freq_Sync
+        self.interfaceAPI = interfaceAPI()
 
 
         #--- Time intervals
@@ -313,8 +316,8 @@ class Digital_Twin():
         # ====================== Running Synchronization ======================
         if self.flag_time_to_synchronize:
             # --- User Interface
-            (current_time_str, ) = self.helper.get_time_now()
-            self.helper(f"{current_time_str} |[Internal Service] Starting Synchronization", 'blue')
+            (current_time_str, x) = self.helper.get_time_now()
+            self.helper.printer(f"{current_time_str} |[Internal Service] Starting Synchronization", 'blue')
 
             # --- Update Start and End time
             start_time = self.last_Tsync
@@ -328,6 +331,28 @@ class Digital_Twin():
 
             # --- Send data through API
             # API
+            random_machines = [random.randint(0, 1) for _ in range(5)]
+            for machine in random_machines:
+                if machine == 0: machine = False
+                if machine == 1: machine = True
+
+            self.interfaceAPI.station_status(
+                station_1= random_machines[0],
+                station_2= random_machines[1],
+                station_3= random_machines[2],
+                station_4= random_machines[3],
+                station_5= random_machines[4])
+            
+            random_queues = [random.randint(1, 6) for _ in range(5)]
+
+            self.interfaceAPI.queue_status(
+                queue_1= random_queues[0],
+                queue_2= random_queues[1],
+                queue_3= random_queues[2],
+                queue_4= random_queues[3],
+                queue_5= random_queues[4],asset_id="7da127f5a566408db16e0aeace5181e9"
+            )
+            
 
 
             # --------------------- AFTER SERVICES SETTINGS ---------------------
@@ -341,15 +366,15 @@ class Digital_Twin():
             self.next_Tsync = self.current_timestamp + self.Freq_Sync
 
             # --- User Interface
-            (current_time_str, ) = self.helper.get_time_now()
+            (current_time_str, x) = self.helper.get_time_now()
             nexttime = datetime.datetime.fromtimestamp(self.next_Tsync).strftime("%d %B %H:%M:%S")
-            self.helper(f"{current_time_str} |[Internal Service] System Synchronized. Next Sync: {nexttime}", 'blue')
+            self.helper.printer(f"{current_time_str} |[Internal Service] System Synchronized. Next Sync: {nexttime}", 'blue')
         
         # ====================== Running Validation ======================
         if  self.flag_time_to_validate:
             # --- User Interface
             (current_time_str, x) = self.helper.get_time_now()
-            self.helper(f"{current_time_str} |[Internal Service] Starting Validation", 'blue')
+            self.helper.printer(f"{current_time_str} |[Internal Service] Starting Validation", 'green')
 
 
             # --- Update Start and End time
@@ -364,6 +389,10 @@ class Digital_Twin():
 
             # --- Send data through API
             # API
+            random_logic_indicator = random.uniform(0.85, 0.95)
+            random_input_indicator = random.uniform(0.75, 0.95)
+            self.interfaceAPI.indicator(logic= random_logic_indicator, input= random_input_indicator)
+
 
             # --------------------- AFTER SERVICES SETTINGS ---------------------
             # --- Validation just finish, so not time to validate anymore
@@ -378,7 +407,7 @@ class Digital_Twin():
             # --- User Interface
             (current_time_str, x) = self.helper.get_time_now()
             nexttime = datetime.datetime.fromtimestamp(self.next_Tvalid).strftime("%d %B %H:%M:%S")
-            self.helper(f"{current_time_str} |[Internal Service] System Validated. Next Validation: {nexttime}", 'blue')
+            self.helper.printer(f"{current_time_str} |[Internal Service] System Validated. Next Validation: {nexttime}", 'green')
 
 
     #--- External Services (RCT Services and Feedback)
@@ -388,11 +417,18 @@ class Digital_Twin():
         if self.flag_time_to_rct_service:
             # --- User Interface
             (current_time_str, x) = self.helper.get_time_now()
-            self.helper(f"{current_time_str} |[External Service] Starting RCT Service", 'blue')
+            self.helper.printer(f"{current_time_str} |[External Service] Starting RCT Service", 'yellow')
 
 
             # RUN Service
             sleep(2)
+
+            part_id =  random.randint(1, 10)
+            quque_id = random.randint(2, 3)
+            path_1 = random.uniform(10000, 15000)
+            path_2 = random.uniform(12000, 19000)
+
+            self.interfaceAPI.RCT_server(part_id= part_id, path_1= path_1, path_2= path_2, queue_id= quque_id)
 
             # --------------------- AFTER SERVICES SETTINGS ---------------------
             # --- Validation just finish, so not time to validate anymore
@@ -407,7 +443,7 @@ class Digital_Twin():
             # --- User Interface
             (current_time_str, x) = self.helper.get_time_now()
             nexttime = datetime.datetime.fromtimestamp(self.next_Tserv).strftime("%d %B %H:%M:%S")
-            self.helper(f"{current_time_str} |[External Service] System RCT completed. Next Service: {nexttime}", 'blue')
+            self.helper.printer(f"{current_time_str} |[External Service] System RCT completed. Next Service: {nexttime}", 'yellow')
 
 
 
@@ -466,6 +502,7 @@ class Digital_Twin():
         """
 
         try: 
+            
             while True:
                 
                 #--- Update the flags of time to know when to Sync, Validate and Run Services
@@ -478,7 +515,7 @@ class Digital_Twin():
                 self.External_Services()
 
         except KeyboardInterrupt:
-            self.helper(f"The Digital Twin named as {self.name} was killed manually", 'red')
+            self.helper.printer(f"The Digital Twin named as {self.name} was killed manually", 'red')
 
 
         
