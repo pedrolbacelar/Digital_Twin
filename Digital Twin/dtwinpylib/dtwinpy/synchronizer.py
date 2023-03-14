@@ -243,9 +243,10 @@ class Zone():
         self.Zone_initial = ini
 
 class Synchronizer():
-    def __init__(self, digital_model, real_database_path, start_time, end_time, copied_realDB = False):
+    def __init__(self, digital_model, real_database_path, start_time, end_time, generate_digital_model, copied_realDB = False):
         #--- Basic Information
         self.digital_model = digital_model
+        self.generate_digital_model= generate_digital_model
         self.zones_dict = {}
         self.Tnow = 0
         self.start_time = start_time
@@ -392,7 +393,7 @@ class Synchronizer():
 
     def sync_TDS(self):
         print("======================= Running TDS for Sync =======================")
-        validator_sync = Validator(digital_model= self.digital_model, simtype= "TDS", real_database_path= self.real_database_path, start_time= self.start_time, end_time= self.end_time, copied_realDB=self.copied_realDB)
+        validator_sync = Validator(digital_model= self.digital_model, simtype= "TDS", real_database_path= self.real_database_path, start_time= self.start_time, end_time= self.end_time, copied_realDB=self.copied_realDB, generate_digital_model= self.generate_digital_model)
 
         #-------- Runnin TDS --------
         # (same implementation used in logic validation)
@@ -608,10 +609,10 @@ class Synchronizer():
         self.positioning_discovery()
 
         #--- Run the Trace Driven Simulation
-        self.sync_TDS()
+        #self.sync_TDS()
 
         #--- Calculate the Indicator
-        self.sync_indicator()
+        #self.sync_indicator()
 
         #--- Aligment (re-positioning)
         if repositioning == True:

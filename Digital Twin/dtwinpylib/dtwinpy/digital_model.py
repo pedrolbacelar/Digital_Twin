@@ -856,6 +856,8 @@ class Model():
             for part in parts_in_queue:
                 self.parts_vector.append(part)
         return self.parts_vector
+    def get_model_constrains(self):
+        return (self.until, self.maxparts, self.targeted_part_id, self.targeted_cluster)
     # ==============================================
 
     def verbose(self):

@@ -34,6 +34,8 @@ class Helper():
             self.Green = "<span style='color:#7DCEA0'>"
             self.Yellow = "<span style='color:yellow'>"
             self.Blue = "<span style='color:#3498DB'>"
+            self.Purple = "<span style='color:#A569BD'>"
+            self.Brown = "<span style='color:#DC7633'>"
             self.Reset = "</span>"
 
         self.colors = {
@@ -41,6 +43,8 @@ class Helper():
             'green': self.Green,
             'yellow': self.Yellow,
             'blue': self.Blue,    
+            'purple': self.Purple,
+            'brown': self.Brown,
             'reset': self.Reset                 
             }
     

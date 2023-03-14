@@ -42,10 +42,7 @@
       "capacity": 1,
       "contemp": 10,
       "cluster": 2,
-      "worked_time": [
-        7,
-        "Part 12"
-      ]
+      "worked_time": 0
     },
     {
       "activity": 4,
@@ -60,10 +57,7 @@
       "capacity": 1,
       "contemp": 10,
       "cluster": 2,
-      "worked_time": [
-        5,
-        "Part 11"
-      ]
+      "worked_time": 0
     },
     {
       "activity": 5,
@@ -77,10 +71,7 @@
       "capacity": 1,
       "contemp": 10,
       "cluster": 2,
-      "worked_time": [
-        4,
-        "Part 10"
-      ]
+      "worked_time": 0
     }
   ],
   "arcs": [
@@ -141,11 +132,13 @@
   ],
   "initial": [
     [
-      "Part 14"
+      "Part 1",
+      "Part 2",
+      "Part 3",
+      "Part 4",
+      "Part 5"
     ],
-    [
-      "Part 13"
-    ],
+    [],
     [],
     [],
     []

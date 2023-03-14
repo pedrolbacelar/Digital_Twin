@@ -17,9 +17,10 @@ importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
 
 
 class Validator():
-    def __init__(self, digital_model, simtype, real_database_path, start_time, end_time, copied_realDB= False):
+    def __init__(self, digital_model, simtype, real_database_path, start_time, end_time, generate_digital_model, copied_realDB= False):
         self.helper = Helper()
         self.digital_model = digital_model
+        self.generate_digital_model= generate_digital_model
         self.simtype = simtype
         # qTDS: each row is the list of process time for each part
         self.matrix_ptime_qTDS = None 
@@ -31,6 +32,8 @@ class Validator():
         # The real database is going to be create by the broker,
         # here we're just getting the object that point to that
         # database. That's why we don't initialize it.
+        self.start_time = start_time
+        self.end_time = end_time
         self.real_database = Database(database_path=real_database_path, event_table= "real_log", start_time=start_time, end_time=end_time, copied_realDB= copied_realDB)
         self.digital_database = self.digital_model.get_model_database()
         self.real_database_path = self.real_database.get_database_path()
@@ -593,6 +596,17 @@ class Validator():
         print("-----------------------------------------------------------------------------------------")
 
     def run(self):
+
+        # --- Update the Digital Model before running anything ---
+        # --- Get model constrains
+        (until, maxparts, targeted_part_id, targeted_cluster) = self.digital_model.get_model_constrains()
+
+        # --- Update the duration of the simulation in case that none of other parameters was give
+        # (also for that you need to have start and end time)
+        if (until, maxparts, targeted_part_id, targeted_cluster) == (None, None, None, None) and (self.start_time != None and self.end_time != None):
+            until = self.real_database.get_current_durantion()
+
+        self.digital_model = self.generate_digital_model(until= until)
 
         # obs: I can run the simulation direct because the machines already have the type of simulation
         if self.simtype == "TDS":
