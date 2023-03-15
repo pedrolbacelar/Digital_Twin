@@ -33,9 +33,12 @@ real_path = "databases/5s_determ/real_database.db"
 
 database_path = mydt.database_path
 mydb = Database(database_path= real_path, copied_realDB=True, event_table= 'real_log')
-"""
 mydt = Digital_Twin(name= "5s_determ_real", maxparts= 10)
 mydt.run_digital_model()
 
 mydt= Digital_Twin(name= "5s_determ_real", copied_realDB= True, Freq_Service=10000, Freq_Sync= 10, Freq_Valid= 30)
+mydt.run()"""
+
+
+mydt = Digital_Twin(name= "2s_determ", Freq_Sync= 60, Freq_Valid= 120, Freq_Service= 10000, delta_t_treshold=30)
 mydt.run()

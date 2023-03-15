@@ -2,6 +2,7 @@
 
 #--- Import Modules
 from .interfaceDB import Database
+from .helper import Helper
 
 #--- Normal Libraries
 import paho.mqtt.client as mqtt
@@ -22,6 +23,7 @@ class Broker_Manager():
         self.ip_address= ip_address
         self.port = port
         self.keepalive = keepalive
+        self.helper = Helper()
 
         #--- MQTT
         self.topics = topics
@@ -110,7 +112,7 @@ class Broker_Manager():
                 part_id = self.part_ID_translator(unique_id)
             except KeyError:
                 #--- ERROR: unique_ID was not found in the dictionary
-                print(f"[ERROR][broker_manager.py/traces_handler()] The Unique ID {unique_id} was not found in the PID dictionary")
+                self.helper.printer(f"[ERROR][broker_manager.py/traces_handler()] The Unique ID {unique_id} was not found in the PID dictionary", 'red')
                 print("printing the current dictionary....")
                 for key in self.UID_to_PID_dict:
                     print(f"{key} | {self.UID_to_PID_dict[key]}")
@@ -183,11 +185,12 @@ class Broker_Manager():
                 table= "real_log",
                 column= "part_id",
                 line_id= line_id,
-                new_value= part_id
+                new_value= part_id,
+                current_time_str_= current_time_str
             )
 
         except IndexError:
-            print(f"{current_time_str} | [ERROR][BROKER]: Your Broker Manager didn't find {machine_id} with 'Part 0' in the database ({self.real_database_path})")
+            self.helper.printer(f"{current_time_str} | [WARNING][BROKER]: Your Broker Manager didn't find {machine_id} with 'Part 0' in the database ({self.real_database_path}). Please, check if the previous attempt was successful.", 'yellow')
         
     def rct_handler(self, message_translated):
         """
@@ -218,7 +221,7 @@ class Broker_Manager():
             print(".")
             sleep(1)
         if rc == 0:
-            print(f"----- Connected with {self.ip_address} Successfully -----")
+            self.helper.printer(f"----- Connected with {self.ip_address} Successfully -----", 'green')
         else:
             print(f"----- Connected with {self.ip_address} FAILED -----")
 
@@ -240,6 +243,8 @@ class Broker_Manager():
         current_time = datetime.datetime.now()
         current_time_str = current_time.strftime("%d %B %H:%M:%S")
 
+        #--- Round current timestamp to get INTEGER
+        current_timestamp = round(current_timestamp)
         #--- Print the payload received
         print(f"{current_time_str} | Topic: {message_topic} | Payload Received: {message_translated}")
 
@@ -299,7 +304,7 @@ class Broker_Manager():
                 sleep(1)
             except KeyboardInterrupt:
                 self.condition = False
-                print(f"---- Communication with {self.ip_address} killed manually----")
+                self.helper.printer(f"---- Communication with {self.ip_address} killed manually----", 'red')
         
         #--- Stop the connection and disconnect the client
         self.client.loop_stop()

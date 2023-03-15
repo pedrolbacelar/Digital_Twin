@@ -16,7 +16,7 @@ import datetime
 from time import sleep
 
 class Helper():
-    def __init__(self, type= "ipynb"):
+    def __init__(self, type= "py"):
         self.type = type
 
         #--- To print on the normal terminal
@@ -25,7 +25,9 @@ class Helper():
             self.Green= "\033[32m"
             self.Yellow= "\033[33m"
             self.Blue= "\033[34m"
-            self.RESET = '\033[0m'
+            self.Purple= "\033[35m "
+            self.Brown= "\033[38;5;94m "
+            self.Reset = '\033[0m'
 
         #--- To print on the Jupyter Notebook
         else:

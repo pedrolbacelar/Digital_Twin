@@ -10,7 +10,8 @@ ip = "10.169.81.165"
 
 #--- Import Broker Manager class
 from dtwinpylib.dtwinpy.broker_manager import Broker_Manager
-name= "5s_deterministic_complex"
+#name= "5s_deterministic_complex"
+name= "2s_determ"
 
 #--- Setting of the broker
 factory_ip_address = "192.168.0.50"
@@ -25,7 +26,7 @@ ID_database_path = f"databases/{name}/ID_database.db"
 ip = alex_phone
 
 try:
-    broker_manager = Broker_Manager(ip_address= ip, real_database_path= real_database_path, ID_database_path= ID_database_path)
+    broker_manager = Broker_Manager(ip_address= factory_ip_address, real_database_path= real_database_path, ID_database_path= ID_database_path)
     #--- Run Broker
     broker_manager.run()
 

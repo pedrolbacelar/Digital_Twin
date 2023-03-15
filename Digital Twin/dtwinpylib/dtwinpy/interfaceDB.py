@@ -2,6 +2,8 @@ from .helper import Helper
 
 import sqlite3
 import shutil
+from time import sleep
+import keyboard
 
 class Database():
     def __init__(self, database_path, event_table, start_time = None, end_time= None, copied_realDB= False):
@@ -25,8 +27,19 @@ class Database():
 
             # ------- Update the relative time -------
             if start_time != None and end_time != None:
+
                 #--- Take the ID of start and end time
                 self.find_line_ID_start_end()
+
+                print("---------- Pointer Status Initial ----------")
+                print(f"Start Time: {self.start_time}")
+                print(f"Start Time ID: {self.start_time_id}")
+                print()
+                print(f"End Time: {self.end_time}")
+                print(f"End Time ID: {self.end_time_id}")
+                print("-------------------------------------")
+
+                
                 
                 #--- Adjust the start time to always starts with a event 'start'
                 #self.update_start_time()
@@ -35,8 +48,11 @@ class Database():
                 #--- Calculate the relative time and update timestamp
                 self.updated_relative_timestamp()
 
-                print("---------- Pointer Status ----------")
+                print("---------- Pointer Status Updated ----------")
+                print(f"Start Time: {self.start_time}")
                 print(f"Start Time ID: {self.start_time_id}")
+                print()
+                print(f"End Time: {self.end_time}")
                 print(f"End Time ID: {self.end_time_id}")
                 print("-------------------------------------")
                     
@@ -199,20 +215,47 @@ class Database():
         conn = sqlite3.connect(self.database_path)
         cursor = conn.cursor()
 
-        # Check for the most recent 'started' activity_type before the original start time
-        cursor.execute(f"""
-            SELECT event_id, timestamp_real
-            FROM real_log
-            WHERE timestamp_real >= ?
-            AND activity_type = 'Started'
-            ORDER BY timestamp_real ASC
-            LIMIT 1
-        """, (self.end_time,))
+        looping = True
+        try_counter = 1
+        #--- Timeout Loop
+        while looping == True and try_counter <= 3:
+            # Check for the most recent 'started' activity_type before the original start time
+            cursor.execute(f"""
+                SELECT event_id, timestamp_real
+                FROM real_log
+                WHERE timestamp_real >= ?
+                AND activity_type = 'Started'
+                ORDER BY timestamp_real ASC
+                LIMIT 1
+            """, (self.end_time,))
 
-        #--- Found the next event to be Started
-        row = cursor.fetchone()
+            #--- Found the next event to be Started
+            row = cursor.fetchone()
+            
+            #--- Stop Conditions
+            if row != None:
+                # Found a started
+                looping = False
+
+            else:
+                #--- Sleep for the next try
+                sleep(6)
+
+                #--- Updated the trying counter
+                try_counter += 1
+        
+        if try_counter > 3:
+            #--- Printer Error Message
+            self.helper.printer(f"[ERROR][interfaceDB.py/update_end_time()] After trying 3 times, it was not possible to find a 'Started' event after the end time: {self.end_time}", 'red')
+            (tstr, t) = self.helper.get_time_now()
+            
+            #--- Killing the program
+            self.helper.printer(f"---- Digital Twin killed at {tstr} ----", 'red')
+            keyboard.press_and_release('ctrl+c')
+        
 
         #--- Take the rigth position before that event
+        # TODO: Raise a erro condition if row is null
         started_position = row[0] # line id
         selected_line_id = started_position - 1
         
@@ -378,9 +421,9 @@ class Database():
                 return DB.execute(f"SELECT event_id FROM {table} WHERE {column1}=? AND {column2}= ? ", (condition1, condition2)).fetchall()
 
 
-    def update_column(self, table, column, line_id, new_value):
+    def update_column(self, table, column, line_id, new_value, current_time_str_):
         with sqlite3.connect(self.database_path) as DB:
-            DB.execute(f"UPDATE {table} SET {column} = ? WHERE event_id = ?", (new_value, line_id))
+            DB.execute(f"UPDATE {table} SET {column} = ?, current_time_str= ? WHERE event_id = ?", (new_value, current_time_str_, line_id))
             DB.commit()
 
     # --------- Function to add a UID and partid to the table ---------

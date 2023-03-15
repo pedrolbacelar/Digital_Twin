@@ -243,7 +243,7 @@ class Zone():
         self.Zone_initial = ini
 
 class Synchronizer():
-    def __init__(self, digital_model, real_database_path, start_time, end_time, generate_digital_model, copied_realDB = False):
+    def __init__(self, digital_model, real_database_path, start_time, end_time, generate_digital_model, copied_realDB = False, delta_t_treshold= 100):
         #--- Basic Information
         self.digital_model = digital_model
         self.generate_digital_model= generate_digital_model
@@ -252,6 +252,7 @@ class Synchronizer():
         self.start_time = start_time
         self.end_time = end_time
         self.copied_realDB = copied_realDB
+        self.delta_t_treshold = delta_t_treshold
 
         #--- Database
         #self.real_database = real_database
@@ -393,7 +394,7 @@ class Synchronizer():
 
     def sync_TDS(self):
         print("======================= Running TDS for Sync =======================")
-        validator_sync = Validator(digital_model= self.digital_model, simtype= "TDS", real_database_path= self.real_database_path, start_time= self.start_time, end_time= self.end_time, copied_realDB=self.copied_realDB, generate_digital_model= self.generate_digital_model)
+        validator_sync = Validator(digital_model= self.digital_model, simtype= "TDS", real_database_path= self.real_database_path, start_time= self.start_time, end_time= self.end_time, copied_realDB=self.copied_realDB, generate_digital_model= self.generate_digital_model, delta_t_treshold= self.delta_t_treshold)
 
         #-------- Runnin TDS --------
         # (same implementation used in logic validation)

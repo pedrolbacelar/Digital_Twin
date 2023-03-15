@@ -27,7 +27,7 @@ importlib.reload(dtwinpylib.dtwinpy.helper)
 
 
 class Digital_Twin():
-    def __init__(self, name, copied_realDB= False,model_path= None, initial= True, targeted_part_id= None, targeted_cluster= None, until= None, digital_database_path= None, real_database_path= None, ID_database_path= None, Freq_Sync= 1000, Freq_Valid= 10000, Freq_Service = None, part_type= "A", loop_type= "closed", maxparts = None):
+    def __init__(self, name, copied_realDB= False,model_path= None, initial= True, targeted_part_id= None, targeted_cluster= None, until= None, digital_database_path= None, real_database_path= None, ID_database_path= None, Freq_Sync= 1000, Freq_Valid= 10000, delta_t_treshold= 100,Freq_Service = None, part_type= "A", loop_type= "closed", maxparts = None):
         self.helper = Helper()
         #--- Model Parameters
         self.name = name
@@ -36,6 +36,7 @@ class Digital_Twin():
         self.digital_model = None
         self.initial = initial
         self.copied_realDB = copied_realDB
+        self.delta_t_treshold = delta_t_treshold
     
         #--- Simulation stop conditions
         self.until = until
@@ -254,7 +255,7 @@ class Digital_Twin():
         """
         
         #--- Create the Logic Validator 
-        validator_logic = Validator(digital_model= self.digital_model, simtype="TDS", real_database_path= self.real_database_path, start_time= start_time, end_time= end_time, generate_digital_model= self.generate_digital_model, copied_realDB= self.copied_realDB)
+        validator_logic = Validator(digital_model= self.digital_model, simtype="TDS", real_database_path= self.real_database_path, start_time= start_time, end_time= end_time, generate_digital_model= self.generate_digital_model, copied_realDB= self.copied_realDB, delta_t_treshold= self.delta_t_treshold)
         
         #--- IMPROVE: give the object validator for the machine to be able to update the ptime_TDS for new parts
         #--- Get the components of the simulation
@@ -277,7 +278,7 @@ class Digital_Twin():
         self.digital_model = self.generate_digital_model(verbose= verbose)
 
         #--- Create the Input Validator
-        validator_input = Validator(digital_model=self.digital_model, simtype="qTDS", real_database_path= self.real_database_path, start_time= start_time, end_time= end_time, copied_realDB= self.copied_realDB, generate_digital_model= self.generate_digital_model)
+        validator_input = Validator(digital_model=self.digital_model, simtype="qTDS", real_database_path= self.real_database_path, start_time= start_time, end_time= end_time, copied_realDB= self.copied_realDB, generate_digital_model= self.generate_digital_model, delta_t_treshold= self.delta_t_treshold)
 
         #--- Allocate the traces
         validator_input.allocate()
@@ -314,7 +315,7 @@ class Digital_Twin():
         """
 
         #--- Create the synchronizer
-        synchronizer = Synchronizer(digital_model= self.digital_model, real_database_path= self.real_database_path, start_time= start_time, end_time= end_time, copied_realDB= self.copied_realDB, generate_digital_model= self.generate_digital_model)
+        synchronizer = Synchronizer(digital_model= self.digital_model, real_database_path= self.real_database_path, start_time= start_time, end_time= end_time, copied_realDB= self.copied_realDB, generate_digital_model= self.generate_digital_model, delta_t_treshold= self.delta_t_treshold)
 
         #--- Run the synchronizer (positioning)
         synchronizer.run(repositioning= repositioning)

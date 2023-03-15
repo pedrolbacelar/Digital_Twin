@@ -17,11 +17,12 @@ importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
 
 
 class Validator():
-    def __init__(self, digital_model, simtype, real_database_path, start_time, end_time, generate_digital_model, copied_realDB= False):
+    def __init__(self, digital_model, simtype, real_database_path, start_time, end_time, generate_digital_model, copied_realDB= False, delta_t_treshold= 100):
         self.helper = Helper()
         self.digital_model = digital_model
         self.generate_digital_model= generate_digital_model
         self.simtype = simtype
+        self.delta_t_treshold = delta_t_treshold
         # qTDS: each row is the list of process time for each part
         self.matrix_ptime_qTDS = None 
         # TDS: each row is the list of process time for each machine
@@ -621,7 +622,7 @@ class Validator():
             (Yr_time, Yr_event) = self.generate_event_sequence(database= self.real_database, table= "real_log")
             
             #--- Compare Event Sequence
-            (lcss, lcss_time, lcss_indicator) = self.LCSS(Sequence1= Ys_event, Sequence1_time= Ys_time, Sequence2= Yr_event, Sequence2_time= Yr_time, delta_t=10)
+            (lcss, lcss_time, lcss_indicator) = self.LCSS(Sequence1= Ys_event, Sequence1_time= Ys_time, Sequence2= Yr_event, Sequence2_time= Yr_time, delta_t= self.delta_t_treshold)
             print("--- LCSS Sequence ---")
             print(lcss)
             print("--- LCSS Time ---")
@@ -644,7 +645,7 @@ class Validator():
             (Yr_time, Yr_event) = self.generate_event_sequence(database= self.real_database, table= "real_log")
 
             #--- Compare Event Sequence
-            (lcss, lcss_time, lcss_indicator) = self.LCSS(Sequence1= Ys_event, Sequence1_time= Ys_time, Sequence2= Yr_event, Sequence2_time= Yr_time, delta_t=20)
+            (lcss, lcss_time, lcss_indicator) = self.LCSS(Sequence1= Ys_event, Sequence1_time= Ys_time, Sequence2= Yr_event, Sequence2_time= Yr_time, delta_t= self.delta_t_treshold)
             print("--- LCSS Sequence ---")
             print(lcss)
             print("--- LCSS Time ---")
