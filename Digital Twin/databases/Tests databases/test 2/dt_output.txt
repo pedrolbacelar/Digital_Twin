@@ -1,0 +1,334 @@
+D:\POLIMI\Digital twins\Digital_Twin\Digital Twin>python integration.py
+←[32mDigital Twin '2s_determ' created sucessfully at 15 March 19:34:33←[0m
+--- printing databases paths ---
+Digital Database: 'databases/2s_determ/digital_database.db'
+Real Database: 'databases/2s_determ/real_database.db'
+ID Database: 'databases/2s_determ/ID_database.db'
+←[34m15 March 19:35:33 |[Internal Service] Starting Synchronization←[0m
+---------- Pointer Status Initial ----------
+Start Time: 1678905274
+Start Time ID: 1
+
+End Time: 1678905334
+End Time ID: 13
+-------------------------------------
+←[38;5;94m [interfaceDB.py/update_end_time] Pointer End Time updated from 13 to 15←[0m
+---------- Pointer Status Updated ----------
+Start Time: 1678905274
+Start Time ID: 1
+
+End Time: 1678905334
+End Time ID: 15
+-------------------------------------
+-----------------------------------------------------------------
+Big picture BEFORE calculations
+--- Zone of Machine 1 ---
+Parts in queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10']
+Part in machine: []
+--- Zone of Machine 2 ---
+Parts in queue: ['Part 4', 'Part 5', 'Part 4']
+Part in machine: ['Part 3']
+-----------------------------------------------------------------
+←[33m[WARNING][synchronizer.py/Mstarted()] Part 1 was not found in elements vector of the queue←[0m
+This might happen if the element is an initial part. If that not the case, CHECK IT OUT!
+printing the list of parts in the queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10']
+----
+After MStarted Part 1 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10']
+Zone of Machine 1 | parts_ids_in_machine: ['Part 1']
+----
+After MFinished Part 1 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10']
+Zone of Machine 1 | parts_ids_in_machine: []
+----
+After Added Part 1 in queue
+Zone of Machine 2 | parts_ids_in_queue: ['Part 4', 'Part 5', 'Part 4', 'Part 1']
+Zone of Machine 2 | parts_ids_in_machine: ['Part 3']
+←[33m[WARNING][synchronizer.py/Mstarted()] Part 2 was not found in elements vector of the queue←[0m
+This might happen if the element is an initial part. If that not the case, CHECK IT OUT!
+printing the list of parts in the queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10']
+----
+After MStarted Part 2 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10']
+Zone of Machine 1 | parts_ids_in_machine: ['Part 2']
+----
+After MStarted Part 1 in queue
+Zone of Machine 2 | parts_ids_in_queue: ['Part 4', 'Part 5', 'Part 4']
+Zone of Machine 2 | parts_ids_in_machine: ['Part 3', 'Part 1']
+----
+After MFinished Part 2 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10']
+Zone of Machine 1 | parts_ids_in_machine: []
+----
+After Added Part 2 in queue
+Zone of Machine 2 | parts_ids_in_queue: ['Part 4', 'Part 5', 'Part 4', 'Part 2']
+Zone of Machine 2 | parts_ids_in_machine: ['Part 3', 'Part 1']
+←[33m[WARNING][synchronizer.py/Mstarted()] Part 3 was not found in elements vector of the queue←[0m
+This might happen if the element is an initial part. If that not the case, CHECK IT OUT!
+printing the list of parts in the queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10']
+----
+After MStarted Part 3 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10']
+Zone of Machine 1 | parts_ids_in_machine: ['Part 3']
+----
+After MFinished Part 1 in queue
+Zone of Machine 2 | parts_ids_in_queue: ['Part 4', 'Part 5', 'Part 4', 'Part 2']
+Zone of Machine 2 | parts_ids_in_machine: ['Part 3']
+----
+After Added Part 11 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11']
+Zone of Machine 1 | parts_ids_in_machine: ['Part 3']
+----
+After MFinished Part 3 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11']
+Zone of Machine 1 | parts_ids_in_machine: []
+----
+After Added Part 3 in queue
+Zone of Machine 2 | parts_ids_in_queue: ['Part 4', 'Part 5', 'Part 4', 'Part 2', 'Part 3']
+Zone of Machine 2 | parts_ids_in_machine: ['Part 3']
+←[33m[WARNING][synchronizer.py/Mstarted()] Part 4 was not found in elements vector of the queue←[0m
+This might happen if the element is an initial part. If that not the case, CHECK IT OUT!
+printing the list of parts in the queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11']
+----
+After MStarted Part 4 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11']
+Zone of Machine 1 | parts_ids_in_machine: ['Part 4']
+----
+After MStarted Part 2 in queue
+Zone of Machine 2 | parts_ids_in_queue: ['Part 4', 'Part 5', 'Part 4', 'Part 3']
+Zone of Machine 2 | parts_ids_in_machine: ['Part 3', 'Part 2']
+----
+After MFinished Part 4 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11']
+Zone of Machine 1 | parts_ids_in_machine: []
+----
+After Added Part 4 in queue
+Zone of Machine 2 | parts_ids_in_queue: ['Part 4', 'Part 5', 'Part 4', 'Part 3', 'Part 4']
+Zone of Machine 2 | parts_ids_in_machine: ['Part 3', 'Part 2']
+←[33m[WARNING][synchronizer.py/Mstarted()] Part 5 was not found in elements vector of the queue←[0m
+This might happen if the element is an initial part. If that not the case, CHECK IT OUT!
+printing the list of parts in the queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11']
+----
+After MStarted Part 5 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11']
+Zone of Machine 1 | parts_ids_in_machine: ['Part 5']
+----
+After MFinished Part 2 in queue
+Zone of Machine 2 | parts_ids_in_queue: ['Part 4', 'Part 5', 'Part 4', 'Part 3', 'Part 4']
+Zone of Machine 2 | parts_ids_in_machine: ['Part 3']
+----
+After Added Part 12 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Zone of Machine 1 | parts_ids_in_machine: ['Part 5']
+----
+After MStarted Part 3 in queue
+Zone of Machine 2 | parts_ids_in_queue: ['Part 4', 'Part 5', 'Part 4', 'Part 4']
+Zone of Machine 2 | parts_ids_in_machine: ['Part 3', 'Part 3']
+----
+After MFinished Part 3 in queue
+Zone of Machine 2 | parts_ids_in_queue: ['Part 4', 'Part 5', 'Part 4', 'Part 4']
+Zone of Machine 2 | parts_ids_in_machine: ['Part 3']
+----
+After Added Part 13 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12', 'Part 13']
+Zone of Machine 1 | parts_ids_in_machine: ['Part 5']
+-----------------------------------------------------------------
+Big picture AFTER calculations
+--- Zone of Machine 1 ---
+Parts in queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12', 'Part 13']
+Part in machine: ['Part 5']
+Zone is Working? True
+--- Zone of Machine 2 ---
+Parts in queue: ['Part 4', 'Part 5', 'Part 4', 'Part 4']
+Part in machine: ['Part 3']
+Zone is Working? True
+-----------------------------------------------------------------
+=========== Self Verification (Digital-Based) ===========
+[Zone of Machine 1] NumParts = 5, Machine Working = False, Parts in Conveyor = 0
+[Zone of Machine 2] NumParts = 3, Machine Working = False, Parts in Conveyor = 0
+=========================================
+=========== Zones Occupations (Real-Based) ===========
+[Zone of Machine 1] NumParts = 4, Machine Working = True, Zone Indicador = None
+[Zone of Machine 2] NumParts = 5, Machine Working = True, Zone Indicador = None
+=========================================
+←[34m15 March 19:35:46 |[Internal Service] System Synchronized. Next Sync: 15 March 19:36:33←[0m
+←[35m 15 March 19:35:46 |[External Service] Starting RCT Service←[0m
+←[35m 15 March 19:35:46 |[External Service] System RCT completed. Next Service: 15 March 19:36:33←[0m
+←[34m15 March 19:36:33 |[Internal Service] Starting Synchronization←[0m
+---------- Pointer Status Initial ----------
+Start Time: 1678905334
+Start Time ID: 16
+
+End Time: 1678905394
+End Time ID: 30
+-------------------------------------
+←[38;5;94m [interfaceDB.py/update_end_time] Pointer End Time updated from 30 to 32←[0m
+---------- Pointer Status Updated ----------
+Start Time: 1678905334
+Start Time ID: 16
+
+End Time: 1678905394
+End Time ID: 32
+-------------------------------------
+-----------------------------------------------------------------
+Big picture BEFORE calculations
+--- Zone of Machine 1 ---
+Parts in queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12', 'Part 13']
+Part in machine: ['Part 5']
+--- Zone of Machine 2 ---
+Parts in queue: ['Part 4', 'Part 5', 'Part 4', 'Part 4']
+Part in machine: ['Part 3']
+-----------------------------------------------------------------
+----
+After MStarted Part 4 in queue
+Zone of Machine 2 | parts_ids_in_queue: ['Part 5', 'Part 4', 'Part 4']
+Zone of Machine 2 | parts_ids_in_machine: ['Part 3', 'Part 4']
+----
+After MFinished Part 5 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12', 'Part 13']
+Zone of Machine 1 | parts_ids_in_machine: []
+----
+After Added Part 5 in queue
+Zone of Machine 2 | parts_ids_in_queue: ['Part 5', 'Part 4', 'Part 4', 'Part 5']
+Zone of Machine 2 | parts_ids_in_machine: ['Part 3', 'Part 4']
+----
+After MStarted Part 6 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12', 'Part 13']
+Zone of Machine 1 | parts_ids_in_machine: ['Part 6']
+----
+After MFinished Part 4 in queue
+Zone of Machine 2 | parts_ids_in_queue: ['Part 5', 'Part 4', 'Part 4', 'Part 5']
+Zone of Machine 2 | parts_ids_in_machine: ['Part 3']
+----
+After Added Part 14 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12', 'Part 13', 'Part 14']
+Zone of Machine 1 | parts_ids_in_machine: ['Part 6']
+----
+After MStarted Part 5 in queue
+Zone of Machine 2 | parts_ids_in_queue: ['Part 4', 'Part 4', 'Part 5']
+Zone of Machine 2 | parts_ids_in_machine: ['Part 3', 'Part 5']
+----
+After MFinished Part 6 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12', 'Part 13', 'Part 14']
+Zone of Machine 1 | parts_ids_in_machine: []
+----
+After Added Part 6 in queue
+Zone of Machine 2 | parts_ids_in_queue: ['Part 4', 'Part 4', 'Part 5', 'Part 6']
+Zone of Machine 2 | parts_ids_in_machine: ['Part 3', 'Part 5']
+----
+After MStarted Part 7 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12', 'Part 13', 'Part 14']
+Zone of Machine 1 | parts_ids_in_machine: ['Part 7']
+----
+After MFinished Part 5 in queue
+Zone of Machine 2 | parts_ids_in_queue: ['Part 4', 'Part 4', 'Part 5', 'Part 6']
+Zone of Machine 2 | parts_ids_in_machine: ['Part 3']
+----
+After Added Part 15 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12', 'Part 13', 'Part 14', 'Part 15']
+Zone of Machine 1 | parts_ids_in_machine: ['Part 7']
+----
+After MFinished Part 7 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12', 'Part 13', 'Part 14', 'Part 15']
+Zone of Machine 1 | parts_ids_in_machine: []
+----
+After Added Part 7 in queue
+Zone of Machine 2 | parts_ids_in_queue: ['Part 4', 'Part 4', 'Part 5', 'Part 6', 'Part 7']
+Zone of Machine 2 | parts_ids_in_machine: ['Part 3']
+----
+After MStarted Part 8 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 9', 'Part 10', 'Part 11', 'Part 12', 'Part 13', 'Part 14', 'Part 15']
+Zone of Machine 1 | parts_ids_in_machine: ['Part 8']
+----
+After MStarted Part 6 in queue
+Zone of Machine 2 | parts_ids_in_queue: ['Part 4', 'Part 4', 'Part 5', 'Part 7']
+Zone of Machine 2 | parts_ids_in_machine: ['Part 3', 'Part 6']
+----
+After MFinished Part 6 in queue
+Zone of Machine 2 | parts_ids_in_queue: ['Part 4', 'Part 4', 'Part 5', 'Part 7']
+Zone of Machine 2 | parts_ids_in_machine: ['Part 3']
+----
+After Added Part 16 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 9', 'Part 10', 'Part 11', 'Part 12', 'Part 13', 'Part 14', 'Part 15', 'Part 16']
+Zone of Machine 1 | parts_ids_in_machine: ['Part 8']
+----
+After MStarted Part 7 in queue
+Zone of Machine 2 | parts_ids_in_queue: ['Part 4', 'Part 4', 'Part 5']
+Zone of Machine 2 | parts_ids_in_machine: ['Part 3', 'Part 7']
+----
+After MFinished Part 8 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 9', 'Part 10', 'Part 11', 'Part 12', 'Part 13', 'Part 14', 'Part 15', 'Part 16']
+Zone of Machine 1 | parts_ids_in_machine: []
+----
+After Added Part 8 in queue
+Zone of Machine 2 | parts_ids_in_queue: ['Part 4', 'Part 4', 'Part 5', 'Part 8']
+Zone of Machine 2 | parts_ids_in_machine: ['Part 3', 'Part 7']
+----
+After MStarted Part 9 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 10', 'Part 11', 'Part 12', 'Part 13', 'Part 14', 'Part 15', 'Part 16']
+Zone of Machine 1 | parts_ids_in_machine: ['Part 9']
+----
+After MFinished Part 7 in queue
+Zone of Machine 2 | parts_ids_in_queue: ['Part 4', 'Part 4', 'Part 5', 'Part 8']
+Zone of Machine 2 | parts_ids_in_machine: ['Part 3']
+----
+After Added Part 17 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 10', 'Part 11', 'Part 12', 'Part 13', 'Part 14', 'Part 15', 'Part 16', 'Part 17']
+Zone of Machine 1 | parts_ids_in_machine: ['Part 9']
+----
+After MFinished Part 9 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 10', 'Part 11', 'Part 12', 'Part 13', 'Part 14', 'Part 15', 'Part 16', 'Part 17']
+Zone of Machine 1 | parts_ids_in_machine: []
+----
+After Added Part 9 in queue
+Zone of Machine 2 | parts_ids_in_queue: ['Part 4', 'Part 4', 'Part 5', 'Part 8', 'Part 9']
+Zone of Machine 2 | parts_ids_in_machine: ['Part 3']
+-----------------------------------------------------------------
+Big picture AFTER calculations
+--- Zone of Machine 1 ---
+Parts in queue: ['Part 10', 'Part 11', 'Part 12', 'Part 13', 'Part 14', 'Part 15', 'Part 16', 'Part 17']
+Part in machine: []
+Zone is Working? False
+--- Zone of Machine 2 ---
+Parts in queue: ['Part 4', 'Part 4', 'Part 5', 'Part 8', 'Part 9']
+Part in machine: ['Part 3']
+Zone is Working? True
+-----------------------------------------------------------------
+=========== Self Verification (Digital-Based) ===========
+[Zone of Machine 1] NumParts = 8, Machine Working = False, Parts in Conveyor = 0
+[Zone of Machine 2] NumParts = 4, Machine Working = False, Parts in Conveyor = 0
+=========================================
+=========== Zones Occupations (Real-Based) ===========
+[Zone of Machine 1] NumParts = 8, Machine Working = False, Zone Indicador = None
+[Zone of Machine 2] NumParts = 6, Machine Working = True, Zone Indicador = None
+=========================================
+←[34m15 March 19:36:47 |[Internal Service] System Synchronized. Next Sync: 15 March 19:37:33←[0m
+←[32m15 March 19:36:47 |[Internal Service] Starting Validation←[0m
+---------- Pointer Status Initial ----------
+Start Time: 1678905394
+Start Time ID: 32
+
+End Time: 1678905454
+End Time ID: 34
+-------------------------------------
+←[31m[ERROR][interfaceDB.py/update_end_time()] After trying 3 times, it was not possible to find a 'Started' event after the end time: 1678905454←[0m
+←[31m---- Digital Twin killed at 15 March 19:37:06 ----←[0m
+Traceback (most recent call last):
+  File "D:\POLIMI\Digital twins\Digital_Twin\Digital Twin\integration.py", line 44, in <module>
+    mydt.run()
+  File "D:\POLIMI\Digital twins\Digital_Twin\Digital Twin\dtwinpylib\dtwinpy\Digital_Twin.py", line 547, in run
+    self.Internal_Services()
+  File "D:\POLIMI\Digital twins\Digital_Twin\Digital Twin\dtwinpylib\dtwinpy\Digital_Twin.py", line 417, in Internal_Services
+    self.run_validation(copied_realDB= self.copied_realDB, start_time= start_time, end_time= end_time)
+  File "D:\POLIMI\Digital twins\Digital_Twin\Digital Twin\dtwinpylib\dtwinpy\Digital_Twin.py", line 258, in run_validation
+    validator_logic = Validator(digital_model= self.digital_model, simtype="TDS", real_database_path= self.real_database_path, start_time= start_time, end_time= end_time, generate_digital_model= self.generate_digital_model, copied_realDB= self.copied_realDB, delta_t_treshold= self.delta_t_treshold)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\POLIMI\Digital twins\Digital_Twin\Digital Twin\dtwinpylib\dtwinpy\validator.py", line 38, in __init__
+    self.real_database = Database(database_path=real_database_path, event_table= "real_log", start_time=start_time, end_time=end_time, copied_realDB= copied_realDB)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\POLIMI\Digital twins\Digital_Twin\Digital Twin\dtwinpylib\dtwinpy\interfaceDB.py", line 46, in __init__
+    self.update_end_time()
+  File "D:\POLIMI\Digital twins\Digital_Twin\Digital Twin\dtwinpylib\dtwinpy\interfaceDB.py", line 259, in update_end_time
+    started_position = row[0] # line id
+                       ~~~^^^
+TypeError: 'NoneType' object is not subscriptable
