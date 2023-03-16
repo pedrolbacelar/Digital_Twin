@@ -2,6 +2,7 @@ from .helper import Helper
 
 import sqlite3
 import shutil
+import sys
 from time import sleep
 import keyboard
 
@@ -121,6 +122,15 @@ class Database():
                 ORDER BY timestamp_real ASC
                 LIMIT 1
                 """, (self.start_time,)).fetchone()
+            
+            if self.start_time_id == None:
+                #--- Printer Error Message
+                self.helper.printer(f"[ERROR][interfaceDB.py/find_line_ID_start_end()] It was not possible to find any event after the start time: {self.start_time}", 'red')
+                (tstr, t) = self.helper.get_time_now()
+                
+                #--- Killing the program
+                self.helper.printer(f"---- Digital Twin killed at {tstr} ----", 'red')
+                sys.exit()
 
             self.start_time_id = self.start_time_id[0]
 
@@ -137,6 +147,15 @@ class Database():
                 ORDER BY timestamp_real DESC
                 LIMIT 1
                 """, (self.end_time,)).fetchone()
+            
+            if self.end_time_id == None:
+                #--- Printer Error Message
+                self.helper.printer(f"[ERROR][interfaceDB.py/find_line_ID_start_end()] It was not possible to find any event before the end time: {self.end_time}", 'red')
+                (tstr, t) = self.helper.get_time_now()
+                
+                #--- Killing the program
+                self.helper.printer(f"---- Digital Twin killed at {tstr} ----", 'red')
+                sys.exit()
     
             self.end_time_id = self.end_time_id[0]
 
@@ -251,11 +270,10 @@ class Database():
             
             #--- Killing the program
             self.helper.printer(f"---- Digital Twin killed at {tstr} ----", 'red')
-            keyboard.press_and_release('ctrl+c')
+            sys.exit()
         
 
         #--- Take the rigth position before that event
-        # TODO: Raise a erro condition if row is null
         started_position = row[0] # line id
         selected_line_id = started_position - 1
         

@@ -27,7 +27,7 @@ importlib.reload(dtwinpylib.dtwinpy.helper)
 
 
 class Digital_Twin():
-    def __init__(self, name, copied_realDB= False,model_path= None, initial= True, targeted_part_id= None, targeted_cluster= None, until= None, digital_database_path= None, real_database_path= None, ID_database_path= None, Freq_Sync= 1000, Freq_Valid= 10000, delta_t_treshold= 100,Freq_Service = None, part_type= "A", loop_type= "closed", maxparts = None):
+    def __init__(self, name, copied_realDB= False,model_path= None, initial= True, targeted_part_id= None, targeted_cluster= None, until= None, digital_database_path= None, real_database_path= None, ID_database_path= None, Freq_Sync= 1000, Freq_Valid= 10000, delta_t_treshold= 100,Freq_Service = None, part_type= "A", loop_type= "closed", maxparts = None, template= False, keepDB= False):
         self.helper = Helper()
         #--- Model Parameters
         self.name = name
@@ -90,6 +90,20 @@ class Digital_Twin():
         else:
             self.model_path = model_path
 
+        #-- delete the current model and copy the template
+        if template == True:
+            #- Delete old model
+            os.remove(self.model_path)
+
+            #- Copy the template into the model json
+            template_path = f"models/{self.name}_template.json"
+            try:
+                shutil.copy2(template_path, self.model_path)
+                print(f"Model copied successfuly from {template_path}!")
+            except FileNotFoundError:
+                self.helper.printer(f"[ERROR][Digital_Twin.py/__init__()] The template file does not exist, please create one or remoe Template condition", 'red')
+            
+
         # --------------- Database ----------------
         # Digital Database path assign
         if digital_database_path == None:
@@ -124,6 +138,32 @@ class Digital_Twin():
         else:
             self.ID_database_path = ID_database_path
         
+        # Delete existing database before starting anything
+        if keepDB == False:
+            print("|- Deleting existing databases...")
+            
+            #- Delete Digital Database
+            try:
+                os.remove(self.database_path)
+                print(f"|-- Digital Database deleted successfuly from {self.database_path}")
+
+            except FileNotFoundError:
+                self.helper.printer(f"[WARNING][Digital_Twin.py/__init()__] The Digital Database doesn't exist yet in the path '{self.database_path}', proceding without deleting...")
+
+            #- Delete Real Database
+            try:
+                os.remove(self.real_database_path)
+                print(f"|-- Real Database deleted successfuly from {self.real_database_path}")
+            except FileNotFoundError:
+                self.helper.printer(f"[WARNING][Digital_Twin.py/__init()__] The Real Database doesn't exist yet in the path '{self.real_database_path}', proceding without deleting...")
+
+            #- Delete ID database
+            try:
+                os.remove(self.ID_database_path)
+                print(f"|-- ID Database deleted successfuly from {self.ID_database_path}")
+            except FileNotFoundError:
+                self.helper.printer(f"[WARNING][Digital_Twin.py/__init()__] The ID Database doesn't exist yet in the path '{self.ID_database_path}', proceding without deleting...")
+
         # --- For Local Test
         if self.copied_realDB == True:
             #--- Update the timestamp ---
@@ -147,12 +187,14 @@ class Digital_Twin():
             #--- Update the timestamp according to the current real time
             self.temporary_real_database.update_real_time_now()
         # ------------------------------------------
-
-        self.helper.printer(f"Digital Twin '{self.name}' created sucessfully at {initial_time_str}", 'green')       
         print(f"--- printing databases paths ---")
         print(f"Digital Database: '{self.database_path}'")
         print(f"Real Database: '{self.real_database_path}'")
         print(f"ID Database: '{self.ID_database_path}'")
+
+        # ================================ SET UP FINISHED ================================
+        self.helper.printer(f"---- Digital Twin '{self.name}' created sucessfully at {initial_time_str} ----", 'green')       
+        # ==================================================================================
 
     #--- Initiate Broker 
     def initiate_broker(self, ip_address, ID_database_path= None, port= 1883, keepalive= 60, topics_sub = ['trace', 'part_id', 'RCT_server'], topic_pub= 'RCT_server', client = None):
@@ -550,7 +592,8 @@ class Digital_Twin():
                 self.External_Services()
 
         except KeyboardInterrupt:
-            self.helper.printer(f"The Digital Twin named as {self.name} was killed manually", 'red')
+            (tstr, t) = self.helper.get_time_now()
+            self.helper.printer(f"---- Digital Twin '{self.name}' was killed manually at {tstr} ----", 'red')
 
 
         

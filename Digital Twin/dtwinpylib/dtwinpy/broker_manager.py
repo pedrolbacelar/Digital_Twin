@@ -84,7 +84,7 @@ class Broker_Manager():
             part_id = self.UID_to_PID_dict[unique_ID]
             return part_id
         except KeyError:
-            print(f"[BROKER][broker_manager.py/part_ID_translator()] Unique ID '{unique_ID}' not found in the Dictionary!")
+            self.helper.printer(f"[ERROR][broker_manager.py/part_ID_translator()] Unique ID '{unique_ID}' not found in the Dictionary!", 'red')
             print("printing the dicitionary....")
             for key in self.UID_to_PID_dict:
                 print(f"{key} | {self.UID_to_PID_dict[key]}")
