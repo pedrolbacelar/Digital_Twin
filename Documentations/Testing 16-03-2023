@@ -1,7 +1,0 @@
-## Initial Setup
-- The power suplly for 3 ESPs was not working - changing the power supply
-
-- The MQTT channel was overloaded by many massages - Stop sending multiples messages for each reading, increase the process time
-
-- Dont re-use old part ids , always takes the new one or send 0
-
