@@ -121,11 +121,13 @@ void loop()
     // --------------------------------------------------------------------
 
     // --------------------------- PUBLISHING -----------------------------
-    for (int c = 0; c < 3; c++)
-    {
-      client.publish("part_id", payload);
-      delay(500);
-    }
+    
+    client.publish("part_id", payload);
+    // for (int c = 0; c < 3; c++)
+    // {
+    //   client.publish("part_id", payload);
+    //   delay(500);
+    // }
     // ---------------------------------------------------------------------
 
   } else Serial.println(F("Card repeated."));
