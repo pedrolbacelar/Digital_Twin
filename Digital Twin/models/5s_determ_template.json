@@ -11,7 +11,7 @@
       ],
       "frequency": 999,
       "capacity": 1,
-      "contemp": 10,
+      "contemp": 24,
       "cluster": 1,
       "worked_time": 0,
       "allocation_counter": 0
@@ -26,7 +26,7 @@
       ],
       "frequency": 999,
       "capacity": 1,
-      "contemp": 10,
+      "contemp": 24,
       "cluster": 2,
       "worked_time": 0
     },
@@ -40,12 +40,9 @@
       ],
       "frequency": 999,
       "capacity": 1,
-      "contemp": 10,
+      "contemp": 22,
       "cluster": 2,
-      "worked_time": [
-        7,
-        "Part 12"
-      ]
+      "worked_time": 0
     },
     {
       "activity": 4,
@@ -58,12 +55,9 @@
       ],
       "frequency": 999,
       "capacity": 1,
-      "contemp": 10,
+      "contemp": 15,
       "cluster": 2,
-      "worked_time": [
-        5,
-        "Part 11"
-      ]
+      "worked_time": 0
     },
     {
       "activity": 5,
@@ -75,12 +69,9 @@
       ],
       "frequency": 999,
       "capacity": 1,
-      "contemp": 10,
+      "contemp": 25,
       "cluster": 2,
-      "worked_time": [
-        4,
-        "Part 10"
-      ]
+      "worked_time": 0
     }
   ],
   "arcs": [
@@ -91,7 +82,7 @@
       ],
       "capacity": 10,
       "frequency": 1000,
-      "contemp": 2
+      "contemp": 20
     },
     {
       "arc": [
@@ -100,7 +91,7 @@
       ],
       "capacity": 10,
       "frequency": 1000,
-      "contemp": 2
+      "contemp": 20
     },
     {
       "arc": [
@@ -109,7 +100,7 @@
       ],
       "capacity": 10,
       "frequency": 1000,
-      "contemp": 1
+      "contemp": 6
     },
     {
       "arc": [
@@ -118,7 +109,7 @@
       ],
       "capacity": 10,
       "frequency": 1000,
-      "contemp": 1
+      "contemp": 6
     },
     {
       "arc": [
@@ -127,7 +118,7 @@
       ],
       "capacity": 10,
       "frequency": 1000,
-      "contemp": 1
+      "contemp": 10
     },
     {
       "arc": [
@@ -136,16 +127,16 @@
       ],
       "capacity": 10,
       "frequency": 1000,
-      "contemp": 3
+      "contemp": 10
     }
   ],
   "initial": [
     [
-      "Part 14"
+      "Part 1",
+      "Part 2",
+      "Part 3"
     ],
-    [
-      "Part 13"
-    ],
+    [],
     [],
     [],
     []

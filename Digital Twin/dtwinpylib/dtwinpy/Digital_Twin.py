@@ -27,7 +27,7 @@ importlib.reload(dtwinpylib.dtwinpy.helper)
 
 
 class Digital_Twin():
-    def __init__(self, name, copied_realDB= False,model_path= None, initial= True, targeted_part_id= None, targeted_cluster= None, until= None, digital_database_path= None, real_database_path= None, ID_database_path= None, Freq_Sync= 1000, Freq_Valid= 10000, delta_t_treshold= 100,Freq_Service = None, part_type= "A", loop_type= "closed", maxparts = None, template= False, keepDB= False):
+    def __init__(self, name, copied_realDB= False,model_path= None, initial= True, targeted_part_id= None, targeted_cluster= None, until= None, digital_database_path= None, real_database_path= None, ID_database_path= None, Freq_Sync= 1000, Freq_Valid= 10000, delta_t_treshold= 100,Freq_Service = None, part_type= "A", loop_type= "closed", maxparts = None, template= False, keepDB= True):
         self.helper = Helper()
         #--- Model Parameters
         self.name = name
@@ -452,8 +452,8 @@ class Digital_Twin():
 
 
             # --- Update Start and End time
-            start_time = round(self.last_Tsync)
-            end_time = round(self.next_Tsync)
+            start_time = round(self.last_Tvalid)
+            end_time = round(self.next_Tvalid)
 
             # -------------- Run Validation --------------
             self.run_validation(copied_realDB= self.copied_realDB, start_time= start_time, end_time= end_time)

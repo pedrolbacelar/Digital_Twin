@@ -479,7 +479,7 @@ class Synchronizer():
                     Delta_T_started = self.Tnow - current_zone.get_last_started_time() 
                 
                 #- Avoid the case when the machine is working and just received the part
-                if Delta_T_started == 0: Delta_T_started = 10
+                if Delta_T_started == 0: Delta_T_started = 1
 
                 #--- Positioning a part within the working machine
                 # ============= Update Model.json =============

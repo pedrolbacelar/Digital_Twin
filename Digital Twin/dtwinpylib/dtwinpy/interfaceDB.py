@@ -136,7 +136,7 @@ class Database():
 
             #--- If it's not the first event, always go to the next because
             # when start time is replaced it's replaced as the previous end time
-            if self.start_time_id != 1:
+            if self.start_time_id == self.end_time_id:
                 self.start_time_id += 1
 
             
@@ -258,7 +258,7 @@ class Database():
 
             else:
                 #--- Sleep for the next try
-                sleep(6)
+                sleep(10)
 
                 #--- Updated the trying counter
                 try_counter += 1
