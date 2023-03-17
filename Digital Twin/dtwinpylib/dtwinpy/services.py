@@ -1,5 +1,6 @@
 #--- Import DT Features
 from .broker_manager import Broker_Manager
+from .helper import Helper
 
 #--- Common Libraries
 from matplotlib import pyplot as plt
@@ -39,6 +40,7 @@ class Service_Handler():
 
     """
     def __init__(self, name, generate_digital_model, broker_manager):
+        self.helper = Helper()
         self.name = name
         self.generate_digital_model = generate_digital_model
         self.digital_model = generate_digital_model(verbose= False)
@@ -82,6 +84,9 @@ class Service_Handler():
         time to the calculation, that's why it's an input. As default, the
         queue_position is 2 (the second position of the queue, not the 3° position)
         """
+        (tstr, t)= self.helper.get_time_now()
+        self.helper.printer(f"{tstr} | Getting Parts Making Decisions....", 'brown')
+
         parts_making_decisions = []
 
         #--- For each existing branching point
@@ -111,6 +116,9 @@ class Service_Handler():
         2) Based on this create a matrix of combinations (each line in the matrix is
         a different path that will need to be evaluated)
         """
+        (tstr, t)= self.helper.get_time_now()
+        self.helper.printer(f"{tstr} | Running Path Scenarios Generation....", 'brown')
+        
         #--- Function to generate combinations recusively
         def generate_combinations(matrix):
             def generate_combinations_helper(matrix, current_index, current_combination, combinations):
@@ -222,17 +230,21 @@ class Service_Handler():
         return parts_in_branching_dm
     
     # ---------- Simulate all the scenarios ----------
-    def simulate_paths(self,possible_pathes, parts_making_decisions, verbose= False):
+    def simulate_paths(self,possible_pathes, parts_making_decisions, verbose= True, plot= False):
+        (tstr, t)= self.helper.get_time_now()
+        self.helper.printer(f"{tstr} | Running Path Simulation....", 'brown')
+
         #--- Dictionary to store parts and its cycle time
         rct_dict = {}
+
+        print(f"--- Parts Making Decisions: ---")
+        for part in parts_making_decisions: print(part.get_name())
 
         #--- For each part, let's simulate all the scenarios
         for part_id in range(len(parts_making_decisions)):
             part = parts_making_decisions[part_id]
 
-            print(f"parts_making_decisions= {parts_making_decisions}")
-            print(f"part name: {part.get_name()}")
-            print(f"part id: {part.get_id()}")
+            self.helper.printer(f"------- {part.get_name()} is making a decision... Starting paths simulations -------", 'green')
 
             #--- For each existing path scenario
             path_counter = 1
@@ -254,15 +266,14 @@ class Service_Handler():
 
                 #--- Get Parts from the Digital Model
                 current_parts_vector = self.digital_model.get_all_parts()
-                print(f"current_parts_vector = {current_parts_vector}")
 
                 #--- Assign to that part the current path scenario being analysed 
                 for current_part in current_parts_vector:
-                    if current_part.get_id() == part_id + 1:
+                    # if current_part.get_id() == part_id + 1:
+                    if current_part.get_id() == part.get_id():
                         current_part.set_branching_path(path_scenario)
                         part_being_simulated = current_part
 
-                print(f"part_being_simulated = {part_being_simulated}")
                 #--- Show the paths
                 if verbose == True:
                     print(f"====================================== Running Scenario for {part.get_name()} | Path {path_counter} ======================================")
@@ -291,7 +302,8 @@ class Service_Handler():
             print("------ RCT Services Results: ------")
             for key in rct_dict:
                 print(f"{key}: {rct_dict[key]}")
-
+            
+        if plot== True:
             print("------ Plot Results ------")
             #-- Count the number of scenarios
             x_scenarios = [0]
@@ -324,13 +336,13 @@ class Service_Handler():
             plt.legend()
             plt.show()
 
-            print("____________________________________________")
+        print("____________________________________________")
         
         #--- Give back the dict with the RCTs for each part
         return rct_dict
 
     # ---------- Calculate the efficiency of each path ----------
-    def RCT_check(self, rct_dict, rct_threshold, possible_pathes, verbose= False):
+    def RCT_check(self, rct_dict, rct_threshold, possible_pathes, verbose= True, plot= False):
         """
         This function calculates the efficiency of each path comparing the path
         with the worst path. It can be seen as the gain of choosing that path.
@@ -353,6 +365,9 @@ class Service_Handler():
                 6) Store this in a new dict (gain_dict)
             7) Look to the higher gain and compare with the threshold
         """
+        (tstr, t)= self.helper.get_time_now()
+        self.helper.printer(f"{tstr} | Running RCT Checking....", 'brown')
+        
         #--- Create the gain dictionary
         gain_dict = {}
 
@@ -399,7 +414,7 @@ class Service_Handler():
             feeback_dict[key] = (flag_feedback, path_to_implement, highets_gain)
 
         #--- Plotting
-        if verbose == True:
+        if plot == True:
             plt.title("Gain of each path compared to the normal (AS-IS) path")
             plt.xlabel("Paths")
             plt.ylabel("Gain")
@@ -429,6 +444,7 @@ class Service_Handler():
             plt.show()
 
             #--- Printing the findings
+        if verbose == True:
             for key in feeback_dict:
                 flag = feeback_dict[key][0]
                 path_index = feeback_dict[key][1]
@@ -436,7 +452,7 @@ class Service_Handler():
 
                 if flag == True:
                     print()
-                    print(f"!!!!!!!!! Optimized Path Found for {key} !!!!!!!!!")
+                    self.helper.printer(f"!!!!!!!!! Optimized Path Found for {key} !!!!!!!!!", 'green')
                     print(f"> Best Path: Path {path_index}")
                     print(f"> Gain: {format(highets_gain * 100, '.3f')} %") 
                     print("> Path:")
@@ -469,6 +485,9 @@ class Service_Handler():
                 {'Part 1': [(convey 2, machine 1), (convey 5, machine 3), ...]}
         2) For each part, use the publishing function to pass the machine_id, part_id, and queue_id (convey id)
         """
+        (tstr, t)= self.helper.get_time_now()
+        self.helper.printer(f"{tstr} | Running Feedback Publishing....", 'brown')
+        
         #---- Changing the feedback format
         #--- Loop through each part in the feedback dictionary
         for part_name in feedback_dict:
@@ -527,7 +546,7 @@ class Service_Handler():
                     print("waking up!")
 
     # ---------------------- RCT Service ----------------------    
-    def run_RCT_service(self, queue_position= 3, verbose= False):
+    def run_RCT_service(self, queue_position= 3, verbose= True, plot= False):
         """
         ## Description
         This run method is one of the service related to the decision making based on the 
@@ -563,6 +582,7 @@ class Service_Handler():
             9.2) If higher, return the choosen path
         10) Future: Send the choosen path to the machines of the parts
         """
+        
         #--- Get all possible combination of path based on branching
         possible_pathes = self.generate_path_scenarios(verbose= verbose)
 
@@ -570,10 +590,10 @@ class Service_Handler():
         parts_making_decisions = self.get_parts_making_decisions(queue_position= queue_position)
 
         #--- Simulate for each path
-        rct_dict = self.simulate_paths(possible_pathes= possible_pathes, parts_making_decisions= parts_making_decisions, verbose= verbose)
+        rct_dict = self.simulate_paths(possible_pathes= possible_pathes, parts_making_decisions= parts_making_decisions, verbose= verbose, plot= plot)
 
         #--- Check if there are a big difference between choices
-        feedback_dict = self.RCT_check(rct_dict= rct_dict, rct_threshold= 0.1,possible_pathes = possible_pathes, verbose=verbose)
+        feedback_dict = self.RCT_check(rct_dict= rct_dict, rct_threshold= 0.1,possible_pathes = possible_pathes, verbose=verbose, plot= plot)
 
         #--- Send the chosen path to the rigth machine
         self.publish_feedback(feedback_dict= feedback_dict, possible_pathes= possible_pathes)

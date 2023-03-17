@@ -11,6 +11,7 @@ from .interfaceAPI import interfaceAPI
 #--- Common Libraries
 import shutil
 import os
+import sys
 import datetime
 from time import sleep
 import random
@@ -27,7 +28,7 @@ importlib.reload(dtwinpylib.dtwinpy.helper)
 
 
 class Digital_Twin():
-    def __init__(self, name, copied_realDB= False,model_path= None, ip_address= None, initial= True, targeted_part_id= None, targeted_cluster= None, until= None, digital_database_path= None, real_database_path= None, ID_database_path= None, Freq_Sync= 1000, Freq_Valid= 10000, delta_t_treshold= 100,Freq_Service = None, part_type= "A", loop_type= "closed", maxparts = None, template= False, keepDB= True):
+    def __init__(self, name, copied_realDB= False,model_path= None, ip_address= None, initial= True, targeted_part_id= None, targeted_cluster= None, until= None, digital_database_path= None, real_database_path= None, ID_database_path= None, Freq_Sync= 1000, Freq_Valid= 10000, delta_t_treshold= 100,Freq_Service = None, part_type= "A", loop_type= "closed", maxparts = None, template= False, keepDB= True, plot= False, verbose= True, rct_queue= 3):
         self.helper = Helper()
         #--- Model Parameters
         self.name = name
@@ -37,6 +38,11 @@ class Digital_Twin():
         self.initial = initial
         self.copied_realDB = copied_realDB
         self.delta_t_treshold = delta_t_treshold
+
+        #--- User Interface options
+        self.verbose= verbose
+        self.plot= plot
+        self.rct_queue= rct_queue
     
         #--- Simulation stop conditions
         self.until = until
@@ -75,9 +81,9 @@ class Digital_Twin():
         self.flag_rct_served = False
 
         #--- Features Counters
-        self.counter_Sync = 0
-        self.counter_Valid = 0
-        self.counter_Serv = 0
+        self.counter_Sync = 1
+        self.counter_Valid = 1
+        self.counter_Serv = 1
 
     
         #--- Model and Figure path
@@ -202,6 +208,7 @@ class Digital_Twin():
 
         #--- Initiate the Broker for Feedback (just if ip_address if given)
         self.ip_address = ip_address
+        self.broker_manager = None
         if self.ip_address != None:
             #--- Create a Broker
             self.broker_manager = self.initiate_broker(self.ip_address)
@@ -212,6 +219,7 @@ class Digital_Twin():
         self.helper.printer(f"---- Digital Twin '{self.name}' created sucessfully at {initial_time_str} ----", 'green')       
         # ==================================================================================
 
+    # -------------------------------------------------- INDIVIDUAL FUNCTIONS --------------------------------------------------
     #--- Initiate Broker 
     def initiate_broker(self, ip_address, ID_database_path= None, port= 1883, keepalive= 60, topics_sub = ['trace', 'part_id', 'RCT_server'], topic_pub= 'RCT_server', client = None):
         #--- Take the global features
@@ -380,22 +388,20 @@ class Digital_Twin():
         synchronizer.run(repositioning= repositioning)
 
     #--- Run RCT Services
-    def run_RCT_services(self, verbose= False):
+    def run_RCT_services(self, verbose= True, plot= False, queue_position= 3):
         """
-        print("============ Running RCT Services ============")
-        #--- Run the Digital Model for the current picture of the system
-        if part_id != None and batch == None:
-            self.run_digital_model(plot= False, verbose= False, targeted_part_id= part_id + 3)
-        if part_id == None and batch != None:
-            self.run_digital_model(plot= False, verbose= False, maxparts= batch + 3)
-
-        #--- Calculate the RCT for the given request
-        self.digital_model.calculate_RCT(part_id_selected= part_id, batch= batch)
+        This functions creates Service object that is responsible for finding parts making decisions in the simulation,
+        generate all possible paths, and calculate the most optimized path for those parts.
         """
-        #--- Create RCT Handler
-        
+        #--- Create a Service 
         RCT_Service = Service_Handler(name= "RCT", generate_digital_model= self.generate_digital_model, broker_manager= self.broker_manager)
-        RCT_Service.run_RCT_service(verbose=verbose)
+        
+        #--- Run the RCT Service
+        RCT_Service.run_RCT_service(verbose=verbose, verbose= verbose, plot= plot, queue_position= queue_position)
+
+    # ------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    # -------------------------------------------------- INTERNAL & EXTERNAL SERVICES --------------------------------------------------
 
     #--- Internal Services (Synchronization and Validation)    
     def Internal_Services(self):
@@ -527,8 +533,23 @@ class Digital_Twin():
             (current_time_str, x) = self.helper.get_time_now()
             self.helper.printer(f"{current_time_str} |[External Service] Starting RCT Service (n° {self.counter_Serv})", 'purple')
 
+            # --- Check if Broker exists and if ip_address was given
+            if self.broker_manager == None:
+                (tstr, t) = self.helper.get_time_now()
+                if self.ip_address == None:
+                    self.helper.printer(f"{tstr} | [ERROR][Digital_Twin.py/External_Services()] Trying to run RCT services without a Broker because none IP ADDRESS was given. Please, provide an IP address (recommendation: 192.168.0.50)", 'red')
+                    
+                else:
+                    self.helper.printer(f"{tstr} | [ERROR][Digital_Twin.py/External_Services()] Trying to run RCT services without a Broker because of unknown reason. Please, check it out...", 'red')
 
-            # RUN Service
+                self.helper.printer(f"---- Digital Twin was killed at {tstr} ----", 'red')
+                sys.exit()
+
+            # -------------------- Run Service ---------------------------------
+            self.run_RCT_services(verbose= self.verbose, plot= self.plot, queue_position= self.rct_queue)
+            # ------------------------------------------------------------------
+
+            # Send API results
             """
             sleep(2)
             part_id =  random.randint(1, 10)
@@ -538,10 +559,6 @@ class Digital_Twin():
 
             self.interfaceAPI.RCT_server(part_id= part_id, path_1= path_1, path_2= path_2, queue_id= quque_id)
             """
-
-            # -------------------- Run Service --------------------
-            self.run_RCT_services(verbose= True)
-            # -----------------------------------------------------
 
             # --------------------- AFTER SERVICES SETTINGS ---------------------
             # --- Increase Serv Counter
@@ -587,7 +604,10 @@ class Digital_Twin():
             #-- Rise Time to Serve
             self.flag_time_to_rct_service = True
 
-
+    # ------------------------------------------------------------------------------------------------------------------------------------------------------
+    
+    
+    
     def run(self):
         """
         ## Architecture
