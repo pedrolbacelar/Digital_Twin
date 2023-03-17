@@ -397,7 +397,7 @@ class Digital_Twin():
         RCT_Service = Service_Handler(name= "RCT", generate_digital_model= self.generate_digital_model, broker_manager= self.broker_manager)
         
         #--- Run the RCT Service
-        RCT_Service.run_RCT_service(verbose=verbose, verbose= verbose, plot= plot, queue_position= queue_position)
+        RCT_Service.run_RCT_service(verbose=verbose, plot= plot, queue_position= queue_position)
 
     # ------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -537,13 +537,12 @@ class Digital_Twin():
             if self.broker_manager == None:
                 (tstr, t) = self.helper.get_time_now()
                 if self.ip_address == None:
-                    self.helper.printer(f"{tstr} | [ERROR][Digital_Twin.py/External_Services()] Trying to run RCT services without a Broker because none IP ADDRESS was given. Please, provide an IP address (recommendation: 192.168.0.50)", 'red')
+                    self.helper.printer(f"{tstr} | [ERROR][Digital_Twin.py/External_Services()] Trying to run RCT services without a Broker because none IP ADDRESS was given. Please, provide an IP address to run online (recommendation: 192.168.0.50). For now, running offiline...", 'red')
                     
                 else:
                     self.helper.printer(f"{tstr} | [ERROR][Digital_Twin.py/External_Services()] Trying to run RCT services without a Broker because of unknown reason. Please, check it out...", 'red')
-
-                self.helper.printer(f"---- Digital Twin was killed at {tstr} ----", 'red')
-                sys.exit()
+                    self.helper.printer(f"---- Digital Twin was killed at {tstr} ----", 'red')
+                    sys.exit()
 
             # -------------------- Run Service ---------------------------------
             self.run_RCT_services(verbose= self.verbose, plot= self.plot, queue_position= self.rct_queue)

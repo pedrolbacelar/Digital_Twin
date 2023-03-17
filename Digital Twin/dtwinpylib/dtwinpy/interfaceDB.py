@@ -86,7 +86,6 @@ class Database():
 
                 digital_model_DB.commit()
 
-
         if event_table == "ID":
             with sqlite3.connect(self.database_path) as db:
                 db.execute(f"""
@@ -106,6 +105,12 @@ class Database():
             """
             pass
     
+        if event_table == "replicated_log":
+            #--- Create the path of the new replicated database
+            old_database_path= self.database_path.replace(".db","")
+            self.replicated_database_path= f"{old_database_path}_replicated.db"
+            
+
     # -------- Setting Functions --------
     def rename_digital_to_real(self):
         with sqlite3.connect(self.database_path) as db:
@@ -557,3 +562,74 @@ class Database():
                 return "x"
             else:
                 return result[0]
+            
+    # --------- Database Replicator Function ---------
+    def replicate_database(self):
+        
+        # --- Copy targeted database
+        #shutil.copy2(self.database_path, self.replicated_database_path)
+
+        # --- clear the table of the old database
+        with sqlite3.connect(self.database_path) as db:
+            db.execute(f"DROP TABLE IF EXISTS real_log")
+            db.execute(f"DROP TABLE IF EXISTS time_pointers")
+            db.commit()
+
+        with sqlite3.connect(self.database_path) as db:
+            #--- Create the table if not exist:
+            db.execute(f"""
+                CREATE TABLE IF NOT EXISTS real_log (
+                    event_id INTEGER PRIMARY KEY,
+                    timestamp INTEGER,
+                    machine_id TEXT,
+                    acitivity_type TEXT,
+                    part_id TEXT,
+                    queue TEXT,
+                    current_time_str TEXT,
+                    timestamp_real INTEGER
+                )
+            """)
+
+            db.commit()
+
+        with sqlite3.connect(self.replicated_database_path) as old_db:
+            last_event_id = old_db.execute(f"""SELECT MAX(event_id) FROM real_log""").fetchone()[0]
+            print(f"total number of traces = {last_event_id}")
+
+            print("====== Starting database replicator ======")
+
+            for ii in range(last_event_id):
+                event_id = ii + 1
+                current_event = old_db.execute(f"""SELECT * FROM real_log WHERE event_id = ?""",(event_id,)).fetchone()
+                if event_id == last_event_id:
+                    break
+                else:
+                    next_event_time = old_db.execute(f"""SELECT * FROM real_log WHERE event_id = ?""",(event_id+1,)).fetchone()[7]
+                    wait = next_event_time - current_event[7]
+
+                print(f"current event_id : {current_event[0]}, machine_id : {current_event[2]}, status : {current_event[3]}, part_id : {current_event[4]}, queue_id : {current_event[5]}")
+                
+                #--- Assign properties
+                machine_id= current_event[2]
+                acitivity_type = current_event[3]
+                part_id= current_event[4]
+                queue= current_event[5]
+
+
+                #--- Insert data from the replicated DB into the real database
+                with sqlite3.connect(self.database_path) as db:
+                    
+                    #--- Take current time
+                    (timestamp_str, timestamp) = self.helper.get_time_now()
+
+                    #--- Insert 
+                    db.execute("""
+                        INSERT INTO real_log (machine_id, acitivity_type, part_id, queue, current_time_str, timestamp_real)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                    """, (machine_id, acitivity_type, part_id, queue, timestamp_str, timestamp))
+
+                    db.commit()
+
+                #--- we sleep between the traces
+                print(f"Next trace in {wait} seconds")
+                sleep(wait)

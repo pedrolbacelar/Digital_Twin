@@ -10,7 +10,7 @@ mydt = Digital_Twin(
     Freq_Valid= 60, 
     Freq_Service= 10000, 
     delta_t_treshold=21,
-    ip_address="192.168.0.50")
+    ip_address="127.0.0.1")
 
 #--- Run the real time Digital Twin
 mydt.run()

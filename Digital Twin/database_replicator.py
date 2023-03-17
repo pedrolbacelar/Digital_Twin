@@ -1,3 +1,6 @@
+
+"""
+
 #--- code to imitate a physical system based on the data in a real_log databse
 
 
@@ -82,5 +85,5 @@ with sqlite3.connect(old_database_path) as old_db:
 
     print("====== Database replicator executed ======")
 
-
+"""
 
