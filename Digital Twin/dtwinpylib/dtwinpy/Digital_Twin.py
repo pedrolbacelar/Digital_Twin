@@ -27,7 +27,7 @@ importlib.reload(dtwinpylib.dtwinpy.helper)
 
 
 class Digital_Twin():
-    def __init__(self, name, copied_realDB= False,model_path= None, initial= True, targeted_part_id= None, targeted_cluster= None, until= None, digital_database_path= None, real_database_path= None, ID_database_path= None, Freq_Sync= 1000, Freq_Valid= 10000, delta_t_treshold= 100,Freq_Service = None, part_type= "A", loop_type= "closed", maxparts = None, template= False, keepDB= True):
+    def __init__(self, name, copied_realDB= False,model_path= None, ip_address= None, initial= True, targeted_part_id= None, targeted_cluster= None, until= None, digital_database_path= None, real_database_path= None, ID_database_path= None, Freq_Sync= 1000, Freq_Valid= 10000, delta_t_treshold= 100,Freq_Service = None, part_type= "A", loop_type= "closed", maxparts = None, template= False, keepDB= True):
         self.helper = Helper()
         #--- Model Parameters
         self.name = name
@@ -74,8 +74,12 @@ class Digital_Twin():
         self.flag_synchronized = False
         self.flag_rct_served = False
 
+        #--- Features Counters
+        self.counter_Sync = 0
+        self.counter_Valid = 0
+        self.counter_Serv = 0
 
-
+    
         #--- Model and Figure path
         if not os.path.exists(f"figures"):
             os.makedirs(f"figures/")
@@ -137,7 +141,7 @@ class Digital_Twin():
             self.ID_database_path = f"databases/{self.name}/ID_database.db"
         else:
             self.ID_database_path = ID_database_path
-        
+
         # Delete existing database before starting anything
         if keepDB == False:
             print("|- Deleting existing databases...")
@@ -186,11 +190,23 @@ class Digital_Twin():
 
             #--- Update the timestamp according to the current real time
             self.temporary_real_database.update_real_time_now()
+        
+        # Time Pointers table (just after real database created)
+        self.pointers_database = Database(database_path= self.real_database_path, event_table= "time_pointers")
+
         # ------------------------------------------
         print(f"--- printing databases paths ---")
         print(f"Digital Database: '{self.database_path}'")
         print(f"Real Database: '{self.real_database_path}'")
         print(f"ID Database: '{self.ID_database_path}'")
+
+        #--- Initiate the Broker for Feedback (just if ip_address if given)
+        self.ip_address = ip_address
+        if self.ip_address != None:
+            #--- Create a Broker
+            self.broker_manager = self.initiate_broker(self.ip_address)
+            print("Broker Manager internally create for publishing feedback...")
+
 
         # ================================ SET UP FINISHED ================================
         self.helper.printer(f"---- Digital Twin '{self.name}' created sucessfully at {initial_time_str} ----", 'green')       
@@ -206,6 +222,7 @@ class Digital_Twin():
         
         #--- Create the Broker Manager
         self.broker_manager = Broker_Manager(
+            name= self.name,
             ip_address= self.ip_address,
             real_database_path= self.real_database_path,
             ID_database_path= ID_database_path,
@@ -387,7 +404,7 @@ class Digital_Twin():
         if self.flag_time_to_synchronize:
             # --- User Interface
             (current_time_str, x) = self.helper.get_time_now()
-            self.helper.printer(f"{current_time_str} |[Internal Service] Starting Synchronization", 'blue')
+            self.helper.printer(f"{current_time_str} |[Internal Service] Starting Synchronization n° {self.counter_Sync}", 'blue')
 
             # --- Update Start and End time
             start_time = round(self.last_Tsync)
@@ -430,11 +447,19 @@ class Digital_Twin():
 
 
             # --------------------- AFTER SERVICES SETTINGS ---------------------
+            # --- Increase Sync Counter
+            self.counter_Sync += 1
+            
             # --- Validation just finish, so not time to validate anymore
             self.flag_time_to_synchronize = False
 
             # --- Adjust WHEN WAS the last validation (just happened)
-            self.last_Tsync = self.next_Tsync # TODO: Update this considering the updated end time!
+            #-- Take the last end time ("previous next_TSync but updated")
+            last_end_time = self.pointers_database.read_last_end_time()
+            self.last_Tsync = last_end_time + 1
+
+            #self.last_Tsync = self.next_Tsync # TODO: Update this considering the updated end time!
+            
 
             # --- Adjust WHEN WILL be the next validation
             self.next_Tsync = self.current_timestamp + self.Freq_Sync
@@ -442,13 +467,13 @@ class Digital_Twin():
             # --- User Interface
             (current_time_str, x) = self.helper.get_time_now()
             nexttime = datetime.datetime.fromtimestamp(self.next_Tsync).strftime("%d %B %H:%M:%S")
-            self.helper.printer(f"{current_time_str} |[Internal Service] System Synchronized. Next Sync: {nexttime}", 'blue')
+            self.helper.printer(f"{current_time_str} |[Internal Service] System Synchronized. Next Sync (n° {self.counter_Sync}): {nexttime}", 'blue')
         
         # ====================== Running Validation ======================
         if  self.flag_time_to_validate:
             # --- User Interface
             (current_time_str, x) = self.helper.get_time_now()
-            self.helper.printer(f"{current_time_str} |[Internal Service] Starting Validation", 'green')
+            self.helper.printer(f"{current_time_str} |[Internal Service] Starting Validation (n° {self.counter_Valid})", 'green')
 
 
             # --- Update Start and End time
@@ -471,11 +496,18 @@ class Digital_Twin():
             """
 
             # --------------------- AFTER SERVICES SETTINGS ---------------------
+            # --- Increase Valid Counter
+            self.counter_Valid += 1
+
             # --- Validation just finish, so not time to validate anymore
             self.flag_time_to_validate = False
 
             # --- Adjust WHEN WAS the last validation (just happened)
-            self.last_Tvalid = self.next_Tvalid
+            #-- Take the last end time ("previous next_TValid but updated")
+            last_end_time = self.pointers_database.read_last_end_time()
+            self.last_Tvalid = last_end_time
+
+            #self.last_Tvalid = self.next_Tvalid
 
             # --- Adjust WHEN WILL be the next validation
             self.next_Tvalid = self.current_timestamp + self.Freq_Valid
@@ -483,17 +515,17 @@ class Digital_Twin():
             # --- User Interface
             (current_time_str, x) = self.helper.get_time_now()
             nexttime = datetime.datetime.fromtimestamp(self.next_Tvalid).strftime("%d %B %H:%M:%S")
-            self.helper.printer(f"{current_time_str} |[Internal Service] System Validated. Next Validation: {nexttime}", 'green')
+            self.helper.printer(f"{current_time_str} |[Internal Service] System Validated. Next Validation (n° {self.counter_Valid}): {nexttime}", 'green')
 
 
     #--- External Services (RCT Services and Feedback)
     def External_Services(self):
 
-        # ====================== Running Synchronization ======================
+        # ====================== Running Services ======================
         if self.flag_time_to_rct_service:
             # --- User Interface
             (current_time_str, x) = self.helper.get_time_now()
-            self.helper.printer(f"{current_time_str} |[External Service] Starting RCT Service", 'purple')
+            self.helper.printer(f"{current_time_str} |[External Service] Starting RCT Service (n° {self.counter_Serv})", 'purple')
 
 
             # RUN Service
@@ -507,13 +539,23 @@ class Digital_Twin():
             self.interfaceAPI.RCT_server(part_id= part_id, path_1= path_1, path_2= path_2, queue_id= quque_id)
             """
 
+            # -------------------- Run Service --------------------
+            self.run_RCT_services(verbose= True)
+            # -----------------------------------------------------
 
             # --------------------- AFTER SERVICES SETTINGS ---------------------
-            # --- Validation just finish, so not time to validate anymore
+            # --- Increase Serv Counter
+            self.counter_Serv += 1
+
+            # --- Service just finish, so not time to validate anymore
             self.flag_time_to_rct_service = False
 
             # --- Adjust WHEN WAS the last validation (just happened)
-            self.last_Tserv = self.next_Tserv
+            #-- Take the last end time ("previous next_Tserv but updated")
+            last_end_time = self.pointers_database.read_last_end_time()
+            self.last_Tserv = last_end_time
+
+            #self.last_Tserv = self.next_Tserv
 
             # --- Adjust WHEN WILL be the next validation
             self.next_Tserv = self.current_timestamp + self.Freq_Service
@@ -521,7 +563,7 @@ class Digital_Twin():
             # --- User Interface
             (current_time_str, x) = self.helper.get_time_now()
             nexttime = datetime.datetime.fromtimestamp(self.next_Tserv).strftime("%d %B %H:%M:%S")
-            self.helper.printer(f"{current_time_str} |[External Service] System RCT completed. Next Service: {nexttime}", 'purple')
+            self.helper.printer(f"{current_time_str} |[External Service] System RCT completed. Next Service (n° {self.counter_Serv}): {nexttime}", 'purple')
 
     #--- Update Flags of time
     def Update_time_flags(self):

@@ -9,6 +9,8 @@ import paho.mqtt.client as mqtt
 import json
 from time import sleep
 import datetime
+import os
+import sys
 
 
 
@@ -18,8 +20,9 @@ import dtwinpylib
 importlib.reload(dtwinpylib.dtwinpy.interfaceDB)"""
 
 class Broker_Manager():
-    def __init__(self, ip_address, real_database_path, ID_database_path, port= 1883, keepalive= 60, topics = ['trace', 'part_id', 'RCT_server'], client = None):
+    def __init__(self, name, ip_address, real_database_path, ID_database_path, port= 1883, keepalive= 60, topics = ['trace', 'part_id', 'RCT_server'], client = None):
         #--- Connect to the Broker
+        self.name= name
         self.ip_address= ip_address
         self.port = port
         self.keepalive = keepalive
@@ -39,6 +42,10 @@ class Broker_Manager():
         #--- Database
         self.real_database_path = real_database_path
         self.ID_database_path = ID_database_path
+        # ----- Deleting existing database before creating the new ones -----ù
+        self.delete_databases()
+
+        # ----- Create the new databases
         self.real_database = Database(database_path= self.real_database_path, event_table= "real_log")
         self.ID_database = Database(database_path= self.ID_database_path, event_table= "ID")
 
@@ -272,7 +279,49 @@ class Broker_Manager():
         #--- Submitte the right function
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
-        
+
+    #--- Delete Existing Databases
+    def delete_databases(self):
+        print("|- Deleting existing databases...")
+        #--- Get current time
+        (tstr, t) = self.helper.get_time_now()
+
+        #--- Digital Database path
+        digital_database_path = f"databases/{self.name}/digital_database.db"
+        try:
+            os.remove(digital_database_path)
+            print(f"|-- Digital Database deleted successfuly from {digital_database_path}")
+
+        except FileNotFoundError:
+            self.helper.printer(f"{tstr} | [WARNING][broker_manager.py/delete_databases()] The Digital Database doesn't exist yet in the path '{digital_database_path}', proceding without deleting...")
+        except PermissionError:
+            self.helper.printer(f"{tstr} | [ERROR][broker_manager.py/delete_databases()] The Digital Database is busy somewhere, please close and try again.", 'red')
+            self.helper.printer(f"---- Digital Twin was killed at {tstr} ----", 'red')
+            sys.exit()
+
+
+        #- Delete Real Database
+        try:
+            os.remove(self.real_database_path)
+            print(f"|-- Real Database deleted successfuly from {self.real_database_path}")
+        except FileNotFoundError:
+            self.helper.printer(f"{tstr} | [WARNING][broker_manager.py/delete_databases()] The Real Database doesn't exist yet in the path '{self.real_database_path}', proceding without deleting...")
+        except PermissionError:
+            self.helper.printer(f"{tstr} | [ERROR][broker_manager.py/delete_databases()] The Real Database is busy somewhere, please close and try again.", 'red')
+            self.helper.printer(f"---- Digital Twin was killed at {tstr} ----", 'red')
+            sys.exit()
+
+        #- Delete ID database
+        try:
+            os.remove(self.ID_database_path)
+            print(f"|-- ID Database deleted successfuly from {self.ID_database_path}")
+        except FileNotFoundError:
+            self.helper.printer(f"{tstr} | [WARNING][broker_manager.py/delete_databases()] The ID Database doesn't exist yet in the path '{self.ID_database_path}', proceding without deleting...")
+        except PermissionError:
+            self.helper.printer(f"{tstr} | [ERROR][broker_manager.py/delete_databases()] The ID Database is busy somewhere, please close and try again.", 'red')
+            self.helper.printer(f"---- Digital Twin was killed at {tstr} ----", 'red')
+            sys.exit()
+
     def run(self):
         """
         This function is the main function of the broker manager. It will make the connection with
@@ -349,6 +398,6 @@ class Broker_Manager():
         current_time_str = current_time.strftime("%d %B %H:%M:%S")
 
         #--- Print the payload received
-        print(f"[BROKER] {current_time_str} | Topic: {topic} | Payload Published: {payload_translated}")
+        self.helper.printer(f"[BROKER] {current_time_str} | Topic: {topic} | Payload Published: {payload_translated}", 'green')
 
         

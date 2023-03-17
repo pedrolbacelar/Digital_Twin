@@ -33,6 +33,7 @@ class Zone():
         self.flag_initial_working = False
         self.first_zone_event = True
         self.event_type = "Started"
+        self.next_queue_position = None
 
         #--- Storing Parts ID
         self.parts_ids_in_queue = []
@@ -158,7 +159,27 @@ class Zone():
         print(f"After MFinished {part_id} in queue")
         print(f"{self.get_name()} | parts_ids_in_queue: {self.parts_ids_in_queue}")
         print(f"{self.get_name()} | parts_ids_in_machine: {self.parts_ids_in_machine}")
+    def next_allocation(self, queue_allocated):
+        # --- Check if it's a branching machine
+        if self.machine.get_branch() != None:
+            machine_queues = self.machine.get_queue_out()
 
+            # Create a vector with the names of the queues
+            machine_queues_name = []
+            for queue in machine_queues:
+                machine_queues_name.append(queue.get_name())
+
+            # Find the position of the current selected queue
+            queue_position = machine_queues_name.index(queue_allocated)
+
+            # Verify if it's the last position
+            if queue_position == len(machine_queues_name) - 1:
+                # If it was the last, the next is the first
+                self.next_queue_position = 0
+            # Incase it was not the last
+            else:
+                self.next_queue_position = queue_position + 1
+            
     
 
     def self_validation(self, Verbose = True):
@@ -230,6 +251,8 @@ class Zone():
         return self.parts_ids_in_machine
     def get_flag_initial_working(self):
         return self.flag_initial_working
+    def get_allocation_counter(self):
+        return self.next_queue_position
     #--- SETs
     def set_zoneInd(self, indicador):
         self.zoneInd = indicador
@@ -320,9 +343,12 @@ class Synchronizer():
                     # because now we check if the machine had a part in it.
                     pass
 
-                # For the current zone a part was finished, so we increment the Out
+                #--- For the current zone a part was finished, so we increment the Out
                 current_zone.addOut(part_id)
                 current_zone.Mfinished(part_id)
+
+                #--- Implement the next allocation based on queue
+                current_zone.next_allocation(queue_name)
 
                 #--- Discovery in which zone the part was putted based on the queues and machines
                 for key in self.zones_dict:
@@ -575,6 +601,31 @@ class Synchronizer():
                     
                     # Since the number of parts to positioned is less than what i can, i'm done
                     break
+            
+            # ========================== Updated Allocation Counter ==========================
+            current_allocation_counter = current_zone.get_allocation_counter()
+            if current_allocation_counter != None:
+                zone_machine = current_zone.get_machine()
+                machine_id = zone_machine.get_id()
+
+                # ============= Update Model.json =============
+                model_path = self.digital_model.get_model_path()
+                with open(model_path, 'r+') as model_file:
+                    data = json.load(model_file)
+
+                    for node in data['nodes']:
+                        if node['activity'] == machine_id:
+                    
+                            #=====================================
+                            node['allocation_counter'] = current_allocation_counter
+                            #=====================================
+
+                            # Move the file pointer to the beginning of the file
+                            model_file.seek(0)
+                            # Write the modified data back to the file
+                            json.dump(data, model_file)
+                            # Truncate any remaining data in the file
+                            model_file.truncate()
 
 
     def show(self):
@@ -616,7 +667,7 @@ class Synchronizer():
             self.sync_aligment()
 
             #--- Change the allocation counter of the branching machine in the json model
-            self.digital_model.changing_allocation_counter()
+            #self.digital_model.changing_allocation_counter()
 
         #--- Show the results
         self.show()

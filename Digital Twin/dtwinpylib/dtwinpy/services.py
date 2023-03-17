@@ -230,6 +230,10 @@ class Service_Handler():
         for part_id in range(len(parts_making_decisions)):
             part = parts_making_decisions[part_id]
 
+            print(f"parts_making_decisions= {parts_making_decisions}")
+            print(f"part name: {part.get_name()}")
+            print(f"part id: {part.get_id()}")
+
             #--- For each existing path scenario
             path_counter = 1
 
@@ -238,18 +242,19 @@ class Service_Handler():
 
             #--- Simulaion AS IS
             print(f"====================================== Simulation AS IS for {part.get_name()} ======================================")
-            self.digital_model = self.generate_digital_model(targeted_part_id= part.id, verbose= False)
+            self.digital_model = self.generate_digital_model(targeted_part_id= part.get_id(), verbose= False)
             self.digital_model.run()
             #- Get the RCT for the Simulation AS IS
-            part_rct = self.digital_model.calculate_RCT(part_id_selected= part.id)
+            part_rct = self.digital_model.calculate_RCT(part_id_selected= part.get_id())
             rct_vector.append(part_rct)
 
             for path_scenario in possible_pathes:
                 #--- Before assigning a new path and run a simulation, it's necessary to recreate the model (this generate new components / objects)
-                self.digital_model = self.generate_digital_model(targeted_part_id= part.id, verbose= False)
+                self.digital_model = self.generate_digital_model(targeted_part_id= part.get_id(), verbose= False)
 
                 #--- Get Parts from the Digital Model
                 current_parts_vector = self.digital_model.get_all_parts()
+                print(f"current_parts_vector = {current_parts_vector}")
 
                 #--- Assign to that part the current path scenario being analysed 
                 for current_part in current_parts_vector:
@@ -257,6 +262,7 @@ class Service_Handler():
                         current_part.set_branching_path(path_scenario)
                         part_being_simulated = current_part
 
+                print(f"part_being_simulated = {part_being_simulated}")
                 #--- Show the paths
                 if verbose == True:
                     print(f"====================================== Running Scenario for {part.get_name()} | Path {path_counter} ======================================")
@@ -503,7 +509,7 @@ class Service_Handler():
                     #---- Prepare the payload
                     #--- Since the feedback is only for the rigth next branching machine,
                     # we just care about the  conveyor in which the path selected
-                    machine_id = machine_selected.get_id()
+                    machine_id = str(machine_selected.get_id())
                     queue_id = str(selected_path[part_location].id)
                     # part_id already there
 
@@ -521,7 +527,7 @@ class Service_Handler():
                     print("waking up!")
 
     # ---------------------- RCT Service ----------------------    
-    def run_RCT_service(self, queue_position= 1, verbose= False):
+    def run_RCT_service(self, queue_position= 3, verbose= False):
         """
         ## Description
         This run method is one of the service related to the decision making based on the 

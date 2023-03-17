@@ -662,6 +662,8 @@ class Validator():
         # (also for that you need to have start and end time)
         if (until, maxparts, targeted_part_id, targeted_cluster) == (None, None, None, None) and (self.start_time != None and self.end_time != None):
             until = self.real_database.get_current_durantion()
+            #-- adjust to run until the end
+            until += 1
 
         self.digital_model = self.generate_digital_model(until= until)
 

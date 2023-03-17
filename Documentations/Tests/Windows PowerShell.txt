@@ -1,0 +1,1207 @@
+Windows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Install the latest PowerShell for new features and improvements! https://aka.ms/PSWindows
+
+PS C:\Users\pedro> cd '.\Github Repositories\Digital_Twin\Digital Twin\'
+PS C:\Users\pedro\Github Repositories\Digital_Twin\Digital Twin> python .\mydt.py
+Importing the libraries.....
+Model copied successfuly from models/5s_determ_template.json!
+--- printing databases paths ---
+Digital Database: 'databases/5s_determ/digital_database.db'
+Real Database: 'databases/5s_determ/real_database.db'
+ID Database: 'databases/5s_determ/ID_database.db'
+|- Deleting existing databases...
+17 March 19:48:50 | [WARNING][broker_manager.py/delete_databases()] The Digital Database doesn't exist yet in the path 'databases/5s_determ/digital_database.db', proceding without deleting...
+|-- Real Database deleted successfuly from databases/5s_determ/real_database.db
+|-- ID Database deleted successfuly from databases/5s_determ/ID_database.db
+Broker Manager internally create for publishing feedback...
+---- Digital Twin '5s_determ' created sucessfully at 17 March 19:48:50 ----
+17 March 19:49:20 |[Internal Service] Starting Synchronization n° 0
+---------- Pointer Status Initial ----------
+Start Time: 1679078931
+Start Time ID: 1
+
+End Time: 1679078961
+End Time ID: 3
+-------------------------------------
+ 17 March 19:49:20 | [interfaceDB.py/update_end_time] Not found 'Started' after the end_time: 1679078961. Sleeping for 10 seconds and trying again
+ 17 March 19:49:30 | [interfaceDB.py/update_end_time] Not found 'Started' after the end_time: 1679078961. Sleeping for 10 seconds and trying again
+ 17 March 19:49:40 | [interfaceDB.py/update_end_time] Not found 'Started' after the end_time: 1679078961. Sleeping for 10 seconds and trying again
+---------- Pointer Status Updated ----------
+Start Time: 1679078931
+Start Time ID: 1
+
+End Time: 1679078959
+End Time ID: 3
+-------------------------------------
+parts_zero: []
+-----------------------------------------------------------------
+Big picture BEFORE calculations
+--- Zone of Machine 1 ---
+Parts in queue: ['Part 1', 'Part 2', 'Part 3', 'Part 4', 'Part 5', 'Part 6', 'Part 7']
+Part in machine: []
+--- Zone of Machine 2 ---
+Parts in queue: []
+Part in machine: []
+--- Zone of Machine 3 ---
+Parts in queue: []
+Part in machine: []
+--- Zone of Machine 4 ---
+Parts in queue: []
+Part in machine: []
+--- Zone of Machine 5 ---
+Parts in queue: []
+Part in machine: []
+-----------------------------------------------------------------
+----
+After MStarted Part 1 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 2', 'Part 3', 'Part 4', 'Part 5', 'Part 6', 'Part 7']
+Zone of Machine 1 | parts_ids_in_machine: ['Part 1']
+----
+After MFinished Part 1 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 2', 'Part 3', 'Part 4', 'Part 5', 'Part 6', 'Part 7']
+Zone of Machine 1 | parts_ids_in_machine: []
+----
+After Added Part 1 in queue
+Zone of Machine 2 | parts_ids_in_queue: ['Part 1']
+Zone of Machine 2 | parts_ids_in_machine: []
+----
+After MStarted Part 2 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 3', 'Part 4', 'Part 5', 'Part 6', 'Part 7']
+Zone of Machine 1 | parts_ids_in_machine: ['Part 2']
+-----------------------------------------------------------------
+Big picture AFTER calculations
+--- Zone of Machine 1 ---
+Parts in queue: ['Part 3', 'Part 4', 'Part 5', 'Part 6', 'Part 7']
+Part in machine: ['Part 2']
+Zone is Working? True
+--- Zone of Machine 2 ---
+Parts in queue: ['Part 1']
+Part in machine: []
+Zone is Working? False
+--- Zone of Machine 3 ---
+Parts in queue: []
+Part in machine: []
+Zone is Working? False
+--- Zone of Machine 4 ---
+Parts in queue: []
+Part in machine: []
+Zone is Working? False
+--- Zone of Machine 5 ---
+Parts in queue: []
+Part in machine: []
+Zone is Working? False
+-----------------------------------------------------------------
+=========== Self Verification (Digital-Based) ===========
+[Zone of Machine 1] NumParts = 7, Machine Working = False, Parts in Conveyor = 0
+[Zone of Machine 2] NumParts = 0, Machine Working = False, Parts in Conveyor = 0
+[Zone of Machine 3] NumParts = 0, Machine Working = False, Parts in Conveyor = 0
+[Zone of Machine 4] NumParts = 0, Machine Working = False, Parts in Conveyor = 0
+[Zone of Machine 5] NumParts = 0, Machine Working = False, Parts in Conveyor = 0
+=========================================
+=========== Zones Occupations (Real-Based) ===========
+[Zone of Machine 1] NumParts = 6, Machine Working = True, Zone Indicador = None
+[Zone of Machine 2] NumParts = 1, Machine Working = False, Zone Indicador = None
+[Zone of Machine 3] NumParts = 0, Machine Working = False, Zone Indicador = None
+[Zone of Machine 4] NumParts = 0, Machine Working = False, Zone Indicador = None
+[Zone of Machine 5] NumParts = 0, Machine Working = False, Zone Indicador = None
+=========================================
+17 March 19:49:50 |[Internal Service] System Synchronized. Next Sync (n° 1): 17 March 19:49:50
+ 17 March 19:49:50 |[External Service] Starting RCT Service (n° 0)
+====== Paths Created ======
+---- Path 1 ----
+Conveyor towards Queue 2
+---- Path 2 ----
+Conveyor towards Queue 3
+========================
+parts_making_decisions= [<dtwinpylib.dtwinpy.components.Part object at 0x0000022BE552D360>]
+part name: Part 5
+part id: 5
+====================================== Simulation AS IS for Part 5 ======================================
+### ============ Simulation Started ============ ###
+Time: 0 - [Machine 2] got Part 1 from Queue 2 (capacity= 0)
+Time: 23 - [Conveyor towards Queue 2] GOT Part 2
+Time: 23 - [Machine 1] got Part 3 from Queue 1 (capacity= 4)
+Time: 24 - [Conveyor towards Queue 4] GOT Part 1
+Time: 30 - [Conveyor towards Queue 4] PUT Part 1 in the Queue 4
+Time: 31 - [Machine 4] got Part 1 from Queue 4 (capacity= 0)
+Time: 43 - [Conveyor towards Queue 2] PUT Part 2 in the Queue 2
+Time: 44 - [Machine 2] got Part 2 from Queue 2 (capacity= 0)
+Time: 46 - [Conveyor towards Queue 5] GOT Part 1
+Time: 47 - [Conveyor towards Queue 3] GOT Part 3
+Time: 47 - [Machine 1] got Part 4 from Queue 1 (capacity= 3)
+Time: 56 - [Conveyor towards Queue 5] PUT Part 1 in the Queue 5
+Time: 57 - [Machine 5] got Part 1 from Queue 5 (capacity= 0)
+Time: 67 - [Conveyor towards Queue 3] PUT Part 3 in the Queue 3
+Time: 68 - [Conveyor towards Queue 4] GOT Part 2
+Time: 68 - [Machine 3] got Part 3 from Queue 3 (capacity= 0)
+Time: 71 - [Conveyor towards Queue 2] GOT Part 4
+Time: 71 - [Machine 1] got Part 5 from Queue 1 (capacity= 2)
+Time: 74 - [Conveyor towards Queue 4] PUT Part 2 in the Queue 4
+Time: 75 - [Machine 4] got Part 2 from Queue 4 (capacity= 0)
+Time: 82 - [Terminator] xxx Part 1 terminated xxx
+Time: 82 - [Terminator] Part 8 replaced
+Time: 82 - [Conveyor towards Queue 1] GOT Part 8
+Time: 90 - [Conveyor towards Queue 4] GOT Part 3
+Time: 90 - [Conveyor towards Queue 5] GOT Part 2
+Time: 91 - [Conveyor towards Queue 2] PUT Part 4 in the Queue 2
+Time: 92 - [Machine 2] got Part 4 from Queue 2 (capacity= 0)
+Time: 92 - [Conveyor towards Queue 1] PUT Part 8 in the Queue 1
+Time: 95 - [Conveyor towards Queue 3] GOT Part 5
+Time: 95 - [Machine 1] got Part 6 from Queue 1 (capacity= 2)
+Time: 96 - [Conveyor towards Queue 4] PUT Part 3 in the Queue 4
+Time: 97 - [Machine 4] got Part 3 from Queue 4 (capacity= 0)
+Time: 100 - [Conveyor towards Queue 5] PUT Part 2 in the Queue 5
+Time: 101 - [Machine 5] got Part 2 from Queue 5 (capacity= 0)
+Time: 112 - [Conveyor towards Queue 5] GOT Part 3
+Time: 115 - [Conveyor towards Queue 3] PUT Part 5 in the Queue 3
+Time: 116 - [Conveyor towards Queue 4] GOT Part 4
+Time: 116 - [Machine 3] got Part 5 from Queue 3 (capacity= 0)
+Time: 119 - [Conveyor towards Queue 2] GOT Part 6
+Time: 119 - [Machine 1] got Part 7 from Queue 1 (capacity= 1)
+Time: 122 - [Conveyor towards Queue 4] PUT Part 4 in the Queue 4
+Time: 122 - [Conveyor towards Queue 5] PUT Part 3 in the Queue 5
+Time: 123 - [Machine 4] got Part 4 from Queue 4 (capacity= 0)
+Time: 126 - [Terminator] xxx Part 2 terminated xxx
+Time: 126 - [Terminator] Part 9 replaced
+Time: 126 - [Conveyor towards Queue 1] GOT Part 9
+Time: 126 - [Machine 5] got Part 3 from Queue 5 (capacity= 0)
+Time: 136 - [Conveyor towards Queue 1] PUT Part 9 in the Queue 1
+Time: 138 - [Conveyor towards Queue 4] GOT Part 5
+Time: 138 - [Conveyor towards Queue 5] GOT Part 4
+Time: 139 - [Conveyor towards Queue 2] PUT Part 6 in the Queue 2
+Time: 140 - [Machine 2] got Part 6 from Queue 2 (capacity= 0)
+Time: 143 - [Conveyor towards Queue 3] GOT Part 7
+Time: 143 - [Machine 1] got Part 8 from Queue 1 (capacity= 1)
+Time: 144 - [Conveyor towards Queue 4] PUT Part 5 in the Queue 4
+Time: 145 - [Machine 4] got Part 5 from Queue 4 (capacity= 0)
+Time: 148 - [Conveyor towards Queue 5] PUT Part 4 in the Queue 5
+Time: 151 - [Terminator] xxx Part 3 terminated xxx
+Time: 151 - [Terminator] Part 10 replaced
+Time: 151 - [Conveyor towards Queue 1] GOT Part 10
+Time: 151 - [Machine 5] got Part 4 from Queue 5 (capacity= 0)
+Time: 160 - [Conveyor towards Queue 5] GOT Part 5
+Time: 161 - [Conveyor towards Queue 1] PUT Part 10 in the Queue 1
+Time: 163 - [Conveyor towards Queue 3] PUT Part 7 in the Queue 3
+Time: 164 - [Conveyor towards Queue 4] GOT Part 6
+Time: 164 - [Machine 3] got Part 7 from Queue 3 (capacity= 0)
+Time: 167 - [Conveyor towards Queue 2] GOT Part 8
+Time: 167 - [Machine 1] got Part 9 from Queue 1 (capacity= 1)
+Time: 170 - [Conveyor towards Queue 4] PUT Part 6 in the Queue 4
+Time: 170 - [Conveyor towards Queue 5] PUT Part 5 in the Queue 5
+Time: 171 - [Machine 4] got Part 6 from Queue 4 (capacity= 0)
+Time: 176 - [Terminator] xxx Part 4 terminated xxx
+Time: 176 - [Terminator] Part 11 replaced
+Time: 176 - [Conveyor towards Queue 1] GOT Part 11
+Time: 176 - [Machine 5] got Part 5 from Queue 5 (capacity= 0)
+Time: 186 - [Conveyor towards Queue 4] GOT Part 7
+Time: 186 - [Conveyor towards Queue 5] GOT Part 6
+Time: 186 - [Conveyor towards Queue 1] PUT Part 11 in the Queue 1
+Time: 187 - [Conveyor towards Queue 2] PUT Part 8 in the Queue 2
+Time: 188 - [Machine 2] got Part 8 from Queue 2 (capacity= 0)
+Time: 191 - [Conveyor towards Queue 3] GOT Part 9
+Time: 191 - [Machine 1] got Part 10 from Queue 1 (capacity= 1)
+Time: 192 - [Conveyor towards Queue 4] PUT Part 7 in the Queue 4
+Time: 193 - [Machine 4] got Part 7 from Queue 4 (capacity= 0)
+Time: 196 - [Conveyor towards Queue 5] PUT Part 6 in the Queue 5
+Time: 201 - [Terminator] xxx Part 5 terminated xxx
+Time: 201 - [Terminator] Part 12 replaced
+Time: 201 - [Conveyor towards Queue 1] GOT Part 12
+Time: 201 - [Machine 5] got Part 6 from Queue 5 (capacity= 0)
+=== Reading all the events from table: digital_log ===
+(1, 0, 'Machine 2', 'Started', 'Part 1', 'Queue 2', None, None)
+(2, 23, 'Machine 1', 'Finished', 'Part 2', 'Queue 2', None, None)
+(3, 23, 'Machine 1', 'Started', 'Part 3', 'Queue 1', None, None)
+(4, 24, 'Machine 2', 'Finished', 'Part 1', 'Queue 4', None, None)
+(5, 31, 'Machine 4', 'Started', 'Part 1', 'Queue 4', None, None)
+(6, 44, 'Machine 2', 'Started', 'Part 2', 'Queue 2', None, None)
+(7, 46, 'Machine 4', 'Finished', 'Part 1', 'Queue 5', None, None)
+(8, 47, 'Machine 1', 'Finished', 'Part 3', 'Queue 3', None, None)
+(9, 47, 'Machine 1', 'Started', 'Part 4', 'Queue 1', None, None)
+(10, 57, 'Machine 5', 'Started', 'Part 1', 'Queue 5', None, None)
+(11, 68, 'Machine 2', 'Finished', 'Part 2', 'Queue 4', None, None)
+(12, 68, 'Machine 3', 'Started', 'Part 3', 'Queue 3', None, None)
+(13, 71, 'Machine 1', 'Finished', 'Part 4', 'Queue 2', None, None)
+(14, 71, 'Machine 1', 'Started', 'Part 5', 'Queue 1', None, None)
+(15, 75, 'Machine 4', 'Started', 'Part 2', 'Queue 4', None, None)
+(16, 82, 'Machine 5', 'Finished', 'Part 1', 'Queue 1', None, None)
+(17, 90, 'Machine 3', 'Finished', 'Part 3', 'Queue 4', None, None)
+(18, 90, 'Machine 4', 'Finished', 'Part 2', 'Queue 5', None, None)
+(19, 92, 'Machine 2', 'Started', 'Part 4', 'Queue 2', None, None)
+(20, 95, 'Machine 1', 'Finished', 'Part 5', 'Queue 3', None, None)
+(21, 95, 'Machine 1', 'Started', 'Part 6', 'Queue 1', None, None)
+(22, 97, 'Machine 4', 'Started', 'Part 3', 'Queue 4', None, None)
+(23, 101, 'Machine 5', 'Started', 'Part 2', 'Queue 5', None, None)
+(24, 112, 'Machine 4', 'Finished', 'Part 3', 'Queue 5', None, None)
+(25, 116, 'Machine 2', 'Finished', 'Part 4', 'Queue 4', None, None)
+(26, 116, 'Machine 3', 'Started', 'Part 5', 'Queue 3', None, None)
+(27, 119, 'Machine 1', 'Finished', 'Part 6', 'Queue 2', None, None)
+(28, 119, 'Machine 1', 'Started', 'Part 7', 'Queue 1', None, None)
+(29, 123, 'Machine 4', 'Started', 'Part 4', 'Queue 4', None, None)
+(30, 126, 'Machine 5', 'Finished', 'Part 2', 'Queue 1', None, None)
+(31, 126, 'Machine 5', 'Started', 'Part 3', 'Queue 5', None, None)
+(32, 138, 'Machine 3', 'Finished', 'Part 5', 'Queue 4', None, None)
+(33, 138, 'Machine 4', 'Finished', 'Part 4', 'Queue 5', None, None)
+(34, 140, 'Machine 2', 'Started', 'Part 6', 'Queue 2', None, None)
+(35, 143, 'Machine 1', 'Finished', 'Part 7', 'Queue 3', None, None)
+(36, 143, 'Machine 1', 'Started', 'Part 8', 'Queue 1', None, None)
+(37, 145, 'Machine 4', 'Started', 'Part 5', 'Queue 4', None, None)
+(38, 151, 'Machine 5', 'Finished', 'Part 3', 'Queue 1', None, None)
+(39, 151, 'Machine 5', 'Started', 'Part 4', 'Queue 5', None, None)
+(40, 160, 'Machine 4', 'Finished', 'Part 5', 'Queue 5', None, None)
+(41, 164, 'Machine 2', 'Finished', 'Part 6', 'Queue 4', None, None)
+(42, 164, 'Machine 3', 'Started', 'Part 7', 'Queue 3', None, None)
+(43, 167, 'Machine 1', 'Finished', 'Part 8', 'Queue 2', None, None)
+(44, 167, 'Machine 1', 'Started', 'Part 9', 'Queue 1', None, None)
+(45, 171, 'Machine 4', 'Started', 'Part 6', 'Queue 4', None, None)
+(46, 176, 'Machine 5', 'Finished', 'Part 4', 'Queue 1', None, None)
+(47, 176, 'Machine 5', 'Started', 'Part 5', 'Queue 5', None, None)
+(48, 186, 'Machine 3', 'Finished', 'Part 7', 'Queue 4', None, None)
+(49, 186, 'Machine 4', 'Finished', 'Part 6', 'Queue 5', None, None)
+(50, 188, 'Machine 2', 'Started', 'Part 8', 'Queue 2', None, None)
+(51, 191, 'Machine 1', 'Finished', 'Part 9', 'Queue 3', None, None)
+(52, 191, 'Machine 1', 'Started', 'Part 10', 'Queue 1', None, None)
+(53, 193, 'Machine 4', 'Started', 'Part 7', 'Queue 4', None, None)
+(54, 201, 'Machine 5', 'Finished', 'Part 5', 'Queue 1', None, None)
+(55, 201, 'Machine 5', 'Started', 'Part 6', 'Queue 5', None, None)
+### ============ Simulation Done ============ ###
+> Predicting RCT for Part 5...
+> RCT for Part 5: 201
+====================================== Running Scenario for Part 5 | Path 1 ======================================
+--- Showing Path for Part 1 ---
+|-- Conveyor towards Queue 2
+---
+### ============ Simulation Started ============ ###
+Time: 0 - [Machine 2] got Part 1 from Queue 2 (capacity= 0)
+Time: 23 - [Conveyor towards Queue 2] GOT Part 2
+Time: 23 - [Machine 1] got Part 3 from Queue 1 (capacity= 4)
+Time: 24 - [Conveyor towards Queue 4] GOT Part 1
+Time: 30 - [Conveyor towards Queue 4] PUT Part 1 in the Queue 4
+Time: 31 - [Machine 4] got Part 1 from Queue 4 (capacity= 0)
+Time: 43 - [Conveyor towards Queue 2] PUT Part 2 in the Queue 2
+Time: 44 - [Machine 2] got Part 2 from Queue 2 (capacity= 0)
+Time: 46 - [Conveyor towards Queue 5] GOT Part 1
+Time: 47 - [Conveyor towards Queue 3] GOT Part 3
+Time: 47 - [Machine 1] got Part 4 from Queue 1 (capacity= 3)
+Time: 56 - [Conveyor towards Queue 5] PUT Part 1 in the Queue 5
+Time: 57 - [Machine 5] got Part 1 from Queue 5 (capacity= 0)
+Time: 67 - [Conveyor towards Queue 3] PUT Part 3 in the Queue 3
+Time: 68 - [Conveyor towards Queue 4] GOT Part 2
+Time: 68 - [Machine 3] got Part 3 from Queue 3 (capacity= 0)
+Time: 71 - [Conveyor towards Queue 2] GOT Part 4
+Time: 71 - [Machine 1] got Part 5 from Queue 1 (capacity= 2)
+Time: 74 - [Conveyor towards Queue 4] PUT Part 2 in the Queue 4
+Time: 75 - [Machine 4] got Part 2 from Queue 4 (capacity= 0)
+Time: 82 - [Terminator] xxx Part 1 terminated xxx
+Time: 82 - [Terminator] Part 8 replaced
+Time: 82 - [Conveyor towards Queue 1] GOT Part 8
+Time: 90 - [Conveyor towards Queue 4] GOT Part 3
+Time: 90 - [Conveyor towards Queue 5] GOT Part 2
+Time: 91 - [Conveyor towards Queue 2] PUT Part 4 in the Queue 2
+Time: 92 - [Machine 2] got Part 4 from Queue 2 (capacity= 0)
+Time: 92 - [Conveyor towards Queue 1] PUT Part 8 in the Queue 1
+Time: 95 - [Conveyor towards Queue 3] GOT Part 5
+Time: 95 - [Machine 1] got Part 6 from Queue 1 (capacity= 2)
+Time: 96 - [Conveyor towards Queue 4] PUT Part 3 in the Queue 4
+Time: 97 - [Machine 4] got Part 3 from Queue 4 (capacity= 0)
+Time: 100 - [Conveyor towards Queue 5] PUT Part 2 in the Queue 5
+Time: 101 - [Machine 5] got Part 2 from Queue 5 (capacity= 0)
+Time: 112 - [Conveyor towards Queue 5] GOT Part 3
+Time: 115 - [Conveyor towards Queue 3] PUT Part 5 in the Queue 3
+Time: 116 - [Conveyor towards Queue 4] GOT Part 4
+Time: 116 - [Machine 3] got Part 5 from Queue 3 (capacity= 0)
+Time: 119 - [Conveyor towards Queue 2] GOT Part 6
+Time: 119 - [Machine 1] got Part 7 from Queue 1 (capacity= 1)
+Time: 122 - [Conveyor towards Queue 4] PUT Part 4 in the Queue 4
+Time: 122 - [Conveyor towards Queue 5] PUT Part 3 in the Queue 5
+Time: 123 - [Machine 4] got Part 4 from Queue 4 (capacity= 0)
+Time: 126 - [Terminator] xxx Part 2 terminated xxx
+Time: 126 - [Terminator] Part 9 replaced
+Time: 126 - [Conveyor towards Queue 1] GOT Part 9
+Time: 126 - [Machine 5] got Part 3 from Queue 5 (capacity= 0)
+Time: 136 - [Conveyor towards Queue 1] PUT Part 9 in the Queue 1
+Time: 138 - [Conveyor towards Queue 4] GOT Part 5
+Time: 138 - [Conveyor towards Queue 5] GOT Part 4
+Time: 139 - [Conveyor towards Queue 2] PUT Part 6 in the Queue 2
+Time: 140 - [Machine 2] got Part 6 from Queue 2 (capacity= 0)
+Time: 143 - [Conveyor towards Queue 3] GOT Part 7
+Time: 143 - [Machine 1] got Part 8 from Queue 1 (capacity= 1)
+Time: 144 - [Conveyor towards Queue 4] PUT Part 5 in the Queue 4
+Time: 145 - [Machine 4] got Part 5 from Queue 4 (capacity= 0)
+Time: 148 - [Conveyor towards Queue 5] PUT Part 4 in the Queue 5
+Time: 151 - [Terminator] xxx Part 3 terminated xxx
+Time: 151 - [Terminator] Part 10 replaced
+Time: 151 - [Conveyor towards Queue 1] GOT Part 10
+Time: 151 - [Machine 5] got Part 4 from Queue 5 (capacity= 0)
+Time: 160 - [Conveyor towards Queue 5] GOT Part 5
+Time: 161 - [Conveyor towards Queue 1] PUT Part 10 in the Queue 1
+Time: 163 - [Conveyor towards Queue 3] PUT Part 7 in the Queue 3
+Time: 164 - [Conveyor towards Queue 4] GOT Part 6
+Time: 164 - [Machine 3] got Part 7 from Queue 3 (capacity= 0)
+Time: 167 - [Conveyor towards Queue 2] GOT Part 8
+Time: 167 - [Machine 1] got Part 9 from Queue 1 (capacity= 1)
+Time: 170 - [Conveyor towards Queue 4] PUT Part 6 in the Queue 4
+Time: 170 - [Conveyor towards Queue 5] PUT Part 5 in the Queue 5
+Time: 171 - [Machine 4] got Part 6 from Queue 4 (capacity= 0)
+Time: 176 - [Terminator] xxx Part 4 terminated xxx
+Time: 176 - [Terminator] Part 11 replaced
+Time: 176 - [Conveyor towards Queue 1] GOT Part 11
+Time: 176 - [Machine 5] got Part 5 from Queue 5 (capacity= 0)
+Time: 186 - [Conveyor towards Queue 4] GOT Part 7
+Time: 186 - [Conveyor towards Queue 5] GOT Part 6
+Time: 186 - [Conveyor towards Queue 1] PUT Part 11 in the Queue 1
+Time: 187 - [Conveyor towards Queue 2] PUT Part 8 in the Queue 2
+Time: 188 - [Machine 2] got Part 8 from Queue 2 (capacity= 0)
+Time: 191 - [Conveyor towards Queue 3] GOT Part 9
+Time: 191 - [Machine 1] got Part 10 from Queue 1 (capacity= 1)
+Time: 192 - [Conveyor towards Queue 4] PUT Part 7 in the Queue 4
+Time: 193 - [Machine 4] got Part 7 from Queue 4 (capacity= 0)
+Time: 196 - [Conveyor towards Queue 5] PUT Part 6 in the Queue 5
+Time: 201 - [Terminator] xxx Part 5 terminated xxx
+Time: 201 - [Terminator] Part 12 replaced
+Time: 201 - [Conveyor towards Queue 1] GOT Part 12
+Time: 201 - [Machine 5] got Part 6 from Queue 5 (capacity= 0)
+=== Reading all the events from table: digital_log ===
+(1, 0, 'Machine 2', 'Started', 'Part 1', 'Queue 2', None, None)
+(2, 23, 'Machine 1', 'Finished', 'Part 2', 'Queue 2', None, None)
+(3, 23, 'Machine 1', 'Started', 'Part 3', 'Queue 1', None, None)
+(4, 24, 'Machine 2', 'Finished', 'Part 1', 'Queue 4', None, None)
+(5, 31, 'Machine 4', 'Started', 'Part 1', 'Queue 4', None, None)
+(6, 44, 'Machine 2', 'Started', 'Part 2', 'Queue 2', None, None)
+(7, 46, 'Machine 4', 'Finished', 'Part 1', 'Queue 5', None, None)
+(8, 47, 'Machine 1', 'Finished', 'Part 3', 'Queue 3', None, None)
+(9, 47, 'Machine 1', 'Started', 'Part 4', 'Queue 1', None, None)
+(10, 57, 'Machine 5', 'Started', 'Part 1', 'Queue 5', None, None)
+(11, 68, 'Machine 2', 'Finished', 'Part 2', 'Queue 4', None, None)
+(12, 68, 'Machine 3', 'Started', 'Part 3', 'Queue 3', None, None)
+(13, 71, 'Machine 1', 'Finished', 'Part 4', 'Queue 2', None, None)
+(14, 71, 'Machine 1', 'Started', 'Part 5', 'Queue 1', None, None)
+(15, 75, 'Machine 4', 'Started', 'Part 2', 'Queue 4', None, None)
+(16, 82, 'Machine 5', 'Finished', 'Part 1', 'Queue 1', None, None)
+(17, 90, 'Machine 3', 'Finished', 'Part 3', 'Queue 4', None, None)
+(18, 90, 'Machine 4', 'Finished', 'Part 2', 'Queue 5', None, None)
+(19, 92, 'Machine 2', 'Started', 'Part 4', 'Queue 2', None, None)
+(20, 95, 'Machine 1', 'Finished', 'Part 5', 'Queue 3', None, None)
+(21, 95, 'Machine 1', 'Started', 'Part 6', 'Queue 1', None, None)
+(22, 97, 'Machine 4', 'Started', 'Part 3', 'Queue 4', None, None)
+(23, 101, 'Machine 5', 'Started', 'Part 2', 'Queue 5', None, None)
+(24, 112, 'Machine 4', 'Finished', 'Part 3', 'Queue 5', None, None)
+(25, 116, 'Machine 2', 'Finished', 'Part 4', 'Queue 4', None, None)
+(26, 116, 'Machine 3', 'Started', 'Part 5', 'Queue 3', None, None)
+(27, 119, 'Machine 1', 'Finished', 'Part 6', 'Queue 2', None, None)
+(28, 119, 'Machine 1', 'Started', 'Part 7', 'Queue 1', None, None)
+(29, 123, 'Machine 4', 'Started', 'Part 4', 'Queue 4', None, None)
+(30, 126, 'Machine 5', 'Finished', 'Part 2', 'Queue 1', None, None)
+(31, 126, 'Machine 5', 'Started', 'Part 3', 'Queue 5', None, None)
+(32, 138, 'Machine 3', 'Finished', 'Part 5', 'Queue 4', None, None)
+(33, 138, 'Machine 4', 'Finished', 'Part 4', 'Queue 5', None, None)
+(34, 140, 'Machine 2', 'Started', 'Part 6', 'Queue 2', None, None)
+(35, 143, 'Machine 1', 'Finished', 'Part 7', 'Queue 3', None, None)
+(36, 143, 'Machine 1', 'Started', 'Part 8', 'Queue 1', None, None)
+(37, 145, 'Machine 4', 'Started', 'Part 5', 'Queue 4', None, None)
+(38, 151, 'Machine 5', 'Finished', 'Part 3', 'Queue 1', None, None)
+(39, 151, 'Machine 5', 'Started', 'Part 4', 'Queue 5', None, None)
+(40, 160, 'Machine 4', 'Finished', 'Part 5', 'Queue 5', None, None)
+(41, 164, 'Machine 2', 'Finished', 'Part 6', 'Queue 4', None, None)
+(42, 164, 'Machine 3', 'Started', 'Part 7', 'Queue 3', None, None)
+(43, 167, 'Machine 1', 'Finished', 'Part 8', 'Queue 2', None, None)
+(44, 167, 'Machine 1', 'Started', 'Part 9', 'Queue 1', None, None)
+(45, 171, 'Machine 4', 'Started', 'Part 6', 'Queue 4', None, None)
+(46, 176, 'Machine 5', 'Finished', 'Part 4', 'Queue 1', None, None)
+(47, 176, 'Machine 5', 'Started', 'Part 5', 'Queue 5', None, None)
+(48, 186, 'Machine 3', 'Finished', 'Part 7', 'Queue 4', None, None)
+(49, 186, 'Machine 4', 'Finished', 'Part 6', 'Queue 5', None, None)
+(50, 188, 'Machine 2', 'Started', 'Part 8', 'Queue 2', None, None)
+(51, 191, 'Machine 1', 'Finished', 'Part 9', 'Queue 3', None, None)
+(52, 191, 'Machine 1', 'Started', 'Part 10', 'Queue 1', None, None)
+(53, 193, 'Machine 4', 'Started', 'Part 7', 'Queue 4', None, None)
+(54, 201, 'Machine 5', 'Finished', 'Part 5', 'Queue 1', None, None)
+(55, 201, 'Machine 5', 'Started', 'Part 6', 'Queue 5', None, None)
+### ============ Simulation Done ============ ###
+> Predicting RCT for Part 1...
+> RCT for Part 1: 82
+====================================== Running Scenario for Part 5 | Path 2 ======================================
+--- Showing Path for Part 1 ---
+|-- Conveyor towards Queue 3
+---
+### ============ Simulation Started ============ ###
+Time: 0 - [Machine 2] got Part 1 from Queue 2 (capacity= 0)
+Time: 23 - [Conveyor towards Queue 2] GOT Part 2
+Time: 23 - [Machine 1] got Part 3 from Queue 1 (capacity= 4)
+Time: 24 - [Conveyor towards Queue 4] GOT Part 1
+Time: 30 - [Conveyor towards Queue 4] PUT Part 1 in the Queue 4
+Time: 31 - [Machine 4] got Part 1 from Queue 4 (capacity= 0)
+Time: 43 - [Conveyor towards Queue 2] PUT Part 2 in the Queue 2
+Time: 44 - [Machine 2] got Part 2 from Queue 2 (capacity= 0)
+Time: 46 - [Conveyor towards Queue 5] GOT Part 1
+Time: 47 - [Conveyor towards Queue 3] GOT Part 3
+Time: 47 - [Machine 1] got Part 4 from Queue 1 (capacity= 3)
+Time: 56 - [Conveyor towards Queue 5] PUT Part 1 in the Queue 5
+Time: 57 - [Machine 5] got Part 1 from Queue 5 (capacity= 0)
+Time: 67 - [Conveyor towards Queue 3] PUT Part 3 in the Queue 3
+Time: 68 - [Conveyor towards Queue 4] GOT Part 2
+Time: 68 - [Machine 3] got Part 3 from Queue 3 (capacity= 0)
+Time: 71 - [Conveyor towards Queue 2] GOT Part 4
+Time: 71 - [Machine 1] got Part 5 from Queue 1 (capacity= 2)
+Time: 74 - [Conveyor towards Queue 4] PUT Part 2 in the Queue 4
+Time: 75 - [Machine 4] got Part 2 from Queue 4 (capacity= 0)
+Time: 82 - [Terminator] xxx Part 1 terminated xxx
+Time: 82 - [Terminator] Part 8 replaced
+Time: 82 - [Conveyor towards Queue 1] GOT Part 8
+Time: 90 - [Conveyor towards Queue 4] GOT Part 3
+Time: 90 - [Conveyor towards Queue 5] GOT Part 2
+Time: 91 - [Conveyor towards Queue 2] PUT Part 4 in the Queue 2
+Time: 92 - [Machine 2] got Part 4 from Queue 2 (capacity= 0)
+Time: 92 - [Conveyor towards Queue 1] PUT Part 8 in the Queue 1
+Time: 95 - [Conveyor towards Queue 3] GOT Part 5
+Time: 95 - [Machine 1] got Part 6 from Queue 1 (capacity= 2)
+Time: 96 - [Conveyor towards Queue 4] PUT Part 3 in the Queue 4
+Time: 97 - [Machine 4] got Part 3 from Queue 4 (capacity= 0)
+Time: 100 - [Conveyor towards Queue 5] PUT Part 2 in the Queue 5
+Time: 101 - [Machine 5] got Part 2 from Queue 5 (capacity= 0)
+Time: 112 - [Conveyor towards Queue 5] GOT Part 3
+Time: 115 - [Conveyor towards Queue 3] PUT Part 5 in the Queue 3
+Time: 116 - [Conveyor towards Queue 4] GOT Part 4
+Time: 116 - [Machine 3] got Part 5 from Queue 3 (capacity= 0)
+Time: 119 - [Conveyor towards Queue 2] GOT Part 6
+Time: 119 - [Machine 1] got Part 7 from Queue 1 (capacity= 1)
+Time: 122 - [Conveyor towards Queue 4] PUT Part 4 in the Queue 4
+Time: 122 - [Conveyor towards Queue 5] PUT Part 3 in the Queue 5
+Time: 123 - [Machine 4] got Part 4 from Queue 4 (capacity= 0)
+Time: 126 - [Terminator] xxx Part 2 terminated xxx
+Time: 126 - [Terminator] Part 9 replaced
+Time: 126 - [Conveyor towards Queue 1] GOT Part 9
+Time: 126 - [Machine 5] got Part 3 from Queue 5 (capacity= 0)
+Time: 136 - [Conveyor towards Queue 1] PUT Part 9 in the Queue 1
+Time: 138 - [Conveyor towards Queue 4] GOT Part 5
+Time: 138 - [Conveyor towards Queue 5] GOT Part 4
+Time: 139 - [Conveyor towards Queue 2] PUT Part 6 in the Queue 2
+Time: 140 - [Machine 2] got Part 6 from Queue 2 (capacity= 0)
+Time: 143 - [Conveyor towards Queue 3] GOT Part 7
+Time: 143 - [Machine 1] got Part 8 from Queue 1 (capacity= 1)
+Time: 144 - [Conveyor towards Queue 4] PUT Part 5 in the Queue 4
+Time: 145 - [Machine 4] got Part 5 from Queue 4 (capacity= 0)
+Time: 148 - [Conveyor towards Queue 5] PUT Part 4 in the Queue 5
+Time: 151 - [Terminator] xxx Part 3 terminated xxx
+Time: 151 - [Terminator] Part 10 replaced
+Time: 151 - [Conveyor towards Queue 1] GOT Part 10
+Time: 151 - [Machine 5] got Part 4 from Queue 5 (capacity= 0)
+Time: 160 - [Conveyor towards Queue 5] GOT Part 5
+Time: 161 - [Conveyor towards Queue 1] PUT Part 10 in the Queue 1
+Time: 163 - [Conveyor towards Queue 3] PUT Part 7 in the Queue 3
+Time: 164 - [Conveyor towards Queue 4] GOT Part 6
+Time: 164 - [Machine 3] got Part 7 from Queue 3 (capacity= 0)
+Time: 167 - [Conveyor towards Queue 2] GOT Part 8
+Time: 167 - [Machine 1] got Part 9 from Queue 1 (capacity= 1)
+Time: 170 - [Conveyor towards Queue 4] PUT Part 6 in the Queue 4
+Time: 170 - [Conveyor towards Queue 5] PUT Part 5 in the Queue 5
+Time: 171 - [Machine 4] got Part 6 from Queue 4 (capacity= 0)
+Time: 176 - [Terminator] xxx Part 4 terminated xxx
+Time: 176 - [Terminator] Part 11 replaced
+Time: 176 - [Conveyor towards Queue 1] GOT Part 11
+Time: 176 - [Machine 5] got Part 5 from Queue 5 (capacity= 0)
+Time: 186 - [Conveyor towards Queue 4] GOT Part 7
+Time: 186 - [Conveyor towards Queue 5] GOT Part 6
+Time: 186 - [Conveyor towards Queue 1] PUT Part 11 in the Queue 1
+Time: 187 - [Conveyor towards Queue 2] PUT Part 8 in the Queue 2
+Time: 188 - [Machine 2] got Part 8 from Queue 2 (capacity= 0)
+Time: 191 - [Conveyor towards Queue 3] GOT Part 9
+Time: 191 - [Machine 1] got Part 10 from Queue 1 (capacity= 1)
+Time: 192 - [Conveyor towards Queue 4] PUT Part 7 in the Queue 4
+Time: 193 - [Machine 4] got Part 7 from Queue 4 (capacity= 0)
+Time: 196 - [Conveyor towards Queue 5] PUT Part 6 in the Queue 5
+Time: 201 - [Terminator] xxx Part 5 terminated xxx
+Time: 201 - [Terminator] Part 12 replaced
+Time: 201 - [Conveyor towards Queue 1] GOT Part 12
+Time: 201 - [Machine 5] got Part 6 from Queue 5 (capacity= 0)
+=== Reading all the events from table: digital_log ===
+(1, 0, 'Machine 2', 'Started', 'Part 1', 'Queue 2', None, None)
+(2, 23, 'Machine 1', 'Finished', 'Part 2', 'Queue 2', None, None)
+(3, 23, 'Machine 1', 'Started', 'Part 3', 'Queue 1', None, None)
+(4, 24, 'Machine 2', 'Finished', 'Part 1', 'Queue 4', None, None)
+(5, 31, 'Machine 4', 'Started', 'Part 1', 'Queue 4', None, None)
+(6, 44, 'Machine 2', 'Started', 'Part 2', 'Queue 2', None, None)
+(7, 46, 'Machine 4', 'Finished', 'Part 1', 'Queue 5', None, None)
+(8, 47, 'Machine 1', 'Finished', 'Part 3', 'Queue 3', None, None)
+(9, 47, 'Machine 1', 'Started', 'Part 4', 'Queue 1', None, None)
+(10, 57, 'Machine 5', 'Started', 'Part 1', 'Queue 5', None, None)
+(11, 68, 'Machine 2', 'Finished', 'Part 2', 'Queue 4', None, None)
+(12, 68, 'Machine 3', 'Started', 'Part 3', 'Queue 3', None, None)
+(13, 71, 'Machine 1', 'Finished', 'Part 4', 'Queue 2', None, None)
+(14, 71, 'Machine 1', 'Started', 'Part 5', 'Queue 1', None, None)
+(15, 75, 'Machine 4', 'Started', 'Part 2', 'Queue 4', None, None)
+(16, 82, 'Machine 5', 'Finished', 'Part 1', 'Queue 1', None, None)
+(17, 90, 'Machine 3', 'Finished', 'Part 3', 'Queue 4', None, None)
+(18, 90, 'Machine 4', 'Finished', 'Part 2', 'Queue 5', None, None)
+(19, 92, 'Machine 2', 'Started', 'Part 4', 'Queue 2', None, None)
+(20, 95, 'Machine 1', 'Finished', 'Part 5', 'Queue 3', None, None)
+(21, 95, 'Machine 1', 'Started', 'Part 6', 'Queue 1', None, None)
+(22, 97, 'Machine 4', 'Started', 'Part 3', 'Queue 4', None, None)
+(23, 101, 'Machine 5', 'Started', 'Part 2', 'Queue 5', None, None)
+(24, 112, 'Machine 4', 'Finished', 'Part 3', 'Queue 5', None, None)
+(25, 116, 'Machine 2', 'Finished', 'Part 4', 'Queue 4', None, None)
+(26, 116, 'Machine 3', 'Started', 'Part 5', 'Queue 3', None, None)
+(27, 119, 'Machine 1', 'Finished', 'Part 6', 'Queue 2', None, None)
+(28, 119, 'Machine 1', 'Started', 'Part 7', 'Queue 1', None, None)
+(29, 123, 'Machine 4', 'Started', 'Part 4', 'Queue 4', None, None)
+(30, 126, 'Machine 5', 'Finished', 'Part 2', 'Queue 1', None, None)
+(31, 126, 'Machine 5', 'Started', 'Part 3', 'Queue 5', None, None)
+(32, 138, 'Machine 3', 'Finished', 'Part 5', 'Queue 4', None, None)
+(33, 138, 'Machine 4', 'Finished', 'Part 4', 'Queue 5', None, None)
+(34, 140, 'Machine 2', 'Started', 'Part 6', 'Queue 2', None, None)
+(35, 143, 'Machine 1', 'Finished', 'Part 7', 'Queue 3', None, None)
+(36, 143, 'Machine 1', 'Started', 'Part 8', 'Queue 1', None, None)
+(37, 145, 'Machine 4', 'Started', 'Part 5', 'Queue 4', None, None)
+(38, 151, 'Machine 5', 'Finished', 'Part 3', 'Queue 1', None, None)
+(39, 151, 'Machine 5', 'Started', 'Part 4', 'Queue 5', None, None)
+(40, 160, 'Machine 4', 'Finished', 'Part 5', 'Queue 5', None, None)
+(41, 164, 'Machine 2', 'Finished', 'Part 6', 'Queue 4', None, None)
+(42, 164, 'Machine 3', 'Started', 'Part 7', 'Queue 3', None, None)
+(43, 167, 'Machine 1', 'Finished', 'Part 8', 'Queue 2', None, None)
+(44, 167, 'Machine 1', 'Started', 'Part 9', 'Queue 1', None, None)
+(45, 171, 'Machine 4', 'Started', 'Part 6', 'Queue 4', None, None)
+(46, 176, 'Machine 5', 'Finished', 'Part 4', 'Queue 1', None, None)
+(47, 176, 'Machine 5', 'Started', 'Part 5', 'Queue 5', None, None)
+(48, 186, 'Machine 3', 'Finished', 'Part 7', 'Queue 4', None, None)
+(49, 186, 'Machine 4', 'Finished', 'Part 6', 'Queue 5', None, None)
+(50, 188, 'Machine 2', 'Started', 'Part 8', 'Queue 2', None, None)
+(51, 191, 'Machine 1', 'Finished', 'Part 9', 'Queue 3', None, None)
+(52, 191, 'Machine 1', 'Started', 'Part 10', 'Queue 1', None, None)
+(53, 193, 'Machine 4', 'Started', 'Part 7', 'Queue 4', None, None)
+(54, 201, 'Machine 5', 'Finished', 'Part 5', 'Queue 1', None, None)
+(55, 201, 'Machine 5', 'Started', 'Part 6', 'Queue 5', None, None)
+### ============ Simulation Done ============ ###
+> Predicting RCT for Part 1...
+> RCT for Part 1: 82
+____________________________________________
+------ RCT Services Results: ------
+Part 1: [201, 82, 82]
+------ Plot Results ------
+No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+____________________________________________
+
+!!!!!!!!! Optimized Path Found for Part 1 !!!!!!!!!
+> Best Path: Path 1
+> Gain: 59.204 %
+> Path:
+|- Conveyor towards Queue 2
+Trying to publish: Part 1
+Traceback (most recent call last):
+  File "C:\Users\pedro\Github Repositories\Digital_Twin\Digital Twin\mydt.py", line 16, in <module>
+    mydt.run()
+  File "C:\Users\pedro\Github Repositories\Digital_Twin\Digital Twin\dtwinpylib\dtwinpy\Digital_Twin.py", line 634, in run
+    self.External_Services()
+  File "C:\Users\pedro\Github Repositories\Digital_Twin\Digital Twin\dtwinpylib\dtwinpy\Digital_Twin.py", line 543, in External_Services
+    self.run_RCT_services(verbose= True)
+  File "C:\Users\pedro\Github Repositories\Digital_Twin\Digital Twin\dtwinpylib\dtwinpy\Digital_Twin.py", line 398, in run_RCT_services
+    RCT_Service.run_RCT_service(verbose=verbose)
+  File "C:\Users\pedro\Github Repositories\Digital_Twin\Digital Twin\dtwinpylib\dtwinpy\services.py", line 577, in run_RCT_service
+    self.publish_feedback(feedback_dict= feedback_dict, possible_pathes= possible_pathes)
+  File "C:\Users\pedro\Github Repositories\Digital_Twin\Digital Twin\dtwinpylib\dtwinpy\services.py", line 510, in publish_feedback
+    machine_id = str(machine_selected.get_id())
+UnboundLocalError: local variable 'machine_selected' referenced before assignment
+PS C:\Users\pedro\Github Repositories\Digital_Twin\Digital Twin>
+                                                                 ^C
+PS C:\Users\pedro\Github Repositories\Digital_Twin\Digital Twin> python .\mydt.py
+Importing the libraries.....
+Model copied successfuly from models/5s_determ_template.json!
+--- printing databases paths ---
+Digital Database: 'databases/5s_determ/digital_database.db'
+Real Database: 'databases/5s_determ/real_database.db'
+ID Database: 'databases/5s_determ/ID_database.db'
+|- Deleting existing databases...
+17 March 19:56:44 | [WARNING][broker_manager.py/delete_databases()] The Digital Database doesn't exist yet in the path 'databases/5s_determ/digital_database.db', proceding without deleting...
+|-- Real Database deleted successfuly from databases/5s_determ/real_database.db
+|-- ID Database deleted successfuly from databases/5s_determ/ID_database.db
+Broker Manager internally create for publishing feedback...
+---- Digital Twin '5s_determ' created sucessfully at 17 March 19:56:44 ----
+17 March 19:57:14 |[Internal Service] Starting Synchronization n° 0
+---------- Pointer Status Initial ----------
+Start Time: 1679079405
+Start Time ID: 1
+
+End Time: 1679079435
+End Time ID: 3
+-------------------------------------
+ 17 March 19:57:14 | [interfaceDB.py/update_end_time] Not found 'Started' after the end_time: 1679079435. Sleeping for 10 seconds and trying again
+ 17 March 19:57:24 | [interfaceDB.py/update_end_time] Not found 'Started' after the end_time: 1679079435. Sleeping for 10 seconds and trying again
+ 17 March 19:57:34 | [interfaceDB.py/update_end_time] Not found 'Started' after the end_time: 1679079435. Sleeping for 10 seconds and trying again
+---------- Pointer Status Updated ----------
+Start Time: 1679079405
+Start Time ID: 1
+
+End Time: 1679079434
+End Time ID: 3
+-------------------------------------
+parts_zero: []
+-----------------------------------------------------------------
+Big picture BEFORE calculations
+--- Zone of Machine 1 ---
+Parts in queue: ['Part 1', 'Part 2', 'Part 3', 'Part 4', 'Part 5', 'Part 6', 'Part 7']
+Part in machine: []
+--- Zone of Machine 2 ---
+Parts in queue: []
+Part in machine: []
+--- Zone of Machine 3 ---
+Parts in queue: []
+Part in machine: []
+--- Zone of Machine 4 ---
+Parts in queue: []
+Part in machine: []
+--- Zone of Machine 5 ---
+Parts in queue: []
+Part in machine: []
+-----------------------------------------------------------------
+----
+After MStarted Part 1 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 2', 'Part 3', 'Part 4', 'Part 5', 'Part 6', 'Part 7']
+Zone of Machine 1 | parts_ids_in_machine: ['Part 1']
+----
+After MFinished Part 1 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 2', 'Part 3', 'Part 4', 'Part 5', 'Part 6', 'Part 7']
+Zone of Machine 1 | parts_ids_in_machine: []
+----
+After Added Part 1 in queue
+Zone of Machine 2 | parts_ids_in_queue: ['Part 1']
+Zone of Machine 2 | parts_ids_in_machine: []
+----
+After MStarted Part 2 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 3', 'Part 4', 'Part 5', 'Part 6', 'Part 7']
+Zone of Machine 1 | parts_ids_in_machine: ['Part 2']
+-----------------------------------------------------------------
+Big picture AFTER calculations
+--- Zone of Machine 1 ---
+Parts in queue: ['Part 3', 'Part 4', 'Part 5', 'Part 6', 'Part 7']
+Part in machine: ['Part 2']
+Zone is Working? True
+--- Zone of Machine 2 ---
+Parts in queue: ['Part 1']
+Part in machine: []
+Zone is Working? False
+--- Zone of Machine 3 ---
+Parts in queue: []
+Part in machine: []
+Zone is Working? False
+--- Zone of Machine 4 ---
+Parts in queue: []
+Part in machine: []
+Zone is Working? False
+--- Zone of Machine 5 ---
+Parts in queue: []
+Part in machine: []
+Zone is Working? False
+-----------------------------------------------------------------
+=========== Self Verification (Digital-Based) ===========
+[Zone of Machine 1] NumParts = 7, Machine Working = False, Parts in Conveyor = 0
+[Zone of Machine 2] NumParts = 0, Machine Working = False, Parts in Conveyor = 0
+[Zone of Machine 3] NumParts = 0, Machine Working = False, Parts in Conveyor = 0
+[Zone of Machine 4] NumParts = 0, Machine Working = False, Parts in Conveyor = 0
+[Zone of Machine 5] NumParts = 0, Machine Working = False, Parts in Conveyor = 0
+=========================================
+=========== Zones Occupations (Real-Based) ===========
+[Zone of Machine 1] NumParts = 6, Machine Working = True, Zone Indicador = None
+[Zone of Machine 2] NumParts = 1, Machine Working = False, Zone Indicador = None
+[Zone of Machine 3] NumParts = 0, Machine Working = False, Zone Indicador = None
+[Zone of Machine 4] NumParts = 0, Machine Working = False, Zone Indicador = None
+[Zone of Machine 5] NumParts = 0, Machine Working = False, Zone Indicador = None
+=========================================
+17 March 19:57:44 |[Internal Service] System Synchronized. Next Sync (n° 1): 17 March 19:57:44
+ 17 March 19:57:44 |[External Service] Starting RCT Service (n° 0)
+====== Paths Created ======
+---- Path 1 ----
+Conveyor towards Queue 2
+---- Path 2 ----
+Conveyor towards Queue 3
+========================
+parts_making_decisions= [<dtwinpylib.dtwinpy.components.Part object at 0x000002066452D360>]
+part name: Part 5
+part id: 5
+====================================== Simulation AS IS for Part 5 ======================================
+### ============ Simulation Started ============ ###
+Time: 0 - [Machine 2] got Part 1 from Queue 2 (capacity= 0)
+Time: 23 - [Conveyor towards Queue 2] GOT Part 2
+Time: 23 - [Machine 1] got Part 3 from Queue 1 (capacity= 4)
+Time: 24 - [Conveyor towards Queue 4] GOT Part 1
+Time: 30 - [Conveyor towards Queue 4] PUT Part 1 in the Queue 4
+Time: 31 - [Machine 4] got Part 1 from Queue 4 (capacity= 0)
+Time: 43 - [Conveyor towards Queue 2] PUT Part 2 in the Queue 2
+Time: 44 - [Machine 2] got Part 2 from Queue 2 (capacity= 0)
+Time: 46 - [Conveyor towards Queue 5] GOT Part 1
+Time: 47 - [Conveyor towards Queue 3] GOT Part 3
+Time: 47 - [Machine 1] got Part 4 from Queue 1 (capacity= 3)
+Time: 56 - [Conveyor towards Queue 5] PUT Part 1 in the Queue 5
+Time: 57 - [Machine 5] got Part 1 from Queue 5 (capacity= 0)
+Time: 67 - [Conveyor towards Queue 3] PUT Part 3 in the Queue 3
+Time: 68 - [Conveyor towards Queue 4] GOT Part 2
+Time: 68 - [Machine 3] got Part 3 from Queue 3 (capacity= 0)
+Time: 71 - [Conveyor towards Queue 2] GOT Part 4
+Time: 71 - [Machine 1] got Part 5 from Queue 1 (capacity= 2)
+Time: 74 - [Conveyor towards Queue 4] PUT Part 2 in the Queue 4
+Time: 75 - [Machine 4] got Part 2 from Queue 4 (capacity= 0)
+Time: 82 - [Terminator] xxx Part 1 terminated xxx
+Time: 82 - [Terminator] Part 8 replaced
+Time: 82 - [Conveyor towards Queue 1] GOT Part 8
+Time: 90 - [Conveyor towards Queue 4] GOT Part 3
+Time: 90 - [Conveyor towards Queue 5] GOT Part 2
+Time: 91 - [Conveyor towards Queue 2] PUT Part 4 in the Queue 2
+Time: 92 - [Machine 2] got Part 4 from Queue 2 (capacity= 0)
+Time: 92 - [Conveyor towards Queue 1] PUT Part 8 in the Queue 1
+Time: 95 - [Conveyor towards Queue 3] GOT Part 5
+Time: 95 - [Machine 1] got Part 6 from Queue 1 (capacity= 2)
+Time: 96 - [Conveyor towards Queue 4] PUT Part 3 in the Queue 4
+Time: 97 - [Machine 4] got Part 3 from Queue 4 (capacity= 0)
+Time: 100 - [Conveyor towards Queue 5] PUT Part 2 in the Queue 5
+Time: 101 - [Machine 5] got Part 2 from Queue 5 (capacity= 0)
+Time: 112 - [Conveyor towards Queue 5] GOT Part 3
+Time: 115 - [Conveyor towards Queue 3] PUT Part 5 in the Queue 3
+Time: 116 - [Conveyor towards Queue 4] GOT Part 4
+Time: 116 - [Machine 3] got Part 5 from Queue 3 (capacity= 0)
+Time: 119 - [Conveyor towards Queue 2] GOT Part 6
+Time: 119 - [Machine 1] got Part 7 from Queue 1 (capacity= 1)
+Time: 122 - [Conveyor towards Queue 4] PUT Part 4 in the Queue 4
+Time: 122 - [Conveyor towards Queue 5] PUT Part 3 in the Queue 5
+Time: 123 - [Machine 4] got Part 4 from Queue 4 (capacity= 0)
+Time: 126 - [Terminator] xxx Part 2 terminated xxx
+Time: 126 - [Terminator] Part 9 replaced
+Time: 126 - [Conveyor towards Queue 1] GOT Part 9
+Time: 126 - [Machine 5] got Part 3 from Queue 5 (capacity= 0)
+Time: 136 - [Conveyor towards Queue 1] PUT Part 9 in the Queue 1
+Time: 138 - [Conveyor towards Queue 4] GOT Part 5
+Time: 138 - [Conveyor towards Queue 5] GOT Part 4
+Time: 139 - [Conveyor towards Queue 2] PUT Part 6 in the Queue 2
+Time: 140 - [Machine 2] got Part 6 from Queue 2 (capacity= 0)
+Time: 143 - [Conveyor towards Queue 3] GOT Part 7
+Time: 143 - [Machine 1] got Part 8 from Queue 1 (capacity= 1)
+Time: 144 - [Conveyor towards Queue 4] PUT Part 5 in the Queue 4
+Time: 145 - [Machine 4] got Part 5 from Queue 4 (capacity= 0)
+Time: 148 - [Conveyor towards Queue 5] PUT Part 4 in the Queue 5
+Time: 151 - [Terminator] xxx Part 3 terminated xxx
+Time: 151 - [Terminator] Part 10 replaced
+Time: 151 - [Conveyor towards Queue 1] GOT Part 10
+Time: 151 - [Machine 5] got Part 4 from Queue 5 (capacity= 0)
+Time: 160 - [Conveyor towards Queue 5] GOT Part 5
+Time: 161 - [Conveyor towards Queue 1] PUT Part 10 in the Queue 1
+Time: 163 - [Conveyor towards Queue 3] PUT Part 7 in the Queue 3
+Time: 164 - [Conveyor towards Queue 4] GOT Part 6
+Time: 164 - [Machine 3] got Part 7 from Queue 3 (capacity= 0)
+Time: 167 - [Conveyor towards Queue 2] GOT Part 8
+Time: 167 - [Machine 1] got Part 9 from Queue 1 (capacity= 1)
+Time: 170 - [Conveyor towards Queue 4] PUT Part 6 in the Queue 4
+Time: 170 - [Conveyor towards Queue 5] PUT Part 5 in the Queue 5
+Time: 171 - [Machine 4] got Part 6 from Queue 4 (capacity= 0)
+Time: 176 - [Terminator] xxx Part 4 terminated xxx
+Time: 176 - [Terminator] Part 11 replaced
+Time: 176 - [Conveyor towards Queue 1] GOT Part 11
+Time: 176 - [Machine 5] got Part 5 from Queue 5 (capacity= 0)
+Time: 186 - [Conveyor towards Queue 4] GOT Part 7
+Time: 186 - [Conveyor towards Queue 5] GOT Part 6
+Time: 186 - [Conveyor towards Queue 1] PUT Part 11 in the Queue 1
+Time: 187 - [Conveyor towards Queue 2] PUT Part 8 in the Queue 2
+Time: 188 - [Machine 2] got Part 8 from Queue 2 (capacity= 0)
+Time: 191 - [Conveyor towards Queue 3] GOT Part 9
+Time: 191 - [Machine 1] got Part 10 from Queue 1 (capacity= 1)
+Time: 192 - [Conveyor towards Queue 4] PUT Part 7 in the Queue 4
+Time: 193 - [Machine 4] got Part 7 from Queue 4 (capacity= 0)
+Time: 196 - [Conveyor towards Queue 5] PUT Part 6 in the Queue 5
+Time: 201 - [Terminator] xxx Part 5 terminated xxx
+Time: 201 - [Terminator] Part 12 replaced
+Time: 201 - [Conveyor towards Queue 1] GOT Part 12
+Time: 201 - [Machine 5] got Part 6 from Queue 5 (capacity= 0)
+=== Reading all the events from table: digital_log ===
+(1, 0, 'Machine 2', 'Started', 'Part 1', 'Queue 2', None, None)
+(2, 23, 'Machine 1', 'Finished', 'Part 2', 'Queue 2', None, None)
+(3, 23, 'Machine 1', 'Started', 'Part 3', 'Queue 1', None, None)
+(4, 24, 'Machine 2', 'Finished', 'Part 1', 'Queue 4', None, None)
+(5, 31, 'Machine 4', 'Started', 'Part 1', 'Queue 4', None, None)
+(6, 44, 'Machine 2', 'Started', 'Part 2', 'Queue 2', None, None)
+(7, 46, 'Machine 4', 'Finished', 'Part 1', 'Queue 5', None, None)
+(8, 47, 'Machine 1', 'Finished', 'Part 3', 'Queue 3', None, None)
+(9, 47, 'Machine 1', 'Started', 'Part 4', 'Queue 1', None, None)
+(10, 57, 'Machine 5', 'Started', 'Part 1', 'Queue 5', None, None)
+(11, 68, 'Machine 2', 'Finished', 'Part 2', 'Queue 4', None, None)
+(12, 68, 'Machine 3', 'Started', 'Part 3', 'Queue 3', None, None)
+(13, 71, 'Machine 1', 'Finished', 'Part 4', 'Queue 2', None, None)
+(14, 71, 'Machine 1', 'Started', 'Part 5', 'Queue 1', None, None)
+(15, 75, 'Machine 4', 'Started', 'Part 2', 'Queue 4', None, None)
+(16, 82, 'Machine 5', 'Finished', 'Part 1', 'Queue 1', None, None)
+(17, 90, 'Machine 3', 'Finished', 'Part 3', 'Queue 4', None, None)
+(18, 90, 'Machine 4', 'Finished', 'Part 2', 'Queue 5', None, None)
+(19, 92, 'Machine 2', 'Started', 'Part 4', 'Queue 2', None, None)
+(20, 95, 'Machine 1', 'Finished', 'Part 5', 'Queue 3', None, None)
+(21, 95, 'Machine 1', 'Started', 'Part 6', 'Queue 1', None, None)
+(22, 97, 'Machine 4', 'Started', 'Part 3', 'Queue 4', None, None)
+(23, 101, 'Machine 5', 'Started', 'Part 2', 'Queue 5', None, None)
+(24, 112, 'Machine 4', 'Finished', 'Part 3', 'Queue 5', None, None)
+(25, 116, 'Machine 2', 'Finished', 'Part 4', 'Queue 4', None, None)
+(26, 116, 'Machine 3', 'Started', 'Part 5', 'Queue 3', None, None)
+(27, 119, 'Machine 1', 'Finished', 'Part 6', 'Queue 2', None, None)
+(28, 119, 'Machine 1', 'Started', 'Part 7', 'Queue 1', None, None)
+(29, 123, 'Machine 4', 'Started', 'Part 4', 'Queue 4', None, None)
+(30, 126, 'Machine 5', 'Finished', 'Part 2', 'Queue 1', None, None)
+(31, 126, 'Machine 5', 'Started', 'Part 3', 'Queue 5', None, None)
+(32, 138, 'Machine 3', 'Finished', 'Part 5', 'Queue 4', None, None)
+(33, 138, 'Machine 4', 'Finished', 'Part 4', 'Queue 5', None, None)
+(34, 140, 'Machine 2', 'Started', 'Part 6', 'Queue 2', None, None)
+(35, 143, 'Machine 1', 'Finished', 'Part 7', 'Queue 3', None, None)
+(36, 143, 'Machine 1', 'Started', 'Part 8', 'Queue 1', None, None)
+(37, 145, 'Machine 4', 'Started', 'Part 5', 'Queue 4', None, None)
+(38, 151, 'Machine 5', 'Finished', 'Part 3', 'Queue 1', None, None)
+(39, 151, 'Machine 5', 'Started', 'Part 4', 'Queue 5', None, None)
+(40, 160, 'Machine 4', 'Finished', 'Part 5', 'Queue 5', None, None)
+(41, 164, 'Machine 2', 'Finished', 'Part 6', 'Queue 4', None, None)
+(42, 164, 'Machine 3', 'Started', 'Part 7', 'Queue 3', None, None)
+(43, 167, 'Machine 1', 'Finished', 'Part 8', 'Queue 2', None, None)
+(44, 167, 'Machine 1', 'Started', 'Part 9', 'Queue 1', None, None)
+(45, 171, 'Machine 4', 'Started', 'Part 6', 'Queue 4', None, None)
+(46, 176, 'Machine 5', 'Finished', 'Part 4', 'Queue 1', None, None)
+(47, 176, 'Machine 5', 'Started', 'Part 5', 'Queue 5', None, None)
+(48, 186, 'Machine 3', 'Finished', 'Part 7', 'Queue 4', None, None)
+(49, 186, 'Machine 4', 'Finished', 'Part 6', 'Queue 5', None, None)
+(50, 188, 'Machine 2', 'Started', 'Part 8', 'Queue 2', None, None)
+(51, 191, 'Machine 1', 'Finished', 'Part 9', 'Queue 3', None, None)
+(52, 191, 'Machine 1', 'Started', 'Part 10', 'Queue 1', None, None)
+(53, 193, 'Machine 4', 'Started', 'Part 7', 'Queue 4', None, None)
+(54, 201, 'Machine 5', 'Finished', 'Part 5', 'Queue 1', None, None)
+(55, 201, 'Machine 5', 'Started', 'Part 6', 'Queue 5', None, None)
+### ============ Simulation Done ============ ###
+> Predicting RCT for Part 5...
+> RCT for Part 5: 201
+current_parts_vector = [<dtwinpylib.dtwinpy.components.Part object at 0x00000206644EB580>, <dtwinpylib.dtwinpy.components.Part object at 0x00000206644EB5B0>, <dtwinpylib.dtwinpy.components.Part object at 0x00000206644EB5E0>, <dtwinpylib.dtwinpy.components.Part object at 0x00000206644EB460>, <dtwinpylib.dtwinpy.components.Part object at 0x00000206644E84C0>, <dtwinpylib.dtwinpy.components.Part object at 0x00000206644EA6E0>]
+part_being_simulated = <dtwinpylib.dtwinpy.components.Part object at 0x00000206644EA6E0>
+====================================== Running Scenario for Part 5 | Path 1 ======================================
+--- Showing Path for Part 1 ---
+|-- Conveyor towards Queue 2
+---
+### ============ Simulation Started ============ ###
+Time: 0 - [Machine 2] got Part 1 from Queue 2 (capacity= 0)
+Time: 23 - [Conveyor towards Queue 2] GOT Part 2
+Time: 23 - [Machine 1] got Part 3 from Queue 1 (capacity= 4)
+Time: 24 - [Conveyor towards Queue 4] GOT Part 1
+Time: 30 - [Conveyor towards Queue 4] PUT Part 1 in the Queue 4
+Time: 31 - [Machine 4] got Part 1 from Queue 4 (capacity= 0)
+Time: 43 - [Conveyor towards Queue 2] PUT Part 2 in the Queue 2
+Time: 44 - [Machine 2] got Part 2 from Queue 2 (capacity= 0)
+Time: 46 - [Conveyor towards Queue 5] GOT Part 1
+Time: 47 - [Conveyor towards Queue 3] GOT Part 3
+Time: 47 - [Machine 1] got Part 4 from Queue 1 (capacity= 3)
+Time: 56 - [Conveyor towards Queue 5] PUT Part 1 in the Queue 5
+Time: 57 - [Machine 5] got Part 1 from Queue 5 (capacity= 0)
+Time: 67 - [Conveyor towards Queue 3] PUT Part 3 in the Queue 3
+Time: 68 - [Conveyor towards Queue 4] GOT Part 2
+Time: 68 - [Machine 3] got Part 3 from Queue 3 (capacity= 0)
+Time: 71 - [Conveyor towards Queue 2] GOT Part 4
+Time: 71 - [Machine 1] got Part 5 from Queue 1 (capacity= 2)
+Time: 74 - [Conveyor towards Queue 4] PUT Part 2 in the Queue 4
+Time: 75 - [Machine 4] got Part 2 from Queue 4 (capacity= 0)
+Time: 82 - [Terminator] xxx Part 1 terminated xxx
+Time: 82 - [Terminator] Part 8 replaced
+Time: 82 - [Conveyor towards Queue 1] GOT Part 8
+Time: 90 - [Conveyor towards Queue 4] GOT Part 3
+Time: 90 - [Conveyor towards Queue 5] GOT Part 2
+Time: 91 - [Conveyor towards Queue 2] PUT Part 4 in the Queue 2
+Time: 92 - [Machine 2] got Part 4 from Queue 2 (capacity= 0)
+Time: 92 - [Conveyor towards Queue 1] PUT Part 8 in the Queue 1
+Time: 95 - [Conveyor towards Queue 3] GOT Part 5
+Time: 95 - [Machine 1] got Part 6 from Queue 1 (capacity= 2)
+Time: 96 - [Conveyor towards Queue 4] PUT Part 3 in the Queue 4
+Time: 97 - [Machine 4] got Part 3 from Queue 4 (capacity= 0)
+Time: 100 - [Conveyor towards Queue 5] PUT Part 2 in the Queue 5
+Time: 101 - [Machine 5] got Part 2 from Queue 5 (capacity= 0)
+Time: 112 - [Conveyor towards Queue 5] GOT Part 3
+Time: 115 - [Conveyor towards Queue 3] PUT Part 5 in the Queue 3
+Time: 116 - [Conveyor towards Queue 4] GOT Part 4
+Time: 116 - [Machine 3] got Part 5 from Queue 3 (capacity= 0)
+Time: 119 - [Conveyor towards Queue 2] GOT Part 6
+Time: 119 - [Machine 1] got Part 7 from Queue 1 (capacity= 1)
+Time: 122 - [Conveyor towards Queue 4] PUT Part 4 in the Queue 4
+Time: 122 - [Conveyor towards Queue 5] PUT Part 3 in the Queue 5
+Time: 123 - [Machine 4] got Part 4 from Queue 4 (capacity= 0)
+Time: 126 - [Terminator] xxx Part 2 terminated xxx
+Time: 126 - [Terminator] Part 9 replaced
+Time: 126 - [Conveyor towards Queue 1] GOT Part 9
+Time: 126 - [Machine 5] got Part 3 from Queue 5 (capacity= 0)
+Time: 136 - [Conveyor towards Queue 1] PUT Part 9 in the Queue 1
+Time: 138 - [Conveyor towards Queue 4] GOT Part 5
+Time: 138 - [Conveyor towards Queue 5] GOT Part 4
+Time: 139 - [Conveyor towards Queue 2] PUT Part 6 in the Queue 2
+Time: 140 - [Machine 2] got Part 6 from Queue 2 (capacity= 0)
+Time: 143 - [Conveyor towards Queue 3] GOT Part 7
+Time: 143 - [Machine 1] got Part 8 from Queue 1 (capacity= 1)
+Time: 144 - [Conveyor towards Queue 4] PUT Part 5 in the Queue 4
+Time: 145 - [Machine 4] got Part 5 from Queue 4 (capacity= 0)
+Time: 148 - [Conveyor towards Queue 5] PUT Part 4 in the Queue 5
+Time: 151 - [Terminator] xxx Part 3 terminated xxx
+Time: 151 - [Terminator] Part 10 replaced
+Time: 151 - [Conveyor towards Queue 1] GOT Part 10
+Time: 151 - [Machine 5] got Part 4 from Queue 5 (capacity= 0)
+Time: 160 - [Conveyor towards Queue 5] GOT Part 5
+Time: 161 - [Conveyor towards Queue 1] PUT Part 10 in the Queue 1
+Time: 163 - [Conveyor towards Queue 3] PUT Part 7 in the Queue 3
+Time: 164 - [Conveyor towards Queue 4] GOT Part 6
+Time: 164 - [Machine 3] got Part 7 from Queue 3 (capacity= 0)
+Time: 167 - [Conveyor towards Queue 2] GOT Part 8
+Time: 167 - [Machine 1] got Part 9 from Queue 1 (capacity= 1)
+Time: 170 - [Conveyor towards Queue 4] PUT Part 6 in the Queue 4
+Time: 170 - [Conveyor towards Queue 5] PUT Part 5 in the Queue 5
+Time: 171 - [Machine 4] got Part 6 from Queue 4 (capacity= 0)
+Time: 176 - [Terminator] xxx Part 4 terminated xxx
+Time: 176 - [Terminator] Part 11 replaced
+Time: 176 - [Conveyor towards Queue 1] GOT Part 11
+Time: 176 - [Machine 5] got Part 5 from Queue 5 (capacity= 0)
+Time: 186 - [Conveyor towards Queue 4] GOT Part 7
+Time: 186 - [Conveyor towards Queue 5] GOT Part 6
+Time: 186 - [Conveyor towards Queue 1] PUT Part 11 in the Queue 1
+Time: 187 - [Conveyor towards Queue 2] PUT Part 8 in the Queue 2
+Time: 188 - [Machine 2] got Part 8 from Queue 2 (capacity= 0)
+Time: 191 - [Conveyor towards Queue 3] GOT Part 9
+Time: 191 - [Machine 1] got Part 10 from Queue 1 (capacity= 1)
+Time: 192 - [Conveyor towards Queue 4] PUT Part 7 in the Queue 4
+Time: 193 - [Machine 4] got Part 7 from Queue 4 (capacity= 0)
+Time: 196 - [Conveyor towards Queue 5] PUT Part 6 in the Queue 5
+Time: 201 - [Terminator] xxx Part 5 terminated xxx
+Time: 201 - [Terminator] Part 12 replaced
+Time: 201 - [Conveyor towards Queue 1] GOT Part 12
+Time: 201 - [Machine 5] got Part 6 from Queue 5 (capacity= 0)
+=== Reading all the events from table: digital_log ===
+(1, 0, 'Machine 2', 'Started', 'Part 1', 'Queue 2', None, None)
+(2, 23, 'Machine 1', 'Finished', 'Part 2', 'Queue 2', None, None)
+(3, 23, 'Machine 1', 'Started', 'Part 3', 'Queue 1', None, None)
+(4, 24, 'Machine 2', 'Finished', 'Part 1', 'Queue 4', None, None)
+(5, 31, 'Machine 4', 'Started', 'Part 1', 'Queue 4', None, None)
+(6, 44, 'Machine 2', 'Started', 'Part 2', 'Queue 2', None, None)
+(7, 46, 'Machine 4', 'Finished', 'Part 1', 'Queue 5', None, None)
+(8, 47, 'Machine 1', 'Finished', 'Part 3', 'Queue 3', None, None)
+(9, 47, 'Machine 1', 'Started', 'Part 4', 'Queue 1', None, None)
+(10, 57, 'Machine 5', 'Started', 'Part 1', 'Queue 5', None, None)
+(11, 68, 'Machine 2', 'Finished', 'Part 2', 'Queue 4', None, None)
+(12, 68, 'Machine 3', 'Started', 'Part 3', 'Queue 3', None, None)
+(13, 71, 'Machine 1', 'Finished', 'Part 4', 'Queue 2', None, None)
+(14, 71, 'Machine 1', 'Started', 'Part 5', 'Queue 1', None, None)
+(15, 75, 'Machine 4', 'Started', 'Part 2', 'Queue 4', None, None)
+(16, 82, 'Machine 5', 'Finished', 'Part 1', 'Queue 1', None, None)
+(17, 90, 'Machine 3', 'Finished', 'Part 3', 'Queue 4', None, None)
+(18, 90, 'Machine 4', 'Finished', 'Part 2', 'Queue 5', None, None)
+(19, 92, 'Machine 2', 'Started', 'Part 4', 'Queue 2', None, None)
+(20, 95, 'Machine 1', 'Finished', 'Part 5', 'Queue 3', None, None)
+(21, 95, 'Machine 1', 'Started', 'Part 6', 'Queue 1', None, None)
+(22, 97, 'Machine 4', 'Started', 'Part 3', 'Queue 4', None, None)
+(23, 101, 'Machine 5', 'Started', 'Part 2', 'Queue 5', None, None)
+(24, 112, 'Machine 4', 'Finished', 'Part 3', 'Queue 5', None, None)
+(25, 116, 'Machine 2', 'Finished', 'Part 4', 'Queue 4', None, None)
+(26, 116, 'Machine 3', 'Started', 'Part 5', 'Queue 3', None, None)
+(27, 119, 'Machine 1', 'Finished', 'Part 6', 'Queue 2', None, None)
+(28, 119, 'Machine 1', 'Started', 'Part 7', 'Queue 1', None, None)
+(29, 123, 'Machine 4', 'Started', 'Part 4', 'Queue 4', None, None)
+(30, 126, 'Machine 5', 'Finished', 'Part 2', 'Queue 1', None, None)
+(31, 126, 'Machine 5', 'Started', 'Part 3', 'Queue 5', None, None)
+(32, 138, 'Machine 3', 'Finished', 'Part 5', 'Queue 4', None, None)
+(33, 138, 'Machine 4', 'Finished', 'Part 4', 'Queue 5', None, None)
+(34, 140, 'Machine 2', 'Started', 'Part 6', 'Queue 2', None, None)
+(35, 143, 'Machine 1', 'Finished', 'Part 7', 'Queue 3', None, None)
+(36, 143, 'Machine 1', 'Started', 'Part 8', 'Queue 1', None, None)
+(37, 145, 'Machine 4', 'Started', 'Part 5', 'Queue 4', None, None)
+(38, 151, 'Machine 5', 'Finished', 'Part 3', 'Queue 1', None, None)
+(39, 151, 'Machine 5', 'Started', 'Part 4', 'Queue 5', None, None)
+(40, 160, 'Machine 4', 'Finished', 'Part 5', 'Queue 5', None, None)
+(41, 164, 'Machine 2', 'Finished', 'Part 6', 'Queue 4', None, None)
+(42, 164, 'Machine 3', 'Started', 'Part 7', 'Queue 3', None, None)
+(43, 167, 'Machine 1', 'Finished', 'Part 8', 'Queue 2', None, None)
+(44, 167, 'Machine 1', 'Started', 'Part 9', 'Queue 1', None, None)
+(45, 171, 'Machine 4', 'Started', 'Part 6', 'Queue 4', None, None)
+(46, 176, 'Machine 5', 'Finished', 'Part 4', 'Queue 1', None, None)
+(47, 176, 'Machine 5', 'Started', 'Part 5', 'Queue 5', None, None)
+(48, 186, 'Machine 3', 'Finished', 'Part 7', 'Queue 4', None, None)
+(49, 186, 'Machine 4', 'Finished', 'Part 6', 'Queue 5', None, None)
+(50, 188, 'Machine 2', 'Started', 'Part 8', 'Queue 2', None, None)
+(51, 191, 'Machine 1', 'Finished', 'Part 9', 'Queue 3', None, None)
+(52, 191, 'Machine 1', 'Started', 'Part 10', 'Queue 1', None, None)
+(53, 193, 'Machine 4', 'Started', 'Part 7', 'Queue 4', None, None)
+(54, 201, 'Machine 5', 'Finished', 'Part 5', 'Queue 1', None, None)
+(55, 201, 'Machine 5', 'Started', 'Part 6', 'Queue 5', None, None)
+### ============ Simulation Done ============ ###
+> Predicting RCT for Part 1...
+> RCT for Part 1: 82
+current_parts_vector = [<dtwinpylib.dtwinpy.components.Part object at 0x000002066452C8B0>, <dtwinpylib.dtwinpy.components.Part object at 0x000002066452C2B0>, <dtwinpylib.dtwinpy.components.Part object at 0x000002066452CA30>, <dtwinpylib.dtwinpy.components.Part object at 0x000002066452CA00>, <dtwinpylib.dtwinpy.components.Part object at 0x000002066452C220>, <dtwinpylib.dtwinpy.components.Part object at 0x000002066452C880>]
+part_being_simulated = <dtwinpylib.dtwinpy.components.Part object at 0x000002066452C880>
+====================================== Running Scenario for Part 5 | Path 2 ======================================
+--- Showing Path for Part 1 ---
+|-- Conveyor towards Queue 3
+---
+### ============ Simulation Started ============ ###
+Time: 0 - [Machine 2] got Part 1 from Queue 2 (capacity= 0)
+Time: 23 - [Conveyor towards Queue 2] GOT Part 2
+Time: 23 - [Machine 1] got Part 3 from Queue 1 (capacity= 4)
+Time: 24 - [Conveyor towards Queue 4] GOT Part 1
+Time: 30 - [Conveyor towards Queue 4] PUT Part 1 in the Queue 4
+Time: 31 - [Machine 4] got Part 1 from Queue 4 (capacity= 0)
+Time: 43 - [Conveyor towards Queue 2] PUT Part 2 in the Queue 2
+Time: 44 - [Machine 2] got Part 2 from Queue 2 (capacity= 0)
+Time: 46 - [Conveyor towards Queue 5] GOT Part 1
+Time: 47 - [Conveyor towards Queue 3] GOT Part 3
+Time: 47 - [Machine 1] got Part 4 from Queue 1 (capacity= 3)
+Time: 56 - [Conveyor towards Queue 5] PUT Part 1 in the Queue 5
+Time: 57 - [Machine 5] got Part 1 from Queue 5 (capacity= 0)
+Time: 67 - [Conveyor towards Queue 3] PUT Part 3 in the Queue 3
+Time: 68 - [Conveyor towards Queue 4] GOT Part 2
+Time: 68 - [Machine 3] got Part 3 from Queue 3 (capacity= 0)
+Time: 71 - [Conveyor towards Queue 2] GOT Part 4
+Time: 71 - [Machine 1] got Part 5 from Queue 1 (capacity= 2)
+Time: 74 - [Conveyor towards Queue 4] PUT Part 2 in the Queue 4
+Time: 75 - [Machine 4] got Part 2 from Queue 4 (capacity= 0)
+Time: 82 - [Terminator] xxx Part 1 terminated xxx
+Time: 82 - [Terminator] Part 8 replaced
+Time: 82 - [Conveyor towards Queue 1] GOT Part 8
+Time: 90 - [Conveyor towards Queue 4] GOT Part 3
+Time: 90 - [Conveyor towards Queue 5] GOT Part 2
+Time: 91 - [Conveyor towards Queue 2] PUT Part 4 in the Queue 2
+Time: 92 - [Machine 2] got Part 4 from Queue 2 (capacity= 0)
+Time: 92 - [Conveyor towards Queue 1] PUT Part 8 in the Queue 1
+Time: 95 - [Conveyor towards Queue 3] GOT Part 5
+Time: 95 - [Machine 1] got Part 6 from Queue 1 (capacity= 2)
+Time: 96 - [Conveyor towards Queue 4] PUT Part 3 in the Queue 4
+Time: 97 - [Machine 4] got Part 3 from Queue 4 (capacity= 0)
+Time: 100 - [Conveyor towards Queue 5] PUT Part 2 in the Queue 5
+Time: 101 - [Machine 5] got Part 2 from Queue 5 (capacity= 0)
+Time: 112 - [Conveyor towards Queue 5] GOT Part 3
+Time: 115 - [Conveyor towards Queue 3] PUT Part 5 in the Queue 3
+Time: 116 - [Conveyor towards Queue 4] GOT Part 4
+Time: 116 - [Machine 3] got Part 5 from Queue 3 (capacity= 0)
+Time: 119 - [Conveyor towards Queue 2] GOT Part 6
+Time: 119 - [Machine 1] got Part 7 from Queue 1 (capacity= 1)
+Time: 122 - [Conveyor towards Queue 4] PUT Part 4 in the Queue 4
+Time: 122 - [Conveyor towards Queue 5] PUT Part 3 in the Queue 5
+Time: 123 - [Machine 4] got Part 4 from Queue 4 (capacity= 0)
+Time: 126 - [Terminator] xxx Part 2 terminated xxx
+Time: 126 - [Terminator] Part 9 replaced
+Time: 126 - [Conveyor towards Queue 1] GOT Part 9
+Time: 126 - [Machine 5] got Part 3 from Queue 5 (capacity= 0)
+Time: 136 - [Conveyor towards Queue 1] PUT Part 9 in the Queue 1
+Time: 138 - [Conveyor towards Queue 4] GOT Part 5
+Time: 138 - [Conveyor towards Queue 5] GOT Part 4
+Time: 139 - [Conveyor towards Queue 2] PUT Part 6 in the Queue 2
+Time: 140 - [Machine 2] got Part 6 from Queue 2 (capacity= 0)
+Time: 143 - [Conveyor towards Queue 3] GOT Part 7
+Time: 143 - [Machine 1] got Part 8 from Queue 1 (capacity= 1)
+Time: 144 - [Conveyor towards Queue 4] PUT Part 5 in the Queue 4
+Time: 145 - [Machine 4] got Part 5 from Queue 4 (capacity= 0)
+Time: 148 - [Conveyor towards Queue 5] PUT Part 4 in the Queue 5
+Time: 151 - [Terminator] xxx Part 3 terminated xxx
+Time: 151 - [Terminator] Part 10 replaced
+Time: 151 - [Conveyor towards Queue 1] GOT Part 10
+Time: 151 - [Machine 5] got Part 4 from Queue 5 (capacity= 0)
+Time: 160 - [Conveyor towards Queue 5] GOT Part 5
+Time: 161 - [Conveyor towards Queue 1] PUT Part 10 in the Queue 1
+Time: 163 - [Conveyor towards Queue 3] PUT Part 7 in the Queue 3
+Time: 164 - [Conveyor towards Queue 4] GOT Part 6
+Time: 164 - [Machine 3] got Part 7 from Queue 3 (capacity= 0)
+Time: 167 - [Conveyor towards Queue 2] GOT Part 8
+Time: 167 - [Machine 1] got Part 9 from Queue 1 (capacity= 1)
+Time: 170 - [Conveyor towards Queue 4] PUT Part 6 in the Queue 4
+Time: 170 - [Conveyor towards Queue 5] PUT Part 5 in the Queue 5
+Time: 171 - [Machine 4] got Part 6 from Queue 4 (capacity= 0)
+Time: 176 - [Terminator] xxx Part 4 terminated xxx
+Time: 176 - [Terminator] Part 11 replaced
+Time: 176 - [Conveyor towards Queue 1] GOT Part 11
+Time: 176 - [Machine 5] got Part 5 from Queue 5 (capacity= 0)
+Time: 186 - [Conveyor towards Queue 4] GOT Part 7
+Time: 186 - [Conveyor towards Queue 5] GOT Part 6
+Time: 186 - [Conveyor towards Queue 1] PUT Part 11 in the Queue 1
+Time: 187 - [Conveyor towards Queue 2] PUT Part 8 in the Queue 2
+Time: 188 - [Machine 2] got Part 8 from Queue 2 (capacity= 0)
+Time: 191 - [Conveyor towards Queue 3] GOT Part 9
+Time: 191 - [Machine 1] got Part 10 from Queue 1 (capacity= 1)
+Time: 192 - [Conveyor towards Queue 4] PUT Part 7 in the Queue 4
+Time: 193 - [Machine 4] got Part 7 from Queue 4 (capacity= 0)
+Time: 196 - [Conveyor towards Queue 5] PUT Part 6 in the Queue 5
+Time: 201 - [Terminator] xxx Part 5 terminated xxx
+Time: 201 - [Terminator] Part 12 replaced
+Time: 201 - [Conveyor towards Queue 1] GOT Part 12
+Time: 201 - [Machine 5] got Part 6 from Queue 5 (capacity= 0)
+=== Reading all the events from table: digital_log ===
+(1, 0, 'Machine 2', 'Started', 'Part 1', 'Queue 2', None, None)
+(2, 23, 'Machine 1', 'Finished', 'Part 2', 'Queue 2', None, None)
+(3, 23, 'Machine 1', 'Started', 'Part 3', 'Queue 1', None, None)
+(4, 24, 'Machine 2', 'Finished', 'Part 1', 'Queue 4', None, None)
+(5, 31, 'Machine 4', 'Started', 'Part 1', 'Queue 4', None, None)
+(6, 44, 'Machine 2', 'Started', 'Part 2', 'Queue 2', None, None)
+(7, 46, 'Machine 4', 'Finished', 'Part 1', 'Queue 5', None, None)
+(8, 47, 'Machine 1', 'Finished', 'Part 3', 'Queue 3', None, None)
+(9, 47, 'Machine 1', 'Started', 'Part 4', 'Queue 1', None, None)
+(10, 57, 'Machine 5', 'Started', 'Part 1', 'Queue 5', None, None)
+(11, 68, 'Machine 2', 'Finished', 'Part 2', 'Queue 4', None, None)
+(12, 68, 'Machine 3', 'Started', 'Part 3', 'Queue 3', None, None)
+(13, 71, 'Machine 1', 'Finished', 'Part 4', 'Queue 2', None, None)
+(14, 71, 'Machine 1', 'Started', 'Part 5', 'Queue 1', None, None)
+(15, 75, 'Machine 4', 'Started', 'Part 2', 'Queue 4', None, None)
+(16, 82, 'Machine 5', 'Finished', 'Part 1', 'Queue 1', None, None)
+(17, 90, 'Machine 3', 'Finished', 'Part 3', 'Queue 4', None, None)
+(18, 90, 'Machine 4', 'Finished', 'Part 2', 'Queue 5', None, None)
+(19, 92, 'Machine 2', 'Started', 'Part 4', 'Queue 2', None, None)
+(20, 95, 'Machine 1', 'Finished', 'Part 5', 'Queue 3', None, None)
+(21, 95, 'Machine 1', 'Started', 'Part 6', 'Queue 1', None, None)
+(22, 97, 'Machine 4', 'Started', 'Part 3', 'Queue 4', None, None)
+(23, 101, 'Machine 5', 'Started', 'Part 2', 'Queue 5', None, None)
+(24, 112, 'Machine 4', 'Finished', 'Part 3', 'Queue 5', None, None)
+(25, 116, 'Machine 2', 'Finished', 'Part 4', 'Queue 4', None, None)
+(26, 116, 'Machine 3', 'Started', 'Part 5', 'Queue 3', None, None)
+(27, 119, 'Machine 1', 'Finished', 'Part 6', 'Queue 2', None, None)
+(28, 119, 'Machine 1', 'Started', 'Part 7', 'Queue 1', None, None)
+(29, 123, 'Machine 4', 'Started', 'Part 4', 'Queue 4', None, None)
+(30, 126, 'Machine 5', 'Finished', 'Part 2', 'Queue 1', None, None)
+(31, 126, 'Machine 5', 'Started', 'Part 3', 'Queue 5', None, None)
+(32, 138, 'Machine 3', 'Finished', 'Part 5', 'Queue 4', None, None)
+(33, 138, 'Machine 4', 'Finished', 'Part 4', 'Queue 5', None, None)
+(34, 140, 'Machine 2', 'Started', 'Part 6', 'Queue 2', None, None)
+(35, 143, 'Machine 1', 'Finished', 'Part 7', 'Queue 3', None, None)
+(36, 143, 'Machine 1', 'Started', 'Part 8', 'Queue 1', None, None)
+(37, 145, 'Machine 4', 'Started', 'Part 5', 'Queue 4', None, None)
+(38, 151, 'Machine 5', 'Finished', 'Part 3', 'Queue 1', None, None)
+(39, 151, 'Machine 5', 'Started', 'Part 4', 'Queue 5', None, None)
+(40, 160, 'Machine 4', 'Finished', 'Part 5', 'Queue 5', None, None)
+(41, 164, 'Machine 2', 'Finished', 'Part 6', 'Queue 4', None, None)
+(42, 164, 'Machine 3', 'Started', 'Part 7', 'Queue 3', None, None)
+(43, 167, 'Machine 1', 'Finished', 'Part 8', 'Queue 2', None, None)
+(44, 167, 'Machine 1', 'Started', 'Part 9', 'Queue 1', None, None)
+(45, 171, 'Machine 4', 'Started', 'Part 6', 'Queue 4', None, None)
+(46, 176, 'Machine 5', 'Finished', 'Part 4', 'Queue 1', None, None)
+(47, 176, 'Machine 5', 'Started', 'Part 5', 'Queue 5', None, None)
+(48, 186, 'Machine 3', 'Finished', 'Part 7', 'Queue 4', None, None)
+(49, 186, 'Machine 4', 'Finished', 'Part 6', 'Queue 5', None, None)
+(50, 188, 'Machine 2', 'Started', 'Part 8', 'Queue 2', None, None)
+(51, 191, 'Machine 1', 'Finished', 'Part 9', 'Queue 3', None, None)
+(52, 191, 'Machine 1', 'Started', 'Part 10', 'Queue 1', None, None)
+(53, 193, 'Machine 4', 'Started', 'Part 7', 'Queue 4', None, None)
+(54, 201, 'Machine 5', 'Finished', 'Part 5', 'Queue 1', None, None)
+(55, 201, 'Machine 5', 'Started', 'Part 6', 'Queue 5', None, None)
+### ============ Simulation Done ============ ###
+> Predicting RCT for Part 1...
+> RCT for Part 1: 82
+____________________________________________
+------ RCT Services Results: ------
+Part 1: [201, 82, 82]
+------ Plot Results ------
+No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+____________________________________________
+
+!!!!!!!!! Optimized Path Found for Part 1 !!!!!!!!!
+> Best Path: Path 1
+> Gain: 59.204 %
+> Path:
+|- Conveyor towards Queue 2
+Trying to publish: Part 1
+Traceback (most recent call last):
+  File "C:\Users\pedro\Github Repositories\Digital_Twin\Digital Twin\mydt.py", line 16, in <module>
+    mydt.run()
+  File "C:\Users\pedro\Github Repositories\Digital_Twin\Digital Twin\dtwinpylib\dtwinpy\Digital_Twin.py", line 634, in run
+    self.External_Services()
+  File "C:\Users\pedro\Github Repositories\Digital_Twin\Digital Twin\dtwinpylib\dtwinpy\Digital_Twin.py", line 543, in External_Services
+    self.run_RCT_services(verbose= True)
+  File "C:\Users\pedro\Github Repositories\Digital_Twin\Digital Twin\dtwinpylib\dtwinpy\Digital_Twin.py", line 398, in run_RCT_services
+    RCT_Service.run_RCT_service(verbose=verbose)
+  File "C:\Users\pedro\Github Repositories\Digital_Twin\Digital Twin\dtwinpylib\dtwinpy\services.py", line 579, in run_RCT_service
+    self.publish_feedback(feedback_dict= feedback_dict, possible_pathes= possible_pathes)
+  File "C:\Users\pedro\Github Repositories\Digital_Twin\Digital Twin\dtwinpylib\dtwinpy\services.py", line 512, in publish_feedback
+    machine_id = str(machine_selected.get_id())
+UnboundLocalError: local variable 'machine_selected' referenced before assignment
+PS C:\Users\pedro\Github Repositories\Digital_Twin\Digital Twin>

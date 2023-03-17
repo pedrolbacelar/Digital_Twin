@@ -1,0 +1,438 @@
+Windows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Install the latest PowerShell for new features and improvements! https://aka.ms/PSWindows
+
+PS C:\Users\pedro> cd '.\Github Repositories\Digital_Twin\Digital Twin\'
+PS C:\Users\pedro\Github Repositories\Digital_Twin\Digital Twin> python .\mydt.py
+Importing the libraries.....
+Model copied successfuly from models/5s_determ_template.json!
+--- printing databases paths ---
+Digital Database: 'databases/5s_determ/digital_database.db'
+Real Database: 'databases/5s_determ/real_database.db'
+ID Database: 'databases/5s_determ/ID_database.db'
+---- Digital Twin '5s_determ' created sucessfully at 17 March 11:22:19 ----
+17 March 11:22:49 |[Internal Service] Starting Synchronization
+---------- Pointer Status Initial ----------
+Start Time: 1679048539
+Start Time ID: 1
+
+End Time: 1679048569
+End Time ID: 3
+-------------------------------------
+17 March 11:22:49 | Not found 'Started' after the end_time: 1679048569. Sleeping for 10 seconds and trying again
+17 March 11:22:59 | Not found 'Started' after the end_time: 1679048569. Sleeping for 10 seconds and trying again
+17 March 11:23:09 | Not found 'Started' after the end_time: 1679048569. Sleeping for 10 seconds and trying again
+---------- Pointer Status Updated ----------
+Start Time: 1679048539
+Start Time ID: 1
+
+End Time: 1679048568
+End Time ID: 3
+-------------------------------------
+-----------------------------------------------------------------
+Big picture BEFORE calculations
+--- Zone of Machine 1 ---
+Parts in queue: ['Part 1', 'Part 2', 'Part 3']
+Part in machine: []
+--- Zone of Machine 2 ---
+Parts in queue: []
+Part in machine: []
+--- Zone of Machine 3 ---
+Parts in queue: []
+Part in machine: []
+--- Zone of Machine 4 ---
+Parts in queue: []
+Part in machine: []
+--- Zone of Machine 5 ---
+Parts in queue: []
+Part in machine: []
+-----------------------------------------------------------------
+----
+After MStarted Part 1 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 2', 'Part 3']
+Zone of Machine 1 | parts_ids_in_machine: ['Part 1']
+----
+After MFinished Part 1 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 2', 'Part 3']
+Zone of Machine 1 | parts_ids_in_machine: []
+----
+After Added Part 1 in queue
+Zone of Machine 2 | parts_ids_in_queue: ['Part 1']
+Zone of Machine 2 | parts_ids_in_machine: []
+----
+After MStarted Part 2 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 3']
+Zone of Machine 1 | parts_ids_in_machine: ['Part 2']
+-----------------------------------------------------------------
+Big picture AFTER calculations
+--- Zone of Machine 1 ---
+Parts in queue: ['Part 3']
+Part in machine: ['Part 2']
+Zone is Working? True
+--- Zone of Machine 2 ---
+Parts in queue: ['Part 1']
+Part in machine: []
+Zone is Working? False
+--- Zone of Machine 3 ---
+Parts in queue: []
+Part in machine: []
+Zone is Working? False
+--- Zone of Machine 4 ---
+Parts in queue: []
+Part in machine: []
+Zone is Working? False
+--- Zone of Machine 5 ---
+Parts in queue: []
+Part in machine: []
+Zone is Working? False
+-----------------------------------------------------------------
+=========== Self Verification (Digital-Based) ===========
+[Zone of Machine 1] NumParts = 3, Machine Working = False, Parts in Conveyor = 0
+[Zone of Machine 2] NumParts = 0, Machine Working = False, Parts in Conveyor = 0
+[Zone of Machine 3] NumParts = 0, Machine Working = False, Parts in Conveyor = 0
+[Zone of Machine 4] NumParts = 0, Machine Working = False, Parts in Conveyor = 0
+[Zone of Machine 5] NumParts = 0, Machine Working = False, Parts in Conveyor = 0
+=========================================
+=========== Zones Occupations (Real-Based) ===========
+[Zone of Machine 1] NumParts = 2, Machine Working = True, Zone Indicador = None
+[Zone of Machine 2] NumParts = 1, Machine Working = False, Zone Indicador = None
+[Zone of Machine 3] NumParts = 0, Machine Working = False, Zone Indicador = None
+[Zone of Machine 4] NumParts = 0, Machine Working = False, Zone Indicador = None
+[Zone of Machine 5] NumParts = 0, Machine Working = False, Zone Indicador = None
+=========================================
+17 March 11:23:19 |[Internal Service] System Synchronized. Next Sync: 17 March 11:23:19
+ 17 March 11:23:19 |[External Service] Starting RCT Service
+ 17 March 11:23:19 |[External Service] System RCT completed. Next Service: 17 March 11:23:19
+17 March 11:23:19 |[Internal Service] Starting Synchronization
+---------- Pointer Status Initial ----------
+Start Time: 1679048569
+Start Time ID: 4
+
+End Time: 1679048599
+End Time ID: 6
+-------------------------------------
+17 March 11:23:19 | Not found 'Started' after the end_time: 1679048599. Sleeping for 10 seconds and trying again
+17 March 11:23:29 | Not found 'Started' after the end_time: 1679048599. Sleeping for 10 seconds and trying again
+---------- Pointer Status Updated ----------
+Start Time: 1679048569
+Start Time ID: 4
+
+End Time: 1679048592
+End Time ID: 6
+-------------------------------------
+-----------------------------------------------------------------
+Big picture BEFORE calculations
+--- Zone of Machine 1 ---
+Parts in queue: ['Part 3']
+Part in machine: ['Part 2']
+--- Zone of Machine 2 ---
+Parts in queue: ['Part 1']
+Part in machine: []
+--- Zone of Machine 3 ---
+Parts in queue: []
+Part in machine: []
+--- Zone of Machine 4 ---
+Parts in queue: []
+Part in machine: []
+--- Zone of Machine 5 ---
+Parts in queue: []
+Part in machine: []
+-----------------------------------------------------------------
+----
+After MStarted Part 1 in queue
+Zone of Machine 2 | parts_ids_in_queue: []
+Zone of Machine 2 | parts_ids_in_machine: ['Part 1']
+----
+After MFinished Part 2 in queue
+Zone of Machine 1 | parts_ids_in_queue: ['Part 3']
+Zone of Machine 1 | parts_ids_in_machine: []
+----
+After Added Part 2 in queue
+Zone of Machine 3 | parts_ids_in_queue: ['Part 2']
+Zone of Machine 3 | parts_ids_in_machine: []
+----
+After MStarted Part 3 in queue
+Zone of Machine 1 | parts_ids_in_queue: []
+Zone of Machine 1 | parts_ids_in_machine: ['Part 3']
+-----------------------------------------------------------------
+Big picture AFTER calculations
+--- Zone of Machine 1 ---
+Parts in queue: []
+Part in machine: ['Part 3']
+Zone is Working? True
+--- Zone of Machine 2 ---
+Parts in queue: []
+Part in machine: ['Part 1']
+Zone is Working? True
+--- Zone of Machine 3 ---
+Parts in queue: ['Part 2']
+Part in machine: []
+Zone is Working? False
+--- Zone of Machine 4 ---
+Parts in queue: []
+Part in machine: []
+Zone is Working? False
+--- Zone of Machine 5 ---
+Parts in queue: []
+Part in machine: []
+Zone is Working? False
+-----------------------------------------------------------------
+=========== Self Verification (Digital-Based) ===========
+[Zone of Machine 1] NumParts = 1, Machine Working = False, Parts in Conveyor = 0
+[Zone of Machine 2] NumParts = 1, Machine Working = False, Parts in Conveyor = 0
+[Zone of Machine 3] NumParts = 0, Machine Working = False, Parts in Conveyor = 0
+[Zone of Machine 4] NumParts = 0, Machine Working = False, Parts in Conveyor = 0
+[Zone of Machine 5] NumParts = 0, Machine Working = False, Parts in Conveyor = 0
+=========================================
+=========== Zones Occupations (Real-Based) ===========
+[Zone of Machine 1] NumParts = 1, Machine Working = True, Zone Indicador = None
+[Zone of Machine 2] NumParts = 1, Machine Working = True, Zone Indicador = None
+[Zone of Machine 3] NumParts = 1, Machine Working = False, Zone Indicador = None
+[Zone of Machine 4] NumParts = 0, Machine Working = False, Zone Indicador = None
+[Zone of Machine 5] NumParts = 0, Machine Working = False, Zone Indicador = None
+=========================================
+17 March 11:23:39 |[Internal Service] System Synchronized. Next Sync: 17 March 11:23:49
+17 March 11:23:39 |[Internal Service] Starting Validation
+---------- Pointer Status Initial ----------
+Start Time: 1679048539
+Start Time ID: 1
+
+End Time: 1679048599
+End Time ID: 6
+-------------------------------------
+---------- Pointer Status Updated ----------
+Start Time: 1679048539
+Start Time ID: 1
+
+End Time: 1679048592
+End Time ID: 6
+-------------------------------------
+-----------------------------------------------------------------------------------------
+=== matrix_ptime_qTDS ===
+[VALIDATOR] Simulation Deterministic - No correlation of randoness needed
+
+=== matrix_ptime_TDS ===
+Part 1: [23]
+Part 2: [23]
+Part 3: []
+-----------------------------------------------------------------------------------------
+============ Running Trace Driven Simulation ============
+### ============ Simulation Started ============ ###
+Time: 0 - [Machine 3] got Part 2 from Queue 3 (capacity= 0)
+Time: 22 - [Conveyor towards Queue 4] GOT Part 1
+Time: 22 - [Conveyor towards Queue 4] GOT Part 2
+Time: 23 - [Conveyor towards Queue 2] GOT Part 3
+Time: 28 - [Conveyor towards Queue 4] PUT Part 1 in the Queue 4
+Time: 28 - [Conveyor towards Queue 4] PUT Part 2 in the Queue 4
+Time: 29 - [Machine 4] got Part 1 from Queue 4 (capacity= 1)
+Time: 43 - [Conveyor towards Queue 2] PUT Part 3 in the Queue 2
+Time: 44 - [Conveyor towards Queue 5] GOT Part 1
+Time: 44 - [Machine 4] got Part 2 from Queue 4 (capacity= 0)
+Time: 44 - [Machine 2] got Part 3 from Queue 2 (capacity= 0)
+=== Reading all the events from table: digital_log ===
+(1, 0, 'Machine 3', 'Started', 'Part 2', 'Queue 3', None, None)
+(2, 22, 'Machine 2', 'Finished', 'Part 1', 'Queue 4', None, None)
+(3, 22, 'Machine 3', 'Finished', 'Part 2', 'Queue 4', None, None)
+(4, 23, 'Machine 1', 'Finished', 'Part 3', 'Queue 2', None, None)
+(5, 29, 'Machine 4', 'Started', 'Part 1', 'Queue 4', None, None)
+(6, 44, 'Machine 4', 'Finished', 'Part 1', 'Queue 5', None, None)
+(7, 44, 'Machine 4', 'Started', 'Part 2', 'Queue 4', None, None)
+(8, 44, 'Machine 2', 'Started', 'Part 3', 'Queue 2', None, None)
+### ============ Simulation Done ============ ###
+--- LCSS Sequence ---
+['Machine 1 - Finished', 'Machine 2 - Started']
+--- LCSS Time ---
+[23, 44]
+>>> LCSS Indicator: 0.3333333333333333
+=========================================================
+---------- Pointer Status Initial ----------
+Start Time: 1679048539
+Start Time ID: 1
+
+End Time: 1679048599
+End Time ID: 6
+-------------------------------------
+---------- Pointer Status Updated ----------
+Start Time: 1679048539
+Start Time ID: 1
+
+End Time: 1679048592
+End Time ID: 6
+-------------------------------------
+-----------------------------------------------------------------------------------------
+=== matrix_ptime_qTDS ===
+[VALIDATOR] Simulation Deterministic - No correlation of randoness needed
+
+=== matrix_ptime_TDS ===
+Part 1: [23]
+Part 2: [23]
+Part 3: []
+-----------------------------------------------------------------------------------------
+============ Running quasi Trace Driven Simulation ============
+### ============ Simulation Started ============ ###
+Time: 0 - [Machine 3] got Part 2 from Queue 3 (capacity= 0)
+Time: 22 - [Conveyor towards Queue 4] GOT Part 1
+Time: 22 - [Conveyor towards Queue 4] GOT Part 2
+Time: 23 - [Conveyor towards Queue 2] GOT Part 3
+Time: 28 - [Conveyor towards Queue 4] PUT Part 1 in the Queue 4
+Time: 28 - [Conveyor towards Queue 4] PUT Part 2 in the Queue 4
+Time: 29 - [Machine 4] got Part 1 from Queue 4 (capacity= 1)
+Time: 43 - [Conveyor towards Queue 2] PUT Part 3 in the Queue 2
+Time: 44 - [Conveyor towards Queue 5] GOT Part 1
+Time: 44 - [Machine 4] got Part 2 from Queue 4 (capacity= 0)
+Time: 44 - [Machine 2] got Part 3 from Queue 2 (capacity= 0)
+=== Reading all the events from table: digital_log ===
+(1, 0, 'Machine 3', 'Started', 'Part 2', 'Queue 3', None, None)
+(2, 22, 'Machine 2', 'Finished', 'Part 1', 'Queue 4', None, None)
+(3, 22, 'Machine 3', 'Finished', 'Part 2', 'Queue 4', None, None)
+(4, 23, 'Machine 1', 'Finished', 'Part 3', 'Queue 2', None, None)
+(5, 29, 'Machine 4', 'Started', 'Part 1', 'Queue 4', None, None)
+(6, 44, 'Machine 4', 'Finished', 'Part 1', 'Queue 5', None, None)
+(7, 44, 'Machine 4', 'Started', 'Part 2', 'Queue 4', None, None)
+(8, 44, 'Machine 2', 'Started', 'Part 3', 'Queue 2', None, None)
+### ============ Simulation Done ============ ###
+--- LCSS Sequence ---
+['Machine 1 - Finished', 'Machine 2 - Started']
+--- LCSS Time ---
+[23, 44]
+>>> LCSS Indicator: 0.3333333333333333
+===============================================================
+_______________________ Validation Results _______________________
+> LCSS indicator for LOGIC: 0.3333333333333333
+> LCSS indicator for INPUT: 0.3333333333333333
+__________________________________________________________________
+17 March 11:23:40 |[Internal Service] System Validated. Next Validation: 17 March 11:24:19
+ 17 March 11:23:40 |[External Service] Starting RCT Service
+ 17 March 11:23:40 |[External Service] System RCT completed. Next Service: 17 March 11:23:49
+17 March 11:23:49 |[Internal Service] Starting Synchronization
+---------- Pointer Status Initial ----------
+Start Time: 1679048593
+Start Time ID: 7
+
+End Time: 1679048630
+End Time ID: 10
+-------------------------------------
+17 March 11:23:49 | Not found 'Started' after the end_time: 1679048630. Sleeping for 10 seconds and trying again
+ [interfaceDB.py/update_end_time] Pointer End Time updated from 10 to 12
+---------- Pointer Status Updated ----------
+Start Time: 1679048593
+Start Time ID: 7
+
+End Time: 1679048636
+End Time ID: 12
+-------------------------------------
+-----------------------------------------------------------------
+Big picture BEFORE calculations
+--- Zone of Machine 1 ---
+Parts in queue: []
+Part in machine: ['Part 3']
+--- Zone of Machine 2 ---
+Parts in queue: []
+Part in machine: ['Part 1']
+--- Zone of Machine 3 ---
+Parts in queue: ['Part 2']
+Part in machine: []
+--- Zone of Machine 4 ---
+Parts in queue: []
+Part in machine: []
+--- Zone of Machine 5 ---
+Parts in queue: []
+Part in machine: []
+-----------------------------------------------------------------
+----
+After MStarted Part 2 in queue
+Zone of Machine 3 | parts_ids_in_queue: []
+Zone of Machine 3 | parts_ids_in_machine: ['Part 2']
+----
+After MFinished Part 1 in queue
+Zone of Machine 2 | parts_ids_in_queue: []
+Zone of Machine 2 | parts_ids_in_machine: []
+----
+After Added Part 1 in queue
+Zone of Machine 4 | parts_ids_in_queue: ['Part 1']
+Zone of Machine 4 | parts_ids_in_machine: []
+----
+After MFinished Part 3 in queue
+Zone of Machine 1 | parts_ids_in_queue: []
+Zone of Machine 1 | parts_ids_in_machine: []
+----
+After Added Part 3 in queue
+Zone of Machine 2 | parts_ids_in_queue: ['Part 3']
+Zone of Machine 2 | parts_ids_in_machine: []
+----
+After MStarted Part 1 in queue
+Zone of Machine 4 | parts_ids_in_queue: []
+Zone of Machine 4 | parts_ids_in_machine: ['Part 1']
+----
+After MFinished Part 2 in queue
+Zone of Machine 3 | parts_ids_in_queue: []
+Zone of Machine 3 | parts_ids_in_machine: []
+----
+After Added Part 2 in queue
+Zone of Machine 4 | parts_ids_in_queue: ['Part 2']
+Zone of Machine 4 | parts_ids_in_machine: ['Part 1']
+----
+After MFinished Part 1 in queue
+Zone of Machine 4 | parts_ids_in_queue: ['Part 2']
+Zone of Machine 4 | parts_ids_in_machine: []
+----
+After Added Part 1 in queue
+Zone of Machine 5 | parts_ids_in_queue: ['Part 1']
+Zone of Machine 5 | parts_ids_in_machine: []
+-----------------------------------------------------------------
+Big picture AFTER calculations
+--- Zone of Machine 1 ---
+Parts in queue: []
+Part in machine: []
+Zone is Working? False
+--- Zone of Machine 2 ---
+Parts in queue: ['Part 3']
+Part in machine: []
+Zone is Working? False
+--- Zone of Machine 3 ---
+Parts in queue: []
+Part in machine: []
+Zone is Working? False
+--- Zone of Machine 4 ---
+Parts in queue: ['Part 2']
+Part in machine: []
+Zone is Working? False
+--- Zone of Machine 5 ---
+Parts in queue: ['Part 1']
+Part in machine: []
+Zone is Working? False
+-----------------------------------------------------------------
+=========== Self Verification (Digital-Based) ===========
+[Zone of Machine 1] NumParts = 0, Machine Working = False, Parts in Conveyor = 0
+[Zone of Machine 2] NumParts = 0, Machine Working = False, Parts in Conveyor = 0
+[Zone of Machine 3] NumParts = 1, Machine Working = False, Parts in Conveyor = 0
+[Zone of Machine 4] NumParts = 0, Machine Working = False, Parts in Conveyor = 0
+[Zone of Machine 5] NumParts = 0, Machine Working = False, Parts in Conveyor = 0
+=========================================
+=========== Zones Occupations (Real-Based) ===========
+[Zone of Machine 1] NumParts = 0, Machine Working = False, Zone Indicador = None
+[Zone of Machine 2] NumParts = 1, Machine Working = False, Zone Indicador = None
+[Zone of Machine 3] NumParts = 0, Machine Working = False, Zone Indicador = None
+[Zone of Machine 4] NumParts = 1, Machine Working = False, Zone Indicador = None
+[Zone of Machine 5] NumParts = 1, Machine Working = False, Zone Indicador = None
+=========================================
+17 March 11:23:59 |[Internal Service] System Synchronized. Next Sync: 17 March 11:24:19
+ 17 March 11:23:59 |[External Service] Starting RCT Service
+ 17 March 11:23:59 |[External Service] System RCT completed. Next Service: 17 March 11:24:19
+17 March 11:24:19 |[Internal Service] Starting Validation
+---------- Pointer Status Initial ----------
+Start Time: 1679048592
+Start Time ID: 6
+
+End Time: 1679048660
+End Time ID: 14
+-------------------------------------
+17 March 11:24:19 | Not found 'Started' after the end_time: 1679048660. Sleeping for 10 seconds and trying again
+17 March 11:24:29 | Not found 'Started' after the end_time: 1679048660. Sleeping for 10 seconds and trying again
+17 March 11:24:39 | Not found 'Started' after the end_time: 1679048660. Sleeping for 10 seconds and trying again
+17 March 11:24:49 | Not found 'Started' after the end_time: 1679048660. Sleeping for 10 seconds and trying again
+17 March 11:24:59 | Not found 'Started' after the end_time: 1679048660. Sleeping for 10 seconds and trying again
+[ERROR][interfaceDB.py/update_end_time()] After trying5 times, it was not possible to find a 'Started' eventafter the end time: 1679048660
+---- Digital Twin killed at 17 March 11:25:09 ----
+PS C:\Users\pedro\Github Repositories\Digital_Twin\Digital Twin>

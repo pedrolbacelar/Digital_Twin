@@ -49,6 +49,9 @@ class Database():
                 #--- Calculate the relative time and update timestamp
                 self.updated_relative_timestamp()
 
+                #--- Update table of time pointers
+                self.write_updated_start_end()
+
                 print("---------- Pointer Status Updated ----------")
                 print(f"Start Time: {self.start_time}")
                 print(f"Start Time ID: {self.start_time_id}")
@@ -56,7 +59,9 @@ class Database():
                 print(f"End Time: {self.end_time}")
                 print(f"End Time ID: {self.end_time_id}")
                 print("-------------------------------------")
-                    
+                
+                #--- Check for parts without the correct id within the traces
+                self.check_parts_zero()
 
         if event_table == "digital_log":
             with sqlite3.connect(self.database_path) as digital_model_DB:
@@ -87,6 +92,11 @@ class Database():
 
                 db.commit()
 
+        if event_table == "time_pointers":
+            """
+            This object just read the most recent end time. Nothing to do when initiating.
+            """
+            pass
     
     # -------- Setting Functions --------
     def rename_digital_to_real(self):
@@ -236,8 +246,9 @@ class Database():
 
         looping = True
         try_counter = 1
+        max_counter = 5
         #--- Timeout Loop
-        while looping == True and try_counter <= 3:
+        while looping == True and try_counter <= max_counter:
             # Check for the most recent 'started' activity_type before the original start time
             cursor.execute(f"""
                 SELECT event_id, timestamp_real
@@ -257,16 +268,20 @@ class Database():
                 looping = False
 
             else:
+                (time_str, time) = self.helper.get_time_now()
+                self.helper.printer(f"{time_str} | [interfaceDB.py/update_end_time] Not found 'Started' after the end_time: {self.end_time}. Sleeping for 10 seconds and trying again", 'brown')
                 #--- Sleep for the next try
                 sleep(10)
 
                 #--- Updated the trying counter
                 try_counter += 1
         
-        if try_counter > 3:
+        if try_counter > max_counter:
             #--- Printer Error Message
-            self.helper.printer(f"[ERROR][interfaceDB.py/update_end_time()] After trying 3 times, it was not possible to find a 'Started' event after the end time: {self.end_time}", 'red')
             (tstr, t) = self.helper.get_time_now()
+
+            self.helper.printer(f"{tstr} | [ERROR][interfaceDB.py/update_end_time()] After trying {max_counter} times, it was not possible to find a 'Started' event after the end time: {self.end_time}", 'red')
+            
             
             #--- Killing the program
             self.helper.printer(f"---- Digital Twin killed at {tstr} ----", 'red')
@@ -279,10 +294,15 @@ class Database():
         
         #--- Changed the pointer?
         if selected_line_id != self.end_time_id:
-            self.helper.printer(f"[interfaceDB.py/update_end_time] Pointer End Time updated from {self.end_time_id} to {selected_line_id}", 'brown')
+            (time_str, time) = self.helper.get_time_now()
+            self.helper.printer(f"{time_str} | [interfaceDB.py/update_end_time] Pointer End Time updated from {self.end_time_id} to {selected_line_id}", 'brown')
 
         #--- Update the end_time
         self.end_time_id = selected_line_id
+
+        #--- Take the updated end_time
+        self.end_time = cursor.execute("""SELECT timestamp_real FROM real_log WHERE event_id= ? """, (selected_line_id,)).fetchone()[0]
+
 
         conn.close()
 
@@ -302,10 +322,73 @@ class Database():
             #-- Commit all the changes
             db.commit()
 
+    def check_parts_zero(self):
+        with sqlite3.connect(self.database_path) as db:
+            flag_not_missing_part_id = True
+            sleep_time = 5
+            timeout_max = 3
+            timeout_counter = 1
+
+            while flag_not_missing_part_id== True and timeout_counter <= timeout_max:
+                (time_str, time) = self.helper.get_time_now()
+                
+                parts_zero = db.execute("SELECT * FROM real_log WHERE part_id= ? AND event_id >= ? AND event_id <= ?", ('Part 0', self.start_time_id, self.end_time_id)).fetchall()
+                print(f"parts_zero: {parts_zero}")
+                if len(parts_zero) == 0:
+                    flag_not_missing_part_id = False
+                else:
+                    self.helper.printer(f"{time_str} | [WARNING][interfaceDB.py/check_parts_zero()] A Part 0 (without correct ID) was detected within the traces... Sleeping for {sleep_time} seconds")
+                    sleep(sleep_time)
+                    timeout_counter += 1
+            
+            if timeout_counter > timeout_max:
+                self.helper.printer(f"{time_str} | [ERROR][interfaceDB.py/check_parts_zero()] After trying {timeout_max} ({timeout_max * sleep_time} seconds), there are still Part 0 within the selected trace. Most probably the some ESP32 is not detecting correctly the RFID Sticker", 'red')
+                
+                #--- Killing the program
+                (tstr, t) = self.helper.get_time_now()
+                self.helper.printer(f"---- Digital Twin killed at {tstr} ----", 'red')
+                sys.exit()
+
     def get_current_durantion(self):
         current_durantion = self.end_time - self.start_time
         return current_durantion
 
+    def write_updated_start_end(self):
+        with sqlite3.connect(self.database_path) as db:
+            #--- Create table for pointer
+            db.execute(f"""
+            CREATE TABLE IF NOT EXISTS time_pointers (
+                line_id INTEGER PRIMARY KEY,
+                current_time_str TEXT,
+                start_time INTEGER,
+                end_time INTEGER,
+                start_time_id INTEGER,
+                end_time_id INTEGER
+            )
+            """)
+            db.commit()
+
+            #--- Get current time
+            (time_str, time) = self.helper.get_time_now()
+
+            #--- Write the new pointers
+            db.execute("""
+            INSERT INTO time_pointers (current_time_str, start_time, end_time, start_time_id, end_time_id)
+            VALUES (?, ?, ?, ?, ?)""", (time_str, self.start_time, self.end_time, self.start_time_id, self.end_time_id)
+            )
+
+            db.commit()
+    
+    def read_last_end_time(self):
+        with sqlite3.connect(self.database_path) as db:
+            end_times = db.execute("""
+            SELECT end_time FROM time_pointers
+            """).fetchall()
+            
+            last_end_time = end_times[-1][0]
+
+            return last_end_time
+            
 
     def initialize(self, table):
         with sqlite3.connect(self.database_path) as digital_model_DB:
