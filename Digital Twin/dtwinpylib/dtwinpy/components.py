@@ -292,14 +292,33 @@ class Machine():
 
                         #-- generate the process time following the given distribution
                         if distribution_name == 'norm':
-                            current_process_time = norm.rvs(self.process_time[1], self.process_time[2], size= 1) - self.worked_time
-                            
+                            #current_process_time = norm.rvs(self.process_time[1], self.process_time[2], size= 1) - self.worked_time
+                            current_process_time_gen = norm.rvs(self.process_time[1], self.process_time[2], size= 1)
+
                         elif distribution_name == 'expon':
-                            current_process_time = norm.rvs(self.process_time[1], self.process_time[2], size= 1) - self.worked_time
+                            #current_process_time_gen = norm.rvs(self.process_time[1], self.process_time[2], size= 1) - self.worked_time
+                            current_process_time_gen = norm.rvs(self.process_time[1], self.process_time[2], size= 1) 
 
                     else:
-                        current_process_time = self.process_time - self.worked_time
-                        
+                        #current_process_time_gen = self.process_time - self.worked_time
+                        current_process_time_gen = self.process_time
+
+                    # --- Check if the already worked time is higher than the current process time ---
+                            
+                    # Case 01: Part still being process by the machine
+                    if self.worked_time < current_process_time_gen:
+                        current_process_time = current_process_time_gen - self.worked_time
+                    
+                    # Case 02: Part already processed by the machine, but stuck inside of the machine because of BLOCKING CONDITIONS
+                    if self.worked_time > current_process_time_gen:
+                        # Since it was already process, I take just the time waited by the blocking condition
+                        current_process_time = self.worked_time - current_process_time_gen
+
+                    # Case 03: Part JUST FINISHED the process time of the machine (very rare case, but can happen)
+                    if self.worked_time == current_process_time_gen:
+                        # Sinse it just finished, assign the lowest process time possible
+                        current_process_time= 1
+
                     #=========================================================
                     yield self.env.timeout(int(current_process_time))  # processing time
                     #=========================================================
@@ -315,8 +334,6 @@ class Machine():
                         self.part_in_machine.quick_TDS_fix(self.get_cluster())
 
                     #-- Get the current cluster of that part
-                    if self.env.now== 310000:
-                        pass
                     
                     ##### Old approach before Sync ####
                     #part_current_cluster = self.part_in_machine.get_finished_clusters()

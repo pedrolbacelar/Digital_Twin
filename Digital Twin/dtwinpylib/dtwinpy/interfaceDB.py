@@ -15,8 +15,12 @@ class Database():
         #--- This both parameters are used to constrain the traces from the real log
         self.start_time = start_time
         self.end_time = end_time
+
         self.start_time_id = None
         self.end_time_id = None
+
+        self.start_time_status = None
+        self.end_time_status = None
 
         #--- When create the object, already create the database and table if doesn't exist
         if event_table == "real_log":
@@ -35,9 +39,11 @@ class Database():
                 print("---------- Pointer Status Initial ----------")
                 print(f"Start Time: {self.start_time}")
                 print(f"Start Time ID: {self.start_time_id}")
+                print(f"Start Time Status: {self.start_time_status}")
                 print()
                 print(f"End Time: {self.end_time}")
                 print(f"End Time ID: {self.end_time_id}")
+                print(f"End Time Status: {self.end_time_status}")
                 print("-------------------------------------")
 
                 
@@ -55,9 +61,11 @@ class Database():
                 print("---------- Pointer Status Updated ----------")
                 print(f"Start Time: {self.start_time}")
                 print(f"Start Time ID: {self.start_time_id}")
+                print(f"Start Time Status: {self.start_time_status}")
                 print()
                 print(f"End Time: {self.end_time}")
                 print(f"End Time ID: {self.end_time_id}")
+                print(f"End Time Status: {self.end_time_status}")
                 print("-------------------------------------")
                 
                 #--- Check for parts without the correct id within the traces
@@ -126,7 +134,7 @@ class Database():
         with sqlite3.connect(self.database_path) as db:
 
             self.start_time_id = db.execute(f"""
-                SELECT event_id
+                SELECT event_id, acitivity_type
                 FROM real_log
                 WHERE timestamp_real >= ?
                 ORDER BY timestamp_real ASC
@@ -142,16 +150,12 @@ class Database():
                 self.helper.printer(f"---- Digital Twin killed at {tstr} ----", 'red')
                 sys.exit()
 
+            # --- Update Start Pointers
             self.start_time_id = self.start_time_id[0]
-
-            #--- If it's not the first event, always go to the next because
-            # when start time is replaced it's replaced as the previous end time
-            if self.start_time_id == self.end_time_id:
-                self.start_time_id += 1
-
+            self.start_time_status = self.start_time_id[1]
             
             self.end_time_id = db.execute(f"""
-                SELECT event_id
+                SELECT event_id, acitivity_type
                 FROM real_log
                 WHERE timestamp_real <= ?
                 ORDER BY timestamp_real DESC
@@ -167,7 +171,9 @@ class Database():
                 self.helper.printer(f"---- Digital Twin killed at {tstr} ----", 'red')
                 sys.exit()
     
+            # --- Update End Pointers
             self.end_time_id = self.end_time_id[0]
+            self.end_time_status = self.end_time_id[1]
 
     def copy_timestamp_to_timestamp_real(self):
         with sqlite3.connect(self.database_path) as db:
