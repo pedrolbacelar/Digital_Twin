@@ -116,8 +116,64 @@ class Validator():
         # the cluster of machine. Here I don't need to have the dictionary, because I'm
         # changing each part at time.
         
-        #--- Get all initial parts from the simulation
+        #--- Get all initial parts in queues from the simulation
         initial_parts = self.digital_model.get_all_parts()
+
+        #--- Get the parts names that appears in traces
+        parts_in_trace = self.real_database.get_distinct_values(column= "part_id", table="real_log")
+        parts_in_trace_names = []
+        # Take only the string from the database
+        for part in parts_in_trace:
+            parts_in_trace_names.append(part[0])
+
+        #--- Try to match parts in simulation with parts in trace
+        parts_to_remove = []
+        for part in initial_parts:
+            
+            # Try to see if the part from the model is within the parts of trace
+            try:
+                parts_in_trace_names.index(part.get_name())
+
+            except ValueError:
+                print(f"{part.get_name()} was not found in the parts of trace... Removing part from the list")
+                parts_to_remove.append(part)
+
+        #--- Remove parts
+        for part in parts_to_remove:
+            initial_parts.remove(part)
+        
+        if len(parts_to_remove) > 0:
+            print("----------------  Cleaning Parts for TDS  ----------------")
+            print("Not all the parts in the system appeared in the traces. Printing parts that didn't appeared:")
+            for part in parts_to_remove:
+                print(f"|-- {part.get_name()}")
+            print("Printing parts that appeared and are being considered for TDS:")
+            for part in initial_parts:
+                print(f"|-- {part.get_name()}")
+            print("------------------------------------------------------------")
+
+            
+
+        """
+        initial_copy = initial_parts
+        for i in range(len(initial_copy)):
+            pos = 
+            part = initial_parts[i]
+            # Loop for each simulation part
+            flag_in_trace = False
+            for part_in_trace_name in parts_in_trace:
+                # Loop for each trace part name
+                if part.get_name() == part_in_trace_name[0]:
+                    # Found a the simulation part in the trace, don't need to keep chasing
+                    flag_in_trace = True
+                    break
+            
+            #--- Check if the part was found in some of the traces
+            if flag_in_trace == False:
+                # The part was in the simulation and did't appeared in the trace, removing...
+                initial_parts.remove(part)
+                pass
+        """
 
         #--- Assign the queue object to the part
         for part in initial_parts:

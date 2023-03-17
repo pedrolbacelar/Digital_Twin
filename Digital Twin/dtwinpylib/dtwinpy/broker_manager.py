@@ -178,7 +178,7 @@ class Broker_Manager():
         
         try:
             #--- Take only the number
-            line_id = line_id_ltuple[0][0]
+            line_id = line_id_ltuple[-1][0] # Take the most recent 
 
             #--- UPDATE the part id started for the specific machine into the Real Database
             self.real_database.update_column(

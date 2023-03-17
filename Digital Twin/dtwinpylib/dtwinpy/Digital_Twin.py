@@ -434,7 +434,7 @@ class Digital_Twin():
             self.flag_time_to_synchronize = False
 
             # --- Adjust WHEN WAS the last validation (just happened)
-            self.last_Tsync = self.next_Tsync
+            self.last_Tsync = self.next_Tsync # TODO: Update this considering the updated end time!
 
             # --- Adjust WHEN WILL be the next validation
             self.next_Tsync = self.current_timestamp + self.Freq_Sync
