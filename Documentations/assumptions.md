@@ -1,11 +1,12 @@
 # Assumptions
+
+### info
 Assumptions considered for the Digital twin components developed & integrated and its use cases.
 Created on: 01/02/2023
-Updated on: 01/02/2023
+Updated on: 19/03/2023
 
-<details>
-  <summary>Model generator</summary>
-  
+## Model generator
+
 - the output file obtained from the model generator is a json dictionary.
 - stations are mentioned as nodes and queues are mentioned as arcs.
 - the maximum queue capacities available in the json file is accurate.
@@ -14,11 +15,7 @@ Updated on: 01/02/2023
 - processing time is mentioned as contemp in the json file.
 - routing/transporting times are not available.
 
-  </details>
-  
-<details>
-<summary>Example for format of json dictionary file</summary>
-
+### Example for format of json dictionary file of 2s Model
 ```Python
 {
     "nodes": [
@@ -48,46 +45,6 @@ Updated on: 01/02/2023
             "capacity": 1,
             "contemp": 5,
             "cluster": 2
-        },
-        {
-            "activity": 3,
-            "predecessors": [
-                2
-            ],
-            "successors": [
-                5               
-            ],
-            "frequency": 999,
-            "capacity": 1,
-            "contemp": 5,
-            "cluster": 2
-        },
-        {
-            "activity": 4,
-            "predecessors": [
-                2
-            ],
-            "successors": [
-                5
-            ],
-            "frequency": 999,
-            "capacity": 1,
-            "contemp": 5,
-            "cluster": 2
-        },
-        {
-            "activity": 5,
-            "predecessors": [
-                3,
-                4
-            ],
-            "successors": [
-                1
-            ],
-            "frequency": 999,
-            "capacity": 1,
-            "contemp": 5,
-            "cluster": 2
         }
     ],
     "arcs": [
@@ -103,42 +60,6 @@ Updated on: 01/02/2023
         {
             "arc": [
                 2,
-                4
-            ],
-            "capacity": 10,
-            "frequency": 1000,
-            "contemp": 1
-        },
-        {
-            "arc": [
-                2,
-                3
-            ],
-            "capacity": 10,
-            "frequency": 1000,
-            "contemp": 1
-        },
-        {
-            "arc": [
-                3,
-                5
-            ],
-            "capacity": 10,
-            "frequency": 1000,
-            "contemp": 1
-        },
-        {
-            "arc": [
-                4,
-                5
-            ],
-            "capacity": 10,
-            "frequency": 1000,
-            "contemp": 1
-        },
-        {
-            "arc": [
-                5,
                 1
             ],
             "capacity": 10,
@@ -148,20 +69,13 @@ Updated on: 01/02/2023
     ],
     "initial":[
         1,
-        0,
-        2,
-        0,
-        3,
-        4
+        0
     ]
 }
 ```
 
-</details>
 
-
-<details>
-  <summary>Model translator</summary>
+## Model translator
   
 - Model translator uses the json file from model generator as an input.
 - All the arcs are considered as individual queues. This includes multiple arcs connecting to the same station.
@@ -171,10 +85,8 @@ Updated on: 01/02/2023
   + Number of parts in the system
   + Time length of simulation
 
-  </details>
-  
- <details>
-  <summary>Use case</summary>
+
+## Use case
 
 - It is a closed loop system with fixed number of pallets.
 - The pallets are created by adding them directly to the first queue instantaneously (without interarrival time).
@@ -184,15 +96,14 @@ Updated on: 01/02/2023
 - The time delay between the communications of internal compenets of the digital twin are negligible.
 - Throughput and system time are primary performance indicators.
 - Failures are not considered for the simulation. It could be considered for synchronisation of Machine states.
-  </details>
   
- 
- <details>
-  <summary>Branching and Path Simulation</summary>
+  
+## Branching and Path Simulation
   
 - Branching machines don't have common output queues, each branching machines has a different output queue.
   So there is no case where branch 1 has as output conveyors [convey1, convey2] and other conveyor [convey1, convey3]
- </details>
+
+
 
 
 
