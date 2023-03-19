@@ -39,11 +39,11 @@ class Database():
                 print("---------- Pointer Status Initial ----------")
                 print(f"Start Time: {self.start_time}")
                 print(f"Start Time ID: {self.start_time_id}")
-                print(f"Start Time Status: {self.start_time_status}")
+                
                 print()
                 print(f"End Time: {self.end_time}")
                 print(f"End Time ID: {self.end_time_id}")
-                print(f"End Time Status: {self.end_time_status}")
+                
                 print("-------------------------------------")
 
                 
@@ -61,11 +61,13 @@ class Database():
                 print("---------- Pointer Status Updated ----------")
                 print(f"Start Time: {self.start_time}")
                 print(f"Start Time ID: {self.start_time_id}")
-                print(f"Start Time Status: {self.start_time_status}")
+                if self.start_time_status == "Finished":
+                    self.helper.printer("[ERROR][interfaceDB.py/__init__()] Pointer Start Time is 'Finished'. Not Allowed! Check logic or external interference.")
+                
                 print()
                 print(f"End Time: {self.end_time}")
                 print(f"End Time ID: {self.end_time_id}")
-                print(f"End Time Status: {self.end_time_status}")
+            
                 print("-------------------------------------")
                 
                 #--- Check for parts without the correct id within the traces
@@ -139,7 +141,7 @@ class Database():
         with sqlite3.connect(self.database_path) as db:
 
             self.start_time_id = db.execute(f"""
-                SELECT event_id, acitivity_type
+                SELECT event_id, activity_type
                 FROM real_log
                 WHERE timestamp_real >= ?
                 ORDER BY timestamp_real ASC
@@ -156,11 +158,12 @@ class Database():
                 sys.exit()
 
             # --- Update Start Pointers
-            self.start_time_id = self.start_time_id[0]
             self.start_time_status = self.start_time_id[1]
+            self.start_time_id = self.start_time_id[0]
+            
             
             self.end_time_id = db.execute(f"""
-                SELECT event_id, acitivity_type
+                SELECT event_id, activity_type
                 FROM real_log
                 WHERE timestamp_real <= ?
                 ORDER BY timestamp_real DESC
@@ -177,8 +180,9 @@ class Database():
                 sys.exit()
     
             # --- Update End Pointers
-            self.end_time_id = self.end_time_id[0]
             self.end_time_status = self.end_time_id[1]
+            self.end_time_id = self.end_time_id[0]
+            
 
     def copy_timestamp_to_timestamp_real(self):
         with sqlite3.connect(self.database_path) as db:
@@ -280,7 +284,7 @@ class Database():
 
             else:
                 (time_str, time) = self.helper.get_time_now()
-                self.helper.printer(f"{time_str} | [interfaceDB.py/update_end_time] Not found 'Started' after the end_time: {self.end_time}. Sleeping for 10 seconds and trying again", 'brown')
+                self.helper.printer(f"[interfaceDB.py/update_end_time] Not found 'Started' after the end_time: {self.end_time}. Sleeping for 10 seconds and trying again", 'brown')
                 #--- Sleep for the next try
                 sleep(10)
 
@@ -291,7 +295,7 @@ class Database():
             #--- Printer Error Message
             (tstr, t) = self.helper.get_time_now()
 
-            self.helper.printer(f"{tstr} | [ERROR][interfaceDB.py/update_end_time()] After trying {max_counter} times, it was not possible to find a 'Started' event after the end time: {self.end_time}", 'red')
+            self.helper.printer(f"[ERROR][interfaceDB.py/update_end_time()] After trying {max_counter} times, it was not possible to find a 'Started' event after the end time: {self.end_time}", 'red')
             
             
             #--- Killing the program
@@ -306,7 +310,7 @@ class Database():
         #--- Changed the pointer?
         if selected_line_id != self.end_time_id:
             (time_str, time) = self.helper.get_time_now()
-            self.helper.printer(f"{time_str} | [interfaceDB.py/update_end_time] Pointer End Time updated from {self.end_time_id} to {selected_line_id}", 'brown')
+            self.helper.printer(f"[interfaceDB.py/update_end_time] Pointer End Time updated from {self.end_time_id} to {selected_line_id}", 'brown')
 
         #--- Update the end_time
         self.end_time_id = selected_line_id
@@ -348,12 +352,12 @@ class Database():
                 if len(parts_zero) == 0:
                     flag_not_missing_part_id = False
                 else:
-                    self.helper.printer(f"{time_str} | [WARNING][interfaceDB.py/check_parts_zero()] A Part 0 (without correct ID) was detected within the traces... Sleeping for {sleep_time} seconds")
+                    self.helper.printer(f"[WARNING][interfaceDB.py/check_parts_zero()] A Part 0 (without correct ID) was detected within the traces... Sleeping for {sleep_time} seconds")
                     sleep(sleep_time)
                     timeout_counter += 1
             
             if timeout_counter > timeout_max:
-                self.helper.printer(f"{time_str} | [ERROR][interfaceDB.py/check_parts_zero()] After trying {timeout_max} ({timeout_max * sleep_time} seconds), there are still Part 0 within the selected trace. Most probably the some ESP32 is not detecting correctly the RFID Sticker", 'red')
+                self.helper.printer(f"[ERROR][interfaceDB.py/check_parts_zero()] After trying {timeout_max} ({timeout_max * sleep_time} seconds), there are still Part 0 within the selected trace. Most probably the some ESP32 is not detecting correctly the RFID Sticker", 'red')
                 
                 #--- Killing the program
                 (tstr, t) = self.helper.get_time_now()
@@ -582,7 +586,7 @@ class Database():
                     event_id INTEGER PRIMARY KEY,
                     timestamp INTEGER,
                     machine_id TEXT,
-                    acitivity_type TEXT,
+                    activity_type TEXT,
                     part_id TEXT,
                     queue TEXT,
                     current_time_str TEXT,
@@ -598,38 +602,46 @@ class Database():
 
             print("====== Starting database replicator ======")
 
-            for ii in range(last_event_id):
-                event_id = ii + 1
-                current_event = old_db.execute(f"""SELECT * FROM real_log WHERE event_id = ?""",(event_id,)).fetchone()
-                if event_id == last_event_id:
-                    break
-                else:
-                    next_event_time = old_db.execute(f"""SELECT * FROM real_log WHERE event_id = ?""",(event_id+1,)).fetchone()[7]
-                    wait = next_event_time - current_event[7]
+            try:
+                for ii in range(last_event_id):
+                    event_id = ii + 1
+                    current_event = old_db.execute(f"""SELECT * FROM real_log WHERE event_id = ?""",(event_id,)).fetchone()
+                    if event_id == last_event_id:
+                        break
+                    else:
+                        next_event_time = old_db.execute(f"""SELECT * FROM real_log WHERE event_id = ?""",(event_id+1,)).fetchone()[7]
+                        wait = next_event_time - current_event[7]
 
-                print(f"current event_id : {current_event[0]}, machine_id : {current_event[2]}, status : {current_event[3]}, part_id : {current_event[4]}, queue_id : {current_event[5]}")
-                
-                #--- Assign properties
-                machine_id= current_event[2]
-                acitivity_type = current_event[3]
-                part_id= current_event[4]
-                queue= current_event[5]
-
-
-                #--- Insert data from the replicated DB into the real database
-                with sqlite3.connect(self.database_path) as db:
+                    print(f"current event_id : {current_event[0]}, machine_id : {current_event[2]}, status : {current_event[3]}, part_id : {current_event[4]}, queue_id : {current_event[5]}")
                     
-                    #--- Take current time
-                    (timestamp_str, timestamp) = self.helper.get_time_now()
+                    #--- Assign properties
+                    machine_id= current_event[2]
+                    activity_type = current_event[3]
+                    part_id= current_event[4]
+                    queue= current_event[5]
 
-                    #--- Insert 
-                    db.execute("""
-                        INSERT INTO real_log (machine_id, acitivity_type, part_id, queue, current_time_str, timestamp_real)
-                        VALUES (?, ?, ?, ?, ?, ?)
-                    """, (machine_id, acitivity_type, part_id, queue, timestamp_str, timestamp))
 
-                    db.commit()
+                    #--- Insert data from the replicated DB into the real database
+                    with sqlite3.connect(self.database_path) as db:
+                        
+                        #--- Take current time
+                        (timestamp_str, timestamp) = self.helper.get_time_now()
 
-                #--- we sleep between the traces
-                print(f"Next trace in {wait} seconds")
-                sleep(wait)
+                        #--- Insert 
+                        db.execute("""
+                            INSERT INTO real_log (machine_id, activity_type, part_id, queue, current_time_str, timestamp_real)
+                            VALUES (?, ?, ?, ?, ?, ?)
+                        """, (machine_id, activity_type, part_id, queue, timestamp_str, timestamp))
+
+                        db.commit()
+
+                    #--- we sleep between the traces
+                    print(f"Next trace in {wait} seconds")
+                    sleep(wait)
+
+                self.helper.printer("---- Replication Done Successfully ----", 'green')
+
+            except KeyboardInterrupt:
+                self.helper.printer("---- Replication Killed ----", 'red')
+            
+            

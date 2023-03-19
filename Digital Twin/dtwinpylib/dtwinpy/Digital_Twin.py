@@ -216,7 +216,7 @@ class Digital_Twin():
 
 
         # ================================ SET UP FINISHED ================================
-        self.helper.printer(f"---- Digital Twin '{self.name}' created sucessfully at {initial_time_str} ----", 'green')       
+        self.helper.printer(f"---- Digital Twin '{self.name}' created sucessfully ----", 'green')       
         # ==================================================================================
 
     # -------------------------------------------------- INDIVIDUAL FUNCTIONS --------------------------------------------------
@@ -537,10 +537,10 @@ class Digital_Twin():
             if self.broker_manager == None:
                 (tstr, t) = self.helper.get_time_now()
                 if self.ip_address == None:
-                    self.helper.printer(f"{tstr} | [ERROR][Digital_Twin.py/External_Services()] Trying to run RCT services without a Broker because none IP ADDRESS was given. Please, provide an IP address to run online (recommendation: 192.168.0.50). For now, running offiline...", 'red')
+                    self.helper.printer(f"[ERROR][Digital_Twin.py/External_Services()] Trying to run RCT services without a Broker because none IP ADDRESS was given. Please, provide an IP address to run online (recommendation: 192.168.0.50). For now, running offiline...", 'red')
                     
                 else:
-                    self.helper.printer(f"{tstr} | [ERROR][Digital_Twin.py/External_Services()] Trying to run RCT services without a Broker because of unknown reason. Please, check it out...", 'red')
+                    self.helper.printer(f"[ERROR][Digital_Twin.py/External_Services()] Trying to run RCT services without a Broker because of unknown reason. Please, check it out...", 'red')
                     self.helper.printer(f"---- Digital Twin was killed at {tstr} ----", 'red')
                     sys.exit()
 
@@ -653,8 +653,7 @@ class Digital_Twin():
                 self.External_Services()
 
         except KeyboardInterrupt:
-            (tstr, t) = self.helper.get_time_now()
-            self.helper.printer(f"---- Digital Twin '{self.name}' was killed manually at {tstr} ----", 'red')
+            self.helper.printer(f"---- Digital Twin '{self.name}' was killed manually ----", 'red')
 
 
         

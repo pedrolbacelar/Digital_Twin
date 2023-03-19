@@ -293,9 +293,9 @@ class Broker_Manager():
             print(f"|-- Digital Database deleted successfuly from {digital_database_path}")
 
         except FileNotFoundError:
-            self.helper.printer(f"{tstr} | [WARNING][broker_manager.py/delete_databases()] The Digital Database doesn't exist yet in the path '{digital_database_path}', proceding without deleting...")
+            self.helper.printer(f"[WARNING][broker_manager.py/delete_databases()] The Digital Database doesn't exist yet in the path '{digital_database_path}', proceding without deleting...")
         except PermissionError:
-            self.helper.printer(f"{tstr} | [ERROR][broker_manager.py/delete_databases()] The Digital Database is busy somewhere, please close and try again.", 'red')
+            self.helper.printer(f"[ERROR][broker_manager.py/delete_databases()] The Digital Database is busy somewhere, please close and try again.", 'red')
             self.helper.printer(f"---- Digital Twin was killed at {tstr} ----", 'red')
             sys.exit()
 
@@ -305,9 +305,9 @@ class Broker_Manager():
             os.remove(self.real_database_path)
             print(f"|-- Real Database deleted successfuly from {self.real_database_path}")
         except FileNotFoundError:
-            self.helper.printer(f"{tstr} | [WARNING][broker_manager.py/delete_databases()] The Real Database doesn't exist yet in the path '{self.real_database_path}', proceding without deleting...")
+            self.helper.printer(f"[WARNING][broker_manager.py/delete_databases()] The Real Database doesn't exist yet in the path '{self.real_database_path}', proceding without deleting...")
         except PermissionError:
-            self.helper.printer(f"{tstr} | [ERROR][broker_manager.py/delete_databases()] The Real Database is busy somewhere, please close and try again.", 'red')
+            self.helper.printer(f"[ERROR][broker_manager.py/delete_databases()] The Real Database is busy somewhere, please close and try again.", 'red')
             self.helper.printer(f"---- Digital Twin was killed at {tstr} ----", 'red')
             sys.exit()
 
@@ -316,9 +316,9 @@ class Broker_Manager():
             os.remove(self.ID_database_path)
             print(f"|-- ID Database deleted successfuly from {self.ID_database_path}")
         except FileNotFoundError:
-            self.helper.printer(f"{tstr} | [WARNING][broker_manager.py/delete_databases()] The ID Database doesn't exist yet in the path '{self.ID_database_path}', proceding without deleting...")
+            self.helper.printer(f"[WARNING][broker_manager.py/delete_databases()] The ID Database doesn't exist yet in the path '{self.ID_database_path}', proceding without deleting...")
         except PermissionError:
-            self.helper.printer(f"{tstr} | [ERROR][broker_manager.py/delete_databases()] The ID Database is busy somewhere, please close and try again.", 'red')
+            self.helper.printer(f"[ERROR][broker_manager.py/delete_databases()] The ID Database is busy somewhere, please close and try again.", 'red')
             self.helper.printer(f"---- Digital Twin was killed at {tstr} ----", 'red')
             sys.exit()
 

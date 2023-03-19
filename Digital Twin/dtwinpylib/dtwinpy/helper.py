@@ -51,12 +51,20 @@ class Helper():
             }
     
     #--- Printing with colors
-    def printer(self, text, color= 'yellow'):
-        if self.type == "py":
-            print(f"{self.colors[color]}{text}{self.Reset}")
-        
+    def printer(self, text, color= 'yellow', time= True):
+        (tstr, t) = self.get_time_now()
+        if time == True:
+            if self.type == "py":
+                print(f"{self.colors[color]}{tstr} |{text}{self.Reset}")
+            
+            else:
+                display(Markdown(f"{self.colors[color]}{tstr} |{text}{self.Reset}"))
         else:
-            display(Markdown(f"{self.colors[color]}{text}{self.Reset}"))
+            if self.type == "py":
+                print(f"{self.colors[color]}{text}{self.Reset}")
+            
+            else:
+                display(Markdown(f"{self.colors[color]}{text}{self.Reset}"))
 
     #--- Print with Markdown language
     def markdown(self, mark):

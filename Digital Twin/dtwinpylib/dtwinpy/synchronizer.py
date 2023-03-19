@@ -21,6 +21,7 @@ class Zone():
         self.help = Helper()
         self.name = "Zone of " + machine.get_name()
         self.machine = machine
+        self.zoneID = self.machine.get_id()
         self.queue_list = queue_list
         self.zoneInd = None
         #--- Counters for in and out number of parts
@@ -33,6 +34,7 @@ class Zone():
         self.flag_initial_working = False
         self.first_zone_event = True
         self.event_type = "Started"
+        self.next_queue_position = None
 
         #--- Storing Parts ID
         self.parts_ids_in_queue = []
@@ -90,10 +92,6 @@ class Zone():
         #--- Everytime a part is ADD to the zone we add it to the queue
         self.parts_ids_in_queue.append(part_id)
 
-        print("----")
-        print(f"After Added {part_id} in queue")
-        print(f"{self.get_name()} | parts_ids_in_queue: {self.parts_ids_in_queue}")
-        print(f"{self.get_name()} | parts_ids_in_machine: {self.parts_ids_in_machine}")
 
 
     #--- A part leaves the Zone
@@ -130,11 +128,6 @@ class Zone():
             print("This might happen if the element is an initial part. If that not the case, CHECK IT OUT!")
             print(f"printing the list of parts in the queue: {self.parts_ids_in_queue}")
     
-
-        print("----")
-        print(f"After MStarted {part_id} in queue")
-        print(f"{self.get_name()} | parts_ids_in_queue: {self.parts_ids_in_queue}")
-        print(f"{self.get_name()} | parts_ids_in_machine: {self.parts_ids_in_machine}")
     def Mfinished(self, part_id):
         #-- In the case that this was the part that the machine started the simulation
         if self.flag_initial_working == True:
@@ -154,10 +147,27 @@ class Zone():
         else:
             self.help.printer(f"[WARNING][synchronizer.py/Mstarted()] {part_id} was not found in elements vector of the machine", "yellow")
 
-        print("----")
-        print(f"After MFinished {part_id} in queue")
-        print(f"{self.get_name()} | parts_ids_in_queue: {self.parts_ids_in_queue}")
-        print(f"{self.get_name()} | parts_ids_in_machine: {self.parts_ids_in_machine}")
+       
+    def next_allocation(self, queue_allocated):
+            # --- Check if it's a branching machine
+            if self.machine.get_branch() != None:
+                machine_queues = self.machine.get_queue_out()
+
+                # Create a vector with the names of the queues
+                machine_queues_name = []
+                for queue in machine_queues:
+                    machine_queues_name.append(queue.get_name())
+
+                # Find the position of the current selected queue
+                queue_position = machine_queues_name.index(queue_allocated)
+
+                # Verify if it's the last position
+                if queue_position == len(machine_queues_name) - 1:
+                    # If it was the last, the next is the first
+                    self.next_queue_position = 0
+                # Incase it was not the last
+                else:
+                    self.next_queue_position = queue_position + 1
 
     
 
@@ -230,6 +240,10 @@ class Zone():
         return self.parts_ids_in_machine
     def get_flag_initial_working(self):
         return self.flag_initial_working
+    def get_id(self):
+        return self.zoneID
+    def get_allocation_counter(self):
+        return self.next_queue_position
     #--- SETs
     def set_zoneInd(self, indicador):
         self.zoneInd = indicador
@@ -244,6 +258,7 @@ class Zone():
 
 class Synchronizer():
     def __init__(self, digital_model, real_database_path, start_time, end_time, generate_digital_model, copied_realDB = False, delta_t_treshold= 100):
+        self.helper = Helper()
         #--- Basic Information
         self.digital_model = digital_model
         self.generate_digital_model= generate_digital_model
@@ -283,20 +298,46 @@ class Synchronizer():
 
             #--- add the Zone object in the dictionary of zones
             self.zones_dict[machine_name] = new_zone
-                
+
+    def count_total_parts(self):
+        """
+        This function counts the total number of part in the system. This function is used
+        to measure if there is any added or removed part.
+        """
+        total_number_parts = 0
+        #--- Loop through each zone
+        for key in self.zones_dict:
+            #--- Take the zone object
+            zone = self.zones_dict[key]
+
+            #--- Add the number of parts in queue
+            nparts_queue = len(zone.get_part_id_in_queue())
+            total_number_parts += nparts_queue
+
+            #--- Add the number of parts in machine
+            nparts_machine = len(zone.get_part_id_in_machine())
+            total_number_parts += nparts_machine
+        
+        #--- Return the amount of parts in simulation
+        return total_number_parts
+
+
     def positioning_discovery(self):
 
-        #--- DEBUGGIN - Big picture after calculations
+        #--- Initial counting of parts in the system
+        parts_in_system = self.count_total_parts()
+
+        #--- Big picture after calculations
         print("-----------------------------------------------------------------")
-        print("Big picture BEFORE calculations")
+        print("Big picture BEFORE Sync")
+        print("ZONE |    PART IN QUEUE    |       PARTS IN MACHINE      |")
         for key in self.zones_dict:
             zone = self.zones_dict[key]
-            print(f"--- {zone.get_name()} ---")
-            print(f"Parts in queue: {zone.get_part_id_in_queue()}")
-            print(f"Part in machine: {zone.get_part_id_in_machine()}")
+            print(f"{zone.get_id()} | {zone.get_part_id_in_queue()} | {zone.get_part_id_in_machine()} |")
         print("-----------------------------------------------------------------")
 
         #--- Find the Positioning
+        print("--------- Step by Step Sync ---------")
         for event in self.full_database:
             
             #--- Extract the important informations
@@ -325,9 +366,12 @@ class Synchronizer():
                     # because now we check if the machine had a part in it.
                     pass
 
-                # For the current zone a part was finished, so we increment the Out
+                #--- For the current zone a part was finished, so we increment the Out
                 current_zone.addOut(part_id)
                 current_zone.Mfinished(part_id)
+
+                #--- Implement the next allocation based on queue
+                current_zone.next_allocation(queue_name)
 
                 #--- Discovery in which zone the part was putted based on the queues and machines
                 for key in self.zones_dict:
@@ -370,25 +414,34 @@ class Synchronizer():
                 #--- Updated the event type
                 current_zone.set_event_type("Started")
 
+            #--- Counting of parts in the system
+            new_parts_in_system = self.count_total_parts()
+            if new_parts_in_system != parts_in_system:
+                (tstr, t) = self.helper.get_time_now()
+                self.helper.printer(f"[ERROR][synchronizer.py/positioning_discovery()] A different number of parts in the system was detected. Check for parts duplications or external interference! Previous number: {parts_in_system}, New number: {new_parts_in_system}", 'red')
 
-            #--- OLD
-            #--- After finishing an event (Started or Finished)
-            # update that this zone it's not in the first event anymore
-            #current_zone.set_first_zone_event(False)
+                #--- Updated the amount of parts in the system
+                parts_in_system= new_parts_in_system
+
+            # ------------- Verbose -------------
+            print(f"Event - machine_name: {machine_name}, status: {status}, part_id: {part_id}, queue_name: {queue_name}")
+            print("ZONE |    PART IN QUEUE    |       PARTS IN MACHINE      |")
+            for key in self.zones_dict:
+                zone = self.zones_dict[key]
+                print(f"{zone.get_id()} | {zone.get_part_id_in_queue()} | {zone.get_part_id_in_machine()} |")
+
 
 
         #--- Assign Tnow according the last event of the real log
         self.Tnow = self.full_database[-1][0]
 
-        #--- DEBUGGIN - Big picture after calculations
+        #--- Big picture after calculations
         print("-----------------------------------------------------------------")
-        print("Big picture AFTER calculations")
+        print("Big picture AFTER Sync")
+        print("ZONE |    PART IN QUEUE    |       PARTS IN MACHINE      |")
         for key in self.zones_dict:
             zone = self.zones_dict[key]
-            print(f"--- {zone.get_name()} ---")
-            print(f"Parts in queue: {zone.get_part_id_in_queue()}")
-            print(f"Part in machine: {zone.get_part_id_in_machine()}")
-            print(f"Zone is Working? {zone.get_machine_working()}")
+            print(f"{zone.get_id()} | {zone.get_part_id_in_queue()} | {zone.get_part_id_in_machine()} |")
         print("-----------------------------------------------------------------")
 
 
@@ -444,6 +497,8 @@ class Synchronizer():
     def sync_aligment(self):
         #--- Loop through each zone (machine and queue in)
         for key in self.zones_dict:
+
+            # ========================== COMMON VARIABLES ==========================
             #--- For each Zone
             current_zone = self.zones_dict[key]
             current_NumParts = current_zone.get_NumParts()
@@ -455,6 +510,7 @@ class Synchronizer():
             #-- Parts within the queue
             parts_id_in_queues = current_zone.get_part_id_in_queue()
 
+            # ========================== UPDATE WORKED TIME ==========================
             #-- Parts within the machine
             if len(current_zone.get_part_id_in_machine()) > 0:
                 parts_id_in_machine = current_zone.get_part_id_in_machine()[0]
@@ -522,7 +578,7 @@ class Synchronizer():
 
                             break
 
-            # ================== Positioning of Parts in Queues ==================
+            # ========================== Positioning of Parts in Queues ==========================
             #--- Loop through the Queues to allocate the parts
             for queue in current_Queues_In:
                 queue_len = queue.get_capacity()
@@ -581,6 +637,31 @@ class Synchronizer():
                     # Since the number of parts to positioned is less than what i can, i'm done
                     break
 
+            # ========================== Updated Allocation Counter ==========================
+            current_allocation_counter = current_zone.get_allocation_counter()
+            if current_allocation_counter != None:
+                zone_machine = current_zone.get_machine()
+                machine_id = zone_machine.get_id()
+
+                # ============= Update Model.json =============
+                model_path = self.digital_model.get_model_path()
+                with open(model_path, 'r+') as model_file:
+                    data = json.load(model_file)
+
+                    for node in data['nodes']:
+                        if node['activity'] == machine_id:
+
+                            #=====================================
+                            node['allocation_counter'] = current_allocation_counter
+                            #=====================================
+
+                            # Move the file pointer to the beginning of the file
+                            model_file.seek(0)
+                            # Write the modified data back to the file
+                            json.dump(data, model_file)
+                            # Truncate any remaining data in the file
+                            model_file.truncate()
+
 
     def show(self):
         
@@ -621,7 +702,7 @@ class Synchronizer():
             self.sync_aligment()
 
             #--- Change the allocation counter of the branching machine in the json model
-            self.digital_model.changing_allocation_counter()
+            #self.digital_model.changing_allocation_counter()
 
         #--- Show the results
-        self.show()
+        #self.show()

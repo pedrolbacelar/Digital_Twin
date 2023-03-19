@@ -85,7 +85,7 @@ class Service_Handler():
         queue_position is 2 (the second position of the queue, not the 3° position)
         """
         (tstr, t)= self.helper.get_time_now()
-        self.helper.printer(f"{tstr} | Getting Parts Making Decisions....", 'brown')
+        self.helper.printer(f"Getting Parts Making Decisions....", 'brown')
 
         parts_making_decisions = []
 
@@ -99,8 +99,12 @@ class Service_Handler():
                 parts_in_queue = queue.get_all_items()
 
                 #-- Check if the queue has a part in the right position
-                if len(parts_in_queue) >= queue_position - 1:
+                if len(parts_in_queue) > queue_position - 1:
                     parts_making_decisions.append(parts_in_queue[queue_position - 1])
+
+                else:
+                    #--- No parts making decision, skip service
+                    return False
 
         return parts_making_decisions
 
@@ -117,7 +121,7 @@ class Service_Handler():
         a different path that will need to be evaluated)
         """
         (tstr, t)= self.helper.get_time_now()
-        self.helper.printer(f"{tstr} | Running Path Scenarios Generation....", 'brown')
+        self.helper.printer(f"Running Path Scenarios Generation....", 'brown')
         
         #--- Function to generate combinations recusively
         def generate_combinations(matrix):
@@ -232,7 +236,7 @@ class Service_Handler():
     # ---------- Simulate all the scenarios ----------
     def simulate_paths(self,possible_pathes, parts_making_decisions, verbose= True, plot= False):
         (tstr, t)= self.helper.get_time_now()
-        self.helper.printer(f"{tstr} | Running Path Simulation....", 'brown')
+        self.helper.printer(f"Running Path Simulation....", 'brown')
 
         #--- Dictionary to store parts and its cycle time
         rct_dict = {}
@@ -366,7 +370,7 @@ class Service_Handler():
             7) Look to the higher gain and compare with the threshold
         """
         (tstr, t)= self.helper.get_time_now()
-        self.helper.printer(f"{tstr} | Running RCT Checking....", 'brown')
+        self.helper.printer(f"Running RCT Checking....", 'brown')
         
         #--- Create the gain dictionary
         gain_dict = {}
@@ -460,7 +464,7 @@ class Service_Handler():
                         print(f"|- {convey.get_name()}")
                 
                 else:
-                    print(f"----- No Path found with gain higher than {rct_threshold * 100}% -----")
+                    self.helper.printer(f"XXX No Path found with gain higher than {rct_threshold * 100}% XXX", 'brown')
             
         #--- Return the feedback flag and the chosen path index (dictionary)
         return feeback_dict
@@ -485,13 +489,10 @@ class Service_Handler():
                 {'Part 1': [(convey 2, machine 1), (convey 5, machine 3), ...]}
         2) For each part, use the publishing function to pass the machine_id, part_id, and queue_id (convey id)
         """
-        (tstr, t)= self.helper.get_time_now()
-        self.helper.printer(f"{tstr} | Running Feedback Publishing....", 'brown')
-        
+                
         #---- Changing the feedback format
         #--- Loop through each part in the feedback dictionary
         for part_name in feedback_dict:
-            print(f"Trying to publish: {part_name}")
             #--- Get the part id from the string
             part_id = int(re.findall(r'\d+', part_name)[0])
 
@@ -505,6 +506,9 @@ class Service_Handler():
 
             #--- Check if the flag says to change the path or keep as usual
             if feedback_flag == True:
+                (tstr, t)= self.helper.get_time_now()
+                self.helper.printer(f"Running Feedback Publishing for 'Part {part_id}'....", 'brown')
+
 
                 #--- Find the location of the current part
                 part_location = None
@@ -588,16 +592,23 @@ class Service_Handler():
 
         #--- Get parts in positions of making decisions
         parts_making_decisions = self.get_parts_making_decisions(queue_position= queue_position)
+        #--- Check if there are parts making decision
+        if parts_making_decisions == False:
+            (tstr,t) = self.helper.get_time_now()
+            self.helper.printer(f"[WARNING][services.py/run_RCT_service()] No parts making decisions in the system. Check if there are no parts in the position {queue_position} of any branching machines's queues in. Skiping path simulation...")
+            #--- Skip the rest of the function
+            return 
+        
+        else:
+            #--- Simulate for each path
+            rct_dict = self.simulate_paths(possible_pathes= possible_pathes, parts_making_decisions= parts_making_decisions, verbose= verbose, plot= plot)
 
-        #--- Simulate for each path
-        rct_dict = self.simulate_paths(possible_pathes= possible_pathes, parts_making_decisions= parts_making_decisions, verbose= verbose, plot= plot)
+            #--- Check if there are a big difference between choices
+            feedback_dict = self.RCT_check(rct_dict= rct_dict, rct_threshold= 0.1,possible_pathes = possible_pathes, verbose=verbose, plot= plot)
 
-        #--- Check if there are a big difference between choices
-        feedback_dict = self.RCT_check(rct_dict= rct_dict, rct_threshold= 0.1,possible_pathes = possible_pathes, verbose=verbose, plot= plot)
-
-        #--- Send the chosen path to the rigth machine
-        self.publish_feedback(feedback_dict= feedback_dict, possible_pathes= possible_pathes)
-    
+            #--- Send the chosen path to the rigth machine
+            self.publish_feedback(feedback_dict= feedback_dict, possible_pathes= possible_pathes)
+        
     # =================================================================================
 
     # ================================== RCT Tracking ==================================
