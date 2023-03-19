@@ -116,15 +116,8 @@ Updated on: 19/03/2023
 - Blocking conditions: Blocking After Service (BAS) based on the queue capacity of downstream buffer.
 - Loading/Unloading times are already included in the processing time.
 - The time delay between the communications of internal compenets of the digital twin are negligible.
-- Throughput and system time are primary performance indicators.
-- Failures are not considered for the simulation. It could be considered for synchronisation of Machine states.
-  
-  
-## Branching and Path Simulation
-  
-- Branching machines don't have common output queues, each branching machines has a different output queue.
-  So there is no case where branch 1 has as output conveyors [convey1, convey2] and other conveyor [convey1, convey3]
-
+- Remaining cycle time for individual part, Throughput and system time are primary performance indicators.
+- Failures are not considered for the simulation.
 
 
 
