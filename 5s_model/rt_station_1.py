@@ -19,7 +19,7 @@
 #--- import required packages
 import paho.mqtt.client as mqtt
 import json
-#import datetime
+import datetime
 import time
 from time import sleep
 from ev3dev.ev3 import *
@@ -170,6 +170,9 @@ try:
                 payload_start = {"machine_id" : st_num, "status":"Started","part_id":"0","queue_id":"1"}
                 client.publish(topic = "trace", payload= json.dumps(payload_start))
                 print("---------- part entering station ", st_num,"----------")
+
+                time_entry = datetime.datetime.now().timestamp()
+                
                 sleep(0.8)
                 pusher.stop(stop_action='coast')
                 sleep(1)
@@ -179,8 +182,13 @@ try:
                 station_status = "busy"
             
                 
+            if station_status == "busy" and time_entry != None:
+                if datetime.datetime.now().timestamp() - time_entry > 10:
+                    print("[Station Fault] Part didn't enter the station after Started trace.")
+
             if station_sensor.value() > 20 and system_status == "start":
-                station.stop(stop_action = 'hold') 
+                time_entry = None
+                station.stop(stop_action = 'hold')
                 
                 for ii in range(process_time):
                     sleep(1)

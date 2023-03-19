@@ -1,0 +1,44 @@
+# datetime
+import datetime
+
+=============================================================================
+
+# move following into start_status > 0
+conveyor.run_forever(speed_sp = -conveyor_speed)
+station.run_forever(speed_sp = -station_speed)
+
+=============================================================================
+
+# [Warning] part not entering the station
+time_entry = datetime.datetime.now().timestamp()
+
+if station_status == "busy" and time_entry != None:
+	if datetime.datetime.now().timestamp() - time_entry > 10:
+		print("[Station Fault] Part didn't enter the station after Started trace.")
+
+	time_entry = None
+
+=============================================================================
+
+# process time sleep code
+for ii in range(process_time):
+	sleep(1)
+	if system_status == "stop":
+		break
+
+=============================================================================
+
+# while loop during blocking condition
+release = True
+while release:
+
+	release = False
+
+=============================================================================
+
+# unloading time sleep code
+for ii in range(3):
+	sleep(1)    #--- delay for the part to move to grey conveyor.
+	if system_status == "stop":
+		break
+==============================================================================
