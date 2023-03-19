@@ -5,73 +5,95 @@ Assumptions considered for the Digital twin components developed & integrated an
 Created on: 01/02/2023
 Updated on: 19/03/2023
 
+## Physical twin
+- The physical system is a closed loop system with multiple machines.
+- The number of pallets in the system is fixed.
+- When a part completes a cycle, the pallet enters the system with a new part.
+- Each machine has a facility to recognize which pallet it is processing (such as a RFID reader).
+- Processing capacity of all the machines are 1.
+- Queue capacity is an integer value.
+- The physical system is capable of sending the traces of key events to the 'real log' in real time.
+- The physical system is capable of recieving feedback from the digital twin and implementing it in the system.
+- The 'Started' trace is send when the pusher allows a part from the queue to the station.
+- The 'Finished' trace is send after unloading the part in the station.
+
+
 ## Model generator
 
 - the output file obtained from the model generator is a json dictionary.
 - stations are mentioned as nodes and queues are mentioned as arcs.
-- the maximum queue capacities available in the json file is accurate.
+- the maximum queue capacities available in the json file are accurate.
 - the current number of parts in each queue is not available from model generation.
-- the staion without a preedecessor is first staion and the station without a successor in the last station.
 - processing time is mentioned as contemp in the json file.
-- routing/transporting times are not available.
+- routing/transporting times are not obtained from the model generation.
+- cluster number of each machine are available in the json dictionary
+- initial part positions in each queue is known from json dictionary.
 
-### Example for format of json dictionary file of 2s Model
+### Example: format of json dictionary file of 2s Model
+
 ```Python
 {
     "nodes": [
-        {
-            "activity": 1,
-            "predecessors": [
-                5
-            ],
-            "successors": [
-                2
-            ],
-            "frequency": 999,
-            "capacity": 1,
-            "contemp": 5,
-            "cluster": 1
-        },
-        {
-            "activity": 2,
-            "predecessors": [
-                1
-            ],
-            "successors": [
-                3,
-                4
-            ],
-            "frequency": 999,
-            "capacity": 1,
-            "contemp": 5,
-            "cluster": 2
-        }
+      {
+        "activity": 1,
+        "predecessors": [
+          2
+        ],
+        "successors": [
+          2
+        ],
+        "frequency": 999,
+        "capacity": 1,
+        "contemp": 12,
+        "cluster": 1,
+        "worked_time": 0
+      },
+      {
+        "activity": 2,
+        "predecessors": [
+          1
+        ],
+        "successors": [
+          1
+        ],
+        "frequency": 999,
+        "capacity": 1,
+        "contemp": 12,
+        "cluster": 2,
+        "worked_time": 0
+      }
     ],
     "arcs": [
-        {
-            "arc": [
-                1,
-                2
-            ],
-            "capacity": 10,
-            "frequency": 1000,
-            "contemp": 1
-        },
-        {
-            "arc": [
-                2,
-                1
-            ],
-            "capacity": 10,
-            "frequency": 1000,
-            "contemp": 1
-        }
+      {
+        "arc": [
+          1,
+          2
+        ],
+        "capacity": 10,
+        "frequency": 1000,
+        "contemp": 14
+      },
+      {
+        "arc": [
+          2,
+          1
+        ],
+        "capacity": 10,
+        "frequency": 1000,
+        "contemp": 14
+      }
     ],
-    "initial":[
-        1,
-        0
+    "initial": [
+      [
+        "Part 1",
+        "Part 2"
+      ],
+      [],
+      [],
+      [],
+      []
     ]
-}
+  }
 ```
 
 
