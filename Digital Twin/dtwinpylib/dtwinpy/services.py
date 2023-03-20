@@ -453,6 +453,8 @@ class Service_Handler():
             plt.show()
 
             #--- Printing the findings
+        
+        #--- Verbose
         if verbose == True:
             for key in feeback_dict:
                 flag = feeback_dict[key][0]
@@ -494,7 +496,10 @@ class Service_Handler():
                 {'Part 1': [(convey 2, machine 1), (convey 5, machine 3), ...]}
         2) For each part, use the publishing function to pass the machine_id, part_id, and queue_id (convey id)
         """
-                
+        
+        #--- vector to store queues selected for each part making a decision
+        queues_selected = []
+
         #---- Changing the feedback format
         #--- Loop through each part in the feedback dictionary
         for part_name in feedback_dict:
@@ -549,10 +554,47 @@ class Service_Handler():
                         topic= "RCT_server"
                     )
 
+                    queues_selected.append(queue_id)
+
                     #--- Wait a little before sending the next MQTT message to no lose it
                     print("sleeping...")
                     sleep(1)
                     print("waking up!")
+
+        return (feedback_flag, queues_selected)  
+    
+    def return_first_branch(self, rct_dict, publish_results):
+        """
+        This function is used for returning some specific values from the service, in this case
+        only for the first branching machine. This values are used to send an API request in the
+        Digital Twin main code.
+
+        return (part_id, path_1, path_2, queue_id)
+        """
+
+        #--- Get the first dictionary key 
+        part_name = list(rct_dict.keys())
+        part_id = int(re.findall(r'\d+', part_name))
+
+        #--- Get the first path
+        path_1 = rct_dict[part_name][1]
+
+        #--- Get the second path
+        path_2 = rct_dict[part_name][2]
+
+        #--- Get the part id of the first part making decision
+        queue_id = publish_results[1]
+
+        #--- Get the feedback flag (if need to implement or not the feedback)
+        feedback_flag = publish_results[0]
+
+        #--- Build a result tuple
+        rct_results = (part_id, path_1, path_2, queue_id, feedback_flag)
+
+        #--- Give back the desired result
+        return rct_results
+
+
 
     # ---------------------- RCT Service ----------------------    
     def run_RCT_service(self, queue_position= 3, verbose= True, plot= False):
@@ -602,7 +644,7 @@ class Service_Handler():
             (tstr,t) = self.helper.get_time_now()
             self.helper.printer(f"[WARNING][services.py/run_RCT_service()] No parts making decisions in the system. Check if there are no parts in the position {queue_position} of any branching machines's queues in. Skiping path simulation...")
             #--- Skip the rest of the function
-            return 
+            return False
         
         else:
             #--- Simulate for each path
@@ -612,8 +654,12 @@ class Service_Handler():
             feedback_dict = self.RCT_check(rct_dict= rct_dict, rct_threshold= 0.1,possible_pathes = possible_pathes, verbose=verbose, plot= plot)
 
             #--- Send the chosen path to the rigth machine
-            self.publish_feedback(feedback_dict= feedback_dict, possible_pathes= possible_pathes)
+            publish_results= self.publish_feedback(feedback_dict= feedback_dict, possible_pathes= possible_pathes)
         
+            #--- Return for the first branch
+            rct_results = self.return_first_branch(rct_dict= rct_dict, publish_results= publish_results)
+            return rct_results
+
     # =================================================================================
 
     # ================================== RCT Tracking ==================================

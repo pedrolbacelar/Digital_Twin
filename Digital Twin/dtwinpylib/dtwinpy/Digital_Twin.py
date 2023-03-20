@@ -28,7 +28,7 @@ importlib.reload(dtwinpylib.dtwinpy.helper)
 
 
 class Digital_Twin():
-    def __init__(self, name, copied_realDB= False,model_path= None, ip_address= None, initial= True, targeted_part_id= None, targeted_cluster= None, until= None, digital_database_path= None, real_database_path= None, ID_database_path= None, Freq_Sync= 1000, Freq_Valid= 10000, delta_t_treshold= 100,Freq_Service = None, part_type= "A", loop_type= "closed", maxparts = None, template= False, keepDB= True, plot= False, verbose= True, rct_queue= 3):
+    def __init__(self, name, copied_realDB= False,model_path= None, ip_address= None, initial= True, targeted_part_id= None, targeted_cluster= None, until= None, digital_database_path= None, real_database_path= None, ID_database_path= None, Freq_Sync= 1000, Freq_Valid= 10000, delta_t_treshold= 100, logic_threshold= 0.75, input_threshold= 0.75,Freq_Service = None, part_type= "A", loop_type= "closed", maxparts = None, template= False, keepDB= True, plot= False, verbose= True, rct_queue= 3):
         self.helper = Helper()
         #--- Model Parameters
         self.name = name
@@ -37,7 +37,11 @@ class Digital_Twin():
         self.digital_model = None
         self.initial = initial
         self.copied_realDB = copied_realDB
+
+        #--- Thresholds
         self.delta_t_treshold = delta_t_treshold
+        self.logic_threshold = logic_threshold
+        self.input_threshold = input_threshold
 
         #--- User Interface options
         self.verbose= verbose
@@ -54,7 +58,7 @@ class Digital_Twin():
         self.Freq_Sync = Freq_Sync
         self.Freq_Valid = Freq_Valid
         self.Freq_Service = self.Freq_Sync
-        #self.interfaceAPI = interfaceAPI()
+        self.interfaceAPI = interfaceAPI()
 
 
         #--- Time intervals
@@ -385,6 +389,8 @@ class Digital_Twin():
         print(f"> LCSS indicator for INPUT: {lcss_indicator_input}")
         print("__________________________________________________________________")
 
+        return (lcss_indicator_logic, lcss_indicator_input)
+
     #--- Run Synchronization
     def run_sync(self, repositioning = True, start_time= None, end_time= None, copied_realDB= False):            
         
@@ -410,7 +416,9 @@ class Digital_Twin():
         synchronizer = Synchronizer(digital_model= self.digital_model, real_database_path= self.real_database_path, start_time= start_time, end_time= end_time, copied_realDB= self.copied_realDB, generate_digital_model= self.generate_digital_model, delta_t_treshold= self.delta_t_treshold)
 
         #--- Run the synchronizer (positioning)
-        synchronizer.run(repositioning= repositioning)
+        (machine_status, queue_status)= synchronizer.run(repositioning= repositioning)
+
+        return (machine_status, queue_status)
 
     #--- Run RCT Services
     def run_RCT_services(self, verbose= True, plot= False, queue_position= 3):
@@ -422,8 +430,9 @@ class Digital_Twin():
         RCT_Service = Service_Handler(name= "RCT", generate_digital_model= self.generate_digital_model, broker_manager= self.broker_manager)
         
         #--- Run the RCT Service
-        RCT_Service.run_RCT_service(verbose=verbose, plot= plot, queue_position= queue_position)
+        rct_results= RCT_Service.run_RCT_service(verbose=verbose, plot= plot, queue_position= queue_position)
 
+        return rct_results
     # ------------------------------------------------------------------------------------------------------------------------------------------------------
 
     # -------------------------------------------------- INTERNAL & EXTERNAL SERVICES --------------------------------------------------
@@ -461,39 +470,13 @@ class Digital_Twin():
             
 
             # -------------- Run Synchronization --------------
-            self.run_sync(copied_realDB= self.copied_realDB, start_time= start_time, end_time= end_time)
+            (machine_status, queue_status)= self.run_sync(copied_realDB= self.copied_realDB, start_time= start_time, end_time= end_time)
             # -------------------------------------------------
 
-            
-
-            # --- Send data through API
-            # API
-            """
-            sleep(2)
-            random_machines = [random.randint(0, 1) for _ in range(5)]
-            for machine in random_machines:
-                if machine == 0: machine = False
-                if machine == 1: machine = True
-
-            self.interfaceAPI.station_status(
-                station_1= random_machines[0],
-                station_2= random_machines[1],
-                station_3= random_machines[2],
-                station_4= random_machines[3],
-                station_5= random_machines[4])
-            
-            random_queues = [random.randint(1, 6) for _ in range(5)]
-
-            self.interfaceAPI.queue_status(
-                queue_1= random_queues[0],
-                queue_2= random_queues[1],
-                queue_3= random_queues[2],
-                queue_4= random_queues[3],
-                queue_5= random_queues[4],asset_id="7da127f5a566408db16e0aeace5181e9"
-            )
-            """
-            
-
+            # ------------------------ API INTERFACE ------------------------
+            #self.interfaceAPI.station_status(machine_status)
+            #self.interfaceAPI.queue_status(queue_status)
+            # ---------------------------------------------------------------            
 
             # --------------------- AFTER SERVICES SETTINGS ---------------------
             # --- Increase Sync Counter
@@ -540,19 +523,22 @@ class Digital_Twin():
             self.model_pointer_Valid = self.model_pointer_Sync
 
             # -------------- Run Validation --------------
-            self.run_validation(copied_realDB= self.copied_realDB, start_time= start_time, end_time= end_time)
+            (lcss_indicator_logic, lcss_indicator_input) = self.run_validation(copied_realDB= self.copied_realDB, start_time= start_time, end_time= end_time)
             # -------------------------------------------------
 
-            
+            # ------------------------ MODEL UPDATE ------------------------
 
-            # --- Send data through API
-            # API
-            """
-            sleep(2)
-            random_logic_indicator = random.uniform(0.85, 0.95)
-            random_input_indicator = random.uniform(0.75, 0.95)
-            self.interfaceAPI.indicator(logic= random_logic_indicator, input= random_input_indicator)
-            """
+            # --- Verify indicators & Model Update (TODO: maybe in the future do this base on an array of indicators takign the average)
+            if lcss_indicator_logic < self.logic_threshold:
+                self.helper.printer(f"[WARNING][Digital_Twin.py/Internal_Services()] The LOGIC indicators is lower than the threshold allowed! Logic indicator: {lcss_indicator_logic}, logic Threshold: {self.logic_threshold}. Running model generation update to correct the model!")            
+
+            if lcss_indicator_input < self.input_threshold:
+                self.helper.printer(f"[WARNING][Digital_Twin.py/Internal_Services()] The INPUT indicators is lower than the threshold allowed! Input indicator: {lcss_indicator_input}, Input Threshold: {self.input_threshold}. Running model input update to correct the model!")
+            
+            
+            # ------------------------ API INTERFACE ------------------------
+            #self.interfaceAPI.indicator(logic= lcss_indicator_logic, input= lcss_indicator_input)
+            # ---------------------------------------------------------------
 
             # --------------------- AFTER SERVICES SETTINGS ---------------------
             # --- Give back the model pointer to the present
@@ -613,19 +599,21 @@ class Digital_Twin():
             self.model_pointer_Serv = self.model_pointer_Sync
 
             # -------------------- Run Service ---------------------------------
-            self.run_RCT_services(verbose= self.verbose, plot= self.plot, queue_position= self.rct_queue)
+            rct_results= self.run_RCT_services(verbose= self.verbose, plot= self.plot, queue_position= self.rct_queue)
             # ------------------------------------------------------------------
 
-            # Send API results
-            """
-            sleep(2)
-            part_id =  random.randint(1, 10)
-            quque_id = random.randint(2, 3)
-            path_1 = random.uniform(10000, 15000)
-            path_2 = random.uniform(12000, 19000)
+            # ------------------------ API INTERFACE ------------------------
+            #--- Check if there is a path taking a decision
+            if rct_results != False:
+                #--- Assign the results
+                (part_id, path_1, path_2, queue_id, feedback_flag) = (rct_results[0], rct_results[1], rct_results[2], rct_results[3], rct_results[4])
 
-            self.interfaceAPI.RCT_server(part_id= part_id, path_1= path_1, path_2= path_2, queue_id= quque_id)
-            """
+                #--- Check if there is a path better than the normal
+                if feedback_flag == True:
+                    # ----- Send the API results -----
+                    self.interfaceAPI.RCT_server(part_id= part_id, path_1= path_1, path_2= path_2, queue_id= queue_id)
+            # ---------------------------------------------------------------
+
 
             # --------------------- AFTER SERVICES SETTINGS ---------------------
             # --- Give back the model pointer to the present

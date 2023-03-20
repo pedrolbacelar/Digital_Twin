@@ -38,6 +38,15 @@ class Broker_Manager():
         self.PID_to_UID_dict = {}
         self.PID_counter = 1
         self.old_UID = 0
+        self.UID_to_PalletID= {
+            "236439249": "Pallet 1",
+            "2041719249": "Pallet 2",
+            "2049810149": "Pallet 3",
+            "236629349": "Pallet 4",
+            "1721739249": "Pallet 5",
+            "28159349": "Pallet 6",
+            "44139349": "Pallet 7"
+        }
 
         #--- Database
         self.real_database_path = real_database_path
@@ -61,6 +70,9 @@ class Broker_Manager():
         #--- Add the UID with the current PID counter in the dictionary
         self.UID_to_PID_dict[unique_ID] = f"Part {self.PID_counter}"
 
+        #--- Get the PalletID for that specific UID
+        palletID = self.UID_to_PalletID[unique_ID]
+
         #----- Add the PID with the current UID to the dictionary
         self.PID_to_UID_dict[f"Part {self.PID_counter}"] = unique_ID
 
@@ -69,7 +81,8 @@ class Broker_Manager():
             table_name= "ID",
             uid= unique_ID,
             partid= f"Part {self.PID_counter}",
-            current_time_str= current_time_str
+            current_time_str= current_time_str,
+            palletID= palletID
 
         )
 
@@ -96,6 +109,18 @@ class Broker_Manager():
             for key in self.UID_to_PID_dict:
                 print(f"{key} | {self.UID_to_PID_dict[key]}")
     
+    def UID_checker(self, UID, machine):
+        """
+        Checks if the given UID already exists in the dictionary of UID. If exists it returns True,
+        if do not exists it return False.
+        """
+        try:
+            PID = self.UID_to_PID_dict[UID]
+            return True
+        except KeyError:
+            self.helper.printer(f"[WARNING][broker_manager.py/UID_checker()] Unique ID '{UID}' detected in {machine}. Adding UID into the database...")
+            return False
+
     def traces_handler(self, message_translated, current_timestamp, current_time_str):
         """
         This functions is used when a MQTT message of the topic 'traces' is received by the broker.
@@ -161,12 +186,20 @@ class Broker_Manager():
         machine_id = f"Machine {(message_translated['machine_id'])}"
         unique_ID = message_translated['part_id']
         
+        """[OLD]
         #--- If machine 1, (re)create the PID for that given UID
         if machine_id == "Machine 1":
             #--- Create the PID related to the UID and assign it in the PID dict
             if self.old_UID != unique_ID:
                 self.part_ID_creator(unique_ID, current_time_str)
                 self.old_UID = unique_ID
+        """
+        #--- Check if the current UID exist in the dictionary
+        uid_exists = self.UID_checker(unique_ID, machine_id)
+
+        #--- If the UID is not in the database, create the new PID and add it into the database
+        if uid_exists == False:
+            self.part_ID_creator(unique_ID, current_time_str)
 
         #--- For all the machines (including machine 1)
         # Take the corresponded PID of the given UID

@@ -666,12 +666,18 @@ class Synchronizer():
     def show(self):
         
         #--- Running Self Validation
+        """
         print("=========== Self Verification (Digital-Based) ===========")
         for key in self.zones_dict:
             current_zone = self.zones_dict[key]
             zone_NumParts = current_zone.self_validation()
         print("=========================================")
-        
+        """
+        #--- Create vectors to extract status from Sync (and send to API)
+        # (don't need to be a dictionary because the ID of the zones)
+
+        machines_status = []
+        queues_status = []
 
         #--- Print the Zones Occupation
         print("=========== Zones Occupations (Real-Based) ===========")
@@ -681,7 +687,14 @@ class Synchronizer():
             machine_working = current_zone.get_machine_working()
             indicator = current_zone.get_zoneInd()
             print(f"[{current_zone.get_name()}] NumParts = {zone_NumParts}, Machine Working = {machine_working}, Zone Indicador = {indicator}")
+
+            #--- Update Status vector
+            machines_status.append(machine_working)
+            queues_status.append(zone_NumParts)
         print("=========================================")
+
+        #--- Return the Status Vector
+        return (machines_status, queues_status)
     
     def run(self, repositioning = True):
         #--- Create the Zones for the Initial Conditions
@@ -705,4 +718,7 @@ class Synchronizer():
             #self.digital_model.changing_allocation_counter()
 
         #--- Show the results
-        #self.show()
+        (machine_status, queue_status) = self.show()
+
+        #--- Return Status Vectors
+        return (machine_status, queue_status)

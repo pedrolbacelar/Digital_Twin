@@ -98,7 +98,8 @@ class Database():
                     line_id INTEGER PRIMARY KEY,
                     UID TEXT,
                     PID TEXT,
-                    current_time_str TEXT
+                    current_time_str TEXT,
+                    palletID TEXT
                 )
                 """)
 
@@ -571,13 +572,13 @@ class Database():
             DB.commit()
 
     # --------- Function to add a UID and partid to the table ---------
-    def add_UID_partid(self, table_name, uid, partid, current_time_str):
+    def add_UID_partid(self, table_name, uid, partid, current_time_str, palletID):
         with sqlite3.connect(self.database_path) as DB:
             # Check if UID already exists in table
             result = DB.execute(f"SELECT UID FROM {table_name} WHERE UID = ?", (uid,)).fetchone()
             if result is None:
                 # UID does not exist in table, so insert new row
-                DB.execute(f"INSERT INTO {table_name} (UID, PID, current_time_str) VALUES (?, ?, ?)", (uid, partid, current_time_str))
+                DB.execute(f"INSERT INTO {table_name} (UID, PID, current_time_str, palletID) VALUES (?, ?, ?, ?)", (uid, partid, current_time_str, palletID))
             else:
                 # UID already exists in table, so update existing row
                 DB.execute(f"UPDATE {table_name} SET PID = ? WHERE UID = ?", (partid, uid))
