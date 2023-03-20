@@ -174,7 +174,7 @@ class interfaceAPI():
 
         response = requests.request("PUT", url, headers=headers, data=payload)  # PUT API call
         if not response.text:
-            print("Data PUT successfully.")
+            print(f"Following data was PUT successfully to '{aspect_name}' aspect: {payload}")
         else:
             print("Error:\n\t",response.text)
             print("Trying again ...................\n....\n....")
