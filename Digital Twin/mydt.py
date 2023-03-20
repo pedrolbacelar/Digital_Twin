@@ -1,7 +1,7 @@
 #--- Import Library
 print("Importing the libraries.....")
 from dtwinpylib.dtwinpy.Digital_Twin import Digital_Twin
-
+factory_ip = "192.168.0.50"
 #--- Create a Digital Twin object with the require inputs
 mydt = Digital_Twin(
     name= "5s_determ",
@@ -10,7 +10,7 @@ mydt = Digital_Twin(
     Freq_Valid= 60, 
     Freq_Service= 10000, 
     delta_t_treshold=21,
-    ip_address="127.0.0.1")
+    ip_address=factory_ip)
 
 #--- Run the real time Digital Twin
 mydt.run()

@@ -134,8 +134,11 @@ class interfaceAPI():
                     asset_id = assets_list["_embedded"]["assets"][ii]["assetId"]
                     # print(asset_name,asset_Id)
                     self.asset_id_flag = True
-                    return(asset_id)
-            else: print("Error:\n\tAsset not found in the assets list.\n\tVerify the accuracy of asset name and the assets list. Asset name is case sensitive.")
+                    break
+            else:
+                print("Error:\n\tAsset not found in the assets list.\n\tVerify the accuracy of asset name and the assets list. Asset name is case sensitive.")
+
+            return(asset_id)
         except IndexError:
             print("Error:\n\tAsset not found in the assets list.\n\tVerify the accuracy of asset name and the assets list. Asset name is case sensitive.")
 
@@ -182,57 +185,61 @@ class interfaceAPI():
                 print("\nPUT method failed. Attention required.")
                 print("Error:\n\t",response2.text)
 
-    def indicator(self, logic, input):
+    #--- write validation indicator [logic,input] = [float, float]
+    def indicator(self, data):
         aspect_name = "validation_indicator"
         payload = json.dumps([
             {
             "_time" : datetime.datetime.utcnow().isoformat() + 'Z',
-            "logic" : logic,
-            "input" : input
+            "logic" : data[0],
+            "input" : data[1]
             }
         ])
         self.token_check()
         self.put_timeseries(payload = payload, aspect_name=aspect_name)
 
-    def station_status(self, station_1, station_2, station_3, station_4, station_5):
+    #--- write station_status [station1, station2, station3, station4, station5] = [boolean, boolean, boolean, boolean, boolean]
+    def station_status(self, data):
         aspect_name = "station_status"
         payload = json.dumps([
             {
             "_time" : datetime.datetime.utcnow().isoformat() + 'Z',
-            "station_1" : station_1,
-            "station_2" : station_2,
-            "station_3" : station_3,
-            "station_4" : station_4,
-            "station_5" : station_5
+            "station_1" : data[0],
+            "station_2" : data[1],
+            "station_3" : data[2],
+            "station_4" : data[3],
+            "station_5" : data[4]
             }
         ])
         self.token_check()
         self.put_timeseries(payload = payload, aspect_name=aspect_name)
 
-    def queue_status(self, queue_1, queue_2, queue_3, queue_4, queue_5):
+    #--- write queue_status [queue1, queue2, queue3, queue4, queue5] = [int, int, int, int, int]
+    def queue_status(self, data):
         aspect_name = "queue_status"
         payload = json.dumps([
             {
             "_time" : datetime.datetime.utcnow().isoformat() + 'Z',
-            "queue_1" : queue_1,
-            "queue_2" : queue_2,
-            "queue_3" : queue_3,
-            "queue_4" : queue_4,
-            "queue_5" : queue_5
+            "queue_1" : data[0],
+            "queue_2" : data[1],
+            "queue_3" : data[2],
+            "queue_4" : data[3],
+            "queue_5" : data[4]
             }
         ])
         self.token_check()
         self.put_timeseries(payload = payload, aspect_name=aspect_name)
 
-    def RCT_server(self, part_id, path_1, path_2, queue_id):
+    #--- write queue_status [part id, path 1, path 2, queue id] = [int, float, float, int]
+    def RCT_server(self, data):
         aspect_name = "RCT_server"
         payload = json.dumps([
             {
             "_time" : datetime.datetime.utcnow().isoformat() + 'Z',
-            "part_id" : part_id,
-            "path_1" : path_1,
-            "path_2" : path_2,
-            "queue_id" : queue_id
+            "part_id" : data[0],
+            "path_1" : data[1],
+            "path_2" : data[2],
+            "queue_id" : data[3]
             }
         ])
         self.token_check()
