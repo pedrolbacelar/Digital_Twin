@@ -1,6 +1,4 @@
 {
-    "configuration": "FlashFreq=80,UploadSpeed=921600,DebugLevel=none,EraseFlash=none",
     "board": "esp32:esp32:esp32doit-devkit-v1",
-    "sketch": "Physical Twin\\esp32_test\\esp32_test.ino",
     "port": "COM5"
 }
