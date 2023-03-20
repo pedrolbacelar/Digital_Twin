@@ -11,7 +11,7 @@
         ],
         "frequency": 999,
         "capacity": 1,
-        "contemp": 24,
+        "contemp": 23,
         "cluster": 1,
         "worked_time": 0,
         "allocation_counter": 0
@@ -40,7 +40,7 @@
         ],
         "frequency": 999,
         "capacity": 1,
-        "contemp": 22,
+        "contemp": 23,
         "cluster": 2,
         "worked_time": 0
       },
@@ -55,7 +55,7 @@
         ],
         "frequency": 999,
         "capacity": 1,
-        "contemp": 15,
+        "contemp": 16,
         "cluster": 2,
         "worked_time": 0
       },
@@ -69,7 +69,7 @@
         ],
         "frequency": 999,
         "capacity": 1,
-        "contemp": 25,
+        "contemp": 16,
         "cluster": 2,
         "worked_time": 0
       }

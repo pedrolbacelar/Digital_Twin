@@ -24,11 +24,12 @@ importlib.reload(dtwinpylib.dtwinpy.validator)
 importlib.reload(dtwinpylib.dtwinpy.synchronizer)
 importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
 importlib.reload(dtwinpylib.dtwinpy.helper)
+importlib.reload(dtwinpylib.dtwinpy.services)
 
 
 
 class Digital_Twin():
-    def __init__(self, name, copied_realDB= False,model_path= None, ip_address= None, initial= True, targeted_part_id= None, targeted_cluster= None, until= None, digital_database_path= None, real_database_path= None, ID_database_path= None, Freq_Sync= 1000, Freq_Valid= 10000, delta_t_treshold= 100, logic_threshold= 0.75, input_threshold= 0.75,Freq_Service = None, part_type= "A", loop_type= "closed", maxparts = None, template= False, keepDB= True, plot= False, verbose= True, rct_queue= 3):
+    def __init__(self, name, copied_realDB= False,model_path= None, ip_address= None, initial= True, targeted_part_id= None, targeted_cluster= None, until= None, digital_database_path= None, real_database_path= None, ID_database_path= None, Freq_Sync= 1000, Freq_Valid= 10000, delta_t_treshold= 100, logic_threshold= 0.75, input_threshold= 0.75, rct_threshold= 0.02, Freq_Service = None, part_type= "A", loop_type= "closed", maxparts = None, template= False, keepDB= True, plot= False, verbose= True, flag_API= False, rct_queue= 3):
         self.helper = Helper()
         #--- Model Parameters
         self.name = name
@@ -42,11 +43,13 @@ class Digital_Twin():
         self.delta_t_treshold = delta_t_treshold
         self.logic_threshold = logic_threshold
         self.input_threshold = input_threshold
+        self.rct_threshold = rct_threshold
 
         #--- User Interface options
         self.verbose= verbose
         self.plot= plot
         self.rct_queue= rct_queue
+        self.flag_API = flag_API
     
         #--- Simulation stop conditions
         self.until = until
@@ -58,7 +61,8 @@ class Digital_Twin():
         self.Freq_Sync = Freq_Sync
         self.Freq_Valid = Freq_Valid
         self.Freq_Service = self.Freq_Sync
-        self.interfaceAPI = interfaceAPI()
+        if flag_API: self.interfaceAPI = interfaceAPI()
+        
 
 
         #--- Time intervals
@@ -430,7 +434,7 @@ class Digital_Twin():
         RCT_Service = Service_Handler(name= "RCT", generate_digital_model= self.generate_digital_model, broker_manager= self.broker_manager)
         
         #--- Run the RCT Service
-        rct_results= RCT_Service.run_RCT_service(verbose=verbose, plot= plot, queue_position= queue_position)
+        rct_results= RCT_Service.run_RCT_service(verbose=verbose, plot= plot, queue_position= queue_position, rct_threshold= self.rct_threshold)
 
         return rct_results
     # ------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -474,8 +478,8 @@ class Digital_Twin():
             # -------------------------------------------------
 
             # ------------------------ API INTERFACE ------------------------
-            #self.interfaceAPI.station_status(machine_status)
-            #self.interfaceAPI.queue_status(queue_status)
+            if self.flag_API: self.interfaceAPI.station_status(machine_status)
+            if self.flag_API: self.interfaceAPI.queue_status(queue_status)
             # ---------------------------------------------------------------            
 
             # --------------------- AFTER SERVICES SETTINGS ---------------------
@@ -537,7 +541,7 @@ class Digital_Twin():
             
             
             # ------------------------ API INTERFACE ------------------------
-            #self.interfaceAPI.indicator(logic= lcss_indicator_logic, input= lcss_indicator_input)
+            if self.flag_API: self.interfaceAPI.indicator([lcss_indicator_logic,lcss_indicator_input])
             # ---------------------------------------------------------------
 
             # --------------------- AFTER SERVICES SETTINGS ---------------------
@@ -611,7 +615,7 @@ class Digital_Twin():
                 #--- Check if there is a path better than the normal
                 if feedback_flag == True:
                     # ----- Send the API results -----
-                    self.interfaceAPI.RCT_server(part_id= part_id, path_1= path_1, path_2= path_2, queue_id= queue_id)
+                    if self.flag_API: self.interfaceAPI.RCT_server([part_id, path_1, path_2, queue_id])
             # ---------------------------------------------------------------
 
 

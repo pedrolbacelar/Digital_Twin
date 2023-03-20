@@ -39,12 +39,13 @@ class Service_Handler():
     the most optimized path.
 
     """
-    def __init__(self, name, generate_digital_model, broker_manager):
+    def __init__(self, name, generate_digital_model, broker_manager, rct_threshold= 0.02):
         self.helper = Helper()
         self.name = name
         self.generate_digital_model = generate_digital_model
         self.digital_model = generate_digital_model(verbose= False)
         self.broker_manager = broker_manager
+        self.rct_threshold= rct_threshold
 
         #--- Get the components from the digital model
         self.branches = self.digital_model.get_branches()
@@ -471,7 +472,7 @@ class Service_Handler():
                         print(f"|- {convey.get_name()}")
                 
                 else:
-                    self.helper.printer(f"XXX No Path found with gain higher than {rct_threshold * 100}% XXX", 'brown')
+                    self.helper.printer(f"XXX No Path found with gain higher than {rct_threshold * 100}%. Current Gain 1: {gain_dict[list(gain_dict.keys)[0]][0]}, Gain 2: {gain_dict[list(gain_dict.keys)[0]][1]} XXX", 'brown')
             
         #--- Return the feedback flag and the chosen path index (dictionary)
         return feeback_dict
@@ -573,8 +574,11 @@ class Service_Handler():
         """
 
         #--- Get the first dictionary key 
-        part_name = list(rct_dict.keys())
-        part_id = int(re.findall(r'\d+', part_name))
+        part_name_list = list(rct_dict.keys())
+        part_name = part_name_list[0]
+        print(f"part_name: {part_name}")
+        part_id = int(re.findall(r'\d+', part_name)[0])
+        print(f"part_id: {part_id}")
 
         #--- Get the first path
         path_1 = rct_dict[part_name][1]
@@ -651,7 +655,7 @@ class Service_Handler():
             rct_dict = self.simulate_paths(possible_pathes= possible_pathes, parts_making_decisions= parts_making_decisions, verbose= verbose, plot= plot)
 
             #--- Check if there are a big difference between choices
-            feedback_dict = self.RCT_check(rct_dict= rct_dict, rct_threshold= 0.1,possible_pathes = possible_pathes, verbose=verbose, plot= plot)
+            feedback_dict = self.RCT_check(rct_dict= rct_dict, rct_threshold= self.rct_threshold,possible_pathes = possible_pathes, verbose=verbose, plot= plot)
 
             #--- Send the chosen path to the rigth machine
             publish_results= self.publish_feedback(feedback_dict= feedback_dict, possible_pathes= possible_pathes)

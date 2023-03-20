@@ -329,11 +329,12 @@ class Synchronizer():
 
         #--- Big picture after calculations
         print("-----------------------------------------------------------------")
-        print("Big picture BEFORE Sync")
-        print("ZONE |    PART IN QUEUE    |       PARTS IN MACHINE      |")
+        self.helper.printer("Big picture BEFORE Sync", 'brown')
         for key in self.zones_dict:
             zone = self.zones_dict[key]
-            print(f"{zone.get_id()} | {zone.get_part_id_in_queue()} | {zone.get_part_id_in_machine()} |")
+            print(f" ------------ ZONE ID: {zone.get_id()} ------------")
+            print(f"Parts in Queue: {zone.get_part_id_in_queue()}")
+            print(f"Part in Machine: {zone.get_part_id_in_machine()}")
         print("-----------------------------------------------------------------")
 
         #--- Find the Positioning
@@ -425,11 +426,11 @@ class Synchronizer():
 
             # ------------- Verbose -------------
             print(f"Event - machine_name: {machine_name}, status: {status}, part_id: {part_id}, queue_name: {queue_name}")
-            print("ZONE |    PART IN QUEUE    |       PARTS IN MACHINE      |")
             for key in self.zones_dict:
                 zone = self.zones_dict[key]
-                print(f"{zone.get_id()} | {zone.get_part_id_in_queue()} | {zone.get_part_id_in_machine()} |")
-
+                print(f" ------------ ZONE ID: {zone.get_id()} ------------")
+                print(f"Parts in Queue: {zone.get_part_id_in_queue()}")
+                print(f"Part in Machine: {zone.get_part_id_in_machine()}")
 
 
         #--- Assign Tnow according the last event of the real log
@@ -437,11 +438,12 @@ class Synchronizer():
 
         #--- Big picture after calculations
         print("-----------------------------------------------------------------")
-        print("Big picture AFTER Sync")
-        print("ZONE |    PART IN QUEUE    |       PARTS IN MACHINE      |")
+        self.helper.printer("Big picture AFTER Sync", 'brown')
         for key in self.zones_dict:
             zone = self.zones_dict[key]
-            print(f"{zone.get_id()} | {zone.get_part_id_in_queue()} | {zone.get_part_id_in_machine()} |")
+            print(f" ------------ ZONE ID: {zone.get_id()} ------------")
+            print(f"Parts in Queue: {zone.get_part_id_in_queue()}")
+            print(f"Part in Machine: {zone.get_part_id_in_machine()}")        
         print("-----------------------------------------------------------------")
 
 
@@ -680,18 +682,16 @@ class Synchronizer():
         queues_status = []
 
         #--- Print the Zones Occupation
-        print("=========== Zones Occupations (Real-Based) ===========")
         for key in self.zones_dict:
             current_zone = self.zones_dict[key]
             zone_NumParts = current_zone.calculate_parts()
             machine_working = current_zone.get_machine_working()
             indicator = current_zone.get_zoneInd()
-            print(f"[{current_zone.get_name()}] NumParts = {zone_NumParts}, Machine Working = {machine_working}, Zone Indicador = {indicator}")
+            #print(f"[{current_zone.get_name()}] NumParts = {zone_NumParts}, Machine Working = {machine_working}, Zone Indicador = {indicator}")
 
             #--- Update Status vector
             machines_status.append(machine_working)
             queues_status.append(zone_NumParts)
-        print("=========================================")
 
         #--- Return the Status Vector
         return (machines_status, queues_status)

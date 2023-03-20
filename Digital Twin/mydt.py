@@ -10,7 +10,9 @@ mydt = Digital_Twin(
     Freq_Valid= 60, 
     Freq_Service= 10000, 
     delta_t_treshold=21,
-    ip_address=factory_ip)
+    ip_address=factory_ip,
+    flag_API= True,
+    rct_threshold= 0.02)
 
 #--- Run the real time Digital Twin
 mydt.run()
