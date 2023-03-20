@@ -29,7 +29,7 @@ importlib.reload(dtwinpylib.dtwinpy.services)
 
 
 class Digital_Twin():
-    def __init__(self, name, copied_realDB= False,model_path= None, ip_address= None, initial= True, targeted_part_id= None, targeted_cluster= None, until= None, digital_database_path= None, real_database_path= None, ID_database_path= None, Freq_Sync= 1000, Freq_Valid= 10000, delta_t_treshold= 100, logic_threshold= 0.75, input_threshold= 0.75, rct_threshold= 0.02, Freq_Service = None, part_type= "A", loop_type= "closed", maxparts = None, template= False, keepDB= True, plot= False, verbose= True, flag_API= False, rct_queue= 3):
+    def __init__(self, name, copied_realDB= False,model_path= None, ip_address= None, initial= True, targeted_part_id= None, targeted_cluster= None, until= None, digital_database_path= None, real_database_path= None, ID_database_path= None, Freq_Sync= 1000, Freq_Valid= 10000, delta_t_treshold= 100, logic_threshold= 0.75, input_threshold= 0.75, rct_threshold= 0.02, queue_position= 2, Freq_Service = None, part_type= "A", loop_type= "closed", maxparts = None, template= False, keepDB= True, plot= False, verbose= True, flag_API= False, flag_external_service= False, rct_queue= 3):
         self.helper = Helper()
         #--- Model Parameters
         self.name = name
@@ -44,12 +44,13 @@ class Digital_Twin():
         self.logic_threshold = logic_threshold
         self.input_threshold = input_threshold
         self.rct_threshold = rct_threshold
+        self.queue_position = queue_position
 
         #--- User Interface options
         self.verbose= verbose
         self.plot= plot
         self.rct_queue= rct_queue
-        self.flag_API = flag_API
+        
     
         #--- Simulation stop conditions
         self.until = until
@@ -61,9 +62,11 @@ class Digital_Twin():
         self.Freq_Sync = Freq_Sync
         self.Freq_Valid = Freq_Valid
         self.Freq_Service = self.Freq_Sync
-        if flag_API: self.interfaceAPI = interfaceAPI()
-        
 
+        #--- Flag of Features
+        self.flag_API = flag_API
+        if flag_API: self.interfaceAPI = interfaceAPI()
+        self.flag_external_service = flag_external_service
 
         #--- Time intervals
         (initial_time_str, initial_timestamp) = self.helper.get_time_now()
@@ -575,7 +578,7 @@ class Digital_Twin():
     def External_Services(self):
 
         # ====================== Running Services ======================
-        if self.flag_time_to_rct_service:
+        if self.flag_time_to_rct_service and self.flag_external_service:
             # --------------------- BEFORE SERVICES SETTINGS ---------------------
             # --- User Interface
             (current_time_str, x) = self.helper.get_time_now()
@@ -592,15 +595,15 @@ class Digital_Twin():
                     self.helper.printer(f"---- Digital Twin was killed ----", 'red')
                     sys.exit()
 
+            # --- Update Service pointer according to the current Sync Pointer
+            self.model_pointer_Serv = self.model_pointer_Sync
+
             # --- Take the subpath according to last Service pointer
             subpath = self.model_subpath_dict[self.model_pointer_Serv]
 
             # --- Update the model path for Service
             self.model_path = f"{self.model_root}/{subpath}.json"
             print(f"--- Model Path being used: {self.model_path}")
-
-            # --- Update Service pointer according to the current Sync Pointer
-            self.model_pointer_Serv = self.model_pointer_Sync
 
             # -------------------- Run Service ---------------------------------
             rct_results= self.run_RCT_services(verbose= self.verbose, plot= self.plot, queue_position= self.rct_queue)

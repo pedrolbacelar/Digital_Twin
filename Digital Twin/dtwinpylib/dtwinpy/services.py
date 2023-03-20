@@ -39,13 +39,16 @@ class Service_Handler():
     the most optimized path.
 
     """
-    def __init__(self, name, generate_digital_model, broker_manager, rct_threshold= 0.02):
+    def __init__(self, name, generate_digital_model, broker_manager, rct_threshold= 0.02, queue_position= 2):
         self.helper = Helper()
         self.name = name
         self.generate_digital_model = generate_digital_model
         self.digital_model = generate_digital_model(verbose= False)
         self.broker_manager = broker_manager
+
+        #--- Parameters
         self.rct_threshold= rct_threshold
+        self.queue_position= queue_position
 
         #--- Get the components from the digital model
         self.branches = self.digital_model.get_branches()
@@ -104,7 +107,9 @@ class Service_Handler():
                     parts_making_decisions.append(parts_in_queue[queue_position - 1])
 
                 else:
-                    #--- No parts making decision, skip service
+                    #--- No parts making decision
+
+
                     return False
 
         return parts_making_decisions
@@ -523,12 +528,26 @@ class Service_Handler():
 
                 #--- Find the location of the current part
                 part_location = None
+
                 for part in self.part_vector:
                     #-- Found the part
                     if part.get_id() == part_id:
                         #-- Get location
                         part_location = part.get_location()
+                  
+
                 if part_location != None:
+                    #--- Find in which branch the part is to know what path should be send
+                    for branch in self.branches:
+                        #--- Get machine id
+                        branch_machine = branch.get_branch_machine()
+
+                        #--- If the id of the part location matches with the id of the machine of the branch, we found it!
+                        # part location is always minos 1 than the queue id and machine id, so a part in queue 1 has location 0...
+                        if branch_machine.get_id() == part_location + 1:
+                            selected_branch_id = branch.get_id()
+
+
                     #--- Find the branch based on the Queue ID
                     for branch in self.branches:
                         branch_queue_ins = branch.get_branch_queue_in()
@@ -543,9 +562,9 @@ class Service_Handler():
                     #---- Prepare the payload
                     #--- Since the feedback is only for the rigth next branching machine,
                     # we just care about the  conveyor in which the path selected
+
                     machine_id = str(machine_selected.get_id())
-                    queue_id = str(selected_path[part_location].id)
-                    # part_id already there
+                    queue_id = str(selected_path[selected_branch_id - 1].id)
 
                     #--- Send the MQTT publish payload
                     self.broker_manager.publishing(
@@ -554,6 +573,9 @@ class Service_Handler():
                         queue_id= queue_id, 
                         topic= "RCT_server"
                     )
+                    print(f"--- Settings of the Prediction ---")
+                    print(f"|-- Part ID: Part {part_id}")
+                    print(f"|-- Model Path used: {self.digital_model.get_model_path()}")
 
                     queues_selected.append(queue_id)
 
@@ -576,9 +598,7 @@ class Service_Handler():
         #--- Get the first dictionary key 
         part_name_list = list(rct_dict.keys())
         part_name = part_name_list[0]
-        print(f"part_name: {part_name}")
         part_id = int(re.findall(r'\d+', part_name)[0])
-        print(f"part_id: {part_id}")
 
         #--- Get the first path
         path_1 = rct_dict[part_name][1]
@@ -601,7 +621,7 @@ class Service_Handler():
 
 
     # ---------------------- RCT Service ----------------------    
-    def run_RCT_service(self, queue_position= 3, verbose= True, plot= False):
+    def run_RCT_service(self, queue_position= 2, verbose= True, plot= False):
         """
         ## Description
         This run method is one of the service related to the decision making based on the 

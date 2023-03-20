@@ -198,7 +198,11 @@ class Broker_Manager():
         uid_exists = self.UID_checker(unique_ID, machine_id)
 
         #--- If the UID is not in the database, create the new PID and add it into the database
-        if uid_exists == False:
+        if uid_exists == False and machine_id != "Machine 1":
+            self.part_ID_creator(unique_ID, current_time_str)
+
+        #--- If it's Machine 1, always create a part
+        if machine_id == "Machine 1":
             self.part_ID_creator(unique_ID, current_time_str)
 
         #--- For all the machines (including machine 1)
