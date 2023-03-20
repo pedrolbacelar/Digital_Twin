@@ -85,34 +85,59 @@ class Digital_Twin():
         self.counter_Valid = 1
         self.counter_Serv = 1
 
+        #--- Model Pointers
+        self.model_pointer_Sync = 0
+        self.model_pointer_Valid = 0
+        self.model_pointer_Serv = 0
+        self.model_subpath_dict = {0: "initial"}
+        """ 
+        model_subpath_dict = {
+            pointer1: 'timestamp1_pointer1',
+            pointer2: 'timestamp2_pointer2',
+            pointer3: 'timestamp3_pointer3'.
+        }
+        """
+
     
-        #--- Model and Figure path
+        #--- Figure path
         if not os.path.exists(f"figures"):
             os.makedirs(f"figures/")
 
+        #------ Model JSON ------
+
+        #-- Models root
+        self.model_root = f"models/{self.name}"
+
         if model_path == None:
             # If folder doesn't exist, creates folder
-            if not os.path.exists(f"models"):
-                os.makedirs(f"models/")
-                
-            # Model Path default
-            self.model_path = "models/" + self.name + ".json"
+            if not os.path.exists(self.model_root):
+                os.makedirs(self.model_root)
+            
+            #-- First model name
+            first_model = "initial.json"
+
+            #-- Model Path default
+            self.model_path = f"{self.model_root}/{first_model}"
+
+            #-- Clean existing model files
+            self.helper.delete_old_model(self.model_root, first_model)
         else:
             self.model_path = model_path
 
         #-- delete the current model and copy the template
+        """
         if template == True:
             #- Delete old model
             os.remove(self.model_path)
 
             #- Copy the template into the model json
-            template_path = f"models/{self.name}_template.json"
+            template_path = f"models/{self.name}/template.json"
             try:
                 shutil.copy2(template_path, self.model_path)
                 print(f"Model copied successfuly from {template_path}!")
             except FileNotFoundError:
                 self.helper.printer(f"[ERROR][Digital_Twin.py/__init__()] The template file does not exist, please create one or remoe Template condition", 'red')
-            
+        """
 
         # --------------- Database ----------------
         # Digital Database path assign
@@ -408,13 +433,31 @@ class Digital_Twin():
         
         # ====================== Running Synchronization ======================
         if self.flag_time_to_synchronize:
+
+            # --------------------- BEFORE SERVICES SETTINGS ---------------------
             # --- User Interface
             (current_time_str, x) = self.helper.get_time_now()
-            self.helper.printer(f"{current_time_str} |[Internal Service] Starting Synchronization n° {self.counter_Sync}", 'blue')
+            self.helper.printer(f"[Internal Service] Starting Synchronization n° {self.counter_Sync}", 'blue')
 
             # --- Update Start and End time
             start_time = round(self.last_Tsync)
             end_time = round(self.next_Tsync)
+
+            # --- Update Model Sync Pointer
+            self.model_pointer_Sync += 1
+
+            # --- Duplicate current before syncing
+            (tstr, t) = self.helper.get_time_now()
+            subpath = f"{t}_{self.model_pointer_Sync}"
+            new_model_path = f"{self.model_root}/{subpath}.json"
+            self.helper.duplicate_file(self.model_path, new_model_path)
+
+            # --- Update model time dict
+            self.model_subpath_dict[self.model_pointer_Sync] = subpath
+
+            # --- Update Model Path
+            self.model_path = new_model_path
+            print(f"--- Model Path being used: {self.model_path}")
             
 
             # -------------- Run Synchronization --------------
@@ -473,18 +516,28 @@ class Digital_Twin():
             # --- User Interface
             (current_time_str, x) = self.helper.get_time_now()
             nexttime = datetime.datetime.fromtimestamp(self.next_Tsync).strftime("%d %B %H:%M:%S")
-            self.helper.printer(f"{current_time_str} |[Internal Service] System Synchronized. Next Sync (n° {self.counter_Sync}): {nexttime}", 'blue')
+            self.helper.printer(f"[Internal Service] System Synchronized. Next Sync (n° {self.counter_Sync}): {nexttime}", 'blue')
         
         # ====================== Running Validation ======================
         if  self.flag_time_to_validate:
+            # --------------------- BEFORE SERVICES SETTINGS ---------------------
             # --- User Interface
             (current_time_str, x) = self.helper.get_time_now()
-            self.helper.printer(f"{current_time_str} |[Internal Service] Starting Validation (n° {self.counter_Valid})", 'green')
-
+            self.helper.printer(f"[Internal Service] Starting Validation (n° {self.counter_Valid})", 'green')
 
             # --- Update Start and End time
             start_time = round(self.last_Tvalid)
             end_time = round(self.next_Tvalid)
+
+            # --- Take the subpath according to last validation pointer
+            subpath = self.model_subpath_dict[self.model_pointer_Valid]
+
+            # --- Update the model path for Validation
+            self.model_path = f"{self.model_root}/{subpath}.json"
+            print(f"--- Model Path being used: {self.model_path}")
+
+            # --- Update validation pointer according to the current Sync Pointer
+            self.model_pointer_Valid = self.model_pointer_Sync
 
             # -------------- Run Validation --------------
             self.run_validation(copied_realDB= self.copied_realDB, start_time= start_time, end_time= end_time)
@@ -502,6 +555,10 @@ class Digital_Twin():
             """
 
             # --------------------- AFTER SERVICES SETTINGS ---------------------
+            # --- Give back the model pointer to the present
+            subpath = self.model_subpath_dict[self.model_pointer_Valid]
+            self.model_path = f"{self.model_root}/{subpath}.json"
+
             # --- Increase Valid Counter
             self.counter_Valid += 1
 
@@ -521,7 +578,7 @@ class Digital_Twin():
             # --- User Interface
             (current_time_str, x) = self.helper.get_time_now()
             nexttime = datetime.datetime.fromtimestamp(self.next_Tvalid).strftime("%d %B %H:%M:%S")
-            self.helper.printer(f"{current_time_str} |[Internal Service] System Validated. Next Validation (n° {self.counter_Valid}): {nexttime}", 'green')
+            self.helper.printer(f"[Internal Service] System Validated. Next Validation (n° {self.counter_Valid}): {nexttime}", 'green')
 
 
     #--- External Services (RCT Services and Feedback)
@@ -529,9 +586,10 @@ class Digital_Twin():
 
         # ====================== Running Services ======================
         if self.flag_time_to_rct_service:
+            # --------------------- BEFORE SERVICES SETTINGS ---------------------
             # --- User Interface
             (current_time_str, x) = self.helper.get_time_now()
-            self.helper.printer(f"{current_time_str} |[External Service] Starting RCT Service (n° {self.counter_Serv})", 'purple')
+            self.helper.printer(f"[External Service] Starting RCT Service (n° {self.counter_Serv})", 'purple')
 
             # --- Check if Broker exists and if ip_address was given
             if self.broker_manager == None:
@@ -541,8 +599,18 @@ class Digital_Twin():
                     
                 else:
                     self.helper.printer(f"[ERROR][Digital_Twin.py/External_Services()] Trying to run RCT services without a Broker because of unknown reason. Please, check it out...", 'red')
-                    self.helper.printer(f"---- Digital Twin was killed at {tstr} ----", 'red')
+                    self.helper.printer(f"---- Digital Twin was killed ----", 'red')
                     sys.exit()
+
+            # --- Take the subpath according to last Service pointer
+            subpath = self.model_subpath_dict[self.model_pointer_Serv]
+
+            # --- Update the model path for Service
+            self.model_path = f"{self.model_root}/{subpath}.json"
+            print(f"--- Model Path being used: {self.model_path}")
+
+            # --- Update Service pointer according to the current Sync Pointer
+            self.model_pointer_Serv = self.model_pointer_Sync
 
             # -------------------- Run Service ---------------------------------
             self.run_RCT_services(verbose= self.verbose, plot= self.plot, queue_position= self.rct_queue)
@@ -560,6 +628,10 @@ class Digital_Twin():
             """
 
             # --------------------- AFTER SERVICES SETTINGS ---------------------
+            # --- Give back the model pointer to the present
+            subpath = self.model_subpath_dict[self.model_pointer_Serv]
+            self.model_path = f"{self.model_root}/{subpath}.json"
+
             # --- Increase Serv Counter
             self.counter_Serv += 1
 
@@ -579,8 +651,12 @@ class Digital_Twin():
             # --- User Interface
             (current_time_str, x) = self.helper.get_time_now()
             nexttime = datetime.datetime.fromtimestamp(self.next_Tserv).strftime("%d %B %H:%M:%S")
-            self.helper.printer(f"{current_time_str} |[External Service] System RCT completed. Next Service (n° {self.counter_Serv}): {nexttime}", 'purple')
+            self.helper.printer(f"[External Service] System RCT completed. Next Service (n° {self.counter_Serv}): {nexttime}", 'purple')
 
+            # --- Reset the targeted part id to not change the stop condition of Validation
+            self.targeted_part_id = None
+            self.targeted_cluster = None
+            
     #--- Update Flags of time
     def Update_time_flags(self):
         #--- Take the current time

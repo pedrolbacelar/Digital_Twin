@@ -14,6 +14,8 @@ helper.markdown(f"## {colors['yellow']} warning")
 #--- Common Libraries
 import datetime
 from time import sleep
+import shutil
+import os
 
 class Helper():
     def __init__(self, type= "py"):
@@ -80,6 +82,7 @@ class Helper():
     #--- Get the timestemp and translate it
     def get_time_now(self, verbose= False):
         current_timestamp = datetime.datetime.now().timestamp()
+        current_timestamp = round(current_timestamp)
         current_time = datetime.datetime.now()
         current_time_str = current_time.strftime("%d %B %H:%M:%S")
 
@@ -88,3 +91,19 @@ class Helper():
             print(f"Current Timestamp: {current_timestamp}")
 
         return (current_time_str, current_timestamp)
+    
+    #--- Copy one file into a new path
+    def duplicate_file(self, reference_file, copied_file):
+        shutil.copy2(reference_file, copied_file)
+
+    #--- Delete models (except by one specific file)
+    def delete_old_model(self, folder_path, file_to_save):
+        print(f"Deleting existing model (excepted by '{file_to_save}') from the relative folder path:'{folder_path}'")
+        model_counter = 0
+        for file_name in os.listdir(folder_path):
+            file_path = os.path.join(folder_path, file_name)
+            if file_name != file_to_save:
+                os.remove(file_path)
+                print(f"File '{file_name}' deleted...")
+                model_counter += 1
+        print(f"Done! Deleted {model_counter} successfuly")

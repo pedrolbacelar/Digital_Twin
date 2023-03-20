@@ -272,7 +272,7 @@ class Synchronizer():
         #--- Database
         #self.real_database = real_database
         self.real_database_path = real_database_path
-        self.real_database = Database(database_path=real_database_path, event_table= "real_log", start_time= start_time, end_time= end_time, copied_realDB= copied_realDB)        
+        self.real_database = Database(database_path=real_database_path, event_table= "real_log", feature_usingDB= 'sync', start_time= start_time, end_time= end_time, copied_realDB= copied_realDB)        
         self.full_database = self.real_database.read_store_data_all("real_log")
         
 

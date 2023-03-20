@@ -7,10 +7,12 @@ from time import sleep
 import keyboard
 
 class Database():
-    def __init__(self, database_path, event_table, start_time = None, end_time= None, copied_realDB= False):
+    def __init__(self, database_path, event_table, feature_usingDB= None,start_time = None, end_time= None, copied_realDB= False):
         self.helper = Helper()
+        #--- Common attributes
         self.database_path = database_path
         self.event_table = event_table
+        self.feature_usingDB = feature_usingDB
 
         #--- This both parameters are used to constrain the traces from the real log
         self.start_time = start_time
@@ -62,8 +64,9 @@ class Database():
                 print(f"Start Time: {self.start_time}")
                 print(f"Start Time ID: {self.start_time_id}")
                 if self.start_time_status == "Finished":
-                    self.helper.printer("[ERROR][interfaceDB.py/__init__()] Pointer Start Time is 'Finished'. Not Allowed! Check logic or external interference.")
-                
+                    self.helper.printer("[ERROR][interfaceDB.py/__init__()] Pointer Start Time is 'Finished'. Not Allowed! Check logic or external interference.", 'red')
+                    sys.exit()
+
                 print()
                 print(f"End Time: {self.end_time}")
                 print(f"End Time ID: {self.end_time_id}")
@@ -160,8 +163,22 @@ class Database():
             # --- Update Start Pointers
             self.start_time_status = self.start_time_id[1]
             self.start_time_id = self.start_time_id[0]
-            
-            
+
+            # --- Update Start Time in case of 'Finished'
+            if self.start_time_status == "Finished":
+                #--- Take by force the line id rigth before the last end time
+                next_start_time_id = self.forced_update_start_time()
+                self.helper.printer(f"[WARNING][interfaceDB.py/find_line_ID_start_end()] Changed Start Time by force because a initial trace was 'Finished'. Jumping start time id from {self.start_time_id} to {next_start_time_id}.")
+                
+                #--- update the start time id
+                self.start_time_id = next_start_time_id
+
+                #--- update the start time
+                with sqlite3.connect(self.database_path) as db:
+                    row= db.execute("""SELECT timestamp_real, activity_type FROM real_log WHERE event_id= ? """, (self.start_time_id,)).fetchone()
+                    self.start_time= row[0]
+                    self.start_time_status= row[1]
+
             self.end_time_id = db.execute(f"""
                 SELECT event_id, activity_type
                 FROM real_log
@@ -378,7 +395,8 @@ class Database():
                 start_time INTEGER,
                 end_time INTEGER,
                 start_time_id INTEGER,
-                end_time_id INTEGER
+                end_time_id INTEGER,
+                feature_usingDB TEXT
             )
             """)
             db.commit()
@@ -388,8 +406,8 @@ class Database():
 
             #--- Write the new pointers
             db.execute("""
-            INSERT INTO time_pointers (current_time_str, start_time, end_time, start_time_id, end_time_id)
-            VALUES (?, ?, ?, ?, ?)""", (time_str, self.start_time, self.end_time, self.start_time_id, self.end_time_id)
+            INSERT INTO time_pointers (current_time_str, start_time, end_time, start_time_id, end_time_id, feature_usingDB)
+            VALUES (?, ?, ?, ?, ?, ?)""", (time_str, self.start_time, self.end_time, self.start_time_id, self.end_time_id, self.feature_usingDB)
             )
 
             db.commit()
@@ -404,6 +422,16 @@ class Database():
 
             return last_end_time
             
+    def forced_update_start_time(self):
+        with sqlite3.connect(self.database_path) as db:
+            last_sync_endID = db.execute("""
+                SELECT end_time_id from time_pointers WHERE feature_usingDB= ?
+            """, (self.feature_usingDB,)).fetchall()
+            
+            last_sync_endID = last_sync_endID[-1][0]
+            next_sync_startID = last_sync_endID + 1
+        
+        return next_sync_startID
 
     def initialize(self, table):
         with sqlite3.connect(self.database_path) as digital_model_DB:
@@ -626,6 +654,7 @@ class Database():
                         
                         #--- Take current time
                         (timestamp_str, timestamp) = self.helper.get_time_now()
+                        timestamp = round(timestamp)
 
                         #--- Insert 
                         db.execute("""

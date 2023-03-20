@@ -35,7 +35,13 @@ class Validator():
         # database. That's why we don't initialize it.
         self.start_time = start_time
         self.end_time = end_time
-        self.real_database = Database(database_path=real_database_path, event_table= "real_log", start_time=start_time, end_time=end_time, copied_realDB= copied_realDB)
+
+        if simtype == "TDS":
+            feature_usingDB= "valid_logic"
+        if simtype == "qTDS":
+            feature_usingDB= "valid_input"
+
+        self.real_database = Database(database_path=real_database_path, event_table= "real_log", feature_usingDB= feature_usingDB, start_time=start_time, end_time=end_time, copied_realDB= copied_realDB)
         self.digital_database = self.digital_model.get_model_database()
         self.real_database_path = self.real_database.get_database_path()
 

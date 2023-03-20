@@ -1,4 +1,10 @@
+#--- Common Libraries
 import simpy
+import sys
+
+#--- Import Features
+from dtwinpylib.dtwinpy.helper import Helper
+
 
 #--- Import distributions
 from scipy.stats import norm
@@ -95,8 +101,11 @@ class Machine():
     def __init__(self, env, id, process_time, capacity, terminator, database, worked_time= 0,
         last_part_id=None, queue_in= None, queue_out= None, conveyors_out = None, blocking_policy= "BBS", 
         freq= None, cluster= None, final_machine = False, loop = "closed", exit = None, simtype = None, 
-        ptime_qTDS = None, maxparts= None, initial_part= None, targeted_part_id= None):
+        ptime_qTDS = None, maxparts= None, initial_part= None, targeted_part_id= None, until= None):
         
+        #-- Helper
+        self.helper = Helper()
+
         #-- Main Properties
         self.env = env
         self.id = id
@@ -131,6 +140,7 @@ class Machine():
         self.working = False
         self.part_started_time = self.env.now
         self.targeted_part_id = targeted_part_id
+        self.until = until # just for timeout
 
         #--- Allocation
         self.allocation_counter = 0
@@ -631,7 +641,17 @@ class Machine():
                             #--- Terminates the simulations
                             self.exit.succeed()
                         
+                        #--- Timeout in the simulation (number of parts produced higher than maximum allowed)
+                        if self.terminator.get_len_terminated() >= 100:
+                            #--- Why you produced so many parts? Maybe the system is stuck in some kind of infinity loop!
+                            self.helper.printer("[ERROR][components.py/Machine()/run()] TIMEOUT in the simulation! More than 100 parts produced, the system might be stuck in an infinity loop, please check the stop conditions. Printing stop conditions...")
+                            print("--------- Stop Conditions ---------")
+                            print(f"|-- maxparts: {self.maxparts}")
+                            print(f"|-- until: {self.until}")
+                            print(f"|-- targeted part id: {self.targeted_part_id}")
 
+                            self.helper.printer(f"---- Simulation was killed ----", 'red')
+                            sys.exit()
                 # ============ Finished Action ============
 
                 #------------------------------------------------------
@@ -661,17 +681,6 @@ class Machine():
                     self.current_state = "Allocating"      
             # ==========================================================
 
-            #-------------------- Debuging --------------------
-            """
-            if self.part_in_machine != None:
-                if self.part_in_machine.get_name() == "Part 16":
-                    pass
-            if self.env.now == 1000:
-                pass            
-            """
-            
- 
-            #---------------------------------------------------
 
 
     #--------- Defining GETs ---------

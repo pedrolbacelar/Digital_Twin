@@ -552,7 +552,7 @@ class Model():
                 self.machines_vector.append(Machine(env= self.env, id= node['activity'],freq= node['frequency'],capacity= node['capacity'], 
                 process_time= node['contemp'], database= self.Database, cluster= node['cluster'],
                 terminator= self.terminator, loop= self.loop_type, exit= self.exit, maxparts= self.maxparts,
-                targeted_part_id= self.targeted_part_id))
+                targeted_part_id= self.targeted_part_id, until= self.until))
             
             self.machines_vector[-1].set_final_machine(True)
             #====================================================================
@@ -859,6 +859,12 @@ class Model():
     def get_model_constrains(self):
         return (self.until, self.maxparts, self.targeted_part_id, self.targeted_cluster)
     # ==============================================
+
+    # ================= SETs =================
+    def set_targeted_part_id(self, value):
+        self.targeted_part_id = value
+    def set_targeted_cluster(self, value):
+        self.targeted_cluster= value
 
     def verbose(self):
         print(f"==========  Reading the Model: {self.name}  ==========")

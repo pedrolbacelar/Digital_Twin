@@ -301,6 +301,11 @@ class Service_Handler():
             #--- After finishing all the scenarios for that part, store RCT of each path
             rct_dict[part_being_simulated.get_name()] = rct_vector
 
+        # ----------------- Cleaning Stop Conditions -----------------
+        # We make this here to not have problem in integration, such as using target id to finish and not until
+        self.digital_model.set_targeted_part_id(None)
+        self.digital_model.set_targeted_cluster(None)
+
         if verbose==True:
             print("____________________________________________")
             print("------ RCT Services Results: ------")

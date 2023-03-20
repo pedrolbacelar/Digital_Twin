@@ -197,7 +197,7 @@ class Broker_Manager():
             )
 
         except IndexError:
-            self.helper.printer(f"{current_time_str} | [WARNING][BROKER]: Your Broker Manager didn't find {machine_id} with 'Part 0' in the database ({self.real_database_path}). Please, check if the previous attempt was successful.", 'yellow')
+            self.helper.printer(f"[WARNING][BROKER]: Your Broker Manager didn't find {machine_id} with 'Part 0' in the database ({self.real_database_path}). Please, check if the previous attempt was successful.", 'yellow')
         
     def rct_handler(self, message_translated):
         """
@@ -296,7 +296,7 @@ class Broker_Manager():
             self.helper.printer(f"[WARNING][broker_manager.py/delete_databases()] The Digital Database doesn't exist yet in the path '{digital_database_path}', proceding without deleting...")
         except PermissionError:
             self.helper.printer(f"[ERROR][broker_manager.py/delete_databases()] The Digital Database is busy somewhere, please close and try again.", 'red')
-            self.helper.printer(f"---- Digital Twin was killed at {tstr} ----", 'red')
+            self.helper.printer(f"---- Digital Twin was killed ----", 'red')
             sys.exit()
 
 
@@ -308,7 +308,7 @@ class Broker_Manager():
             self.helper.printer(f"[WARNING][broker_manager.py/delete_databases()] The Real Database doesn't exist yet in the path '{self.real_database_path}', proceding without deleting...")
         except PermissionError:
             self.helper.printer(f"[ERROR][broker_manager.py/delete_databases()] The Real Database is busy somewhere, please close and try again.", 'red')
-            self.helper.printer(f"---- Digital Twin was killed at {tstr} ----", 'red')
+            self.helper.printer(f"---- Digital Twin was killed ----", 'red')
             sys.exit()
 
         #- Delete ID database
@@ -398,6 +398,6 @@ class Broker_Manager():
         current_time_str = current_time.strftime("%d %B %H:%M:%S")
 
         #--- Print the payload received
-        self.helper.printer(f"[BROKER] {current_time_str} | Topic: {topic} | Payload Published: {payload_translated}", 'green')
+        self.helper.printer(f"[BROKER] Topic: {topic} | Payload Published: {payload_translated}", 'green')
 
         
