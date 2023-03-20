@@ -176,13 +176,13 @@ class interfaceAPI():
         if not response.text:
             print(f"Following data was PUT successfully to '{aspect_name}' aspect: {payload}")
         else:
-            print("Error:\n\t",response.text)
+            print(f"Error during '{aspect_name}' PUT method:\n\t",response.text)
             print("Trying again ...................\n....\n....")
             response2 = requests.request("PUT", url, headers=headers, data=payload)  # PUT API call
             if not response2.text:
                 print("Data PUT successfully.")
             else:
-                print("\nPUT method failed. Attention required.")
+                print(f"\nPUT method failed for '{aspect_name}'. Attention required.")
                 print("Error:\n\t",response2.text)
 
     #--- write validation indicator [logic,input] = [float, float]
