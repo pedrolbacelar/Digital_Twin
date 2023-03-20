@@ -590,7 +590,7 @@ class Database():
             result = DB.execute(f"SELECT UID FROM {table_name} WHERE PID = ?", (partid,)).fetchone()
             if result is None:
                 #--- [ERROR] Part ID not stored in dictionary
-                print(f"[ERROR][interfaceDB.py/get_PID()] The part id '{partid}' was not found in the database: '{self.database_path}'")
+                self.helper.printer(f"[ERROR][interfaceDB.py/get_PID()] The part id '{partid}' was not found in the database: '{self.database_path}'", 'red')
                 print("Sending a generic UID: {x}")
                 return "x"
             else:

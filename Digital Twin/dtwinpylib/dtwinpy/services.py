@@ -472,7 +472,7 @@ class Service_Handler():
                         print(f"|- {convey.get_name()}")
                 
                 else:
-                    self.helper.printer(f"XXX No Path found with gain higher than {rct_threshold * 100}%. Current Gain 1: {gain_dict[list(gain_dict.keys)[0]][0]}, Gain 2: {gain_dict[list(gain_dict.keys)[0]][1]} XXX", 'brown')
+                    self.helper.printer(f"XXX No Path found with gain higher than {rct_threshold * 100}% XXX", 'brown')
             
         #--- Return the feedback flag and the chosen path index (dictionary)
         return feeback_dict

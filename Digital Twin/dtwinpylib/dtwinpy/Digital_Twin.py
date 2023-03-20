@@ -431,10 +431,10 @@ class Digital_Twin():
         generate all possible paths, and calculate the most optimized path for those parts.
         """
         #--- Create a Service 
-        RCT_Service = Service_Handler(name= "RCT", generate_digital_model= self.generate_digital_model, broker_manager= self.broker_manager)
+        RCT_Service = Service_Handler(name= "RCT", generate_digital_model= self.generate_digital_model, broker_manager= self.broker_manager, rct_threshold= self.rct_threshold)
         
         #--- Run the RCT Service
-        rct_results= RCT_Service.run_RCT_service(verbose=verbose, plot= plot, queue_position= queue_position, rct_threshold= self.rct_threshold)
+        rct_results= RCT_Service.run_RCT_service(verbose=verbose, plot= plot, queue_position= queue_position)
 
         return rct_results
     # ------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -615,7 +615,7 @@ class Digital_Twin():
                 #--- Check if there is a path better than the normal
                 if feedback_flag == True:
                     # ----- Send the API results -----
-                    if self.flag_API: self.interfaceAPI.RCT_server([part_id, path_1, path_2, queue_id])
+                    if self.flag_API: self.interfaceAPI.RCT_server([part_id, path_1, path_2, queue_id[0][0]])
             # ---------------------------------------------------------------
 
 

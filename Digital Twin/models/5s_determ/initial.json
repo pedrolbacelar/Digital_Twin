@@ -6,15 +6,13 @@
           5
         ],
         "successors": [
-          2,
-          3
+          2
         ],
         "frequency": 999,
         "capacity": 1,
-        "contemp": 23,
+        "contemp": 16,
         "cluster": 1,
-        "worked_time": 0,
-        "allocation_counter": 0
+        "worked_time": 0
       },
       {
         "activity": 2,
@@ -22,7 +20,23 @@
           1
         ],
         "successors": [
+          3,
           4
+        ],
+        "frequency": 999,
+        "capacity": 1,
+        "contemp": 23,
+        "cluster": 2,
+        "worked_time": 0,
+        "allocation_counter": 0
+      },
+      {
+        "activity": 3,
+        "predecessors": [
+          1
+        ],
+        "successors": [
+          5
         ],
         "frequency": 999,
         "capacity": 1,
@@ -31,12 +45,12 @@
         "worked_time": 0
       },
       {
-        "activity": 3,
+        "activity": 4,
         "predecessors": [
           1
         ],
         "successors": [
-          4
+          5
         ],
         "frequency": 999,
         "capacity": 1,
@@ -45,23 +59,9 @@
         "worked_time": 0
       },
       {
-        "activity": 4,
-        "predecessors": [
-          2,
-          3
-        ],
-        "successors": [
-          5
-        ],
-        "frequency": 999,
-        "capacity": 1,
-        "contemp": 16,
-        "cluster": 2,
-        "worked_time": 0
-      },
-      {
         "activity": 5,
         "predecessors": [
+          3,
           4
         ],
         "successors": [
@@ -82,11 +82,11 @@
         ],
         "capacity": 10,
         "frequency": 1000,
-        "contemp": 20
+        "contemp": 12
       },
       {
         "arc": [
-          1,
+          2,
           3
         ],
         "capacity": 10,
@@ -100,16 +100,16 @@
         ],
         "capacity": 10,
         "frequency": 1000,
-        "contemp": 6
+        "contemp": 20
       },
       {
         "arc": [
           3,
-          4
+          5
         ],
         "capacity": 10,
         "frequency": 1000,
-        "contemp": 6
+        "contemp": 10
       },
       {
         "arc": [
