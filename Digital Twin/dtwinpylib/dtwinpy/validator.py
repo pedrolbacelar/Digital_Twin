@@ -687,6 +687,10 @@ class Validator():
             
             #--- Compare Event Sequence
             (lcss, lcss_time, lcss_indicator) = self.LCSS(Sequence1= Ys_event, Sequence1_time= Ys_time, Sequence2= Yr_event, Sequence2_time= Yr_time, delta_t= self.delta_t_treshold)
+            print("---------------------- LOGIC VALIDATION ----------------------")
+            print("---- Real Sequence:")
+            for i in range(len(Yr_event)):
+                print(f"{Yr_time[i]} | {Yr_event[i]}")
             print("--- LCSS Sequence ---")
             print(lcss)
             print("--- LCSS Time ---")
