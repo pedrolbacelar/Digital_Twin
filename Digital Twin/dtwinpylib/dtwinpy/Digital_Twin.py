@@ -7,6 +7,7 @@ from .services import Service_Handler
 from .broker_manager import Broker_Manager
 from .helper import Helper
 from .interfaceAPI import interfaceAPI
+from .updator import Updator
 
 #--- Common Libraries
 import shutil
@@ -538,10 +539,33 @@ class Digital_Twin():
             # --- Verify indicators & Model Update (TODO: maybe in the future do this base on an array of indicators takign the average)
             if lcss_indicator_logic < self.logic_threshold:
                 self.helper.printer(f"[WARNING][Digital_Twin.py/Internal_Services()] The LOGIC indicators is lower than the threshold allowed! Logic indicator: {lcss_indicator_logic}, logic Threshold: {self.logic_threshold}. Running model generation update to correct the model!")            
+                
+                #--- Create a updator for logic
+                logic_updator = Updator(
+                    update_type= 'logic',
+                    digital_model= self.digital_model,
+                    real_database_path= self.real_database_path,
+                    start_time= start_time,
+                    end_time= end_time
+                    )
+                
+                #--- Run the Logic Update
+                logic_updator.run()
 
             if lcss_indicator_input < self.input_threshold:
                 self.helper.printer(f"[WARNING][Digital_Twin.py/Internal_Services()] The INPUT indicators is lower than the threshold allowed! Input indicator: {lcss_indicator_input}, Input Threshold: {self.input_threshold}. Running model input update to correct the model!")
             
+                #--- Create a updator for input
+                input_updator = Updator(
+                    update_type= 'input',
+                    digital_model= self.digital_model,
+                    real_database_path= self.real_database_path,
+                    start_time= start_time,
+                    end_time= end_time
+                )
+
+                #--- Run the Input Update
+                input_updator.run()
             
             # ------------------------ API INTERFACE ------------------------
             if self.flag_API: self.interfaceAPI.indicator([lcss_indicator_logic,lcss_indicator_input])
