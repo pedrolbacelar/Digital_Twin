@@ -4,7 +4,6 @@ import sqlite3
 import shutil
 import sys
 from time import sleep
-import keyboard
 
 class Database():
     def __init__(self, database_path, event_table, feature_usingDB= None,start_time = None, end_time= None, copied_realDB= False):
@@ -99,7 +98,8 @@ class Database():
                     UID TEXT,
                     PID TEXT,
                     current_time_str TEXT,
-                    palletID TEXT
+                    palletID TEXT,
+                    branch_queue TEXT
                 )
                 """)
 
@@ -571,6 +571,7 @@ class Database():
             DB.execute(f"UPDATE {table} SET {column} = ?, current_time_str= ? WHERE event_id = ?", (new_value, current_time_str_, line_id))
             DB.commit()
 
+    # ============================ ID DATABASE ============================
     # --------- Function to add a UID and partid to the table ---------
     def add_UID_partid(self, table_name, uid, partid, current_time_str, palletID):
         with sqlite3.connect(self.database_path) as DB:
@@ -673,5 +674,32 @@ class Database():
 
             except KeyboardInterrupt:
                 self.helper.printer("---- Replication Killed ----", 'red')
+    
+    # --------- Write the Selected Queue from RCT ---------
+    def write_selected_branch_queue(self, UID, selected_queue):
+        with sqlite3.connect(self.database_path) as db:
+            #--- Find the line ID for the given UID
+            line_id= db.execute("""
+            SELECT line_id FROM ID WHERE UID= ?
+            """, (UID,)).fetchone()
             
-            
+            db.execute("""
+            UPDATE ID SET branch_queue= ? WHERE line_id= ?
+            """, (selected_queue, line_id))
+
+            db.commit()
+
+            print(f"Branch Queue of '{UID}' (line id: '{line_id}') updated to '{selected_queue}'")
+
+    # --------- Read Branch Queues for each Part ----------
+    def read_parts_branch_queue(self):
+        """
+        This functions read the ID database and returns the part name (PID) with 
+        their respective branch_queue.
+        """
+        with sqlite3.connect(self.database_path) as db:
+            parts_branch_queue_vect = db.execute("""
+            SELECT PID, branch_queue FROM ID
+            """).fetchall()
+
+        return parts_branch_queue_vect

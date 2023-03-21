@@ -618,7 +618,6 @@ class Model():
         # --- Setting the last allocation counter for branching machines
         self.setting_allocation_counter()
         #======================================================================
-
     # ================================================
 
     # =================== RUNNING ===================
@@ -865,6 +864,10 @@ class Model():
         self.targeted_part_id = value
     def set_targeted_cluster(self, value):
         self.targeted_cluster= value
+    def set_until(self, value):
+        self.until = value
+
+
 
     def verbose(self):
         print(f"==========  Reading the Model: {self.name}  ==========")

@@ -17,7 +17,7 @@ importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
 
 
 class Validator():
-    def __init__(self, digital_model, simtype, real_database_path, start_time, end_time, generate_digital_model, copied_realDB= False, delta_t_treshold= 100):
+    def __init__(self, digital_model, simtype, real_database_path, start_time, end_time, generate_digital_model, id_database_path= False,copied_realDB= False, delta_t_treshold= 100):
         self.helper = Helper()
         self.digital_model = digital_model
         self.generate_digital_model= generate_digital_model
@@ -41,9 +41,11 @@ class Validator():
         if simtype == "qTDS":
             feature_usingDB= "valid_input"
 
+        #--- Databases
         self.real_database = Database(database_path=real_database_path, event_table= "real_log", feature_usingDB= feature_usingDB, start_time=start_time, end_time=end_time, copied_realDB= copied_realDB)
         self.digital_database = self.digital_model.get_model_database()
         self.real_database_path = self.real_database.get_database_path()
+        self.id_database = Database(database_path=id_database_path, event_table= "ID")
 
         #--- Change the name of the table in database if it's digital to real
         with sqlite3.connect(self.real_database_path) as db:
@@ -667,11 +669,24 @@ class Validator():
         # --- Update the duration of the simulation in case that none of other parameters was give
         # (also for that you need to have start and end time)
         if (until, maxparts, targeted_part_id, targeted_cluster) == (None, None, None, None) and (self.start_time != None and self.end_time != None):
+            #--- Get the current duration between start and finish trace
             until = self.real_database.get_current_durantion()
             #-- adjust to run until the end
             until += 1
 
-        self.digital_model = self.generate_digital_model(until= until)
+            #--- Set this new stop condition in the model
+            self.digital_model.set_until(until)
+        
+        # ------- Assign Parts Queue Branches selected -------
+        read_parts_branch_queue = self.id_database.read_parts_branch_queue()
+        for machine in self.machines_vector:
+            machine.set_read_parts_branch_queue(read_parts_branch_queue)
+    
+
+        # [OLD] self.digital_model = self.generate_digital_model(until= until)
+        # Maybe this is a very wrong approach, because you're generating new components after
+        # already made changes in the property of them before. Inside of the Features (validator,
+        # synchronizer, etc we shouldn't create new modules, just update them!)
 
         # obs: I can run the simulation direct because the machines already have the type of simulation
         if self.simtype == "TDS":
@@ -687,16 +702,16 @@ class Validator():
             
             #--- Compare Event Sequence
             (lcss, lcss_time, lcss_indicator) = self.LCSS(Sequence1= Ys_event, Sequence1_time= Ys_time, Sequence2= Yr_event, Sequence2_time= Yr_time, delta_t= self.delta_t_treshold)
-            print("---------------------- LOGIC VALIDATION ----------------------")
+            
+            #--- User Interface
+            print("==================== LOGIC VALIDATION ====================")
             print("---- Real Sequence:")
             for i in range(len(Yr_event)):
                 print(f"{Yr_time[i]} | {Yr_event[i]}")
-            print("--- LCSS Sequence ---")
-            print(lcss)
-            print("--- LCSS Time ---")
-            print(lcss_time)
-            print(f">>> LCSS Indicator: {lcss_indicator}")
-            
+            print("---- Digital Sequence:")
+            for i in range(len(Yr_event)):
+                print(f"{Ys_time[i]} | {Ys_event[i]}")
+            print(f">>> LCSS Indicator Logic: {lcss_indicator}")
             print("=========================================================")
 
             return((lcss, lcss_time, lcss_indicator))
@@ -714,14 +729,17 @@ class Validator():
 
             #--- Compare Event Sequence
             (lcss, lcss_time, lcss_indicator) = self.LCSS(Sequence1= Ys_event, Sequence1_time= Ys_time, Sequence2= Yr_event, Sequence2_time= Yr_time, delta_t= self.delta_t_treshold)
-            print("--- LCSS Sequence ---")
-            print(lcss)
-            print("--- LCSS Time ---")
-            print(lcss_time)
-            print(f">>> LCSS Indicator: {lcss_indicator}")                        
-
-
-            print("===============================================================")
+            
+            #--- User Interface
+            print("==================== INPUT VALIDATION ====================")
+            print("---- Real Sequence:")
+            for i in range(len(Yr_event)):
+                print(f"{Yr_time[i]} | {Yr_event[i]}")
+            print("---- Digital Sequence:")
+            for i in range(len(Yr_event)):
+                print(f"{Ys_time[i]} | {Ys_event[i]}")
+            print(f">>> LCSS Indicator Input: {lcss_indicator}")
+            print("=========================================================")
 
             return((lcss, lcss_time, lcss_indicator))
     # =======================================================================
