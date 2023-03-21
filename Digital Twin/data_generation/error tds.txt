@@ -1,0 +1,1479 @@
+PS D:\POLIMI\Digital twins\Digital_Twin\Digital Twin> python .\mydt.py
+Importing the libraries.....
+API object created for '5s_Model' using 'premium' account.
+Deleting existing model (excepted by 'initial.json') from the relative folder path:'models/5s_determ'
+File '1679423255_1.json' deleted...
+File '1679423285_2.json' deleted...
+Done! Deleted 2 successfuly
+--- printing databases paths ---
+Digital Database: 'databases/5s_determ/digital_database.db'
+Real Database: 'databases/5s_determ/real_database.db'
+ID Database: 'databases/5s_determ/ID_database.db'
+|- Deleting existing databases...
+21 March 19:30:19 |[WARNING][broker_manager.py/delete_databases()] The Digital Database doesn't exist yet in the path 'databases/5s_determ/digital_database.db', proceding without deleting...
+|-- Real Database deleted successfuly from databases/5s_determ/real_database.db
+|-- ID Database deleted successfuly from databases/5s_determ/ID_database.db
+Broker Manager internally create for publishing feedback...
+21 March 19:30:19 |---- Digital Twin '5s_determ' created sucessfully ----
+21 March 19:30:48 |[Internal Service] Starting Synchronization n° 1
+--- Model Path being used: models/5s_determ/1679423449_1.json
+---------- Pointer Status Initial ----------
+Start Time: 1679423419
+Start Time ID: 1
+
+End Time: 1679423449
+End Time ID: 10
+-------------------------------------
+ 21 March 19:30:48 |[interfaceDB.py/update_end_time] Not found 'Started' after the end_time: 1679423449. Sleeping for 10 seconds and trying again
+ 21 March 19:30:58 |[interfaceDB.py/update_end_time] Pointer End Time updated from 10 to 11
+---------- Pointer Status Updated ----------
+Start Time: 1679423419
+Start Time ID: 1
+
+End Time: 1679423449
+End Time ID: 11
+-------------------------------------
+parts_zero: []
+-----------------------------------------------------------------
+ 21 March 19:30:58 |Big picture BEFORE Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9']
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10', 'Part 11']
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: []
+-----------------------------------------------------------------
+--------- Step by Step Sync ---------
+21 March 19:30:58 |[WARNING][synchronizer.py/Mstarted()] Part 4 was not found in elements vector of the queue
+This might happen if the element is an initial part. If that not the case, CHECK IT OUT!
+printing the list of parts in the queue: ['Part 7', 'Part 8', 'Part 9']
+21 March 19:30:58 |[ERROR][synchronizer.py/positioning_discovery()] A different number of parts in the system was detected. Check for parts duplications or external interference! Previous number: 12, New number: 13
+Event - machine_name: Machine 3, status: Started, part_id: Part 4, queue_name: Queue 3
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10', 'Part 11']
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: []
+21 March 19:30:58 |[WARNING][synchronizer.py/Mstarted()] Part 1 was not found in elements vector of the queue
+This might happen if the element is an initial part. If that not the case, CHECK IT OUT!
+printing the list of parts in the queue: ['Part 10', 'Part 11']
+21 March 19:30:58 |[ERROR][synchronizer.py/positioning_discovery()] A different number of parts in the system was detected. Check for parts duplications or external interference! Previous number: 13, New number: 14
+Event - machine_name: Machine 4, status: Started, part_id: Part 1, queue_name: Queue 4
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10', 'Part 11']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: []
+21 March 19:30:58 |[WARNING][synchronizer.py/Mstarted()] Part 2 was not found in elements vector of the queue
+This might happen if the element is an initial part. If that not the case, CHECK IT OUT!
+printing the list of parts in the queue: ['Part 12']
+21 March 19:30:58 |[ERROR][synchronizer.py/positioning_discovery()] A different number of parts in the system was detected. Check for parts duplications or external interference! Previous number: 14, New number: 15
+Event - machine_name: Machine 5, status: Started, part_id: Part 2, queue_name: Queue 5
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10', 'Part 11']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: ['Part 2']
+21 March 19:30:58 |[WARNING][synchronizer.py/Mstarted()] Part 3 was not found in elements vector of the queue
+This might happen if the element is an initial part. If that not the case, CHECK IT OUT!
+printing the list of parts in the queue: ['Part 4', 'Part 5', 'Part 6']
+21 March 19:30:58 |[ERROR][synchronizer.py/positioning_discovery()] A different number of parts in the system was detected. Check for parts duplications or external interference! Previous number: 15, New number: 16
+Event - machine_name: Machine 2, status: Started, part_id: Part 3, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10', 'Part 11']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: ['Part 2']
+21 March 19:30:58 |[WARNING][synchronizer.py/Mstarted()] Part 5 was not found in elements vector of the queue
+This might happen if the element is an initial part. If that not the case, CHECK IT OUT!
+printing the list of parts in the queue: ['Part 1', 'Part 2', 'Part 3']
+21 March 19:30:58 |[ERROR][synchronizer.py/positioning_discovery()] A different number of parts in the system was detected. Check for parts duplications or external interference! Previous number: 16, New number: 17
+Event - machine_name: Machine 1, status: Started, part_id: Part 5, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10', 'Part 11']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: ['Part 2']
+Machine 5 (final machine) just finisehd a part, adding a new one: Part 13 to Zone of Machine 1
+Event - machine_name: Machine 5, status: Finished, part_id: Part 2, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 13']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10', 'Part 11']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: []
+Event - machine_name: Machine 1, status: Finished, part_id: Part 5, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 13']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 5']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10', 'Part 11']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: []
+21 March 19:30:58 |[WARNING][synchronizer.py/Mstarted()] Part 6 was not found in elements vector of the queue
+This might happen if the element is an initial part. If that not the case, CHECK IT OUT!
+printing the list of parts in the queue: ['Part 1', 'Part 2', 'Part 3', 'Part 13']
+21 March 19:30:58 |[ERROR][synchronizer.py/positioning_discovery()] A different number of parts in the system was detected. Check for parts duplications or external interference! Previous number: 17, New number: 18
+Event - machine_name: Machine 1, status: Started, part_id: Part 6, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 13']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 5']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10', 'Part 11']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: []
+Event - machine_name: Machine 2, status: Finished, part_id: Part 3, queue_name: Queue 3
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 13']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 5']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10', 'Part 11']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: []
+21 March 19:30:58 |[WARNING][synchronizer.py/Mstarted()] Part 7 was not found in elements vector of the queue
+This might happen if the element is an initial part. If that not the case, CHECK IT OUT!
+printing the list of parts in the queue: ['Part 4', 'Part 5', 'Part 6', 'Part 5']
+21 March 19:30:58 |[ERROR][synchronizer.py/positioning_discovery()] A different number of parts in the system was detected. Check for parts duplications or external interference! Previous number: 18, New number: 19
+Event - machine_name: Machine 2, status: Started, part_id: Part 7, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 13']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 5']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10', 'Part 11']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: []
+Event - machine_name: Machine 1, status: Finished, part_id: Part 6, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 13']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 5', 'Part 6']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10', 'Part 11']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: []
+-----------------------------------------------------------------
+ 21 March 19:30:58 |Big picture AFTER Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 13']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 5', 'Part 6']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10', 'Part 11']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: []
+-----------------------------------------------------------------
+Following data was PUT successfully to 'station_status' aspect: [{"_time": "2023-03-21T18:30:58.789072Z", "station_1": false, "station_2": true, "station_3": true, "station_4": true, "station_5": false}]
+Following data was PUT successfully to 'queue_status' aspect: [{"_time": "2023-03-21T18:30:59.310071Z", "queue_1": 2, "queue_2": 4, "queue_3": 4, "queue_4": 2, "queue_5": 0}]
+21 March 19:30:59 |[Internal Service] System Synchronized. Next Sync (n° 2): 21 March 19:31:19
+21 March 19:31:18 |[Internal Service] Starting Synchronization n° 2
+--- Model Path being used: models/5s_determ/1679423479_2.json
+---------- Pointer Status Initial ----------
+Start Time: 1679423450
+Start Time ID: 12
+
+End Time: 1679423479
+End Time ID: 23
+-------------------------------------
+ 21 March 19:31:19 |[interfaceDB.py/update_end_time] Pointer End Time updated from 23 to 24
+---------- Pointer Status Updated ----------
+Start Time: 1679423450
+Start Time ID: 12
+
+End Time: 1679423479
+End Time ID: 24
+-------------------------------------
+parts_zero: []
+-----------------------------------------------------------------
+ 21 March 19:31:21 |Big picture BEFORE Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 13']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 5', 'Part 6']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10', 'Part 11']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: []
+-----------------------------------------------------------------
+--------- Step by Step Sync ---------
+21 March 19:31:21 |[WARNING][synchronizer.py/Mstarted()] Part 8 was not found in elements vector of the queue
+This might happen if the element is an initial part. If that not the case, CHECK IT OUT!
+printing the list of parts in the queue: ['Part 1', 'Part 2', 'Part 3', 'Part 13']
+21 March 19:31:21 |[ERROR][synchronizer.py/positioning_discovery()] A different number of parts in the system was detected. Check for parts duplications or external interference! Previous number: 19, New number: 20
+Event - machine_name: Machine 1, status: Started, part_id: Part 8, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 13']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 5', 'Part 6']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10', 'Part 11']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: []
+Event - machine_name: Machine 2, status: Finished, part_id: Part 7, queue_name: Queue 4
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 13']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 5', 'Part 6']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10', 'Part 11', 'Part 7']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: []
+21 March 19:31:23 |[WARNING][synchronizer.py/Mstarted()] Part 9 was not found in elements vector of the queue
+This might happen if the element is an initial part. If that not the case, CHECK IT OUT!
+printing the list of parts in the queue: ['Part 4', 'Part 5', 'Part 6', 'Part 5', 'Part 6']
+21 March 19:31:23 |[ERROR][synchronizer.py/positioning_discovery()] A different number of parts in the system was detected. Check for parts duplications or external interference! Previous number: 20, New number: 21
+Event - machine_name: Machine 2, status: Started, part_id: Part 9, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 13']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 5', 'Part 6']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10', 'Part 11', 'Part 7']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: []
+Event - machine_name: Machine 1, status: Finished, part_id: Part 8, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 13']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 5', 'Part 6', 'Part 8']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10', 'Part 11', 'Part 7']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: []
+Event - machine_name: Machine 4, status: Finished, part_id: Part 1, queue_name: Queue 5
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 13']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 5', 'Part 6', 'Part 8']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10', 'Part 11', 'Part 7']
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12', 'Part 1']
+Part in Machine: []
+21 March 19:31:24 |[WARNING][synchronizer.py/Mstarted()] Part 11 was not found in elements vector of the queue
+This might happen if the element is an initial part. If that not the case, CHECK IT OUT!
+printing the list of parts in the queue: ['Part 1', 'Part 2', 'Part 3', 'Part 13']
+21 March 19:31:24 |[ERROR][synchronizer.py/positioning_discovery()] A different number of parts in the system was detected. Check for parts duplications or external interference! Previous number: 21, New number: 22
+Event - machine_name: Machine 1, status: Started, part_id: Part 11, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 13']
+Part in Machine: ['Part 11']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 5', 'Part 6', 'Part 8']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10', 'Part 11', 'Part 7']
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12', 'Part 1']
+Part in Machine: []
+Event - machine_name: Machine 4, status: Started, part_id: Part 10, queue_name: Queue 4
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 13']
+Part in Machine: ['Part 11']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 5', 'Part 6', 'Part 8']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 7']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12', 'Part 1']
+Part in Machine: []
+Event - machine_name: Machine 5, status: Started, part_id: Part 1, queue_name: Queue 5
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 13']
+Part in Machine: ['Part 11']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 5', 'Part 6', 'Part 8']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 7']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: ['Part 1']
+Event - machine_name: Machine 3, status: Finished, part_id: Part 4, queue_name: Queue 5
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 13']
+Part in Machine: ['Part 11']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 5', 'Part 6', 'Part 8']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3']
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 7']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12', 'Part 4']
+Part in Machine: ['Part 1']
+21 March 19:31:25 |[WARNING][synchronizer.py/Mstarted()] Part 12 was not found in elements vector of the queue
+This might happen if the element is an initial part. If that not the case, CHECK IT OUT!
+printing the list of parts in the queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3']
+21 March 19:31:25 |[ERROR][synchronizer.py/positioning_discovery()] A different number of parts in the system was detected. Check for parts duplications or external interference! Previous number: 22, New number: 23
+Event - machine_name: Machine 3, status: Started, part_id: Part 12, queue_name: Queue 3
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 13']
+Part in Machine: ['Part 11']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 5', 'Part 6', 'Part 8']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 7']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12', 'Part 4']
+Part in Machine: ['Part 1']
+Event - machine_name: Machine 1, status: Finished, part_id: Part 11, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 13']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 5', 'Part 6', 'Part 8', 'Part 11']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 7']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12', 'Part 4']
+Part in Machine: ['Part 1']
+Machine 5 (final machine) just finisehd a part, adding a new one: Part 14 to Zone of Machine 1
+Event - machine_name: Machine 5, status: Finished, part_id: Part 1, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 13', 'Part 14']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 5', 'Part 6', 'Part 8', 'Part 11']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 7']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12', 'Part 4']
+Part in Machine: []
+Event - machine_name: Machine 2, status: Finished, part_id: Part 9, queue_name: Queue 3
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 13', 'Part 14']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 5', 'Part 6', 'Part 8', 'Part 11']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3', 'Part 9']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 7']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12', 'Part 4']
+Part in Machine: []
+-----------------------------------------------------------------
+ 21 March 19:31:26 |Big picture AFTER Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 13', 'Part 14']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 5', 'Part 6', 'Part 8', 'Part 11']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3', 'Part 9']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 7']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12', 'Part 4']
+Part in Machine: []
+-----------------------------------------------------------------
+Following data was PUT successfully to 'station_status' aspect: [{"_time": "2023-03-21T18:31:26.548304Z", "station_1": false, "station_2": false, "station_3": true, "station_4": true, "station_5": false}]
+Following data was PUT successfully to 'queue_status' aspect: [{"_time": "2023-03-21T18:31:27.031305Z", "queue_1": 3, "queue_2": 6, "queue_3": 5, "queue_4": 3, "queue_5": 2}]
+21 March 19:31:27 |[Internal Service] System Synchronized. Next Sync (n° 3): 21 March 19:31:49
+21 March 19:31:27 |[Internal Service] Starting Validation (n° 1)
+--- Model Path being used: models/5s_determ/initial.json
+---------- Pointer Status Initial ----------
+Start Time: 1679423419
+Start Time ID: 1
+
+End Time: 1679423479
+End Time ID: 24
+-------------------------------------
+---------- Pointer Status Updated ----------
+Start Time: 1679423419
+Start Time ID: 1
+
+End Time: 1679423479
+End Time ID: 24
+-------------------------------------
+parts_zero: []
+-----------------------------------------------------------------------------------------
+=== matrix_ptime_qTDS ===
+[VALIDATOR] Simulation Deterministic - No correlation of randoness needed
+
+=== matrix_ptime_TDS ===
+Part 1: [38, 10]
+Part 2: [9]
+Part 3: [17]
+Part 4: [45]
+Part 5: [11]
+Part 6: [11]
+Part 7: [18]
+Part 8: [12]
+Part 9: [17]
+Part 10: []
+Part 11: [11]
+Part 12: []
+-----------------------------------------------------------------------------------------
+parts_branch_queue_vect = [('Part 13', None), ('Part 11', None), ('Part 3', None), ('Part 4', None), ('Part 5', None), ('Part 6', None), ('Part 7', None), ('Part 8', None), ('Part 9', None), ('Part 10', None), ('Part 12', None)]
+============ Running Trace Driven Simulation ============
+### ============ Simulation Started ============ ###
+Time: 0 - [Machine 1] got Part 1 from Queue 1 (capacity= 2)
+Time: 0 - [Machine 2] got Part 4 from Queue 2 (capacity= 2)
+Time: 0 - [Machine 3] got Part 7 from Queue 3 (capacity= 2)
+Time: 0 - [Machine 4] got Part 10 from Queue 4 (capacity= 1)
+Time: 0 - [Machine 5] got Part 12 from Queue 5 (capacity= 0)
+Time: 10 - [Terminator] xxx Part 12 terminated xxx
+Time: 10 - [Terminator] Part 13 replaced
+Time: 10 - [Conveyor towards Queue 1] GOT Part 13
+Time: 18 - [Conveyor towards Queue 5] GOT Part 7
+Time: 18 - [Machine 3] got Part 8 from Queue 3 (capacity= 1)
+Time: 20 - [Conveyor towards Queue 1] PUT Part 13 in the Queue 1
+Time: 28 - [Conveyor towards Queue 5] PUT Part 7 in the Queue 5
+Time: 29 - [Machine 5] got Part 7 from Queue 5 (capacity= 0)
+Time: 30 - [Conveyor towards Queue 5] GOT Part 8
+Time: 30 - [Machine 3] got Part 9 from Queue 3 (capacity= 0)
+Time: 38 - [Conveyor towards Queue 2] GOT Part 1
+Time: 38 - [Machine 1] got Part 2 from Queue 1 (capacity= 2)
+Time: 39 - [Terminator] xxx Part 7 terminated xxx
+Time: 39 - [Terminator] Part 14 replaced
+Time: 39 - [Conveyor towards Queue 1] GOT Part 14
+Time: 40 - [Conveyor towards Queue 5] GOT Part 10
+Time: 40 - [Machine 4] got Part 11 from Queue 4 (capacity= 0)
+Time: 40 - [Conveyor towards Queue 5] PUT Part 8 in the Queue 5
+Time: 41 - [Machine 5] got Part 8 from Queue 5 (capacity= 0)
+Time: 45 - [Conveyor towards Queue 3] GOT Part 4
+Time: 45 - [Machine 2] got Part 5 from Queue 2 (capacity= 1)
+Time: 47 - [Conveyor towards Queue 5] GOT Part 9
+Time: 47 - [Conveyor towards Queue 2] GOT Part 2
+Time: 47 - [Machine 1] got Part 3 from Queue 1 (capacity= 1)
+Time: 49 - [Conveyor towards Queue 1] PUT Part 14 in the Queue 1
+Time: 50 - [Conveyor towards Queue 2] PUT Part 1 in the Queue 2
+Time: 50 - [Conveyor towards Queue 5] PUT Part 10 in the Queue 5
+Time: 51 - [Conveyor towards Queue 5] GOT Part 11
+Time: 51 - [Terminator] xxx Part 8 terminated xxx
+Time: 51 - [Terminator] Part 15 replaced
+Time: 51 - [Conveyor towards Queue 1] GOT Part 15
+Time: 51 - [Machine 5] got Part 10 from Queue 5 (capacity= 0)
+Time: 56 - [Conveyor towards Queue 3] GOT Part 5
+Time: 56 - [Machine 2] got Part 6 from Queue 2 (capacity= 1)
+Time: 57 - [Conveyor towards Queue 5] PUT Part 9 in the Queue 5
+Time: 59 - [Conveyor towards Queue 2] PUT Part 2 in the Queue 2
+=== Reading all the events from table: digital_log ===
+(1, 0, 'Machine 1', 'Started', 'Part 1', 'Queue 1', None, None)
+(2, 0, 'Machine 2', 'Started', 'Part 4', 'Queue 2', None, None)
+(3, 0, 'Machine 3', 'Started', 'Part 7', 'Queue 3', None, None)
+(4, 0, 'Machine 4', 'Started', 'Part 10', 'Queue 4', None, None)
+(5, 0, 'Machine 5', 'Started', 'Part 12', 'Queue 5', None, None)
+(6, 10, 'Machine 5', 'Finished', 'Part 12', 'Queue 1', None, None)
+(7, 18, 'Machine 3', 'Finished', 'Part 7', 'Queue 5', None, None)
+(8, 18, 'Machine 3', 'Started', 'Part 8', 'Queue 3', None, None)
+(9, 29, 'Machine 5', 'Started', 'Part 7', 'Queue 5', None, None)
+(10, 30, 'Machine 3', 'Finished', 'Part 8', 'Queue 5', None, None)
+(11, 30, 'Machine 3', 'Started', 'Part 9', 'Queue 3', None, None)
+(12, 38, 'Machine 1', 'Finished', 'Part 1', 'Queue 2', None, None)
+(13, 38, 'Machine 1', 'Started', 'Part 2', 'Queue 1', None, None)
+(14, 39, 'Machine 5', 'Finished', 'Part 7', 'Queue 1', None, None)
+(15, 40, 'Machine 4', 'Finished', 'Part 10', 'Queue 5', None, None)
+(16, 40, 'Machine 4', 'Started', 'Part 11', 'Queue 4', None, None)
+(17, 41, 'Machine 5', 'Started', 'Part 8', 'Queue 5', None, None)
+(18, 45, 'Machine 2', 'Finished', 'Part 4', 'Queue 3', None, None)
+(19, 45, 'Machine 2', 'Started', 'Part 5', 'Queue 2', None, None)
+(20, 47, 'Machine 3', 'Finished', 'Part 9', 'Queue 5', None, None)
+(21, 47, 'Machine 1', 'Finished', 'Part 2', 'Queue 2', None, None)
+(22, 47, 'Machine 1', 'Started', 'Part 3', 'Queue 1', None, None)
+(23, 51, 'Machine 4', 'Finished', 'Part 11', 'Queue 5', None, None)
+(24, 51, 'Machine 5', 'Finished', 'Part 8', 'Queue 1', None, None)
+(25, 51, 'Machine 5', 'Started', 'Part 10', 'Queue 5', None, None)
+(26, 56, 'Machine 2', 'Finished', 'Part 5', 'Queue 3', None, None)
+(27, 56, 'Machine 2', 'Started', 'Part 6', 'Queue 2', None, None)
+### ============ Simulation Done ============ ###
+==================== LOGIC VALIDATION ====================
+---- Real Sequence:
+0 | Machine 3 - Started
+0 | Machine 4 - Started
+1 | Machine 5 - Started
+1 | Machine 2 - Started
+1 | Machine 1 - Started
+10 | Machine 5 - Finished
+12 | Machine 1 - Finished
+14 | Machine 1 - Started
+18 | Machine 2 - Finished
+19 | Machine 2 - Started
+25 | Machine 1 - Finished
+26 | Machine 1 - Started
+37 | Machine 2 - Finished
+38 | Machine 2 - Started
+38 | Machine 1 - Finished
+38 | Machine 4 - Finished
+39 | Machine 1 - Started
+39 | Machine 4 - Started
+44 | Machine 5 - Started
+45 | Machine 3 - Finished
+46 | Machine 3 - Started
+50 | Machine 1 - Finished
+54 | Machine 5 - Finished
+55 | Machine 2 - Finished
+---- Digital Sequence:
+0 | Machine 1 - Started
+0 | Machine 2 - Started
+0 | Machine 3 - Started
+0 | Machine 4 - Started
+0 | Machine 5 - Started
+10 | Machine 5 - Finished
+18 | Machine 3 - Finished
+18 | Machine 3 - Started
+29 | Machine 5 - Started
+30 | Machine 3 - Finished
+30 | Machine 3 - Started
+38 | Machine 1 - Finished
+38 | Machine 1 - Started
+39 | Machine 5 - Finished
+40 | Machine 4 - Finished
+40 | Machine 4 - Started
+41 | Machine 5 - Started
+45 | Machine 2 - Finished
+45 | Machine 2 - Started
+47 | Machine 3 - Finished
+47 | Machine 1 - Finished
+47 | Machine 1 - Started
+51 | Machine 4 - Finished
+51 | Machine 5 - Finished
+>>> LCSS Indicator Logic: 1.0833333333333333
+=========================================================
+---------- Pointer Status Initial ----------
+Start Time: 1679423419
+Start Time ID: 1
+
+End Time: 1679423479
+End Time ID: 24
+-------------------------------------
+---------- Pointer Status Updated ----------
+Start Time: 1679423419
+Start Time ID: 1
+
+End Time: 1679423479
+End Time ID: 24
+-------------------------------------
+parts_zero: []
+-----------------------------------------------------------------------------------------
+=== matrix_ptime_qTDS ===
+[VALIDATOR] Simulation Deterministic - No correlation of randoness needed
+
+=== matrix_ptime_TDS ===
+Part 1: [38, 10]
+Part 2: [9]
+Part 3: [17]
+Part 4: [45]
+Part 5: [11]
+Part 6: [11]
+Part 7: [18]
+Part 8: [12]
+Part 9: [17]
+Part 10: []
+Part 11: [11]
+Part 12: []
+-----------------------------------------------------------------------------------------
+parts_branch_queue_vect = [('Part 13', None), ('Part 11', None), ('Part 3', None), ('Part 4', None), ('Part 5', None), ('Part 6', None), ('Part 7', None), ('Part 8', None), ('Part 9', None), ('Part 10', None), ('Part 12', None)]
+============ Running quasi Trace Driven Simulation ============
+### ============ Simulation Started ============ ###
+Time: 0 - [Machine 1] got Part 1 from Queue 1 (capacity= 2)
+Time: 0 - [Machine 2] got Part 4 from Queue 2 (capacity= 2)
+Time: 0 - [Machine 3] got Part 7 from Queue 3 (capacity= 2)
+Time: 0 - [Machine 4] got Part 10 from Queue 4 (capacity= 1)
+Time: 0 - [Machine 5] got Part 12 from Queue 5 (capacity= 0)
+Time: 10 - [Conveyor towards Queue 2] GOT Part 1
+Time: 10 - [Machine 1] got Part 2 from Queue 1 (capacity= 1)
+Time: 10 - [Terminator] xxx Part 12 terminated xxx
+Time: 10 - [Terminator] Part 13 replaced
+Time: 10 - [Conveyor towards Queue 1] GOT Part 13
+Time: 18 - [Conveyor towards Queue 3] GOT Part 4
+Time: 18 - [Machine 2] got Part 5 from Queue 2 (capacity= 1)
+Time: 20 - [Conveyor towards Queue 2] GOT Part 2
+Time: 20 - [Machine 1] got Part 3 from Queue 1 (capacity= 0)
+Time: 20 - [Conveyor towards Queue 1] PUT Part 13 in the Queue 1
+Time: 22 - [Conveyor towards Queue 2] PUT Part 1 in the Queue 2
+Time: 30 - [Conveyor towards Queue 2] GOT Part 3
+Time: 30 - [Machine 1] got Part 13 from Queue 1 (capacity= 0)
+Time: 32 - [Conveyor towards Queue 2] PUT Part 2 in the Queue 2
+Time: 36 - [Conveyor towards Queue 3] GOT Part 5
+Time: 36 - [Machine 2] got Part 6 from Queue 2 (capacity= 2)
+Time: 38 - [Conveyor towards Queue 3] PUT Part 4 in the Queue 3
+Time: 40 - [Conveyor towards Queue 5] GOT Part 10
+Time: 40 - [Machine 4] got Part 11 from Queue 4 (capacity= 0)
+Time: 40 - [Conveyor towards Queue 2] GOT Part 13
+Time: 42 - [Conveyor towards Queue 2] PUT Part 3 in the Queue 2
+Time: 45 - [Conveyor towards Queue 5] GOT Part 7
+Time: 45 - [Machine 3] got Part 8 from Queue 3 (capacity= 2)
+Time: 50 - [Conveyor towards Queue 5] PUT Part 10 in the Queue 5
+Time: 51 - [Machine 5] got Part 10 from Queue 5 (capacity= 0)
+Time: 52 - [Conveyor towards Queue 2] PUT Part 13 in the Queue 2
+Time: 54 - [Conveyor towards Queue 3] GOT Part 6
+Time: 54 - [Machine 2] got Part 1 from Queue 2 (capacity= 3)
+Time: 55 - [Conveyor towards Queue 5] PUT Part 7 in the Queue 5
+Time: 56 - [Conveyor towards Queue 3] PUT Part 5 in the Queue 3
+=== Reading all the events from table: digital_log ===
+(1, 0, 'Machine 1', 'Started', 'Part 1', 'Queue 1', None, None)
+(2, 0, 'Machine 2', 'Started', 'Part 4', 'Queue 2', None, None)
+(3, 0, 'Machine 3', 'Started', 'Part 7', 'Queue 3', None, None)
+(4, 0, 'Machine 4', 'Started', 'Part 10', 'Queue 4', None, None)
+(5, 0, 'Machine 5', 'Started', 'Part 12', 'Queue 5', None, None)
+(6, 10, 'Machine 1', 'Finished', 'Part 1', 'Queue 2', None, None)
+(7, 10, 'Machine 1', 'Started', 'Part 2', 'Queue 1', None, None)
+(8, 10, 'Machine 5', 'Finished', 'Part 12', 'Queue 1', None, None)
+(9, 18, 'Machine 2', 'Finished', 'Part 4', 'Queue 3', None, None)
+(10, 18, 'Machine 2', 'Started', 'Part 5', 'Queue 2', None, None)
+(11, 20, 'Machine 1', 'Finished', 'Part 2', 'Queue 2', None, None)
+(12, 20, 'Machine 1', 'Started', 'Part 3', 'Queue 1', None, None)
+(13, 30, 'Machine 1', 'Finished', 'Part 3', 'Queue 2', None, None)
+(14, 30, 'Machine 1', 'Started', 'Part 13', 'Queue 1', None, None)
+(15, 36, 'Machine 2', 'Finished', 'Part 5', 'Queue 3', None, None)
+(16, 36, 'Machine 2', 'Started', 'Part 6', 'Queue 2', None, None)
+(17, 40, 'Machine 4', 'Finished', 'Part 10', 'Queue 5', None, None)
+(18, 40, 'Machine 4', 'Started', 'Part 11', 'Queue 4', None, None)
+(19, 40, 'Machine 1', 'Finished', 'Part 13', 'Queue 2', None, None)
+(20, 45, 'Machine 3', 'Finished', 'Part 7', 'Queue 5', None, None)
+(21, 45, 'Machine 3', 'Started', 'Part 8', 'Queue 3', None, None)
+(22, 51, 'Machine 5', 'Started', 'Part 10', 'Queue 5', None, None)
+(23, 54, 'Machine 2', 'Finished', 'Part 6', 'Queue 3', None, None)
+(24, 54, 'Machine 2', 'Started', 'Part 1', 'Queue 2', None, None)
+### ============ Simulation Done ============ ###
+==================== INPUT VALIDATION ====================
+---- Real Sequence:
+0 | Machine 3 - Started
+0 | Machine 4 - Started
+1 | Machine 5 - Started
+1 | Machine 2 - Started
+1 | Machine 1 - Started
+10 | Machine 5 - Finished
+12 | Machine 1 - Finished
+14 | Machine 1 - Started
+18 | Machine 2 - Finished
+19 | Machine 2 - Started
+25 | Machine 1 - Finished
+26 | Machine 1 - Started
+37 | Machine 2 - Finished
+38 | Machine 2 - Started
+38 | Machine 1 - Finished
+38 | Machine 4 - Finished
+39 | Machine 1 - Started
+39 | Machine 4 - Started
+44 | Machine 5 - Started
+45 | Machine 3 - Finished
+46 | Machine 3 - Started
+50 | Machine 1 - Finished
+54 | Machine 5 - Finished
+55 | Machine 2 - Finished
+---- Digital Sequence:
+0 | Machine 1 - Started
+0 | Machine 2 - Started
+0 | Machine 3 - Started
+0 | Machine 4 - Started
+0 | Machine 5 - Started
+10 | Machine 1 - Finished
+10 | Machine 1 - Started
+10 | Machine 5 - Finished
+18 | Machine 2 - Finished
+18 | Machine 2 - Started
+20 | Machine 1 - Finished
+20 | Machine 1 - Started
+30 | Machine 1 - Finished
+30 | Machine 1 - Started
+36 | Machine 2 - Finished
+36 | Machine 2 - Started
+40 | Machine 4 - Finished
+40 | Machine 4 - Started
+40 | Machine 1 - Finished
+45 | Machine 3 - Finished
+45 | Machine 3 - Started
+51 | Machine 5 - Started
+54 | Machine 2 - Finished
+54 | Machine 2 - Started
+>>> LCSS Indicator Input: 1.0
+=========================================================
+_______________________ Validation Results _______________________
+> LCSS indicator for LOGIC: 1.0833333333333333
+> LCSS indicator for INPUT: 1.0
+__________________________________________________________________
+Following data was PUT successfully to 'validation_indicator' aspect: [{"_time": "2023-03-21T18:31:42.630229Z", "logic": 1.0833333333333333,"input": 1.0}]
+21 March 19:31:43 |[Internal Service] System Validated. Next Validation (n° 2): 21 March 19:32:19
+21 March 19:31:48 |[Internal Service] Starting Synchronization n° 3
+--- Model Path being used: models/5s_determ/1679423509_3.json
+---------- Pointer Status Initial ----------
+Start Time: 1679423480
+Start Time ID: 26
+
+End Time: 1679423509
+End Time ID: 35
+-------------------------------------
+ 21 March 19:31:48 |[interfaceDB.py/update_end_time] Not found 'Started' after the end_time: 1679423509. Sleeping for 10 seconds and trying again
+ 21 March 19:31:58 |[interfaceDB.py/update_end_time] Pointer End Time updated from 35 to 37
+---------- Pointer Status Updated ----------
+Start Time: 1679423480
+Start Time ID: 26
+
+End Time: 1679423514
+End Time ID: 37
+-------------------------------------
+parts_zero: []
+-----------------------------------------------------------------
+ 21 March 19:31:58 |Big picture BEFORE Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 13', 'Part 14']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 5', 'Part 6', 'Part 8', 'Part 11']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3', 'Part 9']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 7']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12', 'Part 4']
+Part in Machine: []
+-----------------------------------------------------------------
+--------- Step by Step Sync ---------
+Event - machine_name: Machine 2, status: Started, part_id: Part 5, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 13', 'Part 14']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 6', 'Part 5', 'Part 6', 'Part 8', 'Part 11']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3', 'Part 9']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 7']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12', 'Part 4']
+Part in Machine: []
+Event - machine_name: Machine 1, status: Started, part_id: Part 13, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 14']
+Part in Machine: ['Part 13']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 6', 'Part 5', 'Part 6', 'Part 8', 'Part 11']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3', 'Part 9']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 7']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12', 'Part 4']
+Part in Machine: []
+21 March 19:31:58 |[WARNING][synchronizer.py/Mstarted()] Part 4 was not found in elements vector of the machine
+Machine 5 (final machine) just finisehd a part, adding a new one: Part 15 to Zone of Machine 1
+21 March 19:31:58 |[ERROR][synchronizer.py/positioning_discovery()] A different number of parts in the system was detected. Check for parts duplications or external interference! Previous number: 23, New number: 24
+Event - machine_name: Machine 5, status: Finished, part_id: Part 4, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 14', 'Part 15']
+Part in Machine: ['Part 13']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 6', 'Part 5', 'Part 6', 'Part 8', 'Part 11']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3', 'Part 9']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 7']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12', 'Part 4']
+Part in Machine: []
+Event - machine_name: Machine 2, status: Finished, part_id: Part 5, queue_name: Queue 4
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 14', 'Part 15']
+Part in Machine: ['Part 13']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 6', 'Part 5', 'Part 6', 'Part 8', 'Part 11']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3', 'Part 9']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 7', 'Part 5']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12', 'Part 4']
+Part in Machine: []
+Event - machine_name: Machine 1, status: Finished, part_id: Part 13, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 14', 'Part 15']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 6', 'Part 5', 'Part 6', 'Part 8', 'Part 11', 'Part 13']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3', 'Part 9']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 7', 'Part 5']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12', 'Part 4']
+Part in Machine: []
+Event - machine_name: Machine 2, status: Started, part_id: Part 6, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 14', 'Part 15']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 8', 'Part 11', 'Part 13']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3', 'Part 9']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 7', 'Part 5']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12', 'Part 4']
+Part in Machine: []
+Event - machine_name: Machine 1, status: Started, part_id: Part 14, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 15']
+Part in Machine: ['Part 14']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 8', 'Part 11', 'Part 13']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3', 'Part 9']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 7', 'Part 5']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12', 'Part 4']
+Part in Machine: []
+Event - machine_name: Machine 4, status: Finished, part_id: Part 10, queue_name: Queue 5
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 15']
+Part in Machine: ['Part 14']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 8', 'Part 11', 'Part 13']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3', 'Part 9']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 7', 'Part 5']
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12', 'Part 4', 'Part 10']
+Part in Machine: []
+Event - machine_name: Machine 4, status: Started, part_id: Part 7, queue_name: Queue 4
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 15']
+Part in Machine: ['Part 14']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 8', 'Part 11', 'Part 13']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3', 'Part 9']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 5']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12', 'Part 4', 'Part 10']
+Part in Machine: []
+Event - machine_name: Machine 5, status: Started, part_id: Part 10, queue_name: Queue 5
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 15']
+Part in Machine: ['Part 14']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 8', 'Part 11', 'Part 13']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3', 'Part 9']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 5']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12', 'Part 4']
+Part in Machine: ['Part 10']
+Event - machine_name: Machine 1, status: Finished, part_id: Part 14, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 15']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 8', 'Part 11', 'Part 13', 'Part 14']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3', 'Part 9']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 5']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12', 'Part 4']
+Part in Machine: ['Part 10']
+Event - machine_name: Machine 3, status: Finished, part_id: Part 12, queue_name: Queue 5
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 15']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 8', 'Part 11', 'Part 13', 'Part 14']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3', 'Part 9']
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 5']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12', 'Part 4', 'Part 12']
+Part in Machine: ['Part 10']
+-----------------------------------------------------------------
+ 21 March 19:31:58 |Big picture AFTER Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 15']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 8', 'Part 11', 'Part 13', 'Part 14']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3', 'Part 9']
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 5']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12', 'Part 4', 'Part 12']
+Part in Machine: ['Part 10']
+-----------------------------------------------------------------
+Following data was PUT successfully to 'station_status' aspect: [{"_time": "2023-03-21T18:31:58.831221Z", "station_1": false, "station_2": true, "station_3": false, "station_4": true, "station_5": false}]
+Following data was PUT successfully to 'queue_status' aspect: [{"_time": "2023-03-21T18:31:59.367220Z", "queue_1": 4, "queue_2": 8, "queue_3": 5, "queue_4": 3, "queue_5": 3}]
+21 March 19:31:59 |[Internal Service] System Synchronized. Next Sync (n° 4): 21 March 19:32:19
+21 March 19:32:18 |[Internal Service] Starting Synchronization n° 4
+--- Model Path being used: models/5s_determ/1679423539_4.json
+---------- Pointer Status Initial ----------
+Start Time: 1679423515
+Start Time ID: 38
+
+End Time: 1679423539
+End Time ID: 47
+-------------------------------------
+ 21 March 19:32:18 |[interfaceDB.py/update_end_time] Not found 'Started' after the end_time: 1679423539. Sleeping for 10 seconds and trying again
+---------- Pointer Status Updated ----------
+Start Time: 1679423515
+Start Time ID: 38
+
+End Time: 1679423537
+End Time ID: 47
+-------------------------------------
+parts_zero: []
+-----------------------------------------------------------------
+ 21 March 19:32:28 |Big picture BEFORE Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 15']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 8', 'Part 11', 'Part 13', 'Part 14']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3', 'Part 9']
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 5']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12', 'Part 4', 'Part 12']
+Part in Machine: []
+-----------------------------------------------------------------
+--------- Step by Step Sync ---------
+21 March 19:32:28 |[WARNING][synchronizer.py/Mstarted()] Part 15 was not found in elements vector of the queue
+This might happen if the element is an initial part. If that not the case, CHECK IT OUT!
+printing the list of parts in the queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3', 'Part 9']
+21 March 19:32:28 |[ERROR][synchronizer.py/positioning_discovery()] A different number of parts in the system was detected. Check for parts duplications or external interference! Previous number: 23, New number: 24
+Event - machine_name: Machine 3, status: Started, part_id: Part 15, queue_name: Queue 3
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 15']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 8', 'Part 11', 'Part 13', 'Part 14']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3', 'Part 9']
+Part in Machine: ['Part 15']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 5']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12', 'Part 4', 'Part 12']
+Part in Machine: []
+Event - machine_name: Machine 2, status: Finished, part_id: Part 6, queue_name: Queue 3
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 15']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 8', 'Part 11', 'Part 13', 'Part 14']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3', 'Part 9', 'Part 6']
+Part in Machine: ['Part 15']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 5']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12', 'Part 4', 'Part 12']
+Part in Machine: []
+Event - machine_name: Machine 2, status: Started, part_id: Part 8, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 15']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 11', 'Part 13', 'Part 14']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3', 'Part 9', 'Part 6']
+Part in Machine: ['Part 15']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 5']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12', 'Part 4', 'Part 12']
+Part in Machine: []
+21 March 19:32:28 |[WARNING][synchronizer.py/Mstarted()] Part 10 was not found in elements vector of the machine
+Machine 5 (final machine) just finisehd a part, adding a new one: Part 16 to Zone of Machine 1
+21 March 19:32:28 |[ERROR][synchronizer.py/positioning_discovery()] A different number of parts in the system was detected. Check for parts duplications or external interference! Previous number: 24, New number: 25
+Event - machine_name: Machine 5, status: Finished, part_id: Part 10, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 15', 'Part 16']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 11', 'Part 13', 'Part 14']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3', 'Part 9', 'Part 6']
+Part in Machine: ['Part 15']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 5']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12', 'Part 4', 'Part 12']
+Part in Machine: []
+Event - machine_name: Machine 5, status: Started, part_id: Part 12, queue_name: Queue 5
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 15', 'Part 16']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 11', 'Part 13', 'Part 14']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3', 'Part 9', 'Part 6']
+Part in Machine: ['Part 15']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 5']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 4', 'Part 12']
+Part in Machine: ['Part 12']
+Event - machine_name: Machine 1, status: Started, part_id: Part 16, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 15']
+Part in Machine: ['Part 16']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 11', 'Part 13', 'Part 14']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3', 'Part 9', 'Part 6']
+Part in Machine: ['Part 15']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 5']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 4', 'Part 12']
+Part in Machine: ['Part 12']
+Machine 5 (final machine) just finisehd a part, adding a new one: Part 17 to Zone of Machine 1
+Event - machine_name: Machine 5, status: Finished, part_id: Part 12, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 15', 'Part 17']
+Part in Machine: ['Part 16']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 11', 'Part 13', 'Part 14']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3', 'Part 9', 'Part 6']
+Part in Machine: ['Part 15']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 5']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 4', 'Part 12']
+Part in Machine: []
+Event - machine_name: Machine 2, status: Finished, part_id: Part 8, queue_name: Queue 4
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 15', 'Part 17']
+Part in Machine: ['Part 16']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 11', 'Part 13', 'Part 14']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3', 'Part 9', 'Part 6']
+Part in Machine: ['Part 15']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 5', 'Part 8']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 4', 'Part 12']
+Part in Machine: []
+Event - machine_name: Machine 2, status: Started, part_id: Part 11, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 15', 'Part 17']
+Part in Machine: ['Part 16']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 13', 'Part 14']
+Part in Machine: ['Part 11']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3', 'Part 9', 'Part 6']
+Part in Machine: ['Part 15']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 5', 'Part 8']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 4', 'Part 12']
+Part in Machine: []
+Event - machine_name: Machine 1, status: Finished, part_id: Part 16, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 15', 'Part 17']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 13', 'Part 14', 'Part 16']
+Part in Machine: ['Part 11']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3', 'Part 9', 'Part 6']
+Part in Machine: ['Part 15']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 5', 'Part 8']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 4', 'Part 12']
+Part in Machine: []
+-----------------------------------------------------------------
+ 21 March 19:32:28 |Big picture AFTER Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 15', 'Part 17']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 13', 'Part 14', 'Part 16']
+Part in Machine: ['Part 11']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 3', 'Part 9', 'Part 6']
+Part in Machine: ['Part 15']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 11', 'Part 5', 'Part 8']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 4', 'Part 12']
+Part in Machine: []
+-----------------------------------------------------------------
+Following data was PUT successfully to 'station_status' aspect: [{"_time": "2023-03-21T18:32:28.838910Z", "station_1": false, "station_2": true, "station_3": true, "station_4": true, "station_5": null}]
+Following data was PUT successfully to 'queue_status' aspect: [{"_time": "2023-03-21T18:32:29.413911Z", "queue_1": 5, "queue_2": 7, "queue_3": 6, "queue_4": 4, "queue_5": 1}]
+21 March 19:32:30 |[Internal Service] System Synchronized. Next Sync (n° 5): 21 March 19:32:49
+21 March 19:32:30 |[Internal Service] Starting Validation (n° 2)
+--- Model Path being used: models/5s_determ/1679423479_2.json
+21 March 19:32:30 |[WARNING][interfaceDB.py/find_line_ID_start_end()] Changed Start Time by force because a initial trace was 'Finished'. Jumping start time id from 24 to 25.
+---------- Pointer Status Initial ----------
+Start Time: 1679423479
+Start Time ID: 25
+
+End Time: 1679423539
+End Time ID: 48
+-------------------------------------
+ 21 March 19:32:30 |[interfaceDB.py/update_end_time] Pointer End Time updated from 48 to 47
+---------- Pointer Status Updated ----------
+Start Time: 1679423479
+Start Time ID: 25
+
+End Time: 1679423537
+End Time ID: 47
+-------------------------------------
+parts_zero: []
+21 March 19:32:30 |[WARNING][validator.py/get_part_TDS()] Trying to get the trace of Part 1, but no traces was created for that part
+If you're running a short simulation, it's possible that the part was in the simulation, but didn't had time to appear in the trace, otherwise CHECK IT OUT
+21 March 19:32:30 |[WARNING][validator.py/get_part_TDS()] Trying to get the trace of Part 2, but no traces was created for that part
+If you're running a short simulation, it's possible that the part was in the simulation, but didn't had time to appear in the trace, otherwise CHECK IT OUT
+21 March 19:32:30 |[WARNING][validator.py/get_part_TDS()] Trying to get the trace of Part 3, but no traces was created for that part
+If you're running a short simulation, it's possible that the part was in the simulation, but didn't had time to appear in the trace, otherwise CHECK IT OUT
+21 March 19:32:30 |[WARNING][validator.py/get_part_TDS()] Trying to get the trace of Part 9, but no traces was created for that part
+If you're running a short simulation, it's possible that the part was in the simulation, but didn't had time to appear in the trace, otherwise CHECK IT OUT
+21 March 19:32:30 |[WARNING][validator.py/get_part_TDS()] Trying to get the trace of Part 3, but no traces was created for that part
+If you're running a short simulation, it's possible that the part was in the simulation, but didn't had time to appear in the trace, otherwise CHECK IT OUT
+21 March 19:32:30 |[WARNING][validator.py/get_part_TDS()] Trying to get the trace of Part 9, but no traces was created for that part
+If you're running a short simulation, it's possible that the part was in the simulation, but didn't had time to appear in the trace, otherwise CHECK IT OUT
+Part 1 was not found in the parts of trace... Removing part from the list
+Part 2 was not found in the parts of trace... Removing part from the list
+Part 3 was not found in the parts of trace... Removing part from the list
+Part 9 was not found in the parts of trace... Removing part from the list
+Part 3 was not found in the parts of trace... Removing part from the list
+Part 9 was not found in the parts of trace... Removing part from the list
+----------------  Cleaning Parts for TDS  ----------------
+Not all the parts in the system appeared in the traces. Printing parts that didn't appeared:
+|-- Part 1
+|-- Part 2
+|-- Part 3
+|-- Part 9
+|-- Part 3
+|-- Part 9
+Printing parts that appeared and are being considered for TDS:
+|-- Part 13
+|-- Part 14
+|-- Part 4
+|-- Part 5
+|-- Part 6
+|-- Part 5
+|-- Part 6
+|-- Part 8
+|-- Part 11
+|-- Part 7
+|-- Part 8
+|-- Part 11
+|-- Part 7
+|-- Part 12
+|-- Part 4
+------------------------------------------------------------
+-----------------------------------------------------------------------------------------
+=== matrix_ptime_qTDS ===
+[VALIDATOR] Simulation Deterministic - No correlation of randoness needed
+
+=== matrix_ptime_TDS ===
+Part 4: [10]
+Part 5: [17]
+Part 6: [15]
+Part 7: []
+Part 8: [17]
+Part 10: [22, 10]
+Part 11: []
+Part 12: [35, 10]
+Part 13: [13]
+Part 14: [10]
+Part 15: []
+Part 16: [11]
+-----------------------------------------------------------------------------------------
+parts_branch_queue_vect = [('Part 13', None), ('Part 11', None), ('Part 3', None), ('Part 14', None), ('Part 5', None), ('Part 6', None), ('Part 7', None), ('Part 8', None), ('Part 9', None), ('Part 16', None), ('Part 17', None), ('Part 15', None)]
+============ Running Trace Driven Simulation ============
+### ============ Simulation Started ============ ###
+Time: 0 - [Machine 1] got Part 1 from Queue 1 (capacity= 4)
+Time: 0 - [Machine 2] got Part 4 from Queue 2 (capacity= 6)
+Time: 0 - [Machine 5] got Part 12 from Queue 5 (capacity= 1)
+Traceback (most recent call last):
+  File "D:\POLIMI\Digital twins\Digital_Twin\Digital Twin\dtwinpylib\dtwinpy\components.py", line 361, in run
+    current_process_time = self.part_in_machine.get_ptime_TDS(machine_cluster - 1)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\POLIMI\Digital twins\Digital_Twin\Digital Twin\dtwinpylib\dtwinpy\components.py", line 63, in get_ptime_TDS
+    return self.ptime_TDS[cluster]
+           ~~~~~~~~~~~~~~^^^^^^^^^
+TypeError: 'NoneType' object is not subscriptable
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\POLIMI\Digital twins\Digital_Twin\Digital Twin\mydt.py", line 21, in <module>
+    mydt.run()
+  File "D:\POLIMI\Digital twins\Digital_Twin\Digital Twin\dtwinpylib\dtwinpy\Digital_Twin.py", line 745, in run
+    self.Internal_Services()
+  File "D:\POLIMI\Digital twins\Digital_Twin\Digital Twin\dtwinpylib\dtwinpy\Digital_Twin.py", line 534, in Internal_Services
+    (lcss_indicator_logic, lcss_indicator_input) = self.run_validation(copied_realDB= self.copied_realDB, start_time= start_time, end_time= end_time)
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\POLIMI\Digital twins\Digital_Twin\Digital Twin\dtwinpylib\dtwinpy\Digital_Twin.py", line 374, in run_validation
+    (lcss_logic, lcss_time_logic, lcss_indicator_logic) = validator_logic.run()
+                                                          ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\POLIMI\Digital twins\Digital_Twin\Digital Twin\dtwinpylib\dtwinpy\validator.py", line 695, in run
+    self.digital_model.run()
+  File "D:\POLIMI\Digital twins\Digital_Twin\Digital Twin\dtwinpylib\dtwinpy\digital_model.py", line 650, in run
+    self.env.run(until= self.until)
+  File "C:\Users\HP\AppData\Local\Programs\Python\Python311\Lib\site-packages\simpy\core.py", line 254, in run
+    self.step()
+  File "C:\Users\HP\AppData\Local\Programs\Python\Python311\Lib\site-packages\simpy\core.py", line 206, in step
+    raise exc
+TypeError: 'NoneType' object is not subscriptable
+PS D:\POLIMI\Digital twins\Digital_Twin\Digital Twin>

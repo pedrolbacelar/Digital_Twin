@@ -678,9 +678,9 @@ class Validator():
             self.digital_model.set_until(until)
         
         # ------- Assign Parts Queue Branches selected -------
-        read_parts_branch_queue = self.id_database.read_parts_branch_queue()
+        parts_branch_queue = self.id_database.read_parts_branch_queue()
         for machine in self.machines_vector:
-            machine.set_read_parts_branch_queue(read_parts_branch_queue)
+            machine.set_parts_branch_queue(parts_branch_queue)
     
 
         # [OLD] self.digital_model = self.generate_digital_model(until= until)
@@ -709,7 +709,7 @@ class Validator():
             for i in range(len(Yr_event)):
                 print(f"{Yr_time[i]} | {Yr_event[i]}")
             print("---- Digital Sequence:")
-            for i in range(len(Yr_event)):
+            for i in range(len(Ys_time)):
                 print(f"{Ys_time[i]} | {Ys_event[i]}")
             print(f">>> LCSS Indicator Logic: {lcss_indicator}")
             print("=========================================================")
@@ -733,10 +733,10 @@ class Validator():
             #--- User Interface
             print("==================== INPUT VALIDATION ====================")
             print("---- Real Sequence:")
-            for i in range(len(Yr_event)):
+            for i in range(len(Yr_time)):
                 print(f"{Yr_time[i]} | {Yr_event[i]}")
             print("---- Digital Sequence:")
-            for i in range(len(Yr_event)):
+            for i in range(len(Ys_time)):
                 print(f"{Ys_time[i]} | {Ys_event[i]}")
             print(f">>> LCSS Indicator Input: {lcss_indicator}")
             print("=========================================================")

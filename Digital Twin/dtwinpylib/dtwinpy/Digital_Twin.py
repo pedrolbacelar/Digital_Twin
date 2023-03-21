@@ -359,7 +359,7 @@ class Digital_Twin():
         """
         
         #--- Create the Logic Validator 
-        validator_logic = Validator(digital_model= self.digital_model, simtype="TDS", real_database_path= self.real_database_path, start_time= start_time, end_time= end_time, generate_digital_model= self.generate_digital_model, copied_realDB= self.copied_realDB, delta_t_treshold= self.delta_t_treshold)
+        validator_logic = Validator(digital_model= self.digital_model, simtype="TDS", real_database_path= self.real_database_path, start_time= start_time, end_time= end_time, generate_digital_model= self.generate_digital_model, copied_realDB= self.copied_realDB, delta_t_treshold= self.delta_t_treshold, id_database_path= self.ID_database_path)
         
         #--- IMPROVE: give the object validator for the machine to be able to update the ptime_TDS for new parts
         #--- Get the components of the simulation
@@ -382,7 +382,7 @@ class Digital_Twin():
         self.digital_model = self.generate_digital_model(verbose= verbose)
 
         #--- Create the Input Validator
-        validator_input = Validator(digital_model=self.digital_model, simtype="qTDS", real_database_path= self.real_database_path, start_time= start_time, end_time= end_time, copied_realDB= self.copied_realDB, generate_digital_model= self.generate_digital_model, delta_t_treshold= self.delta_t_treshold)
+        validator_input = Validator(digital_model=self.digital_model, simtype="qTDS", real_database_path= self.real_database_path, start_time= start_time, end_time= end_time, copied_realDB= self.copied_realDB, generate_digital_model= self.generate_digital_model, delta_t_treshold= self.delta_t_treshold, id_database_path= self.ID_database_path)
 
         #--- Allocate the traces
         validator_input.allocate()
