@@ -76,6 +76,9 @@ class Broker_Manager():
         #----- Add the PID with the current UID to the dictionary
         self.PID_to_UID_dict[f"Part {self.PID_counter}"] = unique_ID
 
+        #----- Clean the selected Branch Queue for this UID that now has a new PID
+        self.ID_database.write_selected_branch_queue(UID= unique_ID, selected_queue= None)
+
         #----- Add the PID and UID into the PID_UID database
         self.ID_database.add_UID_partid(
             table_name= "ID",
@@ -429,6 +432,9 @@ class Broker_Manager():
             topic = topic, 
             payload= payload_translated
         )
+
+        #--- Update the Branch Queue selected for the current part id
+        self.ID_database.write_selected_branch_queue(UID= unique_ID, selected_queue= f"Queue {queueid}")
 
         #--- Take the current time
         current_time = datetime.datetime.now()
