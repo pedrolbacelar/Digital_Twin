@@ -1,28 +1,35 @@
 #--- Import features
 from dtwinpylib.dtwinpy.helper import Helper
 from dtwinpylib.dtwinpy.interfaceDB import Database
+
+#--- Common Libraries
 import numpy as np
 import scipy.stats
 import warnings
 import matplotlib.pyplot as plt
+import json
 
 class Updator():
     """
     The class Updator is called when the validation is given a certain amount of indicators beyond
     the allowed threshold. 
     """
-    def __init__(self, update_type, real_database_path, start_time, end_time):
+    def __init__(self, update_type, digital_model, real_database_path, start_time, end_time):
         #--- Create helper
         self.helper = Helper()
 
         #--- Basic Stuff
         self.update_type = update_type
+        self.digital_model = digital_model
         self.real_database_path = real_database_path
         self.start_time = start_time
         self.end_time = end_time
 
+        #--- Get the model components
+        (self.machines_vector, self.queues_vector) = self.digital_model.get_model_components()
+
         #--- Create database object
-        self.real_database_updator = Database(
+        self.real_database = Database(
             database_path= self.real_database_path,
             event_table= 'real_log',
             start_time= self.start_time,
@@ -31,10 +38,13 @@ class Updator():
 
     
     # ------------------------------ Main Updating Functions ------------------------------
+    # ------ Update the the model logic using model generation ------
     def update_logic(self):
         ############# MODEL GENERATION (FUTURE ) #############
+        self.helper.printer("[WARNING][updator.py/update_logic()] Trying to run Model Generation... This feature still in progress!")
         pass
 
+    # ------ Update the model inputs using distribution fitting ------
     def update_input(self, input_data, probable_distribution = None):
         #-- distributions list we are interested in.
         distribution_types_list = ['norm', 'expon']
@@ -97,8 +107,104 @@ class Updator():
 
         return (ks[0],parameters[ks_best_id], mean)
 
+    # ------ Generate traces of each machines ------
+    def generate_qTDS_traces(self):
+        """
+        Same function used in Validator.
+        """
+        #--- Extract the unique parts IDs from the real log
+        machines_ids = self.real_database.get_distinct_values(column= "machine_id", table="real_log")
+        #--- Create matrix to store trace of process time for each part
+        matrix_ptime_qTDS = {}
+        machine_matrix_full_trace = []
 
+        #--- Loop for each part of the simulation
+        for machine_id in machines_ids:
+            #--- Get the full trace for each machine
+            machine_full_trace = self.real_database.get_time_activity_of_column(column= "machine_id", table="real_log", column_id=machine_id[0])
+            machine_matrix_full_trace.append(machine_full_trace)
+
+            #--- Initiate as blank values
+            started_time = None
+            finished_time = None
+            processed_time = None
+            machine_trace = []
+
+            for event in machine_full_trace:
+                #--- Extract the Started and Finished time
+                if event[1] == 'Started':
+                    started_time = event[0]
+                elif event[1] == 'Finished':
+                    finished_time = event[0]
+                
+                #--- Calculate the process time
+                if started_time != None and finished_time != None:
+                    processed_time = finished_time - started_time
+
+                    #--- Add event process time to the machine trace
+                    machine_trace.append(processed_time)
+
+                    #--- reset local started and finished time for the next cycle
+                    started_time = None
+                    finished_time = None
+                    processed_time = None
+
+                #--- In the case of part that already was in the machine (worked_time)
+                if finished_time != None and started_time == None:
+                    processed_time = finished_time
+
+                    #--- Add event process time to the part trace
+                    machine_trace.append(processed_time)
+
+                    #--- reset local started and finished time for the next cycle
+                    started_time = None
+                    finished_time = None
+                    processed_time = None
+            
+            #--- Add machine trace to the matrix of all machines traces
+            matrix_ptime_qTDS[machine_id[0]] = (machine_trace)
+            
+        #--- Return the matrix of traces
+        return matrix_ptime_qTDS
+
+    # ------ Check if it's a deterministic or distribution model ------
+    def is_deterministic(self):
+        #--- Initial flag as not deterministic
+        flag_is_deterministic = False
+
+        #--- Loop through all the machines to see if there is distribution machine
+        for machine in self.machines_vector:
+            if type(machine.get_process_time()) != list:
+                #--- Got it, some of machines are not deterministic. Threating all as distribution
+                flag_is_deterministic = True
         
+        #--- Retunr the flag as a result
+        return flag_is_deterministic
+
+    def aligner(self, machine_id, new_process_time):
+        """
+        This function receive a INT machine id and a INT or LIST process time. Base on the 
+        machine_id the function attribute to the write node in the model new process time.
+        """
+
+        #--- Get model path
+        model_path = self.digital_model.get_model_path()
+
+        with open(model_path, 'r+') as model_file:
+            data = json.load(model_file)
+            #--- For each machine (node)
+            for node in data['nodes']:
+                if node['activity'] == machine_id:
+                    #--- Update the process time
+                    node["contemp"] = new_process_time
+
+            #---- Write Back the Changes
+            # Move the file pointer to the beginning of the file
+            model_file.seek(0)
+            # Write the modified data back to the file
+            json.dump(data, model_file)
+            # Truncate any remaining data in the file
+            model_file.truncate()
 
 
 
@@ -111,8 +217,45 @@ class Updator():
 
         # --------------- Logic Model Update ---------------
         if self.update_type == 'logic':
-            pass
+            self.update_logic()
 
         # --------------- Input Model Update ---------------
         if self.update_type == 'input':
-            self.update_input()
+            #--- Generate the traces for all the machines
+            matrix_ptime_qTDS = self.generate_qTDS_traces()
+
+            #--- Check if the machine is deterministic or not
+            flag_deterministic = self.is_deterministic()
+            
+            #--- Loop through all the machines to update all of them
+            for machine in self.machines_vector:
+                #--- Get the machine name and machine id
+                machine_name = machine.get_name()
+                machine_id = machine.get_id()
+
+                #--- Get the machine trace
+                machine_trace = matrix_ptime_qTDS[machine_name]
+
+                #--- Generate the new process time
+                update_result = self.update_input(machine_trace)
+
+                #--- System Deterministic: Take just the mean value
+                if flag_deterministic:
+                    #--- Take the new process time (last position, mean)
+                    new_process_time = update_result[-1]
+
+                #--- System not Deterministic: Take the distribution parameters
+                if not flag_deterministic:
+                    #--- Take the whole parameters
+                    dist_name = update_result[0]
+                    parameter_a = update_result[1]
+                    parameter_b = update_result[2]
+
+                    new_process_time = [dist_name, parameter_a, parameter_b]
+
+                #--- Write the new process time in the json model
+                self.aligner(machine_id, new_process_time)
+
+                #--- User Interface
+                self.helper.printer(f"Process Time of {machine_name} updated to {new_process_time}.", 'brown')
+            
