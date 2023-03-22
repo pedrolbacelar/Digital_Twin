@@ -35,6 +35,7 @@ class Part():
         finished_clusters = current_cluster - 1
         #--- create a new vector with zero for the finished clusters
         new_ptime_TDS = [0] * finished_clusters + self.ptime_TDS
+        print(f"new_ptime_TDS= {new_ptime_TDS}")
         #--- Updated old vector with the new vector
         self.ptime_TDS = new_ptime_TDS
 

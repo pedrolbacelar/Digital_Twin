@@ -80,7 +80,7 @@
         1,
         2
       ],
-      "capacity": 1000,
+      "capacity": 10,
       "frequency": 1000,
       "contemp": 12
     },
@@ -89,7 +89,7 @@
         2,
         3
       ],
-      "capacity": 1000,
+      "capacity": 10,
       "frequency": 1000,
       "contemp": 20
     },
@@ -98,7 +98,7 @@
         2,
         4
       ],
-      "capacity": 1000,
+      "capacity": 10,
       "frequency": 1000,
       "contemp": 20
     },
@@ -107,7 +107,7 @@
         3,
         5
       ],
-      "capacity": 1000,
+      "capacity": 10,
       "frequency": 1000,
       "contemp": 10
     },
@@ -116,7 +116,7 @@
         4,
         5
       ],
-      "capacity": 1000,
+      "capacity": 10,
       "frequency": 1000,
       "contemp": 10
     },
@@ -125,7 +125,7 @@
         5,
         1
       ],
-      "capacity": 1000,
+      "capacity": 12,
       "frequency": 1000,
       "contemp": 10
     }

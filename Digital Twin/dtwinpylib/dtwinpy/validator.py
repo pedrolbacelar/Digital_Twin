@@ -198,6 +198,8 @@ class Validator():
             if part_queue != None and part_queue.get_id() != 1:
                 part_cluster = part_queue.get_cluster()
                 part.quick_TDS_fix(part_cluster)
+                print(f"Part name {part.get_name()} quick done. Part Cluster: {part_cluster}")
+                print(f"{part.get_ptime_TDS(part_cluster)}")
         
 
     #--- Generate the traces of TDS based on the real Event Log
