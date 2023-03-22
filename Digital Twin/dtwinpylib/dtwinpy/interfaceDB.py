@@ -685,7 +685,7 @@ class Database():
             
             db.execute("""
             UPDATE ID SET branch_queue= ? WHERE line_id= ?
-            """, (selected_queue, line_id))
+            """, (selected_queue, line_id[0]))
 
             db.commit()
 
@@ -702,4 +702,5 @@ class Database():
             SELECT PID, branch_queue FROM ID
             """).fetchall()
 
+        print(f"parts_branch_queue_vect = {parts_branch_queue_vect}")
         return parts_branch_queue_vect
