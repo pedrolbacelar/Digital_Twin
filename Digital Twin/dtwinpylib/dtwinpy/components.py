@@ -276,6 +276,7 @@ class Machine():
                             self.simtype = None
                     #--- If the current part has TDS traces (process times) uses TDS simulation, if not use normal simulation
                     if self.part_in_machine.get_ptime_TDS(self.get_cluster() - 1) == None and self.simtype != "qTDS":
+                        self.helper.printer(f"[WARNING][components.py/run()/'Processing'] The {self.part_in_machine.get_name()} in {self.name} didn't have a TDS trace, assigning a normal simulation...")
                         self.simtype = None
                     if self.part_in_machine.get_ptime_TDS(self.get_cluster() - 1) != None and self.simtype != "qTDS":
                         self.simtype = "TDS"
