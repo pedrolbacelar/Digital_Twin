@@ -254,13 +254,43 @@ class Database():
             #--- Clean the timestamp column before updating it again
             db.execute("UPDATE real_log SET timestamp = ?", (None,))
 
-            #--- Check if both start and end reference to the same line (rows == Traces)
-            if  self.start_time_id == self.end_time_id:
-                rows = db.execute("SELECT * FROM real_log WHERE event_id = ?", (self.start_time_id,)).fetchall()
-            else:
-                rows = db.execute("SELECT * FROM real_log WHERE event_id >= ? AND event_id <= ?", (self.start_time_id, self.end_time_id)).fetchall()
 
-            print(f"rows (traces) to be synchronized: {rows}")
+            #--- Timeout Loop
+            self.looping = True
+            self.try_counter = 0
+
+            while self.looping == True and self.try_counter <= self.max_counter:
+                #--- Check if both start and end reference to the same line (rows == Traces)
+                if  self.start_time_id == self.end_time_id:
+                    rows = db.execute("SELECT * FROM real_log WHERE event_id = ?", (self.start_time_id,)).fetchall()
+                else:
+                    rows = db.execute("SELECT * FROM real_log WHERE event_id >= ? AND event_id <= ?", (self.start_time_id, self.end_time_id)).fetchall()
+                    
+                #--- Stop Conditions
+                if rows != None:
+                    # Found a started
+                    self.looping = False
+
+                else:
+                    self.helper.printer(f"[interfaceDB.py/updated_relative_timestamp()] (Waiting {self.try_counter* self.sleep_time} sec) Not found any event between [{self.start_time_id}, {self.end_time_id}]. Sleeping for {self.sleep_time} seconds and trying again", 'brown')
+                    #--- Sleep for the next try
+                    sleep(self.sleep_time)
+
+                    #--- Updated the trying counter
+                    self.try_counter += 1
+
+   
+            if self.try_counter > self.max_counter:
+                #--- Printer Error Message
+                self.helper.printer(f"[ERROR][interfaceDB.py/updated_relative_timestamp()] It was not possible to find any event between [{self.start_time_id}, {self.end_time_id}]", 'red')
+                
+                #--- Killing the program
+                self.helper.printer(f"---- Digital Twin killed ----", 'red')
+                sys.exit()
+
+            print(f"-------- Printing the traces: --------")
+            for row in rows:
+                print(f"{rows}")
 
             # Loop through the selected rows and update the timestamp column with relative values 
             start_timestamp = rows[0][-1]
