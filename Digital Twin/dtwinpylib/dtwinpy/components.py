@@ -274,7 +274,13 @@ class Machine():
                     if self.part_in_machine.get_all_ptime_TDS() != None:
                         if self.get_cluster() > len(self.part_in_machine.get_all_ptime_TDS()) and self.simtype != "qTDS":
                             self.simtype = None
-                    
+                    #--- If the current part has TDS traces (process times) uses TDS simulation, if not use normal simulation
+                    if self.part_in_machine.get_ptime_TDS(self.get_cluster() - 1) == None and self.simtype != "qTDS":
+                        self.simtype = None
+                    if self.part_in_machine.get_ptime_TDS(self.get_cluster() - 1) != None and self.simtype != "qTDS":
+                        self.simtype = "TDS"
+
+
                     """ [OLD: before sync]
                     if self.part_in_machine.get_all_ptime_TDS() != None:
                         if self.part_in_machine.get_finished_clusters() + 1 > len(self.part_in_machine.get_all_ptime_TDS()) and self.simtype != "qTDS":
