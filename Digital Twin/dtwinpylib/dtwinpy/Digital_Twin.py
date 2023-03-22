@@ -259,7 +259,7 @@ class Digital_Twin():
 
         if self.ip_address != None:
             #--- Create a Broker
-            self.broker_manager = self.broker_manager.publish_setting_action('start')
+            self.broker_manager.publish_setting_action('start')
             self.helper.printer("Physical system is requested to start remotely.",'purple')
 
         #--- waiting for the physical system to start sending the trace.
@@ -520,7 +520,6 @@ class Digital_Twin():
             # UPDATE current time:
             (tstr, t) = self.helper.get_time_now()
             self.current_timestamp = t
-
             #-------------------- NEXT SYNC -------------------------
             self.next_Tsync = self.current_timestamp + self.Freq_Sync
             #--------------------------------------------------------
@@ -695,7 +694,6 @@ class Digital_Twin():
             # UPDATE current time:
             (tstr, t) = self.helper.get_time_now()
             self.current_timestamp = t
-
             #-------------------- NEXT RCT SERVICE --------------------
             self.next_Tserv = self.current_timestamp + self.Freq_Service
             #-----------------------------------------------------------
@@ -784,7 +782,7 @@ class Digital_Twin():
 
             if self.ip_address != None:
                 #--- Create a Broker
-                self.broker_manager = self.broker_manager.publish_setting_action('stop')
+                self.broker_manager.publish_setting_action('stop')
                 self.helper.printer("Physical system is requested to stop remotely.",'purple')
 
             self.helper.printer(f"---- Digital Twin '{self.name}' was killed manually ----", 'red')
