@@ -206,9 +206,6 @@ class Database():
                     ORDER BY timestamp_real DESC
                     LIMIT 1
                     """, (self.end_time,self.start_time,)).fetchone()
-
-                #--- Found the next event to be Started
-                self.end_time_id = db.fetchone()
                 
                 #--- Stop Conditions
                 if self.end_time_id != None:
