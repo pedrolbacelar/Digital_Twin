@@ -550,7 +550,7 @@ class Validator():
         indicator = len(lcss) / min(m,n)
         print("Printing LCSS Event sequence...")
         for i in range(len(lcss)):
-            print("")
+            print(f"[]")
 
         # return the longest common sub-sequence
         return (lcss, lcss_time, indicator)

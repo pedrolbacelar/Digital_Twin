@@ -144,7 +144,7 @@ class Database():
     def find_line_ID_start_end(self):
         with sqlite3.connect(self.database_path) as db:
 
-            self.start_time_id = db.execute(f"""
+            self.start_time_row = db.execute(f"""
                 SELECT event_id, activity_type
                 FROM real_log
                 WHERE timestamp_real >= ?
@@ -162,8 +162,8 @@ class Database():
                 sys.exit()
 
             # --- Update Start Pointers (Natural Approach)
-            self.start_time_id = self.start_time_id[0]
-            self.start_time_status = self.start_time_id[1]
+            self.start_time_id = self.start_time_row[0]
+            self.start_time_status = self.start_time_row[1]
             
 
 
