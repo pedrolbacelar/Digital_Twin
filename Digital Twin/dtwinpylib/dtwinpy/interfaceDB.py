@@ -23,6 +23,13 @@ class Database():
         self.start_time_status = None
         self.end_time_status = None
 
+        # --- Threshold for trials
+        self.looping = True
+        self.try_counter = 1
+        self.sleep_time = 1
+        self.timeout = 30 # TODO: input variable for DT
+        self.max_counter= round(self.timeout/self.sleep_time)
+
         #--- When create the object, already create the database and table if doesn't exist
         if event_table == "real_log":
             #--- Check if exist a 'digital_log' (in case of copied databases)
@@ -185,23 +192,47 @@ class Database():
 
 
             # ------------------------------------------ END TIME -------------------------------------------
-            self.end_time_id = db.execute(f"""
-                SELECT event_id, activity_type
-                FROM real_log
-                WHERE timestamp_real <= ? AND timestamp_real >= ?
-                ORDER BY timestamp_real DESC
-                LIMIT 1
-                """, (self.end_time,self.start_time,)).fetchone()
-                        
-            if self.end_time_id == None:
+                       
+            #--- Timeout Loop
+            self.looping = True
+            self.try_counter = 0
+
+            while self.looping == True and self.try_counter <= self.max_counter:
+                # Take the line id most close to the end time but higher than the start time
+                self.end_time_id = db.execute(f"""
+                    SELECT event_id, activity_type
+                    FROM real_log
+                    WHERE timestamp_real <= ? AND timestamp_real >= ?
+                    ORDER BY timestamp_real DESC
+                    LIMIT 1
+                    """, (self.end_time,self.start_time,)).fetchone()
+
+                #--- Found the next event to be Started
+                self.end_time_id = db.fetchone()
+                
+                #--- Stop Conditions
+                if self.end_time_id != None:
+                    # Found a started
+                    self.looping = False
+
+                else:
+                    self.helper.printer(f"[interfaceDB.py/find_line_ID_start_end()] (Waiting {self.try_counter* self.sleep_time} sec) Not found any event before the end_time: {self.end_time} and after the start_time: {self.start_time}. Sleeping for {self.sleep_time} seconds and trying again", 'brown')
+                    #--- Sleep for the next try
+                    sleep(self.sleep_time)
+
+                    #--- Updated the trying counter
+                    self.try_counter += 1
+
+   
+            if self.try_counter > self.max_counter:
                 #--- Printer Error Message
-                self.helper.printer(f"[ERROR][interfaceDB.py/find_line_ID_start_end()] It was not possible to find any event before the end time: {self.end_time}", 'red')
-                (tstr, t) = self.helper.get_time_now()
+                self.helper.printer(f"[ERROR][interfaceDB.py/find_line_ID_start_end()] It was not possible to find any event before the end time: {self.end_time} and after the start time: {self.start_time}", 'red')
                 
                 #--- Killing the program
                 self.helper.printer(f"---- Digital Twin killed at {tstr} ----", 'red')
                 sys.exit()
     
+
             # --- Update End Pointers
             self.end_time_status = self.end_time_id[1]
             self.end_time_id = self.end_time_id[0]
@@ -287,14 +318,10 @@ class Database():
         conn = sqlite3.connect(self.database_path)
         cursor = conn.cursor()
 
-        looping = True
-        try_counter = 1
-        sleep_time = 1
-        timeout = 30 # TODO: input variable for DT
-        max_counter= round(timeout/sleep_time)
-
         #--- Timeout Loop
-        while looping == True and try_counter <= max_counter:
+        self.looping = True
+        self.try_counter = 0
+        while self.looping == True and self.try_counter <= self.max_counter:
             # Check for the most recent 'started' activity_type before the original start time
             cursor.execute(f"""
                 SELECT event_id, timestamp_real
@@ -311,19 +338,19 @@ class Database():
             #--- Stop Conditions
             if row != None:
                 # Found a started
-                looping = False
+                self.looping = False
 
             else:
-                self.helper.printer(f"[interfaceDB.py/update_end_time] (Waiting {try_counter* sleep_time} sec) Not found 'Started' after the end_time: {self.end_time}. Sleeping for {sleep_time} seconds and trying again", 'brown')
+                self.helper.printer(f"[interfaceDB.py/update_end_time] (Waiting {self.try_counter* self.sleep_time} sec) Not found 'Started' after the end_time: {self.end_time}. Sleeping for {self.sleep_time} seconds and trying again", 'brown')
                 #--- Sleep for the next try
-                sleep(sleep_time)
+                sleep(self.sleep_time)
 
                 #--- Updated the trying counter
-                try_counter += 1
+                self.try_counter += 1
         
-        if try_counter > max_counter:
+        if self.try_counter > self.max_counter:
             #--- Printer Error Message
-            self.helper.printer(f"[ERROR][interfaceDB.py/update_end_time()][TIMEOUT] After trying {max_counter} times, it was not possible to find a 'Started' event after the end time: {self.end_time}", 'red')
+            self.helper.printer(f"[ERROR][interfaceDB.py/update_end_time()][TIMEOUT] After trying {self.max_counter} times, it was not possible to find a 'Started' event after the end time: {self.end_time}", 'red')
             
             #--- Killing the program
             self.helper.printer(f"---- Digital Twin killed ----", 'red')
