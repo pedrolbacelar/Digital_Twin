@@ -176,7 +176,7 @@ class Database():
             # --- Update Start Pointers (Forced Approach)
             if self.start_time_id != 1:
                 if self.start_time_status == "Finished":
-                    self.helper.printer(f"[WARNING][interfaceDB.py/find_line_ID_start_end()] Changed Start Time by force because a initial trace was 'Finished'. Jumping start time id from {self.start_time_id} to {next_start_time_id}.")
+                    self.helper.printer(f"[WARNING][interfaceDB.py/find_line_ID_start_end()] Changed Start Time by force because a initial trace was 'Finished'.")
 
                 next_start_time_id = self.forced_update_start_time()
                 self.start_time_id = next_start_time_id
