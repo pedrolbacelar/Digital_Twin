@@ -20,7 +20,7 @@ import dtwinpylib
 importlib.reload(dtwinpylib.dtwinpy.interfaceDB)"""
 
 class Broker_Manager():
-    def __init__(self, name, ip_address, real_database_path, ID_database_path, port= 1883, keepalive= 60, topics = ['trace', 'part_id', 'RCT_server'], client = None):
+    def __init__(self, name, ip_address, real_database_path, ID_database_path, UID_to_PalletID= None, port= 1883, keepalive= 60, topics = ['trace', 'part_id', 'RCT_server'], client = None, WIP= None):
         #--- Connect to the Broker
         self.name= name
         self.ip_address= ip_address
@@ -34,24 +34,36 @@ class Broker_Manager():
         if client == None:
             #--- Create the client object
             self.client = mqtt.Client()
+        
+        #---- UID <> PID dictionaries
         self.UID_to_PID_dict = {}
         self.PID_to_UID_dict = {}
-        self.PID_counter = 1
         self.old_UID = 0
-        self.UID_to_PalletID= {
-            "236439249": "Pallet 1",
-            "2041719249": "Pallet 2",
-            "2049810149": "Pallet 3",
-            "236629349": "Pallet 4",
-            "1721739249": "Pallet 5",
-            "28159349": "Pallet 6",
-            "44139349": "Pallet 7",
-            "601269249": "Pallet 8",
-            "20419710149": "Pallet 9",
-            "1889810149": "Pallet 10",
-            "441289249": "Pallet 11",
-            "28429249": "Pallet 12"
-        }
+        
+        if WIP == None:
+            self.helper.printer(f"[WARNING][__init__()] Not given a WIP, trying to use WIP from model .json...")
+            self.PID_counter = 1
+        if WIP != None:
+            self.PID_counter = WIP + 1
+
+        #------- UID to PALLET ID
+        if UID_to_PalletID == None:
+            self.UID_to_PalletID= {
+                "236439249": "Pallet 1",
+                "2041719249": "Pallet 2",
+                "2049810149": "Pallet 3",
+                "236629349": "Pallet 4",
+                "1721739249": "Pallet 5",
+                "28159349": "Pallet 6",
+                "44139349": "Pallet 7",
+                "601269249": "Pallet 8",
+                "20419710149": "Pallet 9",
+                "1889810149": "Pallet 10",
+                "441289249": "Pallet 11",
+                "28429249": "Pallet 12"
+            }
+        if UID_to_PalletID != None:
+            self.UID_to_PalletID = UID_to_PalletID
 
         #--- Database
         self.real_database_path = real_database_path
@@ -139,11 +151,12 @@ class Broker_Manager():
 
         )
 
+        #--- Add the UID with the current PID counter in the dictionary
+        self.UID_to_PID_dict[unique_ID] = part_id
+
         #----- Clean the selected Branch Queue for this UID that now has a new PID
         self.ID_database.write_selected_branch_queue(UID= unique_ID, selected_queue= None)
 
-        #--- Increase the part id counter
-        self.PID_counter += 1
 
 
     def part_ID_translator(self, unique_ID):
@@ -157,7 +170,7 @@ class Broker_Manager():
             part_id = self.UID_to_PID_dict[unique_ID]
             return part_id
         except KeyError:
-            self.helper.printer(f"[ERROR][broker_manager.py/part_ID_translator()] Unique ID '{unique_ID}' not found in the Dictionary!", 'red')
+            self.helper.printer(f"[ERROR][broker_manager.py/part_ID_translator()] Unique ID '{unique_ID}' not found in the Dictionary 'UID_to_PID_dict'!", 'red')
             print("printing the dicitionary....")
             for key in self.UID_to_PID_dict:
                 print(f"{key} | {self.UID_to_PID_dict[key]}")
@@ -251,11 +264,11 @@ class Broker_Manager():
         uid_exists = self.UID_checker(unique_ID, machine_id)
 
         #--- If the UID is not in the database, create the new PID and add it into the database
-        if uid_exists == False and machine_id != "Machine 1":
+        if uid_exists == False:
             self.first_part_ID_creation(unique_ID)
 
         #--- If it's Machine 1, always create a part
-        if machine_id == "Machine 1":
+        if machine_id == "Machine 1" and uid_exists == True:
             self.part_ID_creator(unique_ID, current_time_str)
 
         #--- For all the machines (including machine 1)

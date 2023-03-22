@@ -565,6 +565,11 @@ class Machine():
                                 #-- Wait to check again later
                                 yield self.env.timeout(self.waiting)
 
+                                if self.env.now >= 1000:
+                                    self.helper.printer("[ERROR][components.py/alternating policy] TIMEOUT", 'red')
+                                    self.exit.succeed()
+                                    sys.exit()
+
                                 #-- Reset the i and also the allocation to check the queues again from the begining
                                 self.allocation_counter = 0
                                 i = 0

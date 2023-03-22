@@ -15,7 +15,7 @@ mydt = Digital_Twin(
     flag_API= True,
     rct_threshold= 0,
     rct_queue= 2,
-    flag_external_service= False)
+    flag_external_service= True)
 
 #--- Run the real time Digital Twin
 mydt.run()

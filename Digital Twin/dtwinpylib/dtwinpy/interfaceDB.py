@@ -162,15 +162,15 @@ class Database():
             
             if self.start_time_row == None:
                 #--- Printer Error Message
-                self.helper.printer(f"[ERROR][interfaceDB.py/find_line_ID_start_end()] It was not possible to find any event after the start time: {self.start_time}", 'red')
+                self.helper.printer(f"[WARNING][interfaceDB.py/find_line_ID_start_end()] It was not possible to find any event after the start time: {self.start_time}", 'red')
                 
-                #--- Killing the program
-                self.helper.printer(f"---- Digital Twin killed ----", 'red')
-                sys.exit()
-
-            # --- Update Start Pointers (Natural Approach)
-            self.start_time_id = self.start_time_row[0]
-            self.start_time_status = self.start_time_row[1]
+                self.start_time_id = None
+                self.start_time_status = None
+                
+            else:
+                # --- Update Start Pointers (Natural Approach)
+                self.start_time_id = self.start_time_row[0]
+                self.start_time_status = self.start_time_row[1]
             
 
             # --- Update Start Pointers (Forced Approach)
@@ -386,7 +386,7 @@ class Database():
         #--- Take the rigth position before that event
         started_position = row[0] # line id
         # To not go to zero, don't subtract with it's one
-        if selected_line_id != 1:
+        if started_position != 1:
             selected_line_id = started_position - 1
         else:
             selected_line_id = started_position

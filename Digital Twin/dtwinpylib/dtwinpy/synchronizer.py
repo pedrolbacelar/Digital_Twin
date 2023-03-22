@@ -422,6 +422,16 @@ class Synchronizer():
             #--- Counting of parts in the system
             new_parts_in_system = self.count_total_parts()
 
+            # ------------- Verbose -------------
+            self.helper.printer(f"Event - machine_name: {machine_name}, status: {status}, part_id: {part_id}, queue_name: {queue_name}", 'brown')
+            for key in self.zones_dict:
+                zone = self.zones_dict[key]
+                print(f" ------------ ZONE ID: {zone.get_id()} ------------")
+                print(f"Parts in Queue: {zone.get_part_id_in_queue()}")
+                print(f"Part in Machine: {zone.get_part_id_in_machine()}")
+
+
+            #--- Erro when different numbers of parts are registered in the traces
             if new_parts_in_system != parts_in_system:
                 (tstr, t) = self.helper.get_time_now()
                 self.helper.printer(f"[ERROR][synchronizer.py/positioning_discovery()] A different number of parts in the system was detected. Check for parts duplications or external interference!", 'red')
@@ -432,16 +442,6 @@ class Synchronizer():
 
                 self.helper.printer(f"---- Digital Twin was killed ----", 'red')
                 sys.exit()
-
-
-
-            # ------------- Verbose -------------
-            self.helper.printer(f"Event - machine_name: {machine_name}, status: {status}, part_id: {part_id}, queue_name: {queue_name}", 'brown')
-            for key in self.zones_dict:
-                zone = self.zones_dict[key]
-                print(f" ------------ ZONE ID: {zone.get_id()} ------------")
-                print(f"Parts in Queue: {zone.get_part_id_in_queue()}")
-                print(f"Part in Machine: {zone.get_part_id_in_machine()}")
 
 
         #--- Assign Tnow according the last event of the real log

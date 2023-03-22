@@ -264,7 +264,7 @@ class Digital_Twin():
 
         #--- waiting for the physical system to start sending the trace.
         print(f"Waiting for the physical system")
-        for ii in range (5):
+        for ii in range (12):
             sleep(1)
             print(".")
         print(f"Starting operations ...")
@@ -511,7 +511,8 @@ class Digital_Twin():
             # --- Adjust WHEN WAS the last validation (just happened)
             #-- Take the last end time ("previous next_TSync but updated")
             last_end_time = self.pointers_database.read_last_end_time()
-            self.last_Tsync = last_end_time + 1
+            #self.last_Tsync = last_end_time + 1
+            self.last_Tsync = last_end_time
 
             #self.last_Tsync = self.next_Tsync # TODO: Update this considering the updated end time!
             
