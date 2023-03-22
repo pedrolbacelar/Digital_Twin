@@ -479,28 +479,33 @@ class Machine():
                     # ------------------ RCT Policy Check ------------------
                     # (only for branching machines)
                     if self.branch != None:
-                        # --- Take the correponding Branch Queue selection for the current part in machine
-                        for part_tuple in self.parts_branch_queue:
-                            # -- Get part name
-                            part_name = part_tuple[0]
 
-                            # --- Find the part that I have inside
-                            if self.part_in_machine.get_name() == part_name:
-                                # -- Get the selected queue for this part (that is the one that we have)
-                                branch_queue_selected = part_tuple[1]
+                        #--- Just do the process if the machine was set with the vector (from RCT server)
+                        if self.parts_branch_queue == True:
+                            # --- Take the correponding Branch Queue selection for the current part in machine
+                            for part_tuple in self.parts_branch_queue:
+                                # -- Get part name
+                                part_name = part_tuple[0]
 
-                                # -- Check if the part has any queue assigned
-                                if branch_queue_selected != None:
-                                    # Store the name of the queue to put
-                                    queue_name_to_put = branch_queue_selected
+                                # --- Find the part that I have inside
+                                if self.part_in_machine.get_name() == part_name:
+                                    # -- Get the selected queue for this part (that is the one that we have)
+                                    branch_queue_selected = part_tuple[1]
 
-                                    # Change the Policy of the Machine
-                                    self.allocation_policy = "rct"
+                                    # -- Check if the part has any queue assigned
+                                    if branch_queue_selected != None:
+                                        # Store the name of the queue to put
+                                        queue_name_to_put = branch_queue_selected
 
-                                # -- If the part that was processed don't have a branch queue, than go back to normal
-                                else:
-                                    self.allocation_policy = self.old_policy
+                                        # Change the Policy of the Machine
+                                        self.allocation_policy = "rct"
 
+                                    # -- If the part that was processed don't have a branch queue, than go back to normal
+                                    else:
+                                        self.allocation_policy = self.old_policy
+                        #--- If the machine was not set with the vector, keep the old policy
+                        if self.parts_branch_queue == False:
+                            self.allocation_policy = self.old_policy
                     # ------------------ Choosing the Next Queue ------------------
 
                     # ---------------- First Queue Free Policy ----------------
@@ -521,10 +526,12 @@ class Machine():
 
                     # ---------------- Alternating Policy ----------------
                     if self.allocation_policy == "alternated":
-                        if self.id == 1:
-                            pass
+                       
                         #--- Select the Queue based on the counter
                         queue_selected = self.queue_out[self.allocation_counter]
+
+                        #--- Define the last Allocation counter as empty
+                        last_allocation_counter = None
 
                         # Loop through next queue in the perspective of the counter
                         for i in range(self.allocation_counter, len(self.queue_out)):
@@ -564,15 +571,22 @@ class Machine():
             
                         #--- If it's not at maximun, increase allocation
                         else:
-                            self.allocation_counter = last_allocation_counter +  1
+                            #--- If the last allocation counter was not assign a new one
+                            # (which means that the machine don't found a free queue). So 
+                            # assign to start the allocation from 0 again
+
+                            if last_allocation_counter == None: last_allocation_counter= 0
+
+                            self.allocation_counter = last_allocation_counter
 
 
-                        #--- Find the right conveyor
-                        for conveyor in self.conveyors_out:
-                            if conveyor.id == self.queue_to_put.get_id():
-                                #--- Conveyor of the same selected queue
-                                conveyor_to_put = conveyor
-                                break
+                        #--- Find the right conveyor (just check the conveyor if the machine found a queue free)
+                        if flag_allocated_queue== True:
+                            for conveyor in self.conveyors_out:
+                                if conveyor.id == self.queue_to_put.get_id():
+                                    #--- Conveyor of the same selected queue
+                                    conveyor_to_put = conveyor
+                                    break
 
                     # ---------------- Branching Policy ----------------
                     if self.allocation_policy == "branching":
@@ -602,12 +616,22 @@ class Machine():
                                 conveyor_to_put = conveyor
                                 break
 
-                    #------------ Check if the Queue is not full --------------
-                    #--- Queue Selected Full
-                    if self.queue_to_put.get_len() < self.queue_to_put.get_capacity():
-                        flag_allocated_part = True
+                    # ============= Check if the Queue is not full =============
+                    # --------------- Alternating Policy ---------------
+                    if self.allocation_policy == "alternated":
+                        # If it's alternated, it just choose the queue when it's free
+                        # so we can use the same flag as before
+                        if flag_allocated_queue == True:
+                            flag_allocated_part = True
                     
-                    #--- Queue Not Full
+                    # --------------- First, Branching and RCT Policy ---------------
+                    if self.allocation_policy== "First" or self.allocation_policy=="Branching" or self.allocation_policy=="rct":
+                        # This policies receives the queue without knowing if it's
+                        # full or not, so we need to check here:
+                        if self.queue_to_put.get_len() < self.queue_to_put.get_capacity():
+                            flag_allocated_part = True
+                        
+                    # ============= ALLOCATION (queue not full) =============
                     if flag_allocated_part == True:
                         #--- Queue Allocated (Update digital_log)
                         # obs: makes senses to take the time just after the allocation, because in the model becuase the model generation works like that
