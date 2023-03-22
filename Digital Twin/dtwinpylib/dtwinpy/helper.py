@@ -55,17 +55,20 @@ class Helper():
             'reset': self.Reset                 
             }
         
-        self.sounds = {
-            'red': pygame.mixer.Sound("sound/error.mp3"),
-            'green': pygame.mixer.Sound("sound/success.mp3"),
-            'yellow': pygame.mixer.Sound("sound/warning.mp3") 
-        }
-
         # Initia the player
         pygame.mixer.init()
+
+        # self.sounds = {
+        #     'red': pygame.mixer.Sound("sound/error.mp3"),
+        #     'green': pygame.mixer.Sound("sound/success.mp3"),
+        #     'yellow': pygame.mixer.Sound("sound/warning.mp3") 
+        # }
+
+        # # Initia the player
+        # pygame.mixer.init()
     
     #--- Printing with colors
-    def printer(self, text, color= 'yellow', time= True, play= True):
+    def printer(self, text, color= 'yellow', time= True, play= False):
         (tstr, t) = self.get_time_now()
         if time == True:
             if self.type == "py":
