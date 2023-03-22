@@ -249,12 +249,27 @@ class Digital_Twin():
         if self.ip_address != None:
             #--- Create a Broker
             self.broker_manager = self.initiate_broker(self.ip_address)
-            print("Broker Manager internally create for publishing feedback...")
+            print("Broker Manager internally created for publishing feedback...")
 
 
         # ================================ SET UP FINISHED ================================
         self.helper.printer(f"---- Digital Twin '{self.name}' created sucessfully ----", 'green')       
         # ==================================================================================
+
+
+        if self.ip_address != None:
+            #--- Create a Broker
+            self.broker_manager = self.broker_manager.publish_setting_action('start')
+            self.helper.printer("Physical system is requested to start remotely.",'purple')
+
+        #--- waiting for the physical system to start sending the trace.
+        print(f"Waiting for the physical system")
+        for ii in range (5):
+            sleep(1)
+            print(".")
+        print(f"Starting operations ...")
+
+
 
     # -------------------------------------------------- INDIVIDUAL FUNCTIONS --------------------------------------------------
     #--- Initiate Broker 
@@ -748,6 +763,12 @@ class Digital_Twin():
                 self.External_Services()
 
         except KeyboardInterrupt:
+
+            if self.ip_address != None:
+                #--- Create a Broker
+                self.broker_manager = self.broker_manager.publish_setting_action('stop')
+                self.helper.printer("Physical system is requested to stop remotely.",'purple')
+
             self.helper.printer(f"---- Digital Twin '{self.name}' was killed manually ----", 'red')
 
 
