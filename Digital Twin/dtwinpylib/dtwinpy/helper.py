@@ -17,6 +17,8 @@ from time import sleep
 import shutil
 import os
 import re
+import pygame
+
 
 class Helper():
     def __init__(self, type= "py"):
@@ -52,9 +54,18 @@ class Helper():
             'brown': self.Brown,
             'reset': self.Reset                 
             }
+        
+        self.sounds = {
+            'red': pygame.mixer.Sound("sound/error.mp3"),
+            'green': pygame.mixer.Sound("sound/success.mp3"),
+            'yellow': pygame.mixer.Sound("sound/warning.mp3") 
+        }
+
+        # Initia the player
+        pygame.mixer.init()
     
     #--- Printing with colors
-    def printer(self, text, color= 'yellow', time= True):
+    def printer(self, text, color= 'yellow', time= True, play= True):
         (tstr, t) = self.get_time_now()
         if time == True:
             if self.type == "py":
@@ -68,6 +79,14 @@ class Helper():
             
             else:
                 display(Markdown(f"{self.colors[color]}{text}{self.Reset}"))
+
+        # Play the Sound related to the color 
+        if play:
+            # Take the respective sound object
+            sound = self.sounds[color]
+
+            # Play the sound
+            sound.play()
 
     #--- Print with Markdown language
     def markdown(self, mark):
