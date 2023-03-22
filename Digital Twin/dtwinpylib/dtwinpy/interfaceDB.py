@@ -162,15 +162,16 @@ class Database():
                 sys.exit()
 
             # --- Update Start Pointers (Natural Approach)
-            #self.start_time_id = self.start_time_id[0]
+            self.start_time_id = self.start_time_id[0]
             self.start_time_status = self.start_time_id[1]
             
 
 
             # --- Update Start Pointers (Forced Approach)
-            next_start_time_id = self.forced_update_start_time()
-            self.start_time_id = next_start_time_id
-            print("Start Time ID assigned by force using the previous End Time ID as reference")
+            if self.start_time_id != 1:
+                next_start_time_id = self.forced_update_start_time()
+                self.start_time_id = next_start_time_id
+                print("Start Time ID assigned by force using the previous End Time ID as reference")
 
             # --- Update Start Time in case of 'Finished'
             if self.start_time_status == "Finished":
