@@ -392,6 +392,8 @@ class Synchronizer():
                     #--- Increment the ID of the new part going back to the system
                     self.last_part_id += 1
                     new_part_id = f"Part {self.last_part_id}"
+
+                    print(f"{machine_obj.get_name()} (final machine) just finisehd a part, adding a new one: {new_part_id} to {next_zone.get_name()}")
                     
                     #--- Add to the next zone
                     next_zone.addIn(new_part_id)

@@ -45,7 +45,12 @@ class Broker_Manager():
             "236629349": "Pallet 4",
             "1721739249": "Pallet 5",
             "28159349": "Pallet 6",
-            "44139349": "Pallet 7"
+            "44139349": "Pallet 7",
+            "601269249": "Pallet 8",
+            "20419710149": "Pallet 9",
+            "1889810149": "Pallet 10",
+            "441289249": "Pallet 11",
+            "28429249": "Pallet 12"
         }
 
         #--- Database
