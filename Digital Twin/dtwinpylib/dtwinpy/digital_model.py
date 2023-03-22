@@ -1,6 +1,8 @@
+#--- Common Libraries
 import simpy
 import json
 import matplotlib.pyplot as plt
+import sys
 
 #--- Import simulation components
 from .components import Part
@@ -143,6 +145,40 @@ class Model():
 
             #--- Update the queue_index to go for the next queue
             queue_index += 1
+
+    def check_queue_capacity(self):
+        """
+        This function looks through the 'initial', counts the number of parts positioned
+        and compare it with the queue capacity. If it's higher than the queue capacity,
+        the digital model is killed. This code needs to run after model translator, 
+        because of merging queues.
+        """
+        #--- Load the json data
+        with open(self.model_path) as json_file:
+            # Assign it in data
+            data = json.load(json_file)
+
+        #--- Loop through initial queues
+        for i in range(len(data["initial"])):
+            queue_initial = data["initial"][i]
+            assigned_capacity = len(queue_initial)
+            
+            #--- Find the related queue
+            # note: i starts with 0, queue id starts with 1
+            for queue in self.queues_vector:
+                if queue.get_id() == i + 1:
+                    # Found it!
+                    model_capacity= queue.get_capacity()
+                    break
+            
+            #--- Compare the assigned capacity and the model capacity
+            if assigned_capacity > model_capacity:
+                self.helper.printer(f"[ERROR][digital_model.py/check_queue_capacity()] Assigned parts in queue is higher than maximum capacity.", 'red')
+                self.helper.printer(f"|-- Queue: {i+1}, Assigned number of parts: {assigned_capacity}, Max Capacity: {model_capacity}. Please make the correct changes in the model: '{self.model_path}'", 'red', False)
+
+                self.helper.printer(f"---- Digital Model was killed ----", 'red')
+                sys.exit()
+
 
     # ----- Find parts alreayd working within machine -----
     def discovery_working_parts(self):
@@ -618,6 +654,13 @@ class Model():
         # --- Setting the last allocation counter for branching machines
         self.setting_allocation_counter()
         #======================================================================
+
+        #========================== Check for Bugs ==========================
+        #--- Check if the assigned parts in the queues are higher than the capacity
+        self.check_queue_capacity()
+        #======================================================================
+
+
     # ================================================
 
     # =================== RUNNING ===================

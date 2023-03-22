@@ -76,7 +76,13 @@ class Broker_Manager():
         self.UID_to_PID_dict[unique_ID] = f"Part {self.PID_counter}"
 
         #--- Get the PalletID for that specific UID
-        palletID = self.UID_to_PalletID[unique_ID]
+        try:
+            palletID = self.UID_to_PalletID[unique_ID]
+        except KeyError:
+            self.helper.printer(f"[ERROR][broker_mager.py/part_ID_creator()] It was not possible to find a Pallet ID for the UID: {unique_ID}", 'red')
+            self.helper.printer(f"|-- Please verify if that UID is a new UID inserted in the system.", 'red')
+            self.helper.printer(f"|-- Assigning a default Pallet ID: 'None'")
+            palletID= 0
 
         #----- Add the PID with the current UID to the dictionary
         self.PID_to_UID_dict[f"Part {self.PID_counter}"] = unique_ID
@@ -105,7 +111,14 @@ class Broker_Manager():
         it uses the Pallet ID as Part ID.
         """
         #--- Get the PalletID for that specific UID
-        palletID = self.UID_to_PalletID[unique_ID]
+        try:
+            palletID = self.UID_to_PalletID[unique_ID]
+        except KeyError:
+            self.helper.printer(f"[ERROR][broker_mager.py/part_ID_creator()] It was not possible to find a Pallet ID for the UID: {unique_ID}", 'red')
+            self.helper.printer(f"|-- Please verify if that UID is a new UID inserted in the system.", 'red')
+            self.helper.printer(f"|-- Assigning a default Pallet ID: 'None'")
+            palletID= 0
+
 
         #--- Extract the ID of pallet string
         id = self.helper.extract_int(palletID)
