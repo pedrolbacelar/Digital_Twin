@@ -226,11 +226,15 @@ class Database():
             #--- Clean the timestamp column before updating it again
             db.execute("UPDATE real_log SET timestamp = ?", (None,))
 
-            #rows = db.execute("SELECT * FROM real_log WHERE timestamp_real >= ? AND timestamp_real <= ?", (self.start_time, self.end_time)).fetchall()
-            rows = db.execute("SELECT * FROM real_log WHERE event_id >= ? AND event_id <= ?", (self.start_time_id, self.end_time_id)).fetchall()
+            #--- Check if both start and end reference to the same line (rows == Traces)
+            if  self.start_time_id == self.end_time_id:
+                rows = db.execute("SELECT * FROM real_log WHERE event_id = ?", (self.start_time_id,)).fetchall()
+            else:
+                rows = db.execute("SELECT * FROM real_log WHERE event_id >= ? AND event_id <= ?", (self.start_time_id, self.end_time_id)).fetchall()
 
-            # Loop through the selected rows and update the timestamp column with relative values
             print(f"rows (traces) to be synchronized: {rows}")
+
+            # Loop through the selected rows and update the timestamp column with relative values 
             start_timestamp = rows[0][-1]
             for row in rows:
                 row_event_id = row[0]
