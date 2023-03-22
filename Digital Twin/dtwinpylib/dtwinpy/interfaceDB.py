@@ -152,7 +152,7 @@ class Database():
                 LIMIT 1
                 """, (self.start_time,)).fetchone()
             
-            if self.start_time_id == None:
+            if self.start_time_row == None:
                 #--- Printer Error Message
                 self.helper.printer(f"[ERROR][interfaceDB.py/find_line_ID_start_end()] It was not possible to find any event after the start time: {self.start_time}", 'red')
                 (tstr, t) = self.helper.get_time_now()
