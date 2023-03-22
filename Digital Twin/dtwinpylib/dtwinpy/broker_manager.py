@@ -98,10 +98,41 @@ class Broker_Manager():
         #--- Increase the part id counter
         self.PID_counter += 1
     
-        #--- DEBUGING
-        """for key in self.UID_to_PID_dict:
-            print(f"{key} | {self.UID_to_PID_dict[key]}")"""
-    
+
+    def first_part_ID_creation(self, unique_ID):
+        """
+        This functions is just used in the first creation of unique IDs. In this cases
+        it uses the Pallet ID as Part ID.
+        """
+        #--- Get the PalletID for that specific UID
+        palletID = self.UID_to_PalletID[unique_ID]
+
+        #--- Extract the ID of pallet string
+        id = self.helper.extract_int(palletID)
+
+        #--- Create the Part ID based on the Pallet ID
+        part_id = f"Part {id}"
+
+        #--- Get current time
+        (tstr, t) = self.helper.get_time_now()
+
+        #----- Add the PID and UID into the PID_UID database
+        self.ID_database.add_UID_partid(
+            table_name= "ID",
+            uid= unique_ID,
+            partid= part_id,
+            current_time_str= tstr,
+            palletID= palletID
+
+        )
+
+        #----- Clean the selected Branch Queue for this UID that now has a new PID
+        self.ID_database.write_selected_branch_queue(UID= unique_ID, selected_queue= None)
+
+        #--- Increase the part id counter
+        self.PID_counter += 1
+
+
     def part_ID_translator(self, unique_ID):
         """
         This function takes a UID and searches in the PID dictionary for the related PID. The function returns
@@ -208,7 +239,7 @@ class Broker_Manager():
 
         #--- If the UID is not in the database, create the new PID and add it into the database
         if uid_exists == False and machine_id != "Machine 1":
-            self.part_ID_creator(unique_ID, current_time_str)
+            self.first_part_ID_creation(unique_ID)
 
         #--- If it's Machine 1, always create a part
         if machine_id == "Machine 1":

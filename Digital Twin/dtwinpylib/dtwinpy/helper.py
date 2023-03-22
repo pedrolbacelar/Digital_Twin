@@ -16,6 +16,7 @@ import datetime
 from time import sleep
 import shutil
 import os
+import re
 
 class Helper():
     def __init__(self, type= "py"):
@@ -107,3 +108,8 @@ class Helper():
                 print(f"File '{file_name}' deleted...")
                 model_counter += 1
         print(f"Done! Deleted {model_counter} successfuly")
+
+    #--- Extract the first number in a string
+    def extract_int(self, string):
+        integer = int(re.findall('\d+', string)[0])
+        return integer
