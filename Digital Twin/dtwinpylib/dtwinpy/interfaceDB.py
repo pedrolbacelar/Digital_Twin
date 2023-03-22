@@ -143,7 +143,8 @@ class Database():
 
     def find_line_ID_start_end(self):
         with sqlite3.connect(self.database_path) as db:
-
+            
+            # ------------------------------------------ START TIME -------------------------------------------
             self.start_time_row = db.execute(f"""
                 SELECT event_id, activity_type
                 FROM real_log
@@ -166,21 +167,14 @@ class Database():
             self.start_time_status = self.start_time_row[1]
             
 
-
             # --- Update Start Pointers (Forced Approach)
             if self.start_time_id != 1:
+                if self.start_time_status == "Finished":
+                    self.helper.printer(f"[WARNING][interfaceDB.py/find_line_ID_start_end()] Changed Start Time by force because a initial trace was 'Finished'. Jumping start time id from {self.start_time_id} to {next_start_time_id}.")
+
                 next_start_time_id = self.forced_update_start_time()
                 self.start_time_id = next_start_time_id
                 print("Start Time ID assigned by force using the previous End Time ID as reference")
-
-            # --- Update Start Time in case of 'Finished'
-            if self.start_time_status == "Finished":
-                #--- Take by force the line id rigth before the last end time
-                next_start_time_id = self.forced_update_start_time()
-                self.helper.printer(f"[WARNING][interfaceDB.py/find_line_ID_start_end()] Changed Start Time by force because a initial trace was 'Finished'. Jumping start time id from {self.start_time_id} to {next_start_time_id}.")
-                
-                #--- update the start time id
-                self.start_time_id = next_start_time_id
 
                 #--- update the start time
                 with sqlite3.connect(self.database_path) as db:
@@ -188,14 +182,17 @@ class Database():
                     self.start_time= row[0]
                     self.start_time_status= row[1]
 
+
+
+            # ------------------------------------------ END TIME -------------------------------------------
             self.end_time_id = db.execute(f"""
                 SELECT event_id, activity_type
                 FROM real_log
-                WHERE timestamp_real <= ?
+                WHERE timestamp_real <= ? AND timestamp_real >= ?
                 ORDER BY timestamp_real DESC
                 LIMIT 1
-                """, (self.end_time,)).fetchone()
-            
+                """, (self.end_time,self.start_time,)).fetchone()
+                        
             if self.end_time_id == None:
                 #--- Printer Error Message
                 self.helper.printer(f"[ERROR][interfaceDB.py/find_line_ID_start_end()] It was not possible to find any event before the end time: {self.end_time}", 'red')
@@ -233,6 +230,7 @@ class Database():
             rows = db.execute("SELECT * FROM real_log WHERE event_id >= ? AND event_id <= ?", (self.start_time_id, self.end_time_id)).fetchall()
 
             # Loop through the selected rows and update the timestamp column with relative values
+            print(f"rows (traces) to be synchronized: {rows}")
             start_timestamp = rows[0][-1]
             for row in rows:
                 row_event_id = row[0]

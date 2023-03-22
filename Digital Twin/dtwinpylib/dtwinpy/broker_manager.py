@@ -504,8 +504,8 @@ class Broker_Manager():
         use once to not cause problems in the physical system.
         """
 
-        if action != 'start' or action != 'stop':
-            self.helper.printer(f"[ERROR][broker_manager.py/publish_setting_action()] Setting action not recognized! Action used: {action}. Actions available: 'start', 'stop'")
+        if action != 'start' and action != 'stop':
+            self.helper.printer(f"[ERROR][broker_manager.py/publish_setting_action()] Setting action not recognized! Action used: {action}. Actions available: 'start', 'stop'", 'red')
             self.helper.printer(f"---- Digital Twin was killed ----", 'red')
             sys.exit()
 
