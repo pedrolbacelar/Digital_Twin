@@ -385,7 +385,11 @@ class Database():
 
         #--- Take the rigth position before that event
         started_position = row[0] # line id
-        selected_line_id = started_position - 1
+        # To not go to zero, don't subtract with it's one
+        if selected_line_id != 1:
+            selected_line_id = started_position - 1
+        else:
+            selected_line_id = started_position
         
         #--- Changed the pointer?
         if selected_line_id != self.end_time_id:
