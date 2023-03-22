@@ -516,8 +516,14 @@ class Digital_Twin():
             #self.last_Tsync = self.next_Tsync # TODO: Update this considering the updated end time!
             
 
-            # --- Adjust WHEN WILL be the next validation
+            # --- Adjust WHEN WILL be the next Synchronization
+            # UPDATE current time:
+            (tstr, t) = self.helper.get_time_now()
+            self.current_timestamp = t
+
+            #-------------------- NEXT SYNC -------------------------
             self.next_Tsync = self.current_timestamp + self.Freq_Sync
+            #--------------------------------------------------------
 
             # --- User Interface
             (current_time_str, x) = self.helper.get_time_now()
@@ -545,9 +551,10 @@ class Digital_Twin():
             # --- Update validation pointer according to the current Sync Pointer
             self.model_pointer_Valid = self.model_pointer_Sync
 
-            # -------------- Run Validation --------------
+            # -------------- Run Validation -------------------
             (lcss_indicator_logic, lcss_indicator_input) = self.run_validation(copied_realDB= self.copied_realDB, start_time= start_time, end_time= end_time)
             # -------------------------------------------------
+
 
             # ------------------------ MODEL UPDATE ------------------------
 
@@ -605,7 +612,12 @@ class Digital_Twin():
             #self.last_Tvalid = self.next_Tvalid
 
             # --- Adjust WHEN WILL be the next validation
+            # UPDATE current time:
+            (tstr, t) = self.helper.get_time_now()
+            self.current_timestamp = t
+            #-------------------- NEXT VALIDATION ---------------------
             self.next_Tvalid = self.current_timestamp + self.Freq_Valid
+            #----------------------------------------------------------
 
             # --- User Interface
             (current_time_str, x) = self.helper.get_time_now()
@@ -680,7 +692,13 @@ class Digital_Twin():
             #self.last_Tserv = self.next_Tserv
 
             # --- Adjust WHEN WILL be the next validation
+            # UPDATE current time:
+            (tstr, t) = self.helper.get_time_now()
+            self.current_timestamp = t
+
+            #-------------------- NEXT RCT SERVICE --------------------
             self.next_Tserv = self.current_timestamp + self.Freq_Service
+            #-----------------------------------------------------------
 
             # --- User Interface
             (current_time_str, x) = self.helper.get_time_now()

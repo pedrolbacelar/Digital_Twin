@@ -163,10 +163,9 @@ class Database():
             if self.start_time_row == None:
                 #--- Printer Error Message
                 self.helper.printer(f"[ERROR][interfaceDB.py/find_line_ID_start_end()] It was not possible to find any event after the start time: {self.start_time}", 'red')
-                (tstr, t) = self.helper.get_time_now()
                 
                 #--- Killing the program
-                self.helper.printer(f"---- Digital Twin killed at {tstr} ----", 'red')
+                self.helper.printer(f"---- Digital Twin killed ----", 'red')
                 sys.exit()
 
             # --- Update Start Pointers (Natural Approach)
@@ -226,7 +225,7 @@ class Database():
                 self.helper.printer(f"[ERROR][interfaceDB.py/find_line_ID_start_end()] It was not possible to find any event before the end time: {self.end_time} and after the start time: {self.start_time}", 'red')
                 
                 #--- Killing the program
-                self.helper.printer(f"---- Digital Twin killed at {tstr} ----", 'red')
+                self.helper.printer(f"---- Digital Twin killed ----", 'red')
                 sys.exit()
     
 
@@ -420,28 +419,24 @@ class Database():
     def check_parts_zero(self):
         with sqlite3.connect(self.database_path) as db:
             flag_not_missing_part_id = True
-            sleep_time = 5
-            timeout_max = 3
             timeout_counter = 1
 
-            while flag_not_missing_part_id== True and timeout_counter <= timeout_max:
-                (time_str, time) = self.helper.get_time_now()
-                
+            while flag_not_missing_part_id== True and timeout_counter <= self.max_counter:
+
                 parts_zero = db.execute("SELECT * FROM real_log WHERE part_id= ? AND event_id >= ? AND event_id <= ?", ('Part 0', self.start_time_id, self.end_time_id)).fetchall()
                 print(f"parts_zero: {parts_zero}")
                 if len(parts_zero) == 0:
                     flag_not_missing_part_id = False
                 else:
-                    self.helper.printer(f"[WARNING][interfaceDB.py/check_parts_zero()] A Part 0 (without correct ID) was detected within the traces... Sleeping for {sleep_time} seconds")
-                    sleep(sleep_time)
+                    self.helper.printer(f"[WARNING][interfaceDB.py/check_parts_zero()] (Waiting {timeout_counter* self.sleep_time} sec) A Part 0 (without correct ID) was detected within the traces... Sleeping for {self.sleep_time} seconds")
+                    sleep(self.sleep_time)
                     timeout_counter += 1
             
-            if timeout_counter > timeout_max:
-                self.helper.printer(f"[ERROR][interfaceDB.py/check_parts_zero()] After trying {timeout_max} ({timeout_max * sleep_time} seconds), there are still Part 0 within the selected trace. Most probably the some ESP32 is not detecting correctly the RFID Sticker", 'red')
+            if timeout_counter > self.max_counter:
+                self.helper.printer(f"[ERROR][interfaceDB.py/check_parts_zero()] After trying {self.max_counter} ({self.max_counter * self.sleep_time} seconds), there are still Part 0 within the selected trace. Most probably the some ESP32 is not detecting correctly the RFID Sticker", 'red')
                 
                 #--- Killing the program
-                (tstr, t) = self.helper.get_time_now()
-                self.helper.printer(f"---- Digital Twin killed at {tstr} ----", 'red')
+                self.helper.printer(f"---- Digital Twin killed ----", 'red')
                 sys.exit()
 
     def get_current_durantion(self):

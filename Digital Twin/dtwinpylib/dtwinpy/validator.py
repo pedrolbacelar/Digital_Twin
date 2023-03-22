@@ -679,6 +679,7 @@ class Validator():
 
             #--- Set this new stop condition in the model
             self.digital_model.set_until(until)
+
         
         # ------- Assign Parts Queue Branches selected -------
         parts_branch_queue = self.id_database.read_parts_branch_queue()
