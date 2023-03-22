@@ -161,9 +161,16 @@ class Database():
                 self.helper.printer(f"---- Digital Twin killed at {tstr} ----", 'red')
                 sys.exit()
 
-            # --- Update Start Pointers
+            # --- Update Start Pointers (Natural Approach)
+            #self.start_time_id = self.start_time_id[0]
             self.start_time_status = self.start_time_id[1]
-            self.start_time_id = self.start_time_id[0]
+            
+
+
+            # --- Update Start Pointers (Forced Approach)
+            next_start_time_id = self.forced_update_start_time()
+            self.start_time_id = next_start_time_id
+            print("Start Time ID assigned by force using the previous End Time ID as reference")
 
             # --- Update Start Time in case of 'Finished'
             if self.start_time_status == "Finished":

@@ -3,9 +3,11 @@ from .validator import Validator
 from .interfaceDB import Database
 from .helper import Helper
 
-#--- Normal database
+#--- Normal libraries
 import json
 import sqlite3
+import sys
+
 
 #--- Reload Package
 
@@ -328,14 +330,14 @@ class Synchronizer():
         parts_in_system = self.count_total_parts()
 
         #--- Big picture after calculations
-        print("-----------------------------------------------------------------")
+        self.helper.printer("-----------------------------------------------------------------", 'brown')
         self.helper.printer("Big picture BEFORE Sync", 'brown')
         for key in self.zones_dict:
             zone = self.zones_dict[key]
             print(f" ------------ ZONE ID: {zone.get_id()} ------------")
             print(f"Parts in Queue: {zone.get_part_id_in_queue()}")
             print(f"Part in Machine: {zone.get_part_id_in_machine()}")
-        print("-----------------------------------------------------------------")
+        self.helper.printer("-----------------------------------------------------------------", 'brown')
 
         #--- Find the Positioning
         print("--------- Step by Step Sync ---------")
@@ -419,15 +421,22 @@ class Synchronizer():
 
             #--- Counting of parts in the system
             new_parts_in_system = self.count_total_parts()
+
             if new_parts_in_system != parts_in_system:
                 (tstr, t) = self.helper.get_time_now()
-                self.helper.printer(f"[ERROR][synchronizer.py/positioning_discovery()] A different number of parts in the system was detected. Check for parts duplications or external interference! Previous number: {parts_in_system}, New number: {new_parts_in_system}", 'red')
+                self.helper.printer(f"[ERROR][synchronizer.py/positioning_discovery()] A different number of parts in the system was detected. Check for parts duplications or external interference!", 'red')
+                self.helper.printer(f"|-- Previous number: {parts_in_system}, New number: {new_parts_in_system}", 'red')
 
                 #--- Updated the amount of parts in the system
                 parts_in_system= new_parts_in_system
 
+                self.helper.printer(f"---- Digital Twin was killed ----", 'red')
+                sys.exit()
+
+
+
             # ------------- Verbose -------------
-            print(f"Event - machine_name: {machine_name}, status: {status}, part_id: {part_id}, queue_name: {queue_name}")
+            self.helper.printer(f"Event - machine_name: {machine_name}, status: {status}, part_id: {part_id}, queue_name: {queue_name}", 'brown')
             for key in self.zones_dict:
                 zone = self.zones_dict[key]
                 print(f" ------------ ZONE ID: {zone.get_id()} ------------")
@@ -439,14 +448,14 @@ class Synchronizer():
         self.Tnow = self.full_database[-1][0]
 
         #--- Big picture after calculations
-        print("-----------------------------------------------------------------")
+        self.helper.printer("-----------------------------------------------------------------", 'brown')
         self.helper.printer("Big picture AFTER Sync", 'brown')
         for key in self.zones_dict:
             zone = self.zones_dict[key]
             print(f" ------------ ZONE ID: {zone.get_id()} ------------")
             print(f"Parts in Queue: {zone.get_part_id_in_queue()}")
             print(f"Part in Machine: {zone.get_part_id_in_machine()}")        
-        print("-----------------------------------------------------------------")
+        self.helper.printer("-----------------------------------------------------------------", 'brown')
 
 
     def sync_TDS(self):
