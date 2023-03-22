@@ -249,7 +249,8 @@ class Digital_Twin():
         if self.ip_address != None:
             #--- Create a Broker
             self.broker_manager = self.initiate_broker(self.ip_address)
-            print("Broker Manager internally created for publishing feedback...")
+            print(f"Broker Manager internally created for publishing feedback with the IP Address {ip_address}...")
+        if self.ip_address == None: print("IP address not provided, Broker Manager not created. Considering an offiline enviorment")
 
 
         # ================================ SET UP FINISHED ================================
@@ -262,12 +263,12 @@ class Digital_Twin():
             self.broker_manager.publish_setting_action('start')
             self.helper.printer("Physical system is requested to start remotely.",'purple')
 
-        #--- waiting for the physical system to start sending the trace.
-        print(f"Waiting for the physical system")
-        for ii in range (12):
-            sleep(1)
-            print(".")
-        print(f"Starting operations ...")
+            #--- waiting for the physical system to start sending the trace.
+            print(f"Waiting for the physical system")
+            for ii in range (12):
+                sleep(1)
+                print(".")
+            print(f"Starting operations ...")
 
 
 

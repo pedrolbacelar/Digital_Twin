@@ -175,7 +175,7 @@ class Machine():
     def run(self):
     
         while True:
-            if self.id == 1:
+            if self.env.now == 267:
                 pass
             ##### ============== State Machine  ==============
 
@@ -469,31 +469,18 @@ class Machine():
                     # All closed loop cases
                     # Open Loop cases that are not final machines
 
-                    # ------------------ Branching Policy Check ------------------
-
-                    #--- Take the list of paths (conveyors) 
-                    part_paths = self.part_in_machine.get_branching_path() #list of conveyors selected
-
-                    #--- Check if it's a branching manchine and if the part is with paths assigned
-                    if self.branch != None and part_paths != None:
-                        #--- change policy
-                        self.allocation_policy = "branching"
-                        
-                    else:
-                        #--- Go back to the default policy
-                        self.allocation_policy = self.old_policy
-
                     # ------------------ RCT Policy Check ------------------
                     # (only for branching machines)
                     if self.branch != None:
 
                         #--- Just do the process if the machine was set with the vector (from RCT server)
-                        if self.parts_branch_queue == True:
+                        if self.parts_branch_queue != None:
                             # --- Take the correponding Branch Queue selection for the current part in machine
                             for part_tuple in self.parts_branch_queue:
                                 # -- Get part name
                                 part_name = part_tuple[0]
-
+                                if self.part_in_machine.get_name() == 'Part 6':
+                                    pass
                                 # --- Find the part that I have inside
                                 if self.part_in_machine.get_name() == part_name:
                                     # -- Get the selected queue for this part (that is the one that we have)
@@ -510,12 +497,34 @@ class Machine():
                                     # -- If the part that was processed don't have a branch queue, than go back to normal
                                     else:
                                         self.allocation_policy = self.old_policy
-                        #--- If the machine was not set with the vector, keep the old policy
-                        if self.parts_branch_queue == False:
-                            self.allocation_policy = self.old_policy
+                        # #--- If the machine was not set with the vector, keep the old policy
+                        # if self.parts_branch_queue == None:
+                        #     self.allocation_policy = self.old_policy
+
+                    if self.part_in_machine.get_name() == 'Part 6':
+                        pass
+                    # ------------------ Branching Policy Check ------------------
+
+                    #--- Take the list of paths (conveyors) 
+                    part_paths = self.part_in_machine.get_branching_path() #list of conveyors selected
+
+                    #--- Check if it's a branching manchine and if the part is with paths assigned
+                    if self.branch != None and part_paths != None:
+                        #--- change policy
+                        self.allocation_policy = "branching"
+                        
+                    elif self.allocation_policy != 'rct':
+                        #--- Go back to the default policy
+                        self.allocation_policy = self.old_policy
+
+
                     # ------------------ Choosing the Next Queue ------------------
 
+                    # ===================================================================================
+
                     # ---------------- First Queue Free Policy ----------------
+                    if self.part_in_machine.get_id() == 6:
+                        pass
                     if self.allocation_policy == "first":
                         for queue in self.queue_out:
                             if queue.get_len() >= queue.capacity: #queue  full
@@ -637,7 +646,7 @@ class Machine():
                             flag_allocated_part = True
                     
                     # --------------- First, Branching and RCT Policy ---------------
-                    if self.allocation_policy== "First" or self.allocation_policy=="Branching" or self.allocation_policy=="rct":
+                    if self.allocation_policy== "first" or self.allocation_policy=="branching" or self.allocation_policy=="rct":
                         # This policies receives the queue without knowing if it's
                         # full or not, so we need to check here:
                         if self.queue_to_put.get_len() < self.queue_to_put.get_capacity():

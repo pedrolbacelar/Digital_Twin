@@ -20,12 +20,13 @@ import dtwinpylib
 importlib.reload(dtwinpylib.dtwinpy.interfaceDB)"""
 
 class Broker_Manager():
-    def __init__(self, name, ip_address, real_database_path, ID_database_path, UID_to_PalletID= None, port= 1883, keepalive= 60, topics = ['trace', 'part_id', 'RCT_server'], client = None, WIP= None):
+    def __init__(self, name, ip_address, real_database_path, ID_database_path, UID_to_PalletID= None, port= 1883, keepalive= 60, topics = ['trace', 'part_id', 'RCT_server'], client = None, WIP= None, keepDB= True):
         #--- Connect to the Broker
         self.name= name
         self.ip_address= ip_address
         self.port = port
         self.keepalive = keepalive
+        self.keepDB = keepDB
         self.helper = Helper()
 
         #--- MQTT
@@ -68,8 +69,10 @@ class Broker_Manager():
         #--- Database
         self.real_database_path = real_database_path
         self.ID_database_path = ID_database_path
-        # ----- Deleting existing database before creating the new ones -----ù
-        self.delete_databases()
+        # ----- Deleting existing database before creating the new ones -----
+        if self.keepDB == False: self.delete_databases()
+        if self.keepDB == True: print("Skiping deleting of databases")
+            
 
         # ----- Create the new databases
         self.real_database = Database(database_path= self.real_database_path, event_table= "real_log")

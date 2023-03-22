@@ -566,13 +566,21 @@ class Service_Handler():
                     machine_id = str(machine_selected.get_id())
                     queue_id = str(selected_path[selected_branch_id - 1].id)
 
-                    #--- Send the MQTT publish payload
-                    self.broker_manager.publishing(
-                        machine_id= machine_id, 
-                        part_id= part_id, 
-                        queue_id= queue_id, 
-                        topic= "RCT_server"
-                    )
+                    if self.broker_manager != None:
+                        #--- Send the MQTT publish payload
+                        self.broker_manager.publishing(
+                            machine_id= machine_id, 
+                            part_id= part_id, 
+                            queue_id= queue_id, 
+                            topic= "RCT_server"
+                        )
+                    
+                    if self.broker_manager == None:
+                        #--- Broker Manager no specified
+                        self.helper.printer(f"[WARNING][services.py/publish_feedback()] Broker Manager not specified, not possible to publish MQTT message. Continuing, without sending...")
+                        self.helper.printer(f"Without publishing the ID database is not receiving the queue selection to update the column branch_queue")
+
+
                     print(f"--- Settings of the Prediction ---")
                     print(f"|-- Part ID: Part {part_id}")
                     print(f"|-- Model Path used: {self.digital_model.get_model_path()}")
