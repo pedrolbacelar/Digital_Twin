@@ -287,7 +287,10 @@ class Database():
 
         looping = True
         try_counter = 1
-        max_counter = 5
+        sleep_time = 1
+        timeout = 30 # TODO: input variable for DT
+        max_counter= round(timeout/sleep_time)
+
         #--- Timeout Loop
         while looping == True and try_counter <= max_counter:
             # Check for the most recent 'started' activity_type before the original start time
@@ -309,23 +312,19 @@ class Database():
                 looping = False
 
             else:
-                (time_str, time) = self.helper.get_time_now()
-                self.helper.printer(f"[interfaceDB.py/update_end_time] Not found 'Started' after the end_time: {self.end_time}. Sleeping for 10 seconds and trying again", 'brown')
+                self.helper.printer(f"[interfaceDB.py/update_end_time] (Waiting {try_counter* sleep_time} sec) Not found 'Started' after the end_time: {self.end_time}. Sleeping for {sleep_time} seconds and trying again", 'brown')
                 #--- Sleep for the next try
-                sleep(10)
+                sleep(sleep_time)
 
                 #--- Updated the trying counter
                 try_counter += 1
         
         if try_counter > max_counter:
             #--- Printer Error Message
-            (tstr, t) = self.helper.get_time_now()
-
-            self.helper.printer(f"[ERROR][interfaceDB.py/update_end_time()] After trying {max_counter} times, it was not possible to find a 'Started' event after the end time: {self.end_time}", 'red')
-            
+            self.helper.printer(f"[ERROR][interfaceDB.py/update_end_time()][TIMEOUT] After trying {max_counter} times, it was not possible to find a 'Started' event after the end time: {self.end_time}", 'red')
             
             #--- Killing the program
-            self.helper.printer(f"---- Digital Twin killed at {tstr} ----", 'red')
+            self.helper.printer(f"---- Digital Twin killed ----", 'red')
             sys.exit()
         
 
@@ -335,7 +334,6 @@ class Database():
         
         #--- Changed the pointer?
         if selected_line_id != self.end_time_id:
-            (time_str, time) = self.helper.get_time_now()
             self.helper.printer(f"[interfaceDB.py/update_end_time] Pointer End Time updated from {self.end_time_id} to {selected_line_id}", 'brown')
 
         #--- Update the end_time
