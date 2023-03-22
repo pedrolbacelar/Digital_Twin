@@ -290,7 +290,7 @@ class Database():
 
             print(f"-------- Printing the traces: --------")
             for row in rows:
-                print(f"{rows}")
+                print(f"{row}")
 
             # Loop through the selected rows and update the timestamp column with relative values 
             start_timestamp = rows[0][-1]
