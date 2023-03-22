@@ -370,7 +370,7 @@ class Broker_Manager():
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
 
-    #--- Delete Existing Databases
+    # ----- Delete Existing Databases -----
     def delete_databases(self):
         print("|- Deleting existing databases...")
         #--- Get current time
@@ -412,6 +412,7 @@ class Broker_Manager():
             self.helper.printer(f"---- Digital Twin was killed at {tstr} ----", 'red')
             sys.exit()
 
+    # ----- RUNNING -----
     def run(self):
         """
         This function is the main function of the broker manager. It will make the connection with
@@ -449,6 +450,7 @@ class Broker_Manager():
         self.client.loop_stop()
         self.client.disconnect()
 
+    # ----- PUBLISHING FROM RCT -----
     def publishing(self, machine_id, part_id, queue_id, topic= "RCT_server"):
         """
         This is a simple function to publish a topic into the Broker
@@ -493,4 +495,26 @@ class Broker_Manager():
         #--- Print the payload received
         self.helper.printer(f"[BROKER] Topic: {topic} | Payload Published: {payload_translated}", 'green')
 
-        
+    # ----- SETTING ACTION (START or STOP) -----
+    def publish_setting_action(self, action):
+        """
+        This function receive an action and publish it in the topic 'system_status'.
+        If the action is 'start', the physical system runs. If the action is 'stop'
+        the physical system stops. Important to know that this messages can just be 
+        use once to not cause problems in the physical system.
+        """
+
+        if action != 'start' or action != 'stop':
+            self.helper.printer(f"[ERROR][broker_manager.py/publish_setting_action()] Setting action not recognized! Action used: {action}. Actions available: 'start', 'stop'")
+            self.helper.printer(f"---- Digital Twin was killed ----", 'red')
+            sys.exit()
+
+        else: 
+            #--- Make the connection with the Broker
+            self.client.connect(self.ip_address, self.port, self.keepalive)
+
+            #--- Publish the action
+            self.client.publish(
+                topic = 'system_status', 
+                payload= action
+            )
