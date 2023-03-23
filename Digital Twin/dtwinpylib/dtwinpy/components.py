@@ -586,6 +586,7 @@ class Machine():
                                 flag_allocated_queue = True
                                 last_allocation_counter = i
                                 self.queue_to_put = queue_selected
+                                print(f"! Using 'alternated' policy to allocate {self.part_in_machine.get_name()} to {self.queue_to_put.get_name()}")
                                 break
                             
                             #--- No queue chosen and already look to all the queues (all full)
@@ -620,7 +621,7 @@ class Machine():
 
                             self.allocation_counter = last_allocation_counter + 1
 
-
+                        
                         #--- Find the right conveyor (just check the conveyor if the machine found a queue free)
                         if flag_allocated_queue== True:
                             for conveyor in self.conveyors_out:
@@ -649,6 +650,7 @@ class Machine():
                             if queue.get_name() == queue_name_to_put:
                                 self.queue_to_put = queue
                         
+                        print(f"! Using 'rct' policy to allocate {self.part_in_machine.get_name()} to {self.queue_to_put.get_name()}")
 
                         #--- Find the right conveyor
                         for conveyor in self.conveyors_out:

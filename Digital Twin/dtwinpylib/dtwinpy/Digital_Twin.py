@@ -74,13 +74,13 @@ class Digital_Twin():
         self.current_timestamp = initial_timestamp
         
 
-        self.next_Tsync = initial_timestamp + self.Freq_Sync
+        self.next_Tsync = initial_timestamp + self.Freq_Sync + 5
         self.last_Tsync = initial_timestamp
 
-        self.next_Tvalid = initial_timestamp + self.Freq_Valid
+        self.next_Tvalid = initial_timestamp + self.Freq_Valid + 5
         self.last_Tvalid = initial_timestamp
 
-        self.next_Tserv = initial_timestamp + self.Freq_Service
+        self.next_Tserv = initial_timestamp + self.Freq_Service + 5
         self.last_Tserv = initial_timestamp
 
         #--- Flags the integration
@@ -265,7 +265,7 @@ class Digital_Twin():
 
             #--- waiting for the physical system to start sending the trace.
             print(f"Waiting for the physical system")
-            for ii in range (12):
+            for ii in range (5):
                 sleep(1)
                 print(".")
             print(f"Starting operations ...")

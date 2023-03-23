@@ -172,8 +172,26 @@ class Database():
                 self.start_time_id = self.start_time_row[0]
                 self.start_time_status = self.start_time_row[1]
             
+            with sqlite3.connect(self.database_path) as db:
+                table = db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='time_pointers';")
+                if table.fetchone() != None:
+                    print("time_pointers table exists")
+                    # --- Update Start Pointers (Forced Approach)
+                    if self.start_time_status == "Finished":
+                            self.helper.printer(f"[WARNING][interfaceDB.py/find_line_ID_start_end()] Changed Start Time by force because a initial trace was 'Finished'.")
 
-            # --- Update Start Pointers (Forced Approach)
+                    next_start_time_id = self.forced_update_start_time()
+                    self.start_time_id = next_start_time_id
+                    print("Start Time ID assigned by force using the previous End Time ID as reference")
+
+                    #--- update the start time
+                    with sqlite3.connect(self.database_path) as db:
+                        row= db.execute("""SELECT timestamp_real, activity_type FROM real_log WHERE event_id= ? """, (self.start_time_id,)).fetchone()
+                        self.start_time= row[0]
+                        self.start_time_status= row[1]
+                else:
+                    print("table 'time_pointers' does not exist")
+            """
             if self.start_time_id != 1:
                 if self.start_time_status == "Finished":
                     self.helper.printer(f"[WARNING][interfaceDB.py/find_line_ID_start_end()] Changed Start Time by force because a initial trace was 'Finished'.")
@@ -183,11 +201,8 @@ class Database():
                 print("Start Time ID assigned by force using the previous End Time ID as reference")
 
                 #--- update the start time
-                with sqlite3.connect(self.database_path) as db:
-                    row= db.execute("""SELECT timestamp_real, activity_type FROM real_log WHERE event_id= ? """, (self.start_time_id,)).fetchone()
-                    self.start_time= row[0]
-                    self.start_time_status= row[1]
-
+                
+            """
 
 
             # ------------------------------------------ END TIME -------------------------------------------

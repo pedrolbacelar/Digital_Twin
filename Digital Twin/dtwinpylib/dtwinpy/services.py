@@ -1,5 +1,6 @@
 #--- Import DT Features
 from .broker_manager import Broker_Manager
+from .interfaceDB import Database
 from .helper import Helper
 
 #--- Common Libraries
@@ -45,6 +46,13 @@ class Service_Handler():
         self.generate_digital_model = generate_digital_model
         self.digital_model = generate_digital_model(verbose= False)
         self.broker_manager = broker_manager
+
+        #--- Create an ID database for updating the RCT policy (using branch queues)
+        digital_database_path = self.digital_model.get_database_path()
+        print(f"digital_database_path: {digital_database_path}")
+        ID_database_path = digital_database_path.replace("digital","ID")
+        print(f"ID_database_path: {ID_database_path}")
+        self.ID_database = Database(database_path= ID_database_path, event_table= "ID")
 
         #--- Parameters
         self.rct_threshold= rct_threshold
@@ -160,6 +168,9 @@ class Service_Handler():
                 
                 i += 1
             print("========================")
+
+        print("-----  generate_path_scenarios results -----")
+        print(f"path_scenarios : {path_scenarios}")
         return path_scenarios
     
     # ---------- (AVOID) Assign the paths to the parts ----------
@@ -264,16 +275,39 @@ class Service_Handler():
 
             #--- Simulaion AS IS
             print(f"====================================== Simulation AS IS for {part.get_name()} ======================================")
+            # ---------------------------- GENERATE MODEL ----------------------------
             self.digital_model = self.generate_digital_model(targeted_part_id= part.get_id(), verbose= False)
+            # ------------------------------------------------------------------------
+
+            # ------- Assign Parts Queue Branches selected -------
+            parts_branch_queue = self.ID_database.read_parts_branch_queue()
+            for machine in self.machines_vector:
+                machine.set_parts_branch_queue(parts_branch_queue)
+            # -----------------------------------------------------
+
+            # ------- RUN SIMULATION -------
             self.digital_model.run()
+            # ------------------------------
+
+            # -------------- GET RCT RESULT --------------
             #- Get the RCT for the Simulation AS IS
             part_rct = self.digital_model.calculate_RCT(part_id_selected= part.get_id())
             rct_vector.append(part_rct)
+            # ---------------------------------------------
 
             for path_scenario in possible_pathes:
                 #--- Before assigning a new path and run a simulation, it's necessary to recreate the model (this generate new components / objects)
+                # ---------------------------- GENERATE MODEL ----------------------------
                 self.digital_model = self.generate_digital_model(targeted_part_id= part.get_id(), verbose= False)
+                # ------------------------------------------------------------------------
 
+                # ------- Assign Parts Queue Branches selected -------
+                parts_branch_queue = self.ID_database.read_parts_branch_queue()
+                for machine in self.machines_vector:
+                    machine.set_parts_branch_queue(parts_branch_queue)
+                # -----------------------------------------------------
+
+                # ------------------ SETTING BRANCH DECISION ------------------
                 #--- Get Parts from the Digital Model
                 current_parts_vector = self.digital_model.get_all_parts()
 
@@ -283,6 +317,7 @@ class Service_Handler():
                     if current_part.get_id() == part.get_id():
                         current_part.set_branching_path(path_scenario)
                         part_being_simulated = current_part
+                # ---------------------------------------------------------------
 
                 #--- Show the paths
                 if verbose == True:
@@ -292,11 +327,13 @@ class Service_Handler():
                         print(f"|-- {convey.get_name()}")
                     print("---")
 
-                #--- Run the simulation
+                # ------- RUN SIMULATION -------
                 self.digital_model.run()
+                # ------------------------------
 
-                #--- Get the RCT for that path simulated
+                # -------------- GET RCT RESULT --------------
                 part_rct = self.digital_model.calculate_RCT(part_id_selected= part_being_simulated.get_id())
+                # ---------------------------------------------
 
                 #--- Store the RCT of that simulation
                 rct_vector.append(part_rct)
@@ -360,7 +397,7 @@ class Service_Handler():
     def RCT_check(self, rct_dict, rct_threshold, possible_pathes, verbose= True, plot= False):
         """
         This function calculates the efficiency of each path comparing the path
-        with the worst path. It can be seen as the gain of choosing that path.
+        with the AS IS path. It can be seen as the gain of choosing that path.
         Thus, the worst path has 0% of gain, and the other path has something bigger.
         If the gain of the best path is not higher than the rct_threshold, than doesn't
         make sense to change the policy of the system (because both path are quite the same).
@@ -418,6 +455,10 @@ class Service_Handler():
             #--- Compare the higher gain with the threshold
             highets_gain = max(gain_vect)
             
+            #--- Remove the AS IS gain, because it's not in the vector of possible paths
+            gain_vect.pop(0)
+
+
             if highets_gain >= rct_threshold:
                 #-- Rise the feedback flag
                 flag_feedback = True
@@ -427,6 +468,10 @@ class Service_Handler():
             #--- Update Dictionaries
             gain_dict[key] = gain_vect
             feeback_dict[key] = (flag_feedback, path_to_implement, highets_gain)
+
+        print("----- RCT Check Results ----")
+        print(f"gain_dict: {gain_dict}")
+        print(f"feeback_dict:  {feeback_dict}")
 
         #--- Plotting
         if plot == True:
@@ -473,7 +518,7 @@ class Service_Handler():
                     print(f"> Best Path: Path {path_index}")
                     print(f"> Gain: {format(highets_gain * 100, '.3f')} %") 
                     print("> Path:")
-                    for convey in possible_pathes[path_index - 1]:
+                    for convey in possible_pathes[path_index]:
                         print(f"|- {convey.get_name()}")
                 
                 else:
@@ -518,7 +563,7 @@ class Service_Handler():
             gain = feedback_dict[part_name][2]
 
             #--- Find the path
-            selected_path = possible_pathes[path_to_implement - 1]
+            selected_path = possible_pathes[path_to_implement]
 
             #--- Check if the flag says to change the path or keep as usual
             if feedback_flag == True:
