@@ -765,3 +765,37 @@ class Database():
 
         print(f"parts_branch_queue_vect = {parts_branch_queue_vect}")
         return parts_branch_queue_vect
+    
+    # ========================== FOR TDS ==========================
+    def get_parts_with_completed_traces(self):
+        with sqlite3.connect(self.database_path) as db:
+            if self.start_time != None and self.end_time != None:
+                return db.execute("""
+                        SELECT DISTINCT t1.part_id
+                        FROM real_log t1
+                        INNER JOIN (
+                        SELECT part_id, activity_type, MIN(timestamp_real) AS min_time
+                        FROM real_log
+                        WHERE event_id >= ? AND event_id <= ?
+                        GROUP BY part_id, activity_type
+                        ) t2
+                        ON t1.part_id = t2.part_id AND t1.activity_type = t2.activity_type AND t1.timestamp_real = t2.min_time
+                        WHERE t1.activity_type = 'Finished' AND t1.event_id  >= ? AND t1.event_id <= ?
+                    """, (self.start_time_id, self.end_time_id, self.start_time_id, self.end_time_id)).fetchall()
+
+            else:
+                print("Didn't test properly")
+                return db.execute("""
+                        SELECT DISTINCT t1.part_id
+                        FROM real_log t1
+                        INNER JOIN (
+                        SELECT part_id, activity_type, MIN(timestamp_real) AS min_time
+                        FROM real_log
+                        GROUP BY part_id, activity_type
+                        ) t2
+                        ON t1.part_id = t2.part_id AND t1.activity_type = t2.activity_type AND t1.timestamp_real = t2.min_time
+                        WHERE t1.activity_type = 'Finished'
+                    """).fetchall()
+
+
+    

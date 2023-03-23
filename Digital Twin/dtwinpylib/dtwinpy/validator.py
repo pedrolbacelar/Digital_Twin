@@ -128,7 +128,8 @@ class Validator():
         initial_parts = self.digital_model.get_all_parts()
 
         #--- Get the parts names that appears in traces
-        parts_in_trace = self.real_database.get_distinct_values(column= "part_id", table="real_log")
+        #parts_in_trace = self.real_database.get_distinct_values(column= "part_id", table="real_log")
+        parts_in_trace = self.real_database.get_parts_with_completed_traces()
         parts_in_trace_names = []
         # Take only the string from the database
         for part in parts_in_trace:
@@ -198,8 +199,9 @@ class Validator():
             if part_queue != None and part_queue.get_id() != 1:
                 part_cluster = part_queue.get_cluster()
                 part.quick_TDS_fix(part_cluster)
-                print(f"Part name {part.get_name()} quick done. Part Cluster: {part_cluster}")
-                print(f"{part.get_ptime_TDS(part_cluster)}")
+                print(f"--- Part name {part.get_name()} quick done. Part Cluster: {part_cluster}")
+                print(f"All process time for each cluster:{part.get_all_ptime_TDS()}")
+                print(f"Process time of the first cluster: {part.get_ptime_TDS(part_cluster - 1)}")
         
 
     #--- Generate the traces of TDS based on the real Event Log
