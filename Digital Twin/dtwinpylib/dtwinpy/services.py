@@ -515,7 +515,7 @@ class Service_Handler():
                 if flag == True:
                     print()
                     self.helper.printer(f"!!!!!!!!! Optimized Path Found for {key} !!!!!!!!!", 'green')
-                    print(f"> Best Path: Path {path_index}")
+                    print(f"> Best Path: Path {path_index + 1}")
                     print(f"> Gain: {format(highets_gain * 100, '.3f')} %") 
                     print("> Path:")
                     for convey in possible_pathes[path_index]:
