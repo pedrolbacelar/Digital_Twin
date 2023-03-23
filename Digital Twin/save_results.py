@@ -3,9 +3,9 @@ import os
 import shutil
 from datetime import datetime
 
-def create_markdown_with_model():
+def create_markdown_with_model(dt_name):
     global folder_name
-    print("Generating folder ...")
+    print(f"Generating folder for \033[32m{dt_name}\033[0m ...")
     # 1. Create folder with current date time format as name, inside "root" folder
     global root_folder
     root_folder = "data_generation"
@@ -42,22 +42,26 @@ def create_markdown_with_model():
     shutil.copy(mydt_path, my_folder)
 
 
-    print("Copying models and databases from 5s_determ ...")
+    print(f"Copying models and databases from {dt_name} ...")
 
     # 7. Copy a different folder into the created folder and rename it to "models"
-    models_folder_path = "models/5s_determ"
+    models_folder_path = f"models/{dt_name}"
     shutil.copytree(models_folder_path, os.path.join(root_folder, folder_name, "models"))
 
     # 8. Copy a different folder into the created folder
-    models_folder_path = "databases/5s_determ"
+    models_folder_path = f"databases/{dt_name}"
     shutil.copytree(models_folder_path, os.path.join(root_folder, folder_name, "databases"))
     markdown_file.close()
 
     print(f"\033[32m Results saved to {folder_name} \033[0m")
 
 try:
-    
-    create_markdown_with_model()
+    user_input = input(f"\033[35m \n Enter the name of mydt or press 'Enter' to continue with '5s_determ': \033[0m")
+    if user_input == "":                      
+        create_markdown_with_model(dt_name="5s_determ")
+    else:
+        create_markdown_with_model(user_input)
+
 
 except KeyboardInterrupt:
     markdown_file.close()
