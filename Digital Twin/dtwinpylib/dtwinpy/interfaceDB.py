@@ -173,8 +173,10 @@ class Database():
                 self.start_time_status = self.start_time_row[1]
             
             with sqlite3.connect(self.database_path) as db:
+                # --------------------------- FOR SYNC ---------------------------
+                # (in case where a start time can occur twice in the same place, we check if the table exists)
                 table = db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='time_pointers';")
-                if table.fetchone() != None:
+                if table.fetchone() != None and self.feature_usingDB != 'valid_logic' and self.feature_usingDB != 'valid_input':
                     print("time_pointers table exists")
                     # --- Update Start Pointers (Forced Approach)
                     if self.start_time_status == "Finished":
@@ -191,6 +193,24 @@ class Database():
                         self.start_time_status= row[1]
                 else:
                     print("table 'time_pointers' does not exist")
+
+                # --------------------------- FOR VALID ---------------------------
+                if (self.feature_usingDB == 'valid_logic' or self.feature_usingDB == 'valid_input') and self.start_time_id != 1:
+                    print("selecting pointer by force for validation")
+                    # --- Update Start Pointers (Forced Approach)
+                    if self.start_time_status == "Finished":
+                        self.helper.printer(f"[WARNING][interfaceDB.py/find_line_ID_start_end()] Changed Start Time by force because a initial trace was 'Finished'.")
+
+                    next_start_time_id = self.forced_update_start_time()
+                    self.start_time_id = next_start_time_id
+                    print("Start Time ID assigned by force using the previous End Time ID as reference")
+
+                    #--- update the start time
+                    with sqlite3.connect(self.database_path) as db:
+                        row= db.execute("""SELECT timestamp_real, activity_type FROM real_log WHERE event_id= ? """, (self.start_time_id,)).fetchone()
+                        self.start_time= row[0]
+                        self.start_time_status= row[1]
+
             """
             if self.start_time_id != 1:
                 if self.start_time_status == "Finished":
@@ -505,6 +525,8 @@ class Database():
                 SELECT end_time_id from time_pointers WHERE feature_usingDB= ?
             """, (self.feature_usingDB,)).fetchall()
             
+            
+
             last_sync_endID = last_sync_endID[-1][0]
             next_sync_startID = last_sync_endID + 1
         
