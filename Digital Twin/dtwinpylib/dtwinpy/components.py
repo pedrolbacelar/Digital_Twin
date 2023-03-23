@@ -14,6 +14,7 @@ from scipy.stats import lognorm
 
 class Part():
     def __init__(self, id, type, location, creation_time, termination_time = None, ptime_TDS = None, part_queue = None):
+        self.helper = Helper()
         self.id = id
         self.name = "Part " + str(self.id)
         self.type = type
@@ -31,13 +32,16 @@ class Part():
         self.branching_path = None
 
     def quick_TDS_fix(self, current_cluster):
-        #--- Count the number of theoretical finished clusters
-        finished_clusters = current_cluster - 1
-        #--- create a new vector with zero for the finished clusters
-        new_ptime_TDS = [0] * finished_clusters + self.ptime_TDS
-        print(f"new_ptime_TDS= {new_ptime_TDS}")
-        #--- Updated old vector with the new vector
-        self.ptime_TDS = new_ptime_TDS
+        try:
+            #--- Count the number of theoretical finished clusters
+            finished_clusters = current_cluster - 1
+            #--- create a new vector with zero for the finished clusters
+            new_ptime_TDS = [0] * finished_clusters + self.ptime_TDS
+            print(f"new_ptime_TDS= {new_ptime_TDS}")
+            #--- Updated old vector with the new vector
+            self.ptime_TDS = new_ptime_TDS
+        except TypeError:
+            pass
 
     def calculate_CT(self):
         self.CT = self.termination_time - self.creation_time
@@ -61,7 +65,14 @@ class Part():
     def get_all_ptime_TDS(self):
         return self.ptime_TDS
     def get_ptime_TDS(self, cluster):
-        return self.ptime_TDS[cluster]
+        try:
+            return self.ptime_TDS[cluster]
+        except:
+            print(f"In {self.name}, Trying to get process time from TDS traces of the cluster {cluster + 1}, but the part don't have traces for that cluster!")
+            print(f"Printing existing traces for each cluster:")
+            print(f"ptime_TDS: {self.get_all_ptime_TDS()}")
+            return False
+            
     def get_finished_clusters(self):
         return self.finished_clusters
     def get_part_queue(self):
@@ -265,6 +276,8 @@ class Machine():
                 #---- Trace Driven Simulation (TDS) ----
                 # Check if the comming part have trace
                 if self.validator != None:
+                    print(f"Part in machine being analysed in validation: {self.part_in_machine.get_name()}")
+                    print(f"Part total TDS traces: {self.part_in_machine.get_all_ptime_TDS()}")
                     #--- If the current part is not within the TDS range (normal simulation)
                     if self.part_in_machine.get_id() > self.validator.get_len_TDS() and self.simtype != "qTDS":
                         self.simtype = None
@@ -276,12 +289,14 @@ class Machine():
                         if self.get_cluster() > len(self.part_in_machine.get_all_ptime_TDS()) and self.simtype != "qTDS":
                             self.simtype = None
                     #--- If the current part has TDS traces (process times) uses TDS simulation, if not use normal simulation
-                    if self.part_in_machine.get_ptime_TDS(self.get_cluster() - 1) == None and self.simtype != "qTDS":
+                    if self.part_in_machine.get_ptime_TDS(self.get_cluster() - 1) == False and self.simtype != "qTDS":
                         self.helper.printer(f"[WARNING][components.py/run()/'Processing'] The {self.part_in_machine.get_name()} in {self.name} didn't have a TDS trace, assigning a normal simulation...")
                         self.simtype = None
-                    if self.part_in_machine.get_ptime_TDS(self.get_cluster() - 1) != None and self.simtype != "qTDS":
+                    if self.part_in_machine.get_ptime_TDS(self.get_cluster() - 1) != False and self.simtype != "qTDS":
                         self.simtype = "TDS"
 
+                    if self.worked_time != 0 and self.part_in_machine.get_ptime_TDS(self.get_cluster() - 1) == False:
+                        pass
 
                     """ [OLD: before sync]
                     if self.part_in_machine.get_all_ptime_TDS() != None:
@@ -352,6 +367,8 @@ class Machine():
                     #-- If our first part still from the initial working
                     if self.worked_time != 0:
                         #-- Updated the processed time list of part considering the "supposed" finished cluster
+                        if self.part_in_machine.get_ptime_TDS(self.get_cluster() - 1) == False:
+                            pass
                         self.part_in_machine.quick_TDS_fix(self.get_cluster())
 
                     #-- Get the current cluster of that part
