@@ -560,6 +560,8 @@ class Machine():
 
                     # ---------------- Alternating Policy ----------------
                     if self.allocation_policy == "alternated":
+                        if self.name== 'Machine 2':
+                            pass
                        
                         #--- Select the Queue based on the counter
                         queue_selected = self.queue_out[self.allocation_counter]
@@ -606,7 +608,7 @@ class Machine():
                         # [OLD] self.allocation_counter = last_allocation_counter +  1
                         
                         #--- Reset the counter if it's at maximum
-                        if self.allocation_counter > (len(self.queue_out) - 1):
+                        if self.allocation_counter >= (len(self.queue_out) - 1):
                             self.allocation_counter = 0 # minus 1 because we're going to increase 1 anyways
             
                         #--- If it's not at maximun, increase allocation
@@ -617,7 +619,7 @@ class Machine():
 
                             if last_allocation_counter == None: last_allocation_counter= 0
 
-                            self.allocation_counter = last_allocation_counter
+                            self.allocation_counter = last_allocation_counter + 1
 
                         
                         #--- Find the right conveyor (just check the conveyor if the machine found a queue free)
