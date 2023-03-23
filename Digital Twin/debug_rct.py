@@ -5,6 +5,8 @@ import dtwinpylib
 importlib.reload(dtwinpylib.dtwinpy.Digital_Twin) #reload this specifc module to upadte the class
 
 mydt = Digital_Twin(name="debug_rct", ip_address= "127.0.0.1")
+
+"""
 #mydt.run_RCT_services(queue_position= 2)
 #mydt.run_digital_model(maxparts=10)
 #--- Create a Database object for ID database
@@ -21,3 +23,7 @@ for machine in machines_vector:
     machine.set_parts_branch_queue(parts_branch_queue)
 
 digital_model.run()
+
+"""
+
+mydt.run_RCT_services(queue_position=2, rct_threshold= 0)

@@ -20,7 +20,7 @@ import dtwinpylib
 importlib.reload(dtwinpylib.dtwinpy.interfaceDB)"""
 
 class Broker_Manager():
-    def __init__(self, name, ip_address, real_database_path, ID_database_path, UID_to_PalletID= None, port= 1883, keepalive= 60, topics = ['trace', 'part_id', 'RCT_server'], client = None, WIP= None, keepDB= False):
+    def __init__(self, name, ip_address, real_database_path, ID_database_path, UID_to_PalletID= None, port= 1883, keepalive= 60, topics = ['trace', 'part_id', 'RCT_server'], client = None, WIP= None, keepDB= True):
         #--- Connect to the Broker
         self.name= name
         self.ip_address= ip_address

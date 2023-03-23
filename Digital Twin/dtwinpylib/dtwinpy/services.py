@@ -279,6 +279,12 @@ class Service_Handler():
             self.digital_model = self.generate_digital_model(targeted_part_id= part.get_id(), verbose= False)
             # ------------------------------------------------------------------------
 
+            # ----------------- GET THE NEW COMPONENTS -----------------
+            self.branches = self.digital_model.get_branches()
+            (self.machines_vector, self.queues_vector) = self.digital_model.get_model_components()
+            self.part_vector = self.digital_model.get_all_parts()
+            # -----------------------------------------------------------
+
             # ------- Assign Parts Queue Branches selected -------
             parts_branch_queue = self.ID_database.read_parts_branch_queue()
             for machine in self.machines_vector:
@@ -300,6 +306,12 @@ class Service_Handler():
                 # ---------------------------- GENERATE MODEL ----------------------------
                 self.digital_model = self.generate_digital_model(targeted_part_id= part.get_id(), verbose= False)
                 # ------------------------------------------------------------------------
+
+                # ----------------- GET THE NEW COMPONENTS -----------------
+                self.branches = self.digital_model.get_branches()
+                (self.machines_vector, self.queues_vector) = self.digital_model.get_model_components()
+                self.part_vector = self.digital_model.get_all_parts()
+                # -----------------------------------------------------------
 
                 # ------- Assign Parts Queue Branches selected -------
                 parts_branch_queue = self.ID_database.read_parts_branch_queue()
