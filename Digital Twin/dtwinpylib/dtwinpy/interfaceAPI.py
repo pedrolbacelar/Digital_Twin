@@ -22,6 +22,7 @@ class interfaceAPI():
         t_now = datetime.datetime.now().timestamp()
         if (t_now - self.tokentime) > 1700:
             self.bearer_token = self.bearerToken()
+            self.tokentime = t_now      #--- updating the time when the next token was created.
             print(self.bearer_token)
 
 
