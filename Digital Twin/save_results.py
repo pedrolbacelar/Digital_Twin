@@ -3,7 +3,7 @@ import os
 import shutil
 from datetime import datetime
 
-def create_markdown_with_model(dt_name = "5s_determ"):
+def create_markdown_with_model(dt_name):
     global folder_name
     print(f"Generating folder for \033[32m{dt_name}\033[0m ...")
     # 1. Create folder with current date time format as name, inside "root" folder
@@ -57,8 +57,8 @@ def create_markdown_with_model(dt_name = "5s_determ"):
 
 try:
     user_input = input(f"\033[35m \n Enter the name of mydt or press 'Enter' to continue with '5s_determ': \033[0m")
-    if user_input == None:                      
-        create_markdown_with_model("5s_determ")
+    if user_input == "":                      
+        create_markdown_with_model(dt_name="5s_determ")
     else:
         create_markdown_with_model(user_input)
 
