@@ -82,7 +82,7 @@
       ],
       "capacity": 10,
       "frequency": 1000,
-      "contemp": 12
+      "contemp": 11
     },
     {
       "arc": [
@@ -91,7 +91,7 @@
       ],
       "capacity": 10,
       "frequency": 1000,
-      "contemp": 20
+      "contemp": 23
     },
     {
       "arc": [
@@ -109,7 +109,7 @@
       ],
       "capacity": 10,
       "frequency": 1000,
-      "contemp": 10
+      "contemp": 11
     },
     {
       "arc": [
@@ -118,7 +118,7 @@
       ],
       "capacity": 10,
       "frequency": 1000,
-      "contemp": 10
+      "contemp": 6
     },
     {
       "arc": [
@@ -127,7 +127,7 @@
       ],
       "capacity": 12,
       "frequency": 1000,
-      "contemp": 10
+      "contemp": 9
     }
   ],
   "initial": [
