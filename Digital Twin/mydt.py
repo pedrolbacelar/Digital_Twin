@@ -4,8 +4,6 @@ from dtwinpylib.dtwinpy.Digital_Twin import Digital_Twin
 factory_ip = "192.168.0.50"
 my_ip = "127.0.0.1"
 
-
-"""
 #--- Create a Digital Twin object with the require inputs
 mydt = Digital_Twin(
     name= "5s_determ",
@@ -25,7 +23,3 @@ mydt = Digital_Twin(
 #--- Run the real time Digital Twin
 mydt.run()
 
-"""
-
-mydt= Digital_Twin(name= "5s_determ", maxparts= 5)
-mydt.run_digital_model()
