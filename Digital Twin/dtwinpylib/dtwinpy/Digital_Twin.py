@@ -445,13 +445,13 @@ class Digital_Twin():
         return (machine_status, queue_status)
 
     #--- Run RCT Services
-    def run_RCT_services(self, verbose= True, plot= False, queue_position= 3):
+    def run_RCT_services(self, verbose= True, plot= False, queue_position= 3, rct_threshold= 0):
         """
         This functions creates Service object that is responsible for finding parts making decisions in the simulation,
         generate all possible paths, and calculate the most optimized path for those parts.
         """
         #--- Create a Service 
-        RCT_Service = Service_Handler(name= "RCT", generate_digital_model= self.generate_digital_model, broker_manager= self.broker_manager, rct_threshold= self.rct_threshold)
+        RCT_Service = Service_Handler(name= "RCT", generate_digital_model= self.generate_digital_model, broker_manager= self.broker_manager, rct_threshold= rct_threshold)
         
         #--- Run the RCT Service
         rct_results= RCT_Service.run_RCT_service(verbose=verbose, plot= plot, queue_position= queue_position)
@@ -658,7 +658,7 @@ class Digital_Twin():
             print(f"--- Model Path being used: {self.model_path}")
 
             # -------------------- Run Service ---------------------------------
-            rct_results= self.run_RCT_services(verbose= self.verbose, plot= self.plot, queue_position= self.rct_queue)
+            rct_results= self.run_RCT_services(verbose= self.verbose, plot= self.plot, queue_position= self.rct_queue, rct_threshold= self.rct_threshold)
             # ------------------------------------------------------------------
 
             # ------------------------ API INTERFACE ------------------------

@@ -560,6 +560,7 @@ class Machine():
 
                     # ---------------- Alternating Policy ----------------
                     if self.allocation_policy == "alternated":
+                        
                         if self.name== 'Machine 2':
                             pass
                        
@@ -675,6 +676,8 @@ class Machine():
                             flag_allocated_part = True
                         
                     # ============= ALLOCATION (queue not full) =============
+                    if self.part_in_machine.get_name()== 'Part 10' and self.name== 'Machine 2':
+                        self 
                     if flag_allocated_part == True:
                         #--- Queue Allocated (Update digital_log)
                         # obs: makes senses to take the time just after the allocation, because in the model becuase the model generation works like that
