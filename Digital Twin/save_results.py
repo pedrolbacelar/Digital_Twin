@@ -35,9 +35,14 @@ def create_markdown_with_model(dt_name):
         markdown_file.write(additional_comments + "\n\n")
     else: markdown_file.write("## None\n")
 
-    print("Copying mydt.py ...")
+    #--- copying the dt df=efinition file
+    if dt_name == "5s_determ":
+        print("Copying mydt.py ...")
+        mydt_path = "mydt.py"
+    else:
+        print(f"Copying {dt_name}.py ...")
+        mydt_path = f"{dt_name}.py"
 
-    mydt_path = "mydt.py"
     my_folder = "data_generation/" + folder_name
     shutil.copy(mydt_path, my_folder)
 
