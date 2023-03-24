@@ -524,6 +524,18 @@ class Validator():
     # ======================== Sequence Comparing Methods ========================
 
     def LCSS(self, Sequence1, Sequence1_time, Sequence2, Sequence2_time, delta_t, order = False):
+        
+        # we take the smallest sequence as first sequence to get the indicator value not greater than 1.0
+        if len(Sequence1) > len(Sequence2):
+            alt = Sequence1
+            alt_time = Sequence1_time
+            Sequence1 = Sequence2
+            Sequence1_time = Sequence2_time
+            Sequence2 = alt
+            Sequence2_time = alt_time
+        else:
+            pass
+        
         # initialize the lengths of the two input vectors
         m, n = len(Sequence1), len(Sequence2)
         
