@@ -1,4 +1,14 @@
+#--- Import Library
+print("Importing the libraries.....")
 from dtwinpylib.dtwinpy.Digital_Twin import Digital_Twin
+
+factory_ip = "192.168.0.50"
+my_ip = "127.0.0.1"
+
+
+
+"""
+# replicator
 
 mydt = Digital_Twin(
     name= 'debug_valid',
@@ -12,5 +22,7 @@ mydt = Digital_Twin(
     ip_address= '127.0.0.1',
     flag_API= True
     )
+
+"""
 
 mydt.run()

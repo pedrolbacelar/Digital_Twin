@@ -9,16 +9,16 @@ mydt = Digital_Twin(
     name= "5s_determ",
     template= True, 
     Freq_Sync= 2, 
-    Freq_Valid= 30000, 
+    Freq_Valid= 3000000000, 
     Freq_Service= 2, 
-    delta_t_treshold=5,
+    delta_t_treshold=20,
     ip_address=factory_ip,
     flag_API= True,
     rct_threshold= 0,
     rct_queue= 2,
     flag_external_service= True,
-    logic_threshold= 0.0001,
-    input_threshold=0.0001)
+    logic_threshold= 0.000,
+    input_threshold=0.000)
 
 #--- Run the real time Digital Twin
 mydt.run()
