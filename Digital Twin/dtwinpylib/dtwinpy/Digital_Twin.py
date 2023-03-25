@@ -18,14 +18,14 @@ from time import sleep
 import random
 
 #--- Reload Package
-"""import importlib
+import importlib
 import dtwinpylib
 importlib.reload(dtwinpylib.dtwinpy.digital_model)
 importlib.reload(dtwinpylib.dtwinpy.validator)
 importlib.reload(dtwinpylib.dtwinpy.synchronizer)
 importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
 importlib.reload(dtwinpylib.dtwinpy.helper)
-importlib.reload(dtwinpylib.dtwinpy.services)"""
+importlib.reload(dtwinpylib.dtwinpy.services)
 
 
 
@@ -413,7 +413,7 @@ class Digital_Twin():
         print(f"> LCSS indicator for INPUT: {lcss_indicator_input}")
         print("__________________________________________________________________")
 
-        return (lcss_indicator_logic, lcss_indicator_input)
+        return [lcss_indicator_logic, lcss_indicator_input]
 
     #--- Run Synchronization
     def run_sync(self, repositioning = True, start_time= None, end_time= None, copied_realDB= False):            
@@ -553,7 +553,7 @@ class Digital_Twin():
             self.model_pointer_Valid = self.model_pointer_Sync
 
             # -------------- Run Validation -------------------
-            (lcss_indicator_logic, lcss_indicator_input) = self.run_validation(copied_realDB= self.copied_realDB, start_time= start_time, end_time= end_time)
+            [lcss_indicator_logic, lcss_indicator_input] = self.run_validation(copied_realDB= self.copied_realDB, start_time= start_time, end_time= end_time)
             # -------------------------------------------------
 
 
@@ -607,7 +607,7 @@ class Digital_Twin():
 
             # --- Adjust WHEN WAS the last validation (just happened)
             #-- Take the last end time ("previous next_TValid but updated")
-            last_end_time = self.pointers_database.read_last_end_time()
+            last_end_time = self.pointers_database.read_last_end_time_valid()
             self.last_Tvalid = last_end_time
 
             #self.last_Tvalid = self.next_Tvalid
@@ -624,7 +624,6 @@ class Digital_Twin():
             (current_time_str, x) = self.helper.get_time_now()
             nexttime = datetime.datetime.fromtimestamp(self.next_Tvalid).strftime("%d %B %H:%M:%S")
             self.helper.printer(f"[Internal Service] System Validated. Next Validation (n° {self.counter_Valid}): {nexttime}", 'green')
-
 
     #--- External Services (RCT Services and Feedback)
     def External_Services(self):

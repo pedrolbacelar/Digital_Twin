@@ -564,9 +564,11 @@ class Validator():
         
         #--- Similarity Indicator
         indicator = len(lcss) / min(m,n)
+        print("-------------------------------------")
         print("Printing LCSS Event sequence...")
         for i in range(len(lcss)):
-            print(f"[]")
+            print(f"[{i}] {lcss_time[i]} - {lcss[i]}")
+        print("-------------------------------------")
 
         # return the longest common sub-sequence
         return (lcss, lcss_time, indicator)

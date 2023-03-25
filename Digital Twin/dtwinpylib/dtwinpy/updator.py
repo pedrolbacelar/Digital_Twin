@@ -14,16 +14,21 @@ class Updator():
     The class Updator is called when the validation is given a certain amount of indicators beyond
     the allowed threshold. 
     """
-    def __init__(self, update_type, digital_model, real_database_path, start_time, end_time):
+    def __init__(self, update_type, digital_model, real_database_path, start_time, end_time, plot= False):
         #--- Create helper
         self.helper = Helper()
 
         #--- Basic Stuff
         self.update_type = update_type
         self.digital_model = digital_model
+        self.plot = plot
+
+        #--- Setting Database
         self.real_database_path = real_database_path
         self.start_time = start_time
         self.end_time = end_time
+        if self.update_type == 'logic': self.feature_usingDB= 'valid_logic'
+        if self.update_type == 'input': self.feature_usingDB= 'valid_input'
 
         #--- Get the model components
         (self.machines_vector, self.queues_vector) = self.digital_model.get_model_components()
@@ -33,9 +38,14 @@ class Updator():
             database_path= self.real_database_path,
             event_table= 'real_log',
             start_time= self.start_time,
-            end_time= self.end_time
+            end_time= self.end_time,
+            feature_usingDB= self.feature_usingDB,
+            model_update= True
         )
 
+        #--- User Interface
+        self.helper.printer(f"Updator for {self.update_type} created", 'brown')
+        print(f"Model path being updated: {self.digital_model.get_model_path()}...")
     
     # ------------------------------ Main Updating Functions ------------------------------
     # ------ Update the the model logic using model generation ------
@@ -79,18 +89,19 @@ class Updator():
 
         #-- QQ plot
         # plot with parameters of best distrribution
-        plt.figure(figsize=(8, 6))
-        res = scipy.stats.probplot(input_data, dist=ks[0], sparams=parameters[ks_best_id], plot=plt)
-        plt.title(f"Normal Q-Q Plot with best fit distribution")
-        plt.show()
-
-        # plot with parameters of actual distrribution
-        if probable_distribution != None:
-            # plot with parameters of actual distrribution
+        if self.plot == True:
             plt.figure(figsize=(8, 6))
-            res = scipy.stats.probplot(input_data, dist=probable_distribution, sparams=parameters[distribution_types_list.index(probable_distribution)], plot=plt)
-            plt.title(f"Normal Q-Q Plot with actual distribution")
+            res = scipy.stats.probplot(input_data, dist=ks[0], sparams=parameters[ks_best_id], plot=plt)
+            plt.title(f"Normal Q-Q Plot with best fit distribution")
             plt.show()
+
+            # plot with parameters of actual distrribution
+            if probable_distribution != None:
+                # plot with parameters of actual distrribution
+                plt.figure(figsize=(8, 6))
+                res = scipy.stats.probplot(input_data, dist=probable_distribution, sparams=parameters[distribution_types_list.index(probable_distribution)], plot=plt)
+                plt.title(f"Normal Q-Q Plot with actual distribution")
+                plt.show()
         
         # #-- to print selected distribution parameters
         # print(f"Best result is: {ks[0]} distribution with a p-value of {ks[1]:.6f}")
@@ -113,7 +124,8 @@ class Updator():
         Same function used in Validator.
         """
         #--- Extract the unique parts IDs from the real log
-        machines_ids = self.real_database.get_distinct_values(column= "machine_id", table="real_log")
+        #machines_ids = self.real_database.get_distinct_values(column= "machine_id", table="real_log")
+        machines_ids = self.real_database.get_machines_with_completed_traces()
         #--- Create matrix to store trace of process time for each part
         matrix_ptime_qTDS = {}
         machine_matrix_full_trace = []
@@ -122,6 +134,8 @@ class Updator():
         for machine_id in machines_ids:
             #--- Get the full trace for each machine
             machine_full_trace = self.real_database.get_time_activity_of_column(column= "machine_id", table="real_log", column_id=machine_id[0])
+            
+            
             machine_matrix_full_trace.append(machine_full_trace)
 
             #--- Initiate as blank values
@@ -163,6 +177,10 @@ class Updator():
             
             #--- Add machine trace to the matrix of all machines traces
             matrix_ptime_qTDS[machine_id[0]] = (machine_trace)
+
+        print("--- Printing the sequence considered for update ---")
+        for key in matrix_ptime_qTDS:
+            print(f"{key}: {matrix_ptime_qTDS[key]}")
             
         #--- Return the matrix of traces
         return matrix_ptime_qTDS
@@ -186,17 +204,26 @@ class Updator():
         This function receive a INT machine id and a INT or LIST process time. Base on the 
         machine_id the function attribute to the write node in the model new process time.
         """
-
         #--- Get model path
         model_path = self.digital_model.get_model_path()
-
+        
         with open(model_path, 'r+') as model_file:
             data = json.load(model_file)
             #--- For each machine (node)
             for node in data['nodes']:
                 if node['activity'] == machine_id:
+                    #--- Take the old process time:
+                    old_process_time = node["contemp"]
+                    machine_name = f'Machine {machine_id}'
+
                     #--- Update the process time
-                    node["contemp"] = new_process_time
+                    node["contemp"] = (new_process_time)
+
+                    #--- User Interface
+                    self.helper.printer(f"Process Time of {machine_name} updated from {old_process_time} to {new_process_time}.", 'brown')
+
+
+
 
             #---- Write Back the Changes
             # Move the file pointer to the beginning of the file
@@ -243,6 +270,7 @@ class Updator():
                 if flag_deterministic:
                     #--- Take the new process time (last position, mean)
                     new_process_time = update_result[-1]
+                    new_process_time = round(new_process_time)
 
                 #--- System not Deterministic: Take the distribution parameters
                 if not flag_deterministic:
@@ -251,11 +279,11 @@ class Updator():
                     parameter_a = update_result[1]
                     parameter_b = update_result[2]
 
-                    new_process_time = [dist_name, parameter_a, parameter_b]
+                    (new_process_time) = [dist_name, parameter_a, parameter_b]
+
 
                 #--- Write the new process time in the json model
                 self.aligner(machine_id, new_process_time)
-
-                #--- User Interface
-                self.helper.printer(f"Process Time of {machine_name} updated to {new_process_time}.", 'brown')
             
+        #--- Finished the Updated
+        self.helper.printer("--- System Updated ---", 'green')

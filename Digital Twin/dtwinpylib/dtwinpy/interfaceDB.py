@@ -6,12 +6,13 @@ import sys
 from time import sleep
 
 class Database():
-    def __init__(self, database_path, event_table, feature_usingDB= None,start_time = None, end_time= None, copied_realDB= False):
+    def __init__(self, database_path, event_table, feature_usingDB= None,start_time = None, end_time= None, copied_realDB= False, model_update= False):
         self.helper = Helper()
         #--- Common attributes
         self.database_path = database_path
         self.event_table = event_table
         self.feature_usingDB = feature_usingDB
+        self.model_update = model_update
 
         #--- This both parameters are used to constrain the traces from the real log
         self.start_time = start_time
@@ -31,7 +32,7 @@ class Database():
         self.max_counter= round(self.timeout/self.sleep_time)
 
         #--- When create the object, already create the database and table if doesn't exist
-        if event_table == "real_log":
+        if event_table == "real_log" and self.model_update == False:
             #--- Check if exist a 'digital_log' (in case of copied databases)
             self.rename_digital_to_real()
                     
@@ -81,6 +82,23 @@ class Database():
                 
                 #--- Check for parts without the correct id within the traces
                 self.check_parts_zero()
+
+        #--- Database for Model Update ---
+        if self.model_update == True:
+            """ 
+            In this case, you just need to take the lines ID of the start and finish
+            of the previous validation, don't need to update it. 
+            """
+            with sqlite3.connect(self.database_path) as db:
+                valid_pointers = db.execute("""SELECT start_time_id, end_time_id FROM time_pointers WHERE feature_usingDB= ?""", ('valid_logic',)).fetchall()
+
+                #--- Take the most recent id of start and end time (last validation - that needs to be updated)
+                self.start_time_id = valid_pointers[-1][0]
+                self.end_time_id = valid_pointers[-1][1]
+
+                print("-- Time Pointers Conisdered for Model Update: --")
+                print(f"|-- Start Time ID: {self.start_time_id}")
+                print(f"|-- End Time ID: {self.start_time_id}")
 
         if event_table == "digital_log":
             with sqlite3.connect(self.database_path) as digital_model_DB:
@@ -518,6 +536,16 @@ class Database():
             last_end_time = end_times[-1][0]
 
             return last_end_time
+        
+    def read_last_end_time_valid(self):
+        with sqlite3.connect(self.database_path) as db:
+            end_times = db.execute("""
+            SELECT end_time FROM time_pointers WHERE feature_usingDB= 'valid_input'
+            """).fetchall()
+            
+            last_end_time = end_times[-1][0]
+
+            return last_end_time
             
     def forced_update_start_time(self):
         with sqlite3.connect(self.database_path) as db:
@@ -834,5 +862,35 @@ class Database():
                         WHERE t1.activity_type = 'Finished'
                     """).fetchall()
 
+    def get_machines_with_completed_traces(self):
+        with sqlite3.connect(self.database_path) as db:
+            traces = db.execute(
+                """
+                SELECT DISTINCT t1.machine_id
+                FROM (
+                    SELECT machine_id, activity_type, MIN(event_id) AS min_event_id
+                    FROM real_log
+                    WHERE activity_type IN ('Started', 'Finished') AND event_id >= ? AND event_id <= ?
+                    GROUP BY machine_id, activity_type
+                ) AS t1
+                INNER JOIN (
+                    SELECT machine_id, MIN(event_id) AS min_started_event_id, MAX(event_id) AS max_finished_event_id
+                    FROM real_log
+                    WHERE activity_type = 'Started' AND event_id >= ? AND event_id <= ?
+                    GROUP BY machine_id
+                ) AS t2 ON t1.machine_id = t2.machine_id
+                WHERE t1.activity_type = 'Started' AND t1.min_event_id = t2.min_started_event_id
+                AND EXISTS (
+                    SELECT 1
+                    FROM real_log
+                    WHERE real_log.machine_id = t1.machine_id AND activity_type = 'Finished' AND event_id >= t1.min_event_id AND event_id <= t2.max_finished_event_id
+                )
+                """, (self.start_time_id, self.end_time_id, self.start_time_id, self.end_time_id)
+            ).fetchall()
 
-    
+
+            print("Printing unique machines ids with completed traces")
+            for element in traces:
+                print(element)
+
+            return traces
