@@ -1,0 +1,175 @@
+D:\POLIMI\Digital twins\Digital_Twin\Digital Twin>python broker_execute.py
+.
+.
+←[32m----- Connected with 192.168.0.50 Successfully -----←[0m
+Subscribed Topics:
+|-- 'trace'
+|-- 'part_id'
+|-- 'RCT_server'
+15 March 19:34:39 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Started', 'part_id': '0', 'machine_id': '1'}
+15 March 19:34:42 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '2209210149'}
+15 March 19:34:42 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '2209210149'}
+←[33m15 March 19:34:42 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 1 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:34:43 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '2209210149'}
+←[33m15 March 19:34:43 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 1 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:34:50 | Topic: trace | Payload Received: {'queue_id': '2', 'status': 'Finished', 'part_id': '2209210149', 'machine_id': '1'}
+15 March 19:34:51 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Started', 'part_id': '0', 'machine_id': '1'}
+15 March 19:34:54 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '28429249'}
+15 March 19:34:54 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '28429249'}
+←[33m15 March 19:34:54 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 1 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:34:55 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '28429249'}
+←[33m15 March 19:34:55 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 1 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:35:05 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Started', 'machine_id': '2', 'part_id': '0'}
+15 March 19:35:07 | Topic: trace | Payload Received: {'queue_id': '2', 'status': 'Finished', 'part_id': '28429249', 'machine_id': '1'}
+15 March 19:35:07 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Started', 'part_id': '0', 'machine_id': '1'}
+15 March 19:35:08 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '2209210149'}
+15 March 19:35:08 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '2209210149'}
+←[33m15 March 19:35:08 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 2 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:35:09 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '2209210149'}
+←[33m15 March 19:35:09 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 2 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:35:10 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '22019510149'}
+15 March 19:35:11 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '22019510149'}
+←[33m15 March 19:35:11 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 1 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:35:11 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '22019510149'}
+←[33m15 March 19:35:11 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 1 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:35:16 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Finished', 'machine_id': '2', 'part_id': '2209210149'}
+15 March 19:35:19 | Topic: trace | Payload Received: {'queue_id': '2', 'status': 'Finished', 'part_id': '22019510149', 'machine_id': '1'}
+15 March 19:35:19 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Started', 'part_id': '0', 'machine_id': '1'}
+15 March 19:35:21 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Started', 'machine_id': '2', 'part_id': '0'}
+15 March 19:35:22 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '442499149'}
+15 March 19:35:23 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '442499149'}
+←[33m15 March 19:35:23 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 1 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:35:23 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '442499149'}
+←[33m15 March 19:35:23 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 1 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:35:24 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '28429249'}
+15 March 19:35:24 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '28429249'}
+←[33m15 March 19:35:24 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 2 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:35:25 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '28429249'}
+←[33m15 March 19:35:25 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 2 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:35:31 | Topic: trace | Payload Received: {'queue_id': '2', 'status': 'Finished', 'part_id': '442499149', 'machine_id': '1'}
+15 March 19:35:31 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Started', 'part_id': '0', 'machine_id': '1'}
+15 March 19:35:32 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Finished', 'machine_id': '2', 'part_id': '28429249'}
+15 March 19:35:33 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Started', 'machine_id': '2', 'part_id': '0'}
+15 March 19:35:34 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '441289249'}
+15 March 19:35:35 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '441289249'}
+←[33m15 March 19:35:35 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 1 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:35:35 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '441289249'}
+←[33m15 March 19:35:35 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 1 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:35:36 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '22019510149'}
+15 March 19:35:36 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '22019510149'}
+←[33m15 March 19:35:36 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 2 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:35:37 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '22019510149'}
+←[33m15 March 19:35:37 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 2 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:35:45 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Finished', 'machine_id': '2', 'part_id': '22019510149'}
+15 March 19:35:45 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Started', 'machine_id': '2', 'part_id': '0'}
+15 March 19:35:47 | Topic: trace | Payload Received: {'queue_id': '2', 'status': 'Finished', 'part_id': '441289249', 'machine_id': '1'}
+15 March 19:35:48 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Started', 'part_id': '0', 'machine_id': '1'}
+15 March 19:35:48 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '442499149'}
+15 March 19:35:49 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '442499149'}
+←[33m15 March 19:35:49 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 2 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:35:49 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '442499149'}
+←[33m15 March 19:35:49 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 2 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:35:50 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '2209210149'}
+15 March 19:35:51 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '2209210149'}
+←[33m15 March 19:35:51 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 1 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:35:51 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '2209210149'}
+←[33m15 March 19:35:51 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 1 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:35:57 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Finished', 'machine_id': '2', 'part_id': '442499149'}
+15 March 19:36:01 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Started', 'machine_id': '2', 'part_id': '0'}
+15 March 19:36:03 | Topic: trace | Payload Received: {'queue_id': '2', 'status': 'Finished', 'part_id': '2209210149', 'machine_id': '1'}
+15 March 19:36:04 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Started', 'part_id': '0', 'machine_id': '1'}
+15 March 19:36:04 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '441289249'}
+15 March 19:36:05 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '441289249'}
+←[33m15 March 19:36:05 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 2 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:36:05 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '441289249'}
+←[33m15 March 19:36:05 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 2 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:36:07 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '28429249'}
+15 March 19:36:07 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '28429249'}
+←[33m15 March 19:36:07 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 1 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:36:08 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '28429249'}
+←[33m15 March 19:36:08 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 1 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:36:13 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Finished', 'machine_id': '2', 'part_id': '441289249'}
+15 March 19:36:15 | Topic: trace | Payload Received: {'queue_id': '2', 'status': 'Finished', 'part_id': '28429249', 'machine_id': '1'}
+15 March 19:36:16 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Started', 'part_id': '0', 'machine_id': '1'}
+15 March 19:36:17 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Started', 'machine_id': '2', 'part_id': '0'}
+15 March 19:36:19 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '22019510149'}
+15 March 19:36:19 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '22019510149'}
+←[33m15 March 19:36:19 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 1 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:36:20 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '22019510149'}
+←[33m15 March 19:36:20 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 1 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:36:20 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '2209210149'}
+15 March 19:36:21 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '2209210149'}
+←[33m15 March 19:36:21 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 2 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:36:21 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '2209210149'}
+←[33m15 March 19:36:21 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 2 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:36:29 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Finished', 'machine_id': '2', 'part_id': '2209210149'}
+15 March 19:36:30 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Started', 'machine_id': '2', 'part_id': '0'}
+15 March 19:36:32 | Topic: trace | Payload Received: {'queue_id': '2', 'status': 'Finished', 'part_id': '22019510149', 'machine_id': '1'}
+15 March 19:36:32 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Started', 'part_id': '0', 'machine_id': '1'}
+15 March 19:36:33 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '28429249'}
+15 March 19:36:34 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '28429249'}
+←[33m15 March 19:36:34 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 2 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:36:34 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '28429249'}
+←[33m15 March 19:36:34 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 2 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:36:35 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '442499149'}
+15 March 19:36:35 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '442499149'}
+←[33m15 March 19:36:35 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 1 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:36:36 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '442499149'}
+←[33m15 March 19:36:36 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 1 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:36:42 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Finished', 'machine_id': '2', 'part_id': '28429249'}
+15 March 19:36:44 | Topic: trace | Payload Received: {'queue_id': '2', 'status': 'Finished', 'part_id': '442499149', 'machine_id': '1'}
+15 March 19:36:44 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Started', 'part_id': '0', 'machine_id': '1'}
+15 March 19:36:46 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Started', 'machine_id': '2', 'part_id': '0'}
+15 March 19:36:47 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '441289249'}
+15 March 19:36:48 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '441289249'}
+←[33m15 March 19:36:48 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 1 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:36:48 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '441289249'}
+←[33m15 March 19:36:48 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 1 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:36:49 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '22019510149'}
+15 March 19:36:49 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '22019510149'}
+←[33m15 March 19:36:49 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 2 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:36:50 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '22019510149'}
+←[33m15 March 19:36:50 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 2 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:36:57 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Finished', 'machine_id': '2', 'part_id': '22019510149'}
+15 March 19:36:58 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Started', 'machine_id': '2', 'part_id': '0'}
+15 March 19:37:00 | Topic: trace | Payload Received: {'queue_id': '2', 'status': 'Finished', 'part_id': '441289249', 'machine_id': '1'}
+15 March 19:37:00 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Started', 'part_id': '0', 'machine_id': '1'}
+15 March 19:37:01 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '442499149'}
+15 March 19:37:01 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '442499149'}
+←[33m15 March 19:37:01 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 2 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:37:02 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '442499149'}
+←[33m15 March 19:37:02 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 2 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:37:03 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '2209210149'}
+15 March 19:37:04 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '2209210149'}
+←[33m15 March 19:37:04 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 1 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:37:04 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '2209210149'}
+←[33m15 March 19:37:04 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 1 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:37:10 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Finished', 'machine_id': '2', 'part_id': '442499149'}
+15 March 19:37:12 | Topic: trace | Payload Received: {'queue_id': '2', 'status': 'Finished', 'part_id': '2209210149', 'machine_id': '1'}
+15 March 19:37:13 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Started', 'part_id': '0', 'machine_id': '1'}
+15 March 19:37:14 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Started', 'machine_id': '2', 'part_id': '0'}
+15 March 19:37:15 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '28429249'}
+15 March 19:37:16 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '28429249'}
+←[33m15 March 19:37:16 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 1 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:37:16 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '28429249'}
+←[33m15 March 19:37:16 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 1 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:37:17 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '441289249'}
+15 March 19:37:17 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '441289249'}
+←[33m15 March 19:37:17 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 2 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:37:18 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '441289249'}
+←[33m15 March 19:37:18 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 2 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:37:26 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Finished', 'machine_id': '2', 'part_id': '441289249'}
+15 March 19:37:26 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Started', 'machine_id': '2', 'part_id': '0'}
+15 March 19:37:28 | Topic: trace | Payload Received: {'queue_id': '2', 'status': 'Finished', 'part_id': '28429249', 'machine_id': '1'}
+15 March 19:37:29 | Topic: trace | Payload Received: {'queue_id': '1', 'status': 'Started', 'part_id': '0', 'machine_id': '1'}
+15 March 19:37:29 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '2209210149'}
+15 March 19:37:30 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '2209210149'}
+←[33m15 March 19:37:30 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 2 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:37:30 | Topic: part_id | Payload Received: {'machine_id': '2', 'part_id': '2209210149'}
+←[33m15 March 19:37:30 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 2 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:37:32 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '22019510149'}
+15 March 19:37:32 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '22019510149'}
+←[33m15 March 19:37:32 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 1 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+15 March 19:37:33 | Topic: part_id | Payload Received: {'machine_id': '1', 'part_id': '22019510149'}
+←[33m15 March 19:37:33 | [WARNING][BROKER]: Your Broker Manager didn't find Machine 1 with 'Part 0' in the database (databases/2s_determ/real_database.db). Please, check if the previous attempt was successful.←[0m
+←[31m---- Communication with 192.168.0.50 killed manually----←[0m
