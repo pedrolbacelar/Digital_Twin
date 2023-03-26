@@ -1,5 +1,3 @@
-
-
 #--- Import Modules
 from .interfaceDB import Database
 from .helper import Helper

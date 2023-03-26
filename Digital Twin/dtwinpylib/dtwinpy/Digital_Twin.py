@@ -1,13 +1,22 @@
 #--- Import DT Features
 from .digital_model import Model
+print("Model imported...")
 from .validator import Validator
+print("Validator imported...")
 from .interfaceDB import Database
+print("Database imported...")
 from .synchronizer import Synchronizer
+print("Synchronizer imported...")
 from .services import Service_Handler
+print("Service_Handler imported...")
 from .broker_manager import Broker_Manager
+print("Broker_Manager imported...")
 from .helper import Helper
+print("Helper imported...")
 from .interfaceAPI import interfaceAPI
+print("interfaceAPI imported...")
 from .updator import Updator
+print("Updator imported...")
 
 #--- Common Libraries
 import shutil
@@ -66,7 +75,9 @@ class Digital_Twin():
 
         #--- Flag of Features
         self.flag_API = flag_API
-        if flag_API: self.interfaceAPI = interfaceAPI()
+        if flag_API: 
+            self.interfaceAPI = interfaceAPI()
+            print("Interface API created....")
         self.flag_external_service = flag_external_service
 
         #--- Time intervals
@@ -254,7 +265,7 @@ class Digital_Twin():
 
 
         # ================================ SET UP FINISHED ================================
-        self.helper.printer(f"---- Digital Twin '{self.name}' created sucessfully ----", 'green')       
+        self.helper.printer(f"---- Digital Twin '{self.name}' created sucessfully ----", 'green', play= True)       
         # ==================================================================================
 
 

@@ -1,15 +1,6 @@
 from IPython.display import Markdown, display
-"""
-Examples using the helper:
-
-from dtwinpylib.dtwinpy.helper import Helper
-
-helper = Helper()
-helper.printer("warning", "yellow")
-colors = helper.get_colors()
-helper.markdown(f"## {colors['yellow']} warning")
-
-"""
+from playsound import playsound
+import os
 
 #--- Common Libraries
 import datetime
@@ -22,6 +13,10 @@ import re
 class Helper():
     def __init__(self, type= "py"):
         self.type = type
+
+        #--- Get global path of the library
+        # Get the directory of the code.py file
+        self.dir_path = os.path.dirname(os.path.realpath(__file__))
 
         #--- To print on the normal terminal
         if self.type == "py":
@@ -53,21 +48,16 @@ class Helper():
             'brown': self.Brown,
             'reset': self.Reset                 
             }
-        
-        # Initia the player
-        #pygame.mixer.init()
 
-        """
+        #--- Construct the sounds paths
         self.sounds = {
-            'red': pygame.mixer.Sound("sound/error.mp3"),
-            'green': pygame.mixer.Sound("sound/success.mp3"),
-            'yellow': pygame.mixer.Sound("sound/warning.mp3") 
+            'red': os.path.join(self.dir_path, 'sound', 'error.mp3'),
+            'green': os.path.join(self.dir_path, 'sound', 'success.mp3'),
+            'yellow': os.path.join(self.dir_path, 'sound', 'warning.mp3') 
         }
-        """
-
     
     #--- Printing with colors
-    def printer(self, text, color= 'yellow', time= True, play= False):
+    def printer(self, text, color= 'yellow', time= True, play= True):
         (tstr, t) = self.get_time_now()
         if time == True:
             if self.type == "py":
@@ -82,13 +72,15 @@ class Helper():
             else:
                 display(Markdown(f"{self.colors[color]}{text}{self.Reset}"))
 
-        # Play the Sound related to the color 
-        if play:
+        
+        # Play the Sound related to the color (always for errors)
+        if play or color== 'red':
             # Take the respective sound object
-            sound = self.sounds[color]
+            sound_path = self.sounds[color]
 
             # Play the sound
-            sound.play()
+            print(f"Sound Path: {sound_path}")
+            playsound(sound_path)
 
     #--- Print with Markdown language
     def markdown(self, mark):
