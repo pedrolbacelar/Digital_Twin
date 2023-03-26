@@ -6,13 +6,14 @@ import sys
 from time import sleep
 
 class Database():
-    def __init__(self, database_path, event_table, feature_usingDB= None,start_time = None, end_time= None, copied_realDB= False, model_update= False):
+    def __init__(self, database_path, event_table= None, feature_usingDB= None,start_time = None, end_time= None, copied_realDB= False, model_update= False, experimental_mode= False):
         self.helper = Helper()
         #--- Common attributes
         self.database_path = database_path
         self.event_table = event_table
         self.feature_usingDB = feature_usingDB
         self.model_update = model_update
+        self.experimental_mode = experimental_mode
 
         #--- This both parameters are used to constrain the traces from the real log
         self.start_time = start_time
@@ -32,7 +33,7 @@ class Database():
         self.max_counter= round(self.timeout/self.sleep_time)
 
         #--- When create the object, already create the database and table if doesn't exist
-        if event_table == "real_log" and self.model_update == False:
+        if event_table == "real_log" and self.model_update == False and self.experimental_mode== False:
             #--- Check if exist a 'digital_log' (in case of copied databases)
             self.rename_digital_to_real()
                     
@@ -99,6 +100,15 @@ class Database():
                 print("-- Time Pointers Conisdered for Model Update: --")
                 print(f"|-- Start Time ID: {self.start_time_id}")
                 print(f"|-- End Time ID: {self.start_time_id}")
+        
+        # --- Database for Experimental Mode ---
+        if self.experimental_mode == True:
+            """
+            When creating the experimental database (in the __init__ of the Digital Twin), the object
+            already create all the necessary tables with all the columns needed
+            """
+
+            
 
         if event_table == "digital_log":
             with sqlite3.connect(self.database_path) as digital_model_DB:
@@ -141,14 +151,7 @@ class Database():
             old_database_path= self.database_path.replace(".db","")
             self.replicated_database_path= f"{old_database_path}_replicated.db"
             
-
-    # -------- Setting Functions --------
-    def rename_digital_to_real(self):
-        with sqlite3.connect(self.database_path) as db:
-                tables = db.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
-                if len(tables) == 1 and tables[0][0] == "digital_log":
-                    self.rename_table("digital_log", "real_log")
-    
+    # -------- Creation of Tables --------
     def create_reallog_table(self):
         with sqlite3.connect(self.database_path) as db:
                 db.execute(f"""
@@ -165,6 +168,37 @@ class Database():
                 """)
 
                 db.commit()
+    
+    def create_valid_indicator_table(self):
+        with sqlite3.connect(self.database_path) as db:
+                # --- Create table of validator indicators
+                db.execute(f"""
+                CREATE TABLE IF NOT EXISTS (
+                    line_id INTEGER PRIMARY KEY,
+                    current_time_str TEXT,
+                    timestamp_real INTEGER
+                    logic_indicator FLOAT,
+                    input_indicator FLOAT,
+                    model_in TEXT,
+                    model_out TEXT,
+                    current_time_str TEXT,
+                    timestamp_real INTEGER
+                )
+                """)
+
+                db.commit()
+
+
+
+    # -------- Setting Functions --------
+    def rename_digital_to_real(self):
+        with sqlite3.connect(self.database_path) as db:
+                tables = db.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
+                if len(tables) == 1 and tables[0][0] == "digital_log":
+                    self.rename_table("digital_log", "real_log")
+    
+
+    
 
     def find_line_ID_start_end(self):
         with sqlite3.connect(self.database_path) as db:

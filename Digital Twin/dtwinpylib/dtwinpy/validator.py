@@ -697,6 +697,7 @@ class Validator():
 
             #--- Set this new stop condition in the model
             self.digital_model.set_until(until)
+            self.helper.printer(f"[Validator] Duration of the TDS and qTDS being used: {until}", 'brown')
 
         
         # ------- Assign Parts Queue Branches selected -------

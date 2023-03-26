@@ -39,7 +39,7 @@ importlib.reload(dtwinpylib.dtwinpy.services)
 
 
 class Digital_Twin():
-    def __init__(self, name, copied_realDB= False,model_path= None, ip_address= None, initial= True, targeted_part_id= None, targeted_cluster= None, until= None, digital_database_path= None, real_database_path= None, ID_database_path= None, Freq_Sync= 1000, Freq_Valid= 10000, delta_t_treshold= 100, logic_threshold= 0.75, input_threshold= 0.75, rct_threshold= 0.02, queue_position= 2, Freq_Service = None, part_type= "A", loop_type= "closed", maxparts = None, template= False, keepDB= True, plot= False, verbose= True, flag_API= False, flag_external_service= False, rct_queue= 3):
+    def __init__(self, name, copied_realDB= False,model_path= None, ip_address= None, initial= True, targeted_part_id= None, targeted_cluster= None, until= None, digital_database_path= None, real_database_path= None, ID_database_path= None, experimental_database_path= None, Freq_Sync= 1000, Freq_Valid= 10000, delta_t_treshold= 100, logic_threshold= 0.75, input_threshold= 0.75, rct_threshold= 0.02, queue_position= 2, Freq_Service = None, part_type= "A", loop_type= "closed", maxparts = None, template= False, keepDB= True, plot= False, verbose= True, flag_API= False, flag_external_service= False, rct_queue= 3):
         self.helper = Helper()
         #--- Model Parameters
         self.name = name
@@ -196,6 +196,13 @@ class Digital_Twin():
         else:
             self.ID_database_path = ID_database_path
 
+        # Experimental database path assign
+        if experimental_database_path == None:
+            # Assign database path
+            self.experimental_database_path = f"databases/{self.name}/experimental_database.db"
+        else:
+            self.experimental_database = experimental_database_path
+
         # Delete existing database before starting anything
         if keepDB == False:
             print("|- Deleting existing databases...")
@@ -246,7 +253,15 @@ class Digital_Twin():
             self.temporary_real_database.update_real_time_now()
         
         # Time Pointers table (just after real database created)
-        self.pointers_database = Database(database_path= self.real_database_path, event_table= "time_pointers")
+        self.pointers_database = Database(
+            database_path= self.real_database_path, 
+            event_table= "time_pointers")
+        
+        # Experimental Database
+        self.experimental_database = Database(
+            database_path= self.experimental_database_path,
+            event_table=
+        )
 
         # ------------------------------------------
         print(f"--- printing databases paths ---")
