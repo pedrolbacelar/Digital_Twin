@@ -10,6 +10,8 @@ import os
 import re
 
 
+
+
 class Helper():
     def __init__(self, type= "py"):
         self.type = type
@@ -50,11 +52,11 @@ class Helper():
             }
 
         #--- Construct the sounds paths
-        self.sounds = {
+        """self.sounds = {
             'red': os.path.join(self.dir_path, 'sound', 'error.mp3'),
             'green': os.path.join(self.dir_path, 'sound', 'success.mp3'),
             'yellow': os.path.join(self.dir_path, 'sound', 'warning.mp3') 
-        }
+        }"""
     
     #--- Printing with colors
     def printer(self, text, color= 'yellow', time= True, play= True):
@@ -75,12 +77,13 @@ class Helper():
         
         # Play the Sound related to the color (always for errors)
         if play or color== 'red':
+            pass
             # Take the respective sound object
-            sound_path = self.sounds[color]
+            #sound_path = self.sounds[color]
 
             # Play the sound
-            print(f"Sound Path: {sound_path}")
-            playsound(sound_path)
+            #print(f"Sound Path: {sound_path}")
+            #playsound(r"C:/Users/pedro/Github_repos/Digital_Twin/Digital Twin/dtwinpylib/dtwinpy/sound/success.mp3")
 
     #--- Print with Markdown language
     def markdown(self, mark):

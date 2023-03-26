@@ -255,7 +255,10 @@ class Updator():
             flag_deterministic = self.is_deterministic()
             
             #--- Loop through all the machines to update all of them
-            for machine in self.machines_vector:
+            for key in matrix_ptime_qTDS:
+                #--- Get the machine component
+                machine = self.digital_model.get_selected_machine(machine_name= key)
+
                 #--- Get the machine name and machine id
                 machine_name = machine.get_name()
                 machine_id = machine.get_id()

@@ -524,11 +524,17 @@ class Broker_Manager():
             sys.exit()
 
         else: 
-            #--- Make the connection with the Broker
-            self.client.connect(self.ip_address, self.port, self.keepalive)
+            try:
+                #--- Make the connection with the Broker
+                self.client.connect(self.ip_address, self.port, self.keepalive)
 
-            #--- Publish the action
-            self.client.publish(
+                #--- Publish the action
+                self.client.publish(
                 topic = 'system_status', 
                 payload= action
             )
+            
+            except ConnectionRefusedError:
+                self.helper.printer(f"[ERROR][broker_manager.py/publish_setting_action()] Mosquitto / Broker is not running in the IP address '{self.ip_address}'", 'red')
+                self.helper.printer(f"---- Digital Twin was killed ----", 'red')
+                sys.exit()

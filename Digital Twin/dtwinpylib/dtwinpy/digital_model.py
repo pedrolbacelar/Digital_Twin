@@ -902,6 +902,21 @@ class Model():
         return (self.until, self.maxparts, self.targeted_part_id, self.targeted_cluster)
     def get_database_path(self):
         return self.database_path
+    def get_selected_machine(self, machine_name= None, machine_id= None):
+        """
+        This function receives a machine name or a machine id and looks through all the 
+        existing machines objects, and return the related object
+        """
+        if machine_name != None:
+            for machine in self.machines_vector:
+                if machine.get_name() == machine_name:
+                    return machine
+
+        if machine_id != None:
+            for machine in self.machines_vector:
+                if machine.get_id() == machine_id:
+                    return machine
+
     # ==============================================
 
     # ================= SETs =================
