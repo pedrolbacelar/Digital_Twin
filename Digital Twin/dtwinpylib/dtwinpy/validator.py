@@ -563,7 +563,7 @@ class Validator():
 
         
         #--- Similarity Indicator
-        indicator = len(lcss) / min(m,n)
+        indicator = len(lcss) / max(m,n)
         print("-------------------------------------")
         print("Printing LCSS Event sequence...")
         for i in range(len(lcss)):

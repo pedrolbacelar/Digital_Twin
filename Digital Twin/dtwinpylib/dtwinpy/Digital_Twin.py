@@ -501,6 +501,7 @@ class Digital_Twin():
 
             # --- Update Model Path
             self.model_path = new_model_path
+            self.model_last_sync = self.model_path
             print(f"--- Model Path being used: {self.model_path}")
             
 
@@ -580,7 +581,8 @@ class Digital_Twin():
                     digital_model= self.digital_model,
                     real_database_path= self.real_database_path,
                     start_time= start_time,
-                    end_time= end_time
+                    end_time= end_time,
+                    model_last_sync= self.model_last_sync
                     )
                 
                 #--- Run the Logic Update
@@ -595,7 +597,8 @@ class Digital_Twin():
                     digital_model= self.digital_model,
                     real_database_path= self.real_database_path,
                     start_time= start_time,
-                    end_time= end_time
+                    end_time= end_time,
+                    model_last_sync= self.model_last_sync
                 )
 
                 #--- Run the Input Update

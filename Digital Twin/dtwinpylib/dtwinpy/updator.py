@@ -14,13 +14,14 @@ class Updator():
     The class Updator is called when the validation is given a certain amount of indicators beyond
     the allowed threshold. 
     """
-    def __init__(self, update_type, digital_model, real_database_path, start_time, end_time, plot= False):
+    def __init__(self, update_type, digital_model, real_database_path, start_time, end_time, model_last_sync, plot= False):
         #--- Create helper
         self.helper = Helper()
 
         #--- Basic Stuff
         self.update_type = update_type
         self.digital_model = digital_model
+        self.model_last_sync = model_last_sync
         self.plot = plot
 
         #--- Setting Database
@@ -45,8 +46,10 @@ class Updator():
 
         #--- User Interface
         self.helper.printer(f"Updator for {self.update_type} created", 'brown')
-        print(f"Model path being updated: {self.digital_model.get_model_path()}...")
-    
+        #print(f"Model path being updated: {self.digital_model.get_model_path()}...")
+        print(f"Model path being updated: {self.model_last_sync}...")
+
+
     # ------------------------------ Main Updating Functions ------------------------------
     # ------ Update the the model logic using model generation ------
     def update_logic(self):
@@ -205,9 +208,10 @@ class Updator():
         machine_id the function attribute to the write node in the model new process time.
         """
         #--- Get model path
-        model_path = self.digital_model.get_model_path()
+        #model_path = self.digital_model.get_model_path()
         
-        with open(model_path, 'r+') as model_file:
+
+        with open(self.model_last_sync, 'r+') as model_file:
             data = json.load(model_file)
             #--- For each machine (node)
             for node in data['nodes']:
@@ -221,9 +225,6 @@ class Updator():
 
                     #--- User Interface
                     self.helper.printer(f"Process Time of {machine_name} updated from {old_process_time} to {new_process_time}.", 'brown')
-
-
-
 
             #---- Write Back the Changes
             # Move the file pointer to the beginning of the file
