@@ -107,6 +107,7 @@ class Database():
             When creating the experimental database (in the __init__ of the Digital Twin), the object
             already create all the necessary tables with all the columns needed
             """
+            pass
 
             
 
