@@ -230,28 +230,7 @@ class Digital_Twin():
             except FileNotFoundError:
                 self.helper.printer(f"[WARNING][Digital_Twin.py/__init()__] The ID Database doesn't exist yet in the path '{self.ID_database_path}', proceding without deleting...")
 
-        # --- For Local Test
-        if self.copied_realDB == True:
-            #--- Update the timestamp ---
         
-            #--- before copying, we delete the previous one
-            try:
-                os.remove(self.real_database_path)
-            except FileNotFoundError:
-                self.helper.printer(f"[WARNING][Digital_Twin.py/init()] The file '{self.real_database_path}' does not exist")
-                print(f"copying file {self.database_path} in the path {self.real_database_path}")
-            
-            #--- Copy the whole database
-            shutil.copy2(self.database_path, self.real_database_path)
-
-            #--- Create a temporary real db object for initial fix
-            self.temporary_real_database = Database(database_path= self.real_database_path, event_table= 'real_log', copied_realDB= self.copied_realDB)
-
-            #--- Copy the column timestamp into timestamp_real and clean the previous one
-            self.temporary_real_database.copy_timestamp_to_timestamp_real()
-
-            #--- Update the timestamp according to the current real time
-            self.temporary_real_database.update_real_time_now()
         
         # Time Pointers table (just after real database created)
         self.pointers_database = Database(
@@ -448,6 +427,34 @@ class Digital_Twin():
     #--- Run Synchronization
     def run_sync(self, repositioning = True, start_time= None, end_time= None, copied_realDB= False):            
         
+        # --- For Local Test
+        if copied_realDB == True:
+            #--- Update the timestamp ---
+        
+            #--- before copying, we delete the previous one
+            try:
+                os.remove(self.real_database_path)
+            except FileNotFoundError:
+                self.helper.printer(f"[WARNING][Digital_Twin.py/init()] The file '{self.real_database_path}' does not exist")
+                print(f"copying file {self.database_path} in the path {self.real_database_path}")
+            
+            #--- Copy the whole database
+            try:
+                shutil.copy2(self.database_path, self.real_database_path)
+            except FileNotFoundError:
+                self.helper.printer(f"[ERROR][Digital_Twin.py/__init__()] It was not possible to find the digital database in the path '{self.database_path}'. Make sure that you runned the a simulation before trying to copy it (mydt.run_digital_model() or if are working directly with the digital_model object: digital_model.run())", 'red')
+                self.helper.kill()
+
+            #--- Create a temporary real db object for initial fix
+            self.temporary_real_database = Database(database_path= self.real_database_path, event_table= 'real_log', copied_realDB= copied_realDB)
+
+            #--- Copy the column timestamp into timestamp_real and clean the previous one
+            #self.temporary_real_database.copy_timestamp_to_timestamp_real()
+
+            #--- Update the timestamp according to the current real time
+            #self.temporary_real_database.update_real_time_now()
+
+
         #--- Make sure the model is updated
         self.generate_digital_model()
 

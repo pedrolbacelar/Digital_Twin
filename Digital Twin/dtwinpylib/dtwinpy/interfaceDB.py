@@ -14,6 +14,7 @@ class Database():
         self.feature_usingDB = feature_usingDB
         self.model_update = model_update
         self.experimental_mode = experimental_mode
+        self.copied_realDB = copied_realDB
 
         #--- This both parameters are used to constrain the traces from the real log
         self.start_time = start_time
