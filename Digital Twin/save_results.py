@@ -46,7 +46,6 @@ def create_markdown_with_model(dt_name):
     my_folder = "data_generation/" + folder_name
     shutil.copy(mydt_path, my_folder)
 
-
     print(f"Copying models and databases from {dt_name} ...")
 
     # 7. Copy a different folder into the created folder and rename it to "models"
@@ -57,6 +56,21 @@ def create_markdown_with_model(dt_name):
     models_folder_path = f"databases/{dt_name}"
     shutil.copytree(models_folder_path, os.path.join(root_folder, folder_name, "databases"))
     markdown_file.close()
+
+
+    print("Creating replicated database ...")
+    
+    #9. replacing replicator_db
+    # Set the path to the file you want to copy and the new filename
+    source_file = f"databases/{dt_name}/real_database.db"
+    new_file = f"databases/{dt_name}/real_database_replicated.db"
+
+    # If the new file already exists, delete it
+    if os.path.isfile(new_file):
+        os.remove(new_file)
+
+    # Copy the source file to the new location with the new filename
+    shutil.copy(source_file, new_file)
 
     print(f"\033[32m Results saved to {folder_name} \033[0m")
 

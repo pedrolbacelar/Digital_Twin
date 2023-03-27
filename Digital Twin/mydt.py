@@ -1,9 +1,35 @@
 #--- Import Library
 print("Importing the libraries.....")
 from dtwinpylib.dtwinpy.Digital_Twin import Digital_Twin
+from dtwinpylib.dtwinpy.tester import tester
+
+
 factory_ip = "192.168.0.50"
 my_ip = "127.0.0.1"
 
+
+
+#--- create test object and replace the initial.json in the models folder
+test = tester()
+print(f"'{test.exp_id}' experiment is loaded")
+
+#--- Create a Digital Twin object with the require inputs
+mydt = Digital_Twin(
+    name= test.name,
+    template= True, 
+    Freq_Sync= test.Freq_Sync, 
+    Freq_Valid= test.Freq_Valid, 
+    Freq_Service= test.Freq_Service, 
+    delta_t_treshold= test.delta_t_treshold,
+    ip_address=factory_ip,
+    flag_API= test.flag_API,
+    rct_threshold= test.rct_threshold,
+    rct_queue= test.rct_queue,
+    flag_external_service= test.flag_external_service,
+    logic_threshold= test.logic_threshold,
+    input_threshold= test.input_threshold)
+
+"""
 #--- Create a Digital Twin object with the require inputs
 mydt = Digital_Twin(
     name= "5s_determ",
@@ -22,4 +48,4 @@ mydt = Digital_Twin(
 
 #--- Run the real time Digital Twin
 mydt.run()
-
+"""
