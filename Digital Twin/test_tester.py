@@ -4,5 +4,5 @@ test = tester()
 #--- create allexp databse
 # test.create_allexp_database()
 
-test = tester()
+test = Tester()
 print(f"'{test.exp_id}' experiment is loaded")
