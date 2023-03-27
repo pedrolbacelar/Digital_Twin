@@ -41,7 +41,7 @@ class Tester():
         self.create_exp_queues_table(queue_id = 5, converging = True)
 
         #--- write initial json model data
-        #self.write_json_model(model_dict = self.initial_json, model_name = "initial")
+        # self.write_json_model(model_dict = self.initial_json, model_name = "initial")
         
 
 
@@ -410,11 +410,11 @@ class Tester():
                 contemp,
                 n_parts) VALUES (?,?,?,?,?,?)
                 """,(model_name, 
-                    model_dict['arcs'][arc_id]['arc'],
+                    json.dumps(model_dict['arcs'][arc_id]['arc']),
                     model_dict['arcs'][arc_id]['capacity'],
                     model_dict['arcs'][arc_id]['frequency'],
                     model_dict['arcs'][arc_id]['contemp'],
-                    model_dict['initial'][0][queue_id-1]))
+                    json.dumps(model_dict['initial'][0][queue_id-1])))
             
             else:
                 cursor.execute(f"""INSERT INTO queue_{queue_id} (
@@ -431,15 +431,15 @@ class Tester():
 
                 n_parts) VALUES (?,?,?,?,?,?,?,?,?,?)
                 """,(model_name, 
-                    model_dict['arcs'][arc_id]['arc'],
+                    json.dumps(model_dict['arcs'][arc_id]['arc']),
                     model_dict['arcs'][arc_id]['capacity'],
                     model_dict['arcs'][arc_id]['frequency'],
                     model_dict['arcs'][arc_id]['contemp'],
-                    model_dict['arcs'][arc_id_secondary]['arc'],
+                    json.dumps(model_dict['arcs'][arc_id_secondary]['arc']),
                     model_dict['arcs'][arc_id_secondary]['capacity'],
                     model_dict['arcs'][arc_id_secondary]['frequency'],
                     model_dict['arcs'][arc_id_secondary]['contemp'],
-                    model_dict['initial'][0][queue_id-1]))
+                    json.dumps(model_dict['initial'][0][queue_id-1])))
             
             exp_db.commit()
     
@@ -459,8 +459,8 @@ class Tester():
                 cluster,
                 worked_time) VALUES (?,?,?,?,?,?,?,?)
                 """,(model_name, 
-                    model_dict['nodes'][machine_id-1]['predecessors'],
-                    model_dict['nodes'][machine_id-1]['successors'],
+                    json.dumps(model_dict['nodes'][machine_id-1]['predecessors']),
+                    json.dumps(model_dict['nodes'][machine_id-1]['successors']),
                     model_dict['nodes'][machine_id-1]['frequency'],
                     model_dict['nodes'][machine_id-1]['capacity'],
                     model_dict['nodes'][machine_id-1]['contemp'],
@@ -468,7 +468,7 @@ class Tester():
                     model_dict['nodes'][machine_id-1]['worked_time']))
 
             #--- write allocation counter for machine 2    
-            cursor.execute(f"""UPDATE machine_2 SET allocation_counter = {model_dict['nodes'][1]['allocation_counter']} WHERE model_name = {model_name}""")
+            cursor.execute(f"""UPDATE machine_2 SET allocation_counter = {model_dict['nodes'][1]['allocation_counter']} WHERE model_name = '{model_name}'""")
             
             #--- save changes
             exp_db.commit()
