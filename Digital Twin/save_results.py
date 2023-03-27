@@ -11,8 +11,7 @@ def save_results(exp_id):
     dt_name = test.name
 
     global folder_name
-    
-    
+        
     #--- 1. Create folder with current date time format as name, inside "root" folder
     print(f"Generating folder for \033[32m{dt_name}\033[0m ...")
     global root_folder
@@ -32,9 +31,8 @@ def save_results(exp_id):
 
     #--- 3. Write data to the markdown file
     markdown_file.write("# test " + folder_name + "\n")
-    markdown_file.write("## Objective\n\n")
-    objective = input("\033[35m \nwhat is the test objective?\033[0m")
-    markdown_file.write(objective + "\n\n")
+    markdown_file.write("## Objective \n\n")
+    markdown_file.write(test.objective + "\n\n")
 
     #--- 4. Ask user for additional comments
     markdown_file.write("## Observations and Comments\n")
@@ -44,7 +42,7 @@ def save_results(exp_id):
         markdown_file.write(additional_comments + "\n\n")
     else: markdown_file.write("## None\n")
 
-    #--- 5. copying the dt definition file
+    #--- 5. copying the definition file
     if dt_name == "5s_determ":
         print("Copying mydt.py ...")
         mydt_path = "mydt.py"
@@ -55,12 +53,12 @@ def save_results(exp_id):
     my_folder = "data_generation/" + folder_name
     shutil.copy(mydt_path, my_folder)
 
-    #--- 7. Copy a different folder into the created folder and rename it to "models"
+    #--- 7. Copy a models folder into the created folder and rename it to "models"
     print(f"Copying models and databases from {dt_name} ...")
     models_folder_path = f"models/{dt_name}"
     shutil.copytree(models_folder_path, os.path.join(root_folder, folder_name, "models"))
 
-    #--- 8. Copy a different folder into the created folder
+    #--- 8. Copy a databases folder into the created folder and rename it to 'databases'
     models_folder_path = f"databases/{dt_name}"
     shutil.copytree(models_folder_path, os.path.join(root_folder, folder_name, "databases"))
     markdown_file.close()
@@ -88,6 +86,10 @@ def save_results(exp_id):
             print(f"writing '{model}' into exp_database")
             json_model = json.load(file)
             test.write_json_model(model_dict=json_model, model_name=model)
+
+    #--- finally. write exp_id into the allexp_database if exp_id given is recent
+    print(f"Assiging the new exp_id to the 'recent' experiment in allexp_database.")
+    test.assign_exp_id(folder_name)
 
     print(f"\033[32m Results saved to {folder_name} \033[0m")
 

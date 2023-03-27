@@ -2,6 +2,7 @@
 import sqlite3
 import json
 import os
+from dtwinpylib.dtwinpy.helper import Helper
 import shutil
 import sys
 
@@ -12,6 +13,7 @@ class Tester():
         self.allexp_path = 'allexp_database.db'
         self.allexp_table = 'experiment_setup'
         self.exp_id = exp_id
+        self.helper = Helper()
         
     def initiate(self):
         #--- loading the experiment setup from allexp
@@ -313,7 +315,7 @@ class Tester():
                     flag_external_service,
                     logic_threshold,
                     input_threshold) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-                """,(self.exp_id, self.timestamp, self.objective, self.name, self.Freq_Sync, 
+                """,(self.exp_id, self.helper.get_time_now()[0], self.objective, self.name, self.Freq_Sync, 
                         self.Freq_Valid, self.Freq_Service, self.delta_t_treshold, self.flag_API, 
                         self.rct_threshold, self.rct_queue, self.flag_external_service, self.logic_threshold, 
                         self.input_threshold))
@@ -324,7 +326,8 @@ class Tester():
         if branching == False:        
             with sqlite3.connect(self.exp_db_path) as exp_db:
                 exp_db.execute(f"""CREATE TABLE IF NOT EXISTS machine_{machine_id} (
-                    model_name TEXT PRIMARY KEY,
+                    model_id INTEGER PRIMARY KEY,
+                    model_name TEXT,
                     predecessors TEXT,
                     successors TEXT,
                     frequency INTEGER,
@@ -338,7 +341,8 @@ class Tester():
         elif branching == True:
             with sqlite3.connect(self.exp_db_path) as exp_db:
                 exp_db.execute(f"""CREATE TABLE IF NOT EXISTS machine_{machine_id} (
-                    model_name TEXT PRIMARY KEY,
+                    model_id INTEGER PRIMARY KEY,
+                    model_name TEXT,
                     predecessors TEXT,
                     successors TEXT,
                     frequency INTEGER,
@@ -356,7 +360,8 @@ class Tester():
         if converging == False:        
             with sqlite3.connect(self.exp_db_path) as exp_db:
                 exp_db.execute(f"""CREATE TABLE IF NOT EXISTS queue_{queue_id} (
-                    model_name TEXT PRIMARY KEY,
+                    model_id INTEGER PRIMARY KEY,
+                    model_name TEXT,
                     arc TEXT,
                     capacity INTEGER,
                     frequency INTEGER,
@@ -369,7 +374,8 @@ class Tester():
         elif converging == True:
             with sqlite3.connect(self.exp_db_path) as exp_db:
                 exp_db.execute(f"""CREATE TABLE IF NOT EXISTS queue_{queue_id} (
-                    model_name TEXT PRIMARY KEY,
+                    model_id INTEGER PRIMARY KEY,
+                    model_name TEXT,
                     arc_1 TEXT,
                     capacity_1 INTEGER,
                     frequency_1 INTEGER,
@@ -467,7 +473,7 @@ class Tester():
             self.write_queue_table(queue_id = 4, arc_id=2,model_dict = model_dict, model_name = model_name, arc_id_secondary=None)   
             self.write_queue_table(queue_id = 5, arc_id=3,model_dict = model_dict, model_name = model_name, arc_id_secondary=4)   
 
-
+    #--- main function to call and create all the required machine and queue tables in exp_database
     def create_json_model_table(self):
         #--- create tables for machines and queues
         self.create_exp_machines_table(machine_id = 1, branching = False)
@@ -482,3 +488,11 @@ class Tester():
         self.create_exp_queues_table(queue_id = 4, converging = False)
         self.create_exp_queues_table(queue_id = 5, converging = True)
 
+    #--- assign exp_id to the 'recent' experiment in the allexp_database
+    def assign_exp_id(self,exp_id):
+        with sqlite3.connect(self.allexp_path) as allexp:
+            cursor = allexp.cursor()
+            cursor.execute(f"""UPDATE {self.allexp_table} SET exp_id = {exp_id} WHERE exp_id = 'recent'""")
+            allexp.commit()
+
+    #--- get objective
