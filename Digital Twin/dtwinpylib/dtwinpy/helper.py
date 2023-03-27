@@ -8,6 +8,7 @@ from time import sleep
 import shutil
 import os
 import re
+import sys
 
 
 
@@ -113,6 +114,73 @@ class Helper():
     def duplicate_file(self, reference_file, copied_file):
         shutil.copy2(reference_file, copied_file)
 
+    #--- Extract the first number in a string
+    def extract_int(self, string):
+        integer = int(re.findall('\d+', string)[0])
+        return integer
+    
+    def kill(self):
+        #--- Killing the program
+        self.printer(f"---- Digital Twin killed ----", 'red')
+        sys.exit()
+
+    def delete_databases(self, name):
+        print("|- Deleting existing databases...")
+        #--- Get current time
+        (tstr, t) = self.get_time_now()
+
+        #--- Digital Database path
+        digital_database_path = f"databases/{name}/digital_database.db"
+        real_database_path = digital_database_path.replace("digital", "real")
+        ID_database_path = digital_database_path.replace("digital", "ID")
+        exp_database_path = digital_database_path.replace("digital", "exp")
+
+
+        try:
+            os.remove(digital_database_path)
+            print(f"|-- Digital Database deleted successfuly from {digital_database_path}")
+
+        except FileNotFoundError:
+            self.printer(f"[WARNING][helper.py/delete_databases()] The Digital Database doesn't exist yet in the path '{digital_database_path}', proceding without deleting...")
+        except PermissionError:
+            self.printer(f"[ERROR][helper.py/delete_databases()] The Digital Database is busy somewhere, please close and try again.", 'red')
+            self.printer(f"---- Digital Twin was killed ----", 'red')
+            sys.exit()
+
+
+        #- Delete Real Database
+        try:
+            os.remove(real_database_path)
+            print(f"|-- Real Database deleted successfuly from {real_database_path}")
+        except FileNotFoundError:
+            self.printer(f"[WARNING][helper.py/delete_databases()] The Real Database doesn't exist yet in the path '{real_database_path}', proceding without deleting...")
+        except PermissionError:
+            self.printer(f"[ERROR][helper.py/delete_databases()] The Real Database is busy somewhere, please close and try again.", 'red')
+            self.printer(f"---- Digital Twin was killed ----", 'red')
+            sys.exit()
+
+        #- Delete ID database
+        try:
+            os.remove(ID_database_path)
+            print(f"|-- ID Database deleted successfuly from {ID_database_path}")
+        except FileNotFoundError:
+            self.printer(f"[WARNING][helper.py/delete_databases()] The ID Database doesn't exist yet in the path '{ID_database_path}', proceding without deleting...")
+        except PermissionError:
+            self.printer(f"[ERROR][helper.py/delete_databases()] The ID Database is busy somewhere, please close and try again.", 'red')
+            self.printer(f"---- Digital Twin was killed at {tstr} ----", 'red')
+            sys.exit()
+
+        #- Delete ID database
+        try:
+            os.remove(exp_database_path)
+            print(f"|-- ID Database deleted successfuly from {exp_database_path}")
+        except FileNotFoundError:
+            self.printer(f"[WARNING][helper.py/delete_databases()] The ID Database doesn't exist yet in the path '{exp_database_path}', proceding without deleting...")
+        except PermissionError:
+            self.printer(f"[ERROR][helper.py/delete_databases()] The ID Database is busy somewhere, please close and try again.", 'red')
+            self.printer(f"---- Digital Twin was killed at {tstr} ----", 'red')
+            sys.exit()
+
     #--- Delete models (except by one specific file)
     def delete_old_model(self, folder_path, file_to_save):
         print(f"Deleting existing model (excepted by '{file_to_save}') from the relative folder path:'{folder_path}'")
@@ -124,8 +192,3 @@ class Helper():
                 print(f"File '{file_name}' deleted...")
                 model_counter += 1
         print(f"Done! Deleted {model_counter} successfuly")
-
-    #--- Extract the first number in a string
-    def extract_int(self, string):
-        integer = int(re.findall('\d+', string)[0])
-        return integer

@@ -258,8 +258,11 @@ class Digital_Twin():
             event_table= "time_pointers")
         
         # Experimental Database
-        self.experimental_database = Database(
-            database_path= self.experimental_database_path
+        exp_database_path = self.database_path.replace("digital", "exp")
+        print(f"exp_database_path: {exp_database_path}")
+        self.exp_database = Database(
+            database_path= exp_database_path,
+            experimental_mode= True
         )
 
         # ------------------------------------------
@@ -623,6 +626,17 @@ class Digital_Twin():
             if self.flag_API: self.interfaceAPI.indicator([lcss_indicator_logic,lcss_indicator_input])
             # ---------------------------------------------------------------
 
+            # ----------------------- EXPERIMENTAL DATABASE -----------------------
+            self.exp_database.write_ValidIndicators(
+                logic_indicator= lcss_indicator_logic,
+                input_indicator= lcss_indicator_input,
+                model_in= self.model_path,
+                model_out= self.model_last_sync
+            )
+            # ----------------------------------------------------------------------
+
+
+
             # --------------------- AFTER SERVICES SETTINGS ---------------------
             # --- Give back the model pointer to the present
             subpath = self.model_subpath_dict[self.model_pointer_Valid]
@@ -700,10 +714,15 @@ class Digital_Twin():
                     # ----- Send the API results -----
                     if self.flag_API: self.interfaceAPI.RCT_server([part_id, path_1, path_2, queue_id[0][0]])
             
-            # ------------------------ EXPERIMENTAL DATABASE ------------------------
-
-            
-            # ---------------------------------------------------------------
+                # ------------------------ EXPERIMENTAL DATABASE ------------------------
+                self.exp_database.write_RCTpaths(
+                    RCT_path1= path_1,
+                    RCT_path2= path_2,
+                    queue_selected= f"Queue {queue_id[0][0]}",
+                    gain= gain[0],
+                    partid= f"Part {part_id}"
+                )
+                # ---------------------------------------------------------------
 
             
 
