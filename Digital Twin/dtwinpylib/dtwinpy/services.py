@@ -53,6 +53,9 @@ class Service_Handler():
         ID_database_path = digital_database_path.replace("digital","ID")
         print(f"ID_database_path: {ID_database_path}")
         self.ID_database = Database(database_path= ID_database_path, event_table= "ID")
+        exp_database_path = digital_database_path.replace("digital", "exp")
+        print(f"exp_database_path: {exp_database_path}")
+        self.exp_database = Database(database_path= exp_database_path)
 
         #--- Parameters
         self.rct_threshold= rct_threshold
@@ -252,6 +255,15 @@ class Service_Handler():
     
     # ---------- Simulate all the scenarios ----------
     def simulate_paths(self,possible_pathes, parts_making_decisions, verbose= True, plot= False):
+        """
+        This functions runs all the simulation for all the possible paths for each part making a decision
+        in the system. The function return the RCT predicted for each part using the following structure:
+
+        RCT dictionary (rct_dict):
+        rct_dict = {
+        "Part Name": [rct_asis, rct_path1, rct_path2, ..., rct_pathn]
+        }
+        """
         (tstr, t)= self.helper.get_time_now()
         self.helper.printer(f"Running Path Simulation....", 'brown')
 
@@ -416,9 +428,15 @@ class Service_Handler():
 
         feedback format:
         {
-            'Part 1': (feedback_flag, [conveyor 1, conveyor 3, ...], gain)
-            'Part 2': (feedback_flag, [conveyor 2, conveyor 4, ...], gain)
+            'Part 1': (feedback_flag, selected_path_index, gain),
+            'Part 2': (feedback_flag, selected_path_index, gain)
         }
+
+        - feedback_flag: 
+            - True: Gain of the highest path higher than the AS IS path
+            - False: Not higher
+        - selected_path_index: Index of selected path (according to the vector of possible paths)
+        - Gain: highest gain calculated
 
         TO-DO:
         1) Do the following calculation for each Part making a decision
@@ -563,6 +581,9 @@ class Service_Handler():
         #--- vector to store queues selected for each part making a decision
         queues_selected = []
 
+        #--- Vector to store highest gain of each part
+        gains = []
+
         #---- Changing the feedback format
         #--- Loop through each part in the feedback dictionary
         for part_name in feedback_dict:
@@ -642,14 +663,16 @@ class Service_Handler():
                     print(f"|-- Part ID: Part {part_id}")
                     print(f"|-- Model Path used: {self.digital_model.get_model_path()}")
 
+                    #--- Add queues selected and gains of each part
                     queues_selected.append(queue_id)
+                    gains.append(gain)
 
                     #--- Wait a little before sending the next MQTT message to no lose it
                     print("sleeping...")
                     sleep(1)
                     print("waking up!")
 
-        return (feedback_flag, queues_selected)  
+        return (feedback_flag, queues_selected, gains)  
     
     def return_first_branch(self, rct_dict, publish_results):
         """
@@ -671,14 +694,18 @@ class Service_Handler():
         #--- Get the second path
         path_2 = rct_dict[part_name][2]
 
-        #--- Get the part id of the first part making decision
-        queue_id = publish_results[1]
-
         #--- Get the feedback flag (if need to implement or not the feedback)
         feedback_flag = publish_results[0]
 
+        #--- Get the part id of the first part making decision
+        queue_id = publish_results[1]
+
+        #--- Get gains for each part
+        gains = publish_results[2]
+
+
         #--- Build a result tuple
-        rct_results = (part_id, path_1, path_2, queue_id, feedback_flag)
+        rct_results = (part_id, path_1, path_2, queue_id, feedback_flag, gains)
 
         #--- Give back the desired result
         return rct_results

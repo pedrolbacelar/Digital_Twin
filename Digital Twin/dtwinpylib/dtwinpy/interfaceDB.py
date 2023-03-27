@@ -107,7 +107,11 @@ class Database():
             When creating the experimental database (in the __init__ of the Digital Twin), the object
             already create all the necessary tables with all the columns needed
             """
-            pass
+            # --- Create table for validation indicators
+            self.create_valid_indicator_table()
+
+            # --- Create table for RCT path
+            self.create_RCTpaths_table()
 
             
 
@@ -171,13 +175,14 @@ class Database():
                 db.commit()
     
     def create_valid_indicator_table(self):
+        # TODO: Finish up
         with sqlite3.connect(self.database_path) as db:
                 # --- Create table of validator indicators
                 db.execute(f"""
                 CREATE TABLE IF NOT EXISTS (
                     line_id INTEGER PRIMARY KEY,
                     current_time_str TEXT,
-                    timestamp_real INTEGER
+                    timestamp_real INTEGER,
                     logic_indicator FLOAT,
                     input_indicator FLOAT,
                     model_in TEXT,
@@ -189,6 +194,23 @@ class Database():
 
                 db.commit()
 
+    def create_RCTpaths_table(self):
+        with sqlite3.connect(self.database_path) as db:
+            #--- Create a table with the RCT of each path
+            db.execute("""
+            CREATE TABLE IF NOT EXIST RCTpaths (
+                line_id INTEGER PRIMARY KEY,
+                current_time_str TEXT,
+                timestamp_real INTEGER,
+                RCT_path1 INTEGER,
+                RCT_path2 INTEGER,
+                queue_selected TEXT,
+                gain INTEGER,
+                partid TEXT
+            )
+            
+            """)
+
 
 
     # -------- Setting Functions --------
@@ -198,9 +220,6 @@ class Database():
                 if len(tables) == 1 and tables[0][0] == "digital_log":
                     self.rename_table("digital_log", "real_log")
     
-
-    
-
     def find_line_ID_start_end(self):
         with sqlite3.connect(self.database_path) as db:
             
@@ -595,6 +614,7 @@ class Database():
         
         return next_sync_startID
 
+# ===================== DIGITAL LOG FUNCTION =====================
     def initialize(self, table):
         with sqlite3.connect(self.database_path) as digital_model_DB:
 
@@ -620,7 +640,6 @@ class Database():
             digital_model_DB.execute(f"DROP TABLE IF EXISTS {table}")
             digital_model_DB.commit()
 
-
     def write_event(self, table, timestamp, machine_id, activity_type, part_id, queue, current_time_str= None, timestamp_real= None):
         #--- Write the given evento into the the database
         
@@ -637,8 +656,6 @@ class Database():
 
             DB.commit()
     
-    
-
     def read_all_events(self, table):
         #--- Read all the events from the given table
         
@@ -929,3 +946,17 @@ class Database():
                 print(element)
 
             return traces
+        
+
+    # ========================== EXPERIMENTAL DATABASE ==========================
+    def write_RCTpaths(self, RCT_path1, RCT_path2, queue_selected, gain, partid):
+        """ This function writes in the experimental database the rct calculate for each path"""
+        (tstr, t) = self.helper.get_time_now()
+        
+        with sqlite3.connect(self.database_path) as db:
+            db.execute("""
+            INSERT INTO RCTpaths (current_time_str, timestamp_real, RCT_path1, RCT_path2, queue_selected, gain, partid)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """, (tstr, t, RCT_path1, RCT_path2, queue_selected, gain, partid))
+
+            db.commit()

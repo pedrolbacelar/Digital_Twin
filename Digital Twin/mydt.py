@@ -1,16 +1,19 @@
 #--- Import Library
 print("Importing the libraries.....")
 from dtwinpylib.dtwinpy.Digital_Twin import Digital_Twin
-from dtwinpylib.dtwinpy.tester import tester
+from dtwinpylib.dtwinpy.tester import Tester
 
 
 factory_ip = "192.168.0.50"
-my_ip = "127.0.0.1"
+home_ip = "127.0.0.1"
+
+my_ip = factory_ip
 
 
 
 #--- create test object and replace the initial.json in the models folder
-test = tester()
+test = Tester()
+test.initiate()
 print(f"'{test.exp_id}' experiment is loaded")
 
 #--- Create a Digital Twin object with the require inputs
@@ -21,13 +24,15 @@ mydt = Digital_Twin(
     Freq_Valid= test.Freq_Valid, 
     Freq_Service= test.Freq_Service, 
     delta_t_treshold= test.delta_t_treshold,
-    ip_address=factory_ip,
-    flag_API= test.flag_API,
+    ip_address=my_ip,
+    flag_API= False,
     rct_threshold= test.rct_threshold,
     rct_queue= test.rct_queue,
     flag_external_service= test.flag_external_service,
     logic_threshold= test.logic_threshold,
     input_threshold= test.input_threshold)
+
+mydt.run()
 
 """
 #--- Create a Digital Twin object with the require inputs

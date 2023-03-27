@@ -5,7 +5,7 @@ import os
 import shutil
 import sys
 
-class tester():
+class Tester():
     def __init__(self, exp_id = 'recent'):
         
         #--- attributes from allexp_database
@@ -41,7 +41,7 @@ class tester():
         self.create_exp_queues_table(queue_id = 5, converging = True)
 
         #--- write initial json model data
-        self.write_json_model(model_dict = self.initial_json, model_name = "initial")
+        #self.write_json_model(model_dict = self.initial_json, model_name = "initial")
         
 
 
@@ -381,7 +381,7 @@ class tester():
                 exp_db.commit()
         elif converging == True:
             with sqlite3.connect(self.exp_db_path) as exp_db:
-                exp_db.execute(f"""CREATE TABLE IF NOT EXISTS machine_{machine_id} (
+                exp_db.execute(f"""CREATE TABLE IF NOT EXISTS machine_{queue_id} (
                     model_name TEXT PRIMARY KEY,
                     arc_1 TEXT,
                     capacity_1 INTEGER,

@@ -314,7 +314,8 @@ class Digital_Twin():
             ID_database_path= ID_database_path,
             port= port,
             keepalive= keepalive,
-            topics= topics_sub
+            topics= topics_sub,
+            keepDB= True
         )
 
         return self.broker_manager
@@ -692,14 +693,19 @@ class Digital_Twin():
             #--- Check if there is a path taking a decision
             if rct_results != False:
                 #--- Assign the results
-                (part_id, path_1, path_2, queue_id, feedback_flag) = (rct_results[0], rct_results[1], rct_results[2], rct_results[3], rct_results[4])
+                (part_id, path_1, path_2, queue_id, feedback_flag, gain) = (rct_results[0], rct_results[1], rct_results[2], rct_results[3], rct_results[4], rct_results[5])
 
                 #--- Check if there is a path better than the normal
                 if feedback_flag == True:
                     # ----- Send the API results -----
                     if self.flag_API: self.interfaceAPI.RCT_server([part_id, path_1, path_2, queue_id[0][0]])
+            
+            # ------------------------ EXPERIMENTAL DATABASE ------------------------
+
+            
             # ---------------------------------------------------------------
 
+            
 
             # --------------------- AFTER SERVICES SETTINGS ---------------------
             # --- Give back the model pointer to the present

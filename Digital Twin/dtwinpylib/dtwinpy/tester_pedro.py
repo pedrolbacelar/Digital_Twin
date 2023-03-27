@@ -5,7 +5,7 @@ import os
 import shutil
 import sys
 
-class tester():
+class Tester():
     def __init__(self, exp_id = 'recent'):
         
         #--- attributes from allexp_database
@@ -383,7 +383,7 @@ class tester():
                 exp_db.commit()
         elif converging == True:
             with sqlite3.connect(self.exp_db_path) as exp_db:
-                exp_db.execute(f"""CREATE TABLE IF NOT EXISTS machine_{machine_id} (
+                exp_db.execute(f"""CREATE TABLE IF NOT EXISTS machine_{queue_id} (
                     model_name TEXT PRIMARY KEY,
                     arc_1 TEXT,
                     capacity_1 INTEGER,
@@ -482,26 +482,4 @@ class tester():
             self.write_queue_table(queue_id = 4, arc_id=2,model_dict = model_dict, model_name = model_name, arc_id_secondary=None)   
             self.write_queue_table(queue_id = 5, arc_id=3,model_dict = model_dict, model_name = model_name, arc_id_secondary=4)   
 
-from .interfaceDB import Database
-from .helper import Helper
 
-class Tester():
-    def __init__(self, name, experimental_database_path= None, real_database_path= None):
-        self.helper = Helper()
-        #--- Database Path management
-        self.real_database_path= real_database_path
-        self.experimental_database_path= experimental_database_path
-
-        #--- Database creation
-        self.real_database = Database(
-            database_path= self.real_database_path
-            event_table= "real_log",
-        )
-
-        self.experimental_database = Database(
-            database_path= self.experimental_database_path,
-        )
-    
-
-    # --- Write Validator Indicators ---
-    def 
