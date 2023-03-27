@@ -569,58 +569,57 @@ class Machine():
 
                         #--- Define the last Allocation counter as empty
                         last_allocation_counter = None
+                        flag_allocated_queue = False
 
                         # Loop through next queue in the perspective of the counter
-                        for i in range(self.allocation_counter, len(self.queue_out)):
-                            flag_allocated_queue = False # Trying again, hope it's not full
-                                
-                            #--- Selected Queue is full
-                            """OLD
-                            if queue_selected.get_len() >= queue_selected.get_capacity() and flag_full == False:
-                                #queue_selected = self.queue_out[self.allocation_counter + i]
-                            """
+                        for i in range(self.allocation_counter, len(self.queue_out)):                                
+
                             #--- Select the current Queue to check
                             queue_selected = self.queue_out[i]
 
-                            #--- Selected Queue is available to receive an input
+                            #---------------------- SELECT AVAIALABLE QUEUE ----------------------
                             if queue_selected.get_len() < queue_selected.get_capacity():
                                 flag_allocated_queue = True
                                 last_allocation_counter = i
                                 self.queue_to_put = queue_selected
                                 print(f"! Using 'alternated' policy to allocate {self.part_in_machine.get_name()} to {self.queue_to_put.get_name()}")
                                 break
+                            #----------------------------------------------------------------------
                             
                             #--- No queue chosen and already look to all the queues (all full)
                             if flag_allocated_queue == False and i+1 >= len(self.queue_out):
-                                print(f'Time: {self.env.now} - [ALL QUEUES FULL] {self.name} is trying to allocate {self.part_in_machine.get_name()}, but all the output queues are full for this machine!')
-                                #-- Wait to check again later
+                                if self.env.now % 5 == 0:
+                                    print(f'Time: {self.env.now} - [ALL QUEUES FULL] {self.name} is trying to allocate {self.part_in_machine.get_name()}, but all the output queues are full for this machine!')
+                                
+                                # -------------- WAITING --------------
                                 yield self.env.timeout(self.waiting)
+                                # -------------------------------------
 
+                                # ---------------------- TIMEOUT ----------------------
                                 if self.env.now >= 1000:
                                     self.helper.printer("[ERROR][components.py/alternating policy] TIMEOUT", 'red')
                                     self.exit.succeed()
                                     sys.exit()
+                                # ------------------------------------------------------
 
+                                # ------------------------ RESET VARIABLES -----------------
                                 #-- Reset the i and also the allocation to check the queues again from the begining
                                 self.allocation_counter = 0
                                 i = 0
+                                # -----------------------------------------------------------
 
-                        #--- Increase the counter for the next allocation
-                        # [OLD] self.allocation_counter = last_allocation_counter +  1
+                        #---------------------- In Case of None ------------------------
+                        if last_allocation_counter == None: last_allocation_counter= 0
+                        #---------------------------------------------------------------
+
+                        #---------- Increase the counter for the next allocation ---------
+                        self.allocation_counter = last_allocation_counter + 1
+                        #-----------------------------------------------------------------
                         
-                        #--- Reset the counter if it's at maximum
+                        #---------------- Reset the counter if it's at maximum ----------------
                         if self.allocation_counter >= (len(self.queue_out) - 1):
                             self.allocation_counter = 0 # minus 1 because we're going to increase 1 anyways
-            
-                        #--- If it's not at maximun, increase allocation
-                        else:
-                            #--- If the last allocation counter was not assign a new one
-                            # (which means that the machine don't found a free queue). So 
-                            # assign to start the allocation from 0 again
-
-                            if last_allocation_counter == None: last_allocation_counter= 0
-
-                            self.allocation_counter = last_allocation_counter + 1
+                        #-----------------------------------------------------------------------
 
                         
                         #--- Find the right conveyor (just check the conveyor if the machine found a queue free)

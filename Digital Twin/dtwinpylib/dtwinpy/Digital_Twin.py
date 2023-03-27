@@ -39,7 +39,7 @@ importlib.reload(dtwinpylib.dtwinpy.services)
 
 
 class Digital_Twin():
-    def __init__(self, name, copied_realDB= False,model_path= None, ip_address= None, initial= True, targeted_part_id= None, targeted_cluster= None, until= None, digital_database_path= None, real_database_path= None, ID_database_path= None, experimental_database_path= None, Freq_Sync= 1000, Freq_Valid= 10000, delta_t_treshold= 100, logic_threshold= 0.75, input_threshold= 0.75, rct_threshold= 0.02, queue_position= 2, Freq_Service = None, part_type= "A", loop_type= "closed", maxparts = None, template= False, keepDB= True, plot= False, verbose= True, flag_API= False, flag_external_service= False, rct_queue= 3):
+    def __init__(self, name, copied_realDB= False,model_path= None, ip_address= None, initial= True, targeted_part_id= None, targeted_cluster= None, until= None, digital_database_path= None, real_database_path= None, ID_database_path= None, experimental_database_path= None, Freq_Sync= 1000, Freq_Valid= 10000, delta_t_treshold= 100, logic_threshold= 0.75, input_threshold= 0.75, rct_threshold= 0.02, queue_position= 2, Freq_Service = None, part_type= "A", loop_type= "closed", maxparts = None, template= False, keepDB= True, plot= False, verbose= True, flag_API= False, flag_external_service= False, flag_publish= True, rct_queue= 3):
         self.helper = Helper()
         #--- Model Parameters
         self.name = name
@@ -79,6 +79,7 @@ class Digital_Twin():
             self.interfaceAPI = interfaceAPI()
             print("Interface API created....")
         self.flag_external_service = flag_external_service
+        self.flag_publish = flag_publish
 
         #--- Time intervals
         (initial_time_str, initial_timestamp) = self.helper.get_time_now()
@@ -480,7 +481,7 @@ class Digital_Twin():
         generate all possible paths, and calculate the most optimized path for those parts.
         """
         #--- Create a Service 
-        RCT_Service = Service_Handler(name= "RCT", generate_digital_model= self.generate_digital_model, broker_manager= self.broker_manager, rct_threshold= rct_threshold)
+        RCT_Service = Service_Handler(name= "RCT", generate_digital_model= self.generate_digital_model, broker_manager= self.broker_manager, rct_threshold= rct_threshold, flag_publish= self.flag_publish)
         
         #--- Run the RCT Service
         rct_results= RCT_Service.run_RCT_service(verbose=verbose, plot= plot, queue_position= queue_position)
