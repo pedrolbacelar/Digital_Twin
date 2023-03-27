@@ -25,11 +25,11 @@ mydt = Digital_Twin(
     Freq_Service= test.Freq_Service, 
     delta_t_treshold= test.delta_t_treshold,
     ip_address=my_ip,
-    flag_API= False,
+    flag_API= test.flag_API,
     rct_threshold= test.rct_threshold,
     rct_queue= test.rct_queue,
     flag_external_service= test.flag_external_service,
-    flag_publish = True,
+    flag_publish = test.flag_publish,
     logic_threshold= test.logic_threshold,
     input_threshold= test.input_threshold)
 
