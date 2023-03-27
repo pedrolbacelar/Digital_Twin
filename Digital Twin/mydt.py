@@ -1,7 +1,7 @@
 #--- Import Library
 print("Importing the libraries.....")
 from dtwinpylib.dtwinpy.Digital_Twin import Digital_Twin
-from dtwinpylib.dtwinpy.tester import tester
+from dtwinpylib.dtwinpy.tester import Tester
 
 
 factory_ip = "192.168.0.50"
@@ -10,7 +10,8 @@ my_ip = "127.0.0.1"
 
 
 #--- create test object and replace the initial.json in the models folder
-test = tester()
+test = Tester()
+test.initiate()
 print(f"'{test.exp_id}' experiment is loaded")
 
 #--- Create a Digital Twin object with the require inputs
