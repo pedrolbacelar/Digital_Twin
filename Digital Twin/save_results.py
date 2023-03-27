@@ -72,6 +72,8 @@ def create_markdown_with_model(dt_name):
     # Copy the source file to the new location with the new filename
     shutil.copy(source_file, new_file)
 
+    # 10. write the models into exp_database
+
     print(f"\033[32m Results saved to {folder_name} \033[0m")
 
 try:
