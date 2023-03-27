@@ -147,10 +147,14 @@ class Updator():
             processed_time = None
             machine_trace = []
 
+            #--- Flag first start
+            flag_first_start_happened = False
+
             for event in machine_full_trace:
                 #--- Extract the Started and Finished time
                 if event[1] == 'Started':
                     started_time = event[0]
+                    flag_first_start_happened = True
                 elif event[1] == 'Finished':
                     finished_time = event[0]
                 
@@ -166,6 +170,7 @@ class Updator():
                     finished_time = None
                     processed_time = None
 
+                """
                 #--- In the case of part that already was in the machine (worked_time)
                 if finished_time != None and started_time == None:
                     processed_time = finished_time
@@ -177,6 +182,7 @@ class Updator():
                     started_time = None
                     finished_time = None
                     processed_time = None
+                """
             
             #--- Add machine trace to the matrix of all machines traces
             matrix_ptime_qTDS[machine_id[0]] = (machine_trace)
