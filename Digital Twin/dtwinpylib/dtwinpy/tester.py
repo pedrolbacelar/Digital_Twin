@@ -27,21 +27,7 @@ class Tester():
         self.create_exp_database()  #--- create new exp_db and create setup_data table
         self.write_setup()          #--- write setup data from allexp_db to exp_db setup_data table
         
-        #--- create tables for machines and queues
-        self.create_exp_machines_table(machine_id = 1, branching = False)
-        self.create_exp_machines_table(machine_id = 2, branching = True)
-        self.create_exp_machines_table(machine_id = 3, branching = False)
-        self.create_exp_machines_table(machine_id = 4, branching = False)
-        self.create_exp_machines_table(machine_id = 5, branching = False)
         
-        self.create_exp_queues_table(queue_id = 1, converging = False)
-        self.create_exp_queues_table(queue_id = 2, converging = False)
-        self.create_exp_queues_table(queue_id = 3, converging = False)
-        self.create_exp_queues_table(queue_id = 4, converging = False)
-        self.create_exp_queues_table(queue_id = 5, converging = True)
-
-        #--- write initial json model data
-        # self.write_json_model(model_dict = self.initial_json, model_name = "initial")
         
 
 
@@ -481,29 +467,19 @@ class Tester():
             self.write_queue_table(queue_id = 5, arc_id=3,model_dict = model_dict, model_name = model_name, arc_id_secondary=4)   
 
 
-"""
-from .interfaceDB import Database
-from .helper import Helper
+    def create_json_model_table(self):
+        #--- create tables for machines and queues
+        self.create_exp_machines_table(machine_id = 1, branching = False)
+        self.create_exp_machines_table(machine_id = 2, branching = True)
+        self.create_exp_machines_table(machine_id = 3, branching = False)
+        self.create_exp_machines_table(machine_id = 4, branching = False)
+        self.create_exp_machines_table(machine_id = 5, branching = False)
+        
+        self.create_exp_queues_table(queue_id = 1, converging = False)
+        self.create_exp_queues_table(queue_id = 2, converging = False)
+        self.create_exp_queues_table(queue_id = 3, converging = False)
+        self.create_exp_queues_table(queue_id = 4, converging = False)
+        self.create_exp_queues_table(queue_id = 5, converging = True)
 
-class Tester():
-    def __init__(self, name, experimental_database_path= None, real_database_path= None):
-        self.helper = Helper()
-        #--- Database Path management
-        self.real_database_path= real_database_path
-        self.experimental_database_path= experimental_database_path
-
-        #--- Database creation
-        self.real_database = Database(
-            database_path= self.real_database_path
-            event_table= "real_log",
-        )
-
-        self.experimental_database = Database(
-            database_path= self.experimental_database_path,
-        )
-    
-
-    # --- Write Validator Indicators ---
-    def 
-
-"""
+        #--- write initial json model data
+        # self.write_json_model(model_dict = self.initial_json, model_name = "initial")

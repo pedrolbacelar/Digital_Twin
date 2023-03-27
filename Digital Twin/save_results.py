@@ -2,8 +2,16 @@
 import os
 import shutil
 from datetime import datetime
+from dtwinpylib.dtwinpy.tester import Tester
 
-def create_markdown_with_model(dt_name):
+def save_results(exp_id):
+    test=Tester(exp_id = exp_id)
+    test.load_exp_setup()
+    dt_name = test.name
+
+    
+
+
     global folder_name
     print(f"Generating folder for \033[32m{dt_name}\033[0m ...")
     # 1. Create folder with current date time format as name, inside "root" folder
@@ -12,6 +20,8 @@ def create_markdown_with_model(dt_name):
     now = datetime.now()
     folder_name = now.strftime(now.strftime("%m").lstrip("0") + "." + now.strftime("%d").lstrip("0") + ".%H.%M")
     os.makedirs(os.path.join(root_folder, folder_name))
+
+    test.exp_db_path = f"{root_folder}/{folder_name}/databases/exp_database.db"
 
     print("Generating markdown file ...")
 
@@ -73,15 +83,16 @@ def create_markdown_with_model(dt_name):
     shutil.copy(source_file, new_file)
 
     # 10. write the models into exp_database
+    test.create_json_model_table()
 
     print(f"\033[32m Results saved to {folder_name} \033[0m")
 
 try:
-    user_input = input(f"\033[35m \n Enter the name of mydt or press 'Enter' to continue with '5s_determ': \033[0m")
+    user_input = input(f"\033[35m \n Enter the exp_id or press 'Enter' to continue with 'recent': \033[0m")
     if user_input == "":                      
-        create_markdown_with_model(dt_name="5s_determ")
+        save_results(exp_id="recent")
     else:
-        create_markdown_with_model(user_input)
+        save_results(exp_id=user_input)
 
 
 except KeyboardInterrupt:
