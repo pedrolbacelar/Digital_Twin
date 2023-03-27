@@ -259,8 +259,7 @@ class Digital_Twin():
         
         # Experimental Database
         self.experimental_database = Database(
-            database_path= self.experimental_database_path,
-            event_table=
+            database_path= self.experimental_database_path
         )
 
         # ------------------------------------------
