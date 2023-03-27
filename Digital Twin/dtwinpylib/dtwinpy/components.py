@@ -615,9 +615,9 @@ class Machine():
                         #---------- Increase the counter for the next allocation ---------
                         self.allocation_counter = last_allocation_counter + 1
                         #-----------------------------------------------------------------
-                        
+
                         #---------------- Reset the counter if it's at maximum ----------------
-                        if self.allocation_counter >= (len(self.queue_out) - 1):
+                        if self.allocation_counter >= (len(self.queue_out)):
                             self.allocation_counter = 0 # minus 1 because we're going to increase 1 anyways
                         #-----------------------------------------------------------------------
 
