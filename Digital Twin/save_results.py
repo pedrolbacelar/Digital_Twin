@@ -3,14 +3,12 @@ import os
 import shutil
 from datetime import datetime
 from dtwinpylib.dtwinpy.tester import Tester
+import json
 
 def save_results(exp_id):
     test=Tester(exp_id = exp_id)
     test.load_exp_setup()
     dt_name = test.name
-
-    
-
 
     global folder_name
     print(f"Generating folder for \033[32m{dt_name}\033[0m ...")
@@ -83,11 +81,19 @@ def save_results(exp_id):
     shutil.copy(source_file, new_file)
 
     # 10. write the models into exp_database
-    test.create_json_model_table()
+    # test.create_json_model_table()
+    # model_subfolder_path = f"{root_folder}/{folder_name}/models"
+    # models_list = os.listdir(model_subfolder_path)
+    # for model in models_list:
+    #     with open(f"{model_subfolder_path}/{model}") as file:
+    #         # Load the JSON data into a Python object
+    #         json_model = json.load(file)
+    #         test.write_json_model(model_dict=json_model, model_name=model)
 
     print(f"\033[32m Results saved to {folder_name} \033[0m")
 
 try:
+    #--- get exp_id from user
     user_input = input(f"\033[35m \n Enter the exp_id or press 'Enter' to continue with 'recent': \033[0m")
     if user_input == "":                      
         save_results(exp_id="recent")
