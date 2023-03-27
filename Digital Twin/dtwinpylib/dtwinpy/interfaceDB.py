@@ -178,17 +178,15 @@ class Database():
         # TODO: Finish up
         with sqlite3.connect(self.database_path) as db:
                 # --- Create table of validator indicators
-                db.execute(f"""
-                CREATE TABLE IF NOT EXISTS (
+                db.execute("""
+                CREATE TABLE IF NOT EXISTS valid_indicators(
                     line_id INTEGER PRIMARY KEY,
                     current_time_str TEXT,
                     timestamp_real INTEGER,
                     logic_indicator FLOAT,
                     input_indicator FLOAT,
                     model_in TEXT,
-                    model_out TEXT,
-                    current_time_str TEXT,
-                    timestamp_real INTEGER
+                    model_out TEXT
                 )
                 """)
 
@@ -198,7 +196,7 @@ class Database():
         with sqlite3.connect(self.database_path) as db:
             #--- Create a table with the RCT of each path
             db.execute("""
-            CREATE TABLE IF NOT EXIST RCTpaths (
+            CREATE TABLE IF NOT EXISTs RCTpaths (
                 line_id INTEGER PRIMARY KEY,
                 current_time_str TEXT,
                 timestamp_real INTEGER,
@@ -234,7 +232,7 @@ class Database():
             
             if self.start_time_row == None:
                 #--- Printer Error Message
-                self.helper.printer(f"[WARNING][interfaceDB.py/find_line_ID_start_end()] It was not possible to find any event after the start time: {self.start_time}", 'red')
+                self.helper.printer(f"[WARNING][interfaceDB.py/find_line_ID_start_end()] It was not possible to find any event after the start time: {self.start_time}")
                 
                 self.start_time_id = None
                 self.start_time_status = None
@@ -399,7 +397,12 @@ class Database():
                 print(f"{row}")
 
             # Loop through the selected rows and update the timestamp column with relative values 
-            start_timestamp = rows[0][-1]
+            try:
+                start_timestamp = rows[0][-1]
+            except IndexError:
+                self.helper.printer("[ERROR][interfaceDB.py/updated_relative_timestamp()] No traces found to start. Check if the real system is working or if you initiate the replicator correctly.", 'red')
+                self.helper.kill()
+
             for row in rows:
                 row_event_id = row[0]
                 timestamp_real = row[-1]  
@@ -805,10 +808,14 @@ class Database():
             db.commit()
 
         with sqlite3.connect(self.replicated_database_path) as old_db:
-            last_event_id = old_db.execute(f"""SELECT MAX(event_id) FROM real_log""").fetchone()[0]
-            print(f"total number of traces = {last_event_id}")
+            try:
+                last_event_id = old_db.execute(f"""SELECT MAX(event_id) FROM real_log""").fetchone()[0]
+                print(f"total number of traces = {last_event_id}")
 
-            print("====== Starting database replicator ======")
+                print("====== Starting database replicator ======")
+            except sqlite3.OperationalError:
+                self.helper.printer(f"[ERROR][interfaceDB.py/replicate_database()] Replicated database is empty (path: {self.replicated_database_path}). Try to copy a real database and rename it to 'replicated_database.db'. (Original error:sqlite3.OperationalError: no such table: real_log )", 'red')
+                self.helper.kill()
 
             try:
                 for ii in range(last_event_id):
@@ -949,6 +956,7 @@ class Database():
         
 
     # ========================== EXPERIMENTAL DATABASE ==========================
+    # --------- Write the RCT prediction into exp_database ---------
     def write_RCTpaths(self, RCT_path1, RCT_path2, queue_selected, gain, partid):
         """ This function writes in the experimental database the rct calculate for each path"""
         (tstr, t) = self.helper.get_time_now()
@@ -956,7 +964,21 @@ class Database():
         with sqlite3.connect(self.database_path) as db:
             db.execute("""
             INSERT INTO RCTpaths (current_time_str, timestamp_real, RCT_path1, RCT_path2, queue_selected, gain, partid)
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (tstr, t, RCT_path1, RCT_path2, queue_selected, gain, partid))
+
+            db.commit()
+
+    # --------- Write the Validation Indicators into the exp_database ---------
+    def write_ValidIndicators(self, logic_indicator, input_indicator, model_in, model_out):
+        #-- Get time
+        (tstr, t)= self.helper.get_time_now()
+
+        #-- Write into the database
+        with sqlite3.connect(self.database_path) as db:
+            db.execute("""
+                INSERT INTO valid_indicators (current_time_str, timestamp_real, logic_indicator, input_indicator, model_in, model_out)
+                VALUES (?,?,?,?,?,?)
+            """, (tstr, t, logic_indicator, input_indicator, model_in, model_out))
 
             db.commit()

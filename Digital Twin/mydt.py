@@ -7,7 +7,7 @@ from dtwinpylib.dtwinpy.tester import Tester
 factory_ip = "192.168.0.50"
 home_ip = "127.0.0.1"
 
-my_ip = factory_ip
+my_ip = home_ip
 
 
 

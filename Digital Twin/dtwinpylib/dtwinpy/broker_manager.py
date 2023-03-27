@@ -68,7 +68,7 @@ class Broker_Manager():
         self.real_database_path = real_database_path
         self.ID_database_path = ID_database_path
         # ----- Deleting existing database before creating the new ones -----
-        if self.keepDB == False: self.delete_databases()
+        if self.keepDB == False: self.helper.delete_databases(name) #self.delete_databases()
         if self.keepDB == True: print("Skiping deleting of databases")
             
 
