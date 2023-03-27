@@ -7,12 +7,13 @@ import shutil
 import sys
 
 class Tester():
-    def __init__(self, exp_id = 'recent'):
+    def __init__(self, exp_id = 'recent', exp_db_path = None):
         
         #--- attributes from allexp_database
         self.allexp_path = 'allexp_database.db'
         self.allexp_table = 'experiment_setup'
         self.exp_id = exp_id
+        self.exp_db_path = exp_db_path
         self.helper = Helper()
         
     def initiate(self):
@@ -494,5 +495,6 @@ class Tester():
             cursor = allexp.cursor()
             cursor.execute(f"""UPDATE {self.allexp_table} SET exp_id = {exp_id} WHERE exp_id = 'recent'""")
             allexp.commit()
+        self.exp_id = exp_id
 
     #--- get objective

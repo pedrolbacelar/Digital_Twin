@@ -53,12 +53,26 @@ def save_results(exp_id):
     my_folder = "data_generation/" + folder_name
     shutil.copy(mydt_path, my_folder)
 
-    #--- 7. Copy a models folder into the created folder and rename it to "models"
+    #--- 7. replacing replicator_db
+    print("Creating replicated database ...")
+    # Set the path to the file you want to copy and the new filename
+    source_file = f"databases/{dt_name}/real_database.db"
+    new_file = f"databases/{dt_name}/real_database_replicated.db"
+
+    #-- If the new file already exists, delete it
+    if os.path.isfile(new_file):
+        os.remove(new_file)
+
+    #-- Copy the source file to the new location with the new filename
+    shutil.copy(source_file, new_file)
+
+
+    #--- 8. Copy a models folder into the created folder and rename it to "models"
     print(f"Copying models and databases from {dt_name} ...")
     models_folder_path = f"models/{dt_name}"
     shutil.copytree(models_folder_path, os.path.join(root_folder, folder_name, "models"))
 
-    #--- 8. Copy a databases folder into the created folder and rename it to 'databases'
+    #--- 9. Copy a databases folder into the created folder and rename it to 'databases'
     models_folder_path = f"databases/{dt_name}"
     shutil.copytree(models_folder_path, os.path.join(root_folder, folder_name, "databases"))
     markdown_file.close()
