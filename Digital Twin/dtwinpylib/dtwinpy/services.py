@@ -40,12 +40,14 @@ class Service_Handler():
     the most optimized path.
 
     """
-    def __init__(self, name, generate_digital_model, broker_manager, rct_threshold= 0.02, queue_position= 2):
+    def __init__(self, name, generate_digital_model, broker_manager, rct_threshold= 0.02, queue_position= 2, flag_publish= True):
         self.helper = Helper()
         self.name = name
         self.generate_digital_model = generate_digital_model
         self.digital_model = generate_digital_model(verbose= False)
         self.broker_manager = broker_manager
+        self.flag_publish = flag_publish
+        
 
         #--- Create an ID database for updating the RCT policy (using branch queues)
         digital_database_path = self.digital_model.get_database_path()
@@ -644,7 +646,7 @@ class Service_Handler():
                     machine_id = str(machine_selected.get_id())
                     queue_id = str(selected_path[selected_branch_id - 1].id)
 
-                    if self.broker_manager != None:
+                    if self.broker_manager != None and self.flag_publish == True:
                         #--- Send the MQTT publish payload
                         self.broker_manager.publishing(
                             machine_id= machine_id, 
@@ -658,6 +660,8 @@ class Service_Handler():
                         self.helper.printer(f"[WARNING][services.py/publish_feedback()] Broker Manager not specified, not possible to publish MQTT message. Continuing, without sending...")
                         self.helper.printer(f"Without publishing the ID database is not receiving the queue selection to update the column branch_queue")
 
+                    if self.flag_publish == False:
+                        print(f"Predictions done, but not publishing results... Flag to Publish: {self.flag_publish}")
 
                     print(f"--- Settings of the Prediction ---")
                     print(f"|-- Part ID: Part {part_id}")
