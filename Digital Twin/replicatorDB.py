@@ -4,6 +4,8 @@ from dtwinpylib.dtwinpy.interfaceDB import Database
 database_path = "databases/5s_determ/real_database.db"
 #database_path = "databases/debug_valid/real_database.db"
 #database_path = "databases/debug_update/real_database.db"
+database_path = "databases/testing_negPT/real_database.db"
+
 
 print(f"REPLICATOR WRITING HERE: {database_path}")
 #--- Create DB object

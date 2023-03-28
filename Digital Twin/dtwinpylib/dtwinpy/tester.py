@@ -605,6 +605,10 @@ class Plotter():
         self.show = show
         self.save = save
 
+        #--- vector of markers and colors
+        self.markers = ['o', '*', '^', 's', 'd', 'v', 'p', 'x', '+']
+        self.colors = ['blue', 'orange', 'green', 'red' , 'purple']
+
     #--- Basic Functions ---
     def ADD_complemts(self, title, xlable, ylable):
         """ Adds title, x lable and y lable"""
@@ -612,6 +616,7 @@ class Plotter():
         plt.title(title)
         plt.xlabel(xlable)
         plt.ylabel(ylable)
+        plt.legend()
     
     def set_max_min(self, xlim= None, ylim= None):
         """ Set max and min for x and y. Receive vectors"""
@@ -700,6 +705,129 @@ class Plotter():
         #--- Save
         if self.save:
             self.save_fig("RCT_Path")
+
+        #--- Show
+        if self.show:
+            plt.show()
+
+    def plot_queues_occupation(self, number_queues = 5, stacked= False):
+        """
+        Loop through the queues table to get the amount of parts in the queue
+        after each synchronization. Plot this amount over time.
+        """
+        #--- Create a dictionary to store the occupation of each queue
+        queue_occupation = {}
+
+        #--- Loop through all the queues id 
+        for i in range(0, number_queues):
+            #-- Create Queue ID
+            queue_id= i + 1
+
+            #-- Extract occupation vector
+            occupation_vector = self.exp_database.read_queue_occupation(queue_id)
+
+            #-- Add the occupation of this queue in the global dictionary
+            queue_occupation[f'Queue {queue_id}'] = occupation_vector
+        
+        #--- Create the x_vector (syncs) with the same length as the queue_occupation
+        x_vector = []
+        for i in range(len(occupation_vector)):x_vector.append(i)
+
+        # ------ Plot for each queue ------
+        if stacked == False:
+            marker = 0
+            for i in range(0, number_queues): 
+                #-- Create Queue ID
+                queue_id= i + 1
+
+                #--- reset markers
+                if marker > len(self.markers): marker = 0
+
+                # ------------------ PLOT ----------------------
+                plt.plot(
+                    x_vector, 
+                    queue_occupation[f'Queue {queue_id}'],
+                    label= f'Queue {queue_id}',
+                    color= self.colors[marker]
+                
+                )
+                # -------------------------------------------------
+
+                #--- Increase marker for the next
+                marker += 1
+        if stacked == True:
+            #--- creator matrix with queue occupation
+            stacked_vector = []
+            labels = []
+            for key in queue_occupation:
+                stacked_vector.append(queue_occupation[key])
+                labels.append(key)
+
+            plt.stackplot(
+                x_vector,
+                stacked_vector,
+                labels= labels
+            )
+
+        #--- Add complements
+        self.ADD_complemts(
+            title= "Queues Occupation",
+            xlable= "Number of Sync",
+            ylable= "Parts in Queue"
+        )
+
+        #--- Save
+        if self.save:
+            self.save_fig("Queues_Occupation")
+
+        #--- Show
+        if self.show:
+            plt.show()
+
+        # --------------------- COMPARE QUEUE 3 AND QUEUE 4 ---------------------
+        marker = 2
+        if stacked == False:
+            for i in range(2, 4): 
+                #-- Create Queue ID
+                queue_id= i + 1
+
+                #--- reset markers
+                if marker > len(self.markers): marker = 0
+
+                # ------------------ PLOT ----------------------
+                plt.plot(
+                    x_vector, 
+                    queue_occupation[f'Queue {queue_id}'],
+                    label= f'Queue {queue_id}',
+                    color= self.colors[marker]
+                )
+                # -------------------------------------------------
+
+                #--- Increase marker for the next
+                marker += 1
+        if stacked == True:
+            #--- creator matrix with queue occupation
+            stacked_vector = [queue_occupation['Queue 3'], queue_occupation['Queue 4']]
+            labels = ['Queue 3', 'Queue 4']
+
+            plt.stackplot(
+                x_vector,
+                queue_occupation['Queue 3'],
+                queue_occupation['Queue 4'],
+                labels= labels
+            )
+
+
+        #--- Add complements
+        self.ADD_complemts(
+            title= "Queue 3 x Queue 4",
+            xlable= "Number of Sync",
+            ylable= "Parts in Queue"
+        )
+
+        #--- Save
+        if self.save:
+            self.save_fig("Queues_Occupation_3_4")
 
         #--- Show
         if self.show:

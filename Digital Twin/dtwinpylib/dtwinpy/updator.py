@@ -170,6 +170,16 @@ class Updator():
                     finished_time = None
                     processed_time = None
 
+                #--- ISSUE #263: In case when the first event is a finished...
+                # Previous we were considering that as the process time, because of the worked time
+                # but since now in the update we don't consider the worked time, we can't not carry
+                # this finish trace for the next event, so reset everything...
+                if finished_time != None and started_time == None:
+                    #--- reset local started and finished time for the next cycle
+                    started_time = None
+                    finished_time = None
+                    processed_time = None
+
                 """
                 #--- In the case of part that already was in the machine (worked_time)
                 if finished_time != None and started_time == None:
@@ -282,6 +292,10 @@ class Updator():
                     new_process_time = update_result[-1]
                     new_process_time = round(new_process_time)
 
+                    if new_process_time < 0:
+                        self.helper.printer(f"[ERROR][updator.py/run()] New Process Time calculated is negative for {machine_name}!", 'red')
+                        self.helper.printer(f"Machine Trace: {machine_trace}")
+                        self.helper.kill()
                 #--- System not Deterministic: Take the distribution parameters
                 if not flag_deterministic:
                     #--- Take the whole parameters
