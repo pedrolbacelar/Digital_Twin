@@ -106,14 +106,14 @@ def save_results(exp_id):
     #-- find last part to exit the system
     #-- find number of parts finished
     #-- find CT of each parts finished
-    #-- plot CT time of each part
     print("calculating CT of system and parts")
     real_db_path = f"{root_folder}/{folder_name}/databases/real_database.db"
     test.calculate_CT(real_db_path=real_db_path)
 
-    #--- finally. write exp_id into the allexp_database if exp_id given is recent
-    print(f"Assiging the new exp_id to the 'recent' experiment in allexp_database.")
-    test.assign_exp_id(folder_name)
+    #--- finally. write exp_id into the allexp_database and exp_database setup_data table if exp_id given is recent
+    if exp_id == 'recent':
+        print(f"Assiging the new exp_id to the 'recent' experiment in allexp_database and exp_db.")
+        test.assign_exp_id(folder_name)
 
     print(f"\033[32m Results saved to {folder_name} \033[0m")
 
