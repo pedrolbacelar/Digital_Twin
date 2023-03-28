@@ -2,6 +2,7 @@
 import sqlite3
 import json
 import os
+from dtwinpylib.dtwinpy.helper import Helper
 import shutil
 import sys
 
@@ -12,8 +13,9 @@ class Tester():
         self.allexp_path = 'allexp_database.db'
         self.allexp_table = 'experiment_setup'
         self.exp_id = exp_id
+        self.helper = Helper()
         
-        
+    def initiate(self):
         #--- loading the experiment setup from allexp
         self.load_exp_setup()
         self.replace_initial_json()
@@ -27,29 +29,13 @@ class Tester():
         self.create_exp_database()  #--- create new exp_db and create setup_data table
         self.write_setup()          #--- write setup data from allexp_db to exp_db setup_data table
         
-        #--- create tables for machines and queues
-        self.create_exp_machines_table(machine_id = 1, branching = False)
-        self.create_exp_machines_table(machine_id = 2, branching = True)
-        self.create_exp_machines_table(machine_id = 3, branching = False)
-        self.create_exp_machines_table(machine_id = 4, branching = False)
-        self.create_exp_machines_table(machine_id = 5, branching = False)
         
-        self.create_exp_queues_table(queue_id = 1, converging = False)
-        self.create_exp_queues_table(queue_id = 2, converging = False)
-        self.create_exp_queues_table(queue_id = 3, converging = False)
-        self.create_exp_queues_table(queue_id = 4, converging = False)
-        self.create_exp_queues_table(queue_id = 5, converging = True)
-
-        #--- write initial json model data
-        self.write_json_model(model_dict = self.initial_json, model_name = "initial")
         
 
 
-        #--- attributes from exp_database
-
-        # self.dt_name = dt_name
-        # if self.database_path == None:
-        #      self.database_path = f"databases/{self.dt_name}/exp_database.db"
+#-------------------------------------------------------------------------------------------------
+#---------------------------------------- MAIN FUNCTIONS -----------------------------------------
+#-------------------------------------------------------------------------------------------------
 
     #--- to create experimental_data table
     def create_allexp_database(self):
@@ -145,7 +131,8 @@ class Tester():
                 n_parts_Q2 INTEGER DEFAULT '[]',
                 n_parts_Q3 INTEGER DEFAULT '[]',
                 n_parts_Q4 INTEGER DEFAULT '[]',
-                n_parts_Q5 INTEGER DEFAULT '[]'
+                n_parts_Q5 INTEGER DEFAULT '[]',
+                flag_publish TEXT DEFAULT True
             )
             """)
             allexp.commit()
@@ -158,118 +145,118 @@ class Tester():
             
             #-- setup variables read from the database
             self.exp_id = exp_setup[0][0]
-            self.timestamp = exp_setup[0][1]
-            self.objective = exp_setup[0][2]
-            self.name= exp_setup[0][3]
-            self.Freq_Sync= exp_setup[0][4] 
-            self.Freq_Valid= exp_setup[0][5] 
-            self.Freq_Service= exp_setup[0][6]
-            self.delta_t_treshold=exp_setup[0][7]
-            self.flag_API= True if exp_setup[0][8] == 'True' else False
-            self.rct_threshold= exp_setup[0][9]
-            self.rct_queue= exp_setup[0][10]
-            self.flag_external_service= True if exp_setup[0][11] == 'True' else False
-            self.logic_threshold= exp_setup[0][12]
-            self.input_threshold= exp_setup[0][13]
+            self.objective = exp_setup[0][1]
+            self.name= exp_setup[0][2]
+            self.Freq_Sync= exp_setup[0][3] 
+            self.Freq_Valid= exp_setup[0][4] 
+            self.Freq_Service= exp_setup[0][5]
+            self.delta_t_treshold=exp_setup[0][6]
+            self.flag_API= True if exp_setup[0][7] == 'True' else False
+            self.rct_threshold= exp_setup[0][8]
+            self.rct_queue= exp_setup[0][9]
+            self.flag_external_service= True if exp_setup[0][10] == 'True' else False
+            self.logic_threshold= exp_setup[0][11]
+            self.input_threshold= exp_setup[0][12]
+            self.flag_publish= True if exp_setup[0][78] == 'True' else False
 
             self.initial_json = {
                 "nodes": [
                     {
                     "activity": 1,
-                    "predecessors": json.loads(exp_setup[0][14]),
-                    "successors": json.loads(exp_setup[0][15]),
-                    "frequency": exp_setup[0][16],
-                    "capacity": exp_setup[0][17],
-                    "contemp": exp_setup[0][18],
-                    "cluster": exp_setup[0][19],
-                    "worked_time": exp_setup[0][20]
+                    "predecessors": json.loads(exp_setup[0][13]),
+                    "successors": json.loads(exp_setup[0][14]),
+                    "frequency": exp_setup[0][15],
+                    "capacity": exp_setup[0][16],
+                    "contemp": exp_setup[0][17],
+                    "cluster": exp_setup[0][18],
+                    "worked_time": exp_setup[0][19]
                     },
                     {
                     "activity": 2,
-                    "predecessors": json.loads(exp_setup[0][21]),
-                    "successors": json.loads(exp_setup[0][22]),
-                    "frequency": exp_setup[0][23],
-                    "capacity": exp_setup[0][24],
-                    "contemp": exp_setup[0][25],
-                    "cluster": exp_setup[0][26],
-                    "worked_time": exp_setup[0][27],
-                    "allocation_counter": exp_setup[0][28]
+                    "predecessors": json.loads(exp_setup[0][20]),
+                    "successors": json.loads(exp_setup[0][21]),
+                    "frequency": exp_setup[0][22],
+                    "capacity": exp_setup[0][23],
+                    "contemp": exp_setup[0][24],
+                    "cluster": exp_setup[0][25],
+                    "worked_time": exp_setup[0][26],
+                    "allocation_counter": exp_setup[0][27]
                     },
                     {
                     "activity": 3,
-                    "predecessors": json.loads(exp_setup[0][29]),
-                    "successors": json.loads(exp_setup[0][30]),
-                    "frequency": exp_setup[0][31],
-                    "capacity": exp_setup[0][32],
-                    "contemp": exp_setup[0][33],
-                    "cluster": exp_setup[0][34],
-                    "worked_time": exp_setup[0][35]
+                    "predecessors": json.loads(exp_setup[0][28]),
+                    "successors": json.loads(exp_setup[0][29]),
+                    "frequency": exp_setup[0][30],
+                    "capacity": exp_setup[0][31],
+                    "contemp": exp_setup[0][32],
+                    "cluster": exp_setup[0][33],
+                    "worked_time": exp_setup[0][34]
                     },
                     {
                     "activity": 4,
-                    "predecessors": json.loads(exp_setup[0][36]),
-                    "successors": json.loads(exp_setup[0][37]),
-                    "frequency": exp_setup[0][38],
-                    "capacity": exp_setup[0][39],
-                    "contemp": exp_setup[0][40],
-                    "cluster": exp_setup[0][41],
-                    "worked_time": exp_setup[0][42]
+                    "predecessors": json.loads(exp_setup[0][35]),
+                    "successors": json.loads(exp_setup[0][36]),
+                    "frequency": exp_setup[0][37],
+                    "capacity": exp_setup[0][38],
+                    "contemp": exp_setup[0][39],
+                    "cluster": exp_setup[0][40],
+                    "worked_time": exp_setup[0][41]
                     },
                     {
                     "activity": 5,
-                    "predecessors": json.loads(exp_setup[0][43]),
-                    "successors": json.loads(exp_setup[0][44]),
-                    "frequency": exp_setup[0][45],
-                    "capacity": exp_setup[0][46],
-                    "contemp": exp_setup[0][47],
-                    "cluster": exp_setup[0][48],
-                    "worked_time": exp_setup[0][49]
+                    "predecessors": json.loads(exp_setup[0][42]),
+                    "successors": json.loads(exp_setup[0][43]),
+                    "frequency": exp_setup[0][44],
+                    "capacity": exp_setup[0][45],
+                    "contemp": exp_setup[0][46],
+                    "cluster": exp_setup[0][47],
+                    "worked_time": exp_setup[0][48]
                     }
                 ],
                 "arcs": [
                     {
-                    "arc": json.loads(exp_setup[0][54]),
-                    "capacity": exp_setup[0][55],
-                    "frequency": exp_setup[0][56],
-                    "contemp": exp_setup[0][57]
+                    "arc": json.loads(exp_setup[0][53]),
+                    "capacity": exp_setup[0][54],
+                    "frequency": exp_setup[0][55],
+                    "contemp": exp_setup[0][56]
                     },
                     {
-                    "arc": json.loads(exp_setup[0][58]),
-                    "capacity": exp_setup[0][59],
-                    "frequency": exp_setup[0][60],
-                    "contemp": exp_setup[0][61]
+                    "arc": json.loads(exp_setup[0][57]),
+                    "capacity": exp_setup[0][58],
+                    "frequency": exp_setup[0][59],
+                    "contemp": exp_setup[0][60]
                     },
                     {
-                    "arc": json.loads(exp_setup[0][62]),
-                    "capacity":exp_setup[0][63],
-                    "frequency": exp_setup[0][64],
-                    "contemp": exp_setup[0][65]
+                    "arc": json.loads(exp_setup[0][61]),
+                    "capacity":exp_setup[0][62],
+                    "frequency": exp_setup[0][63],
+                    "contemp": exp_setup[0][64]
                     },
                     {
-                    "arc": json.loads(exp_setup[0][66]),
-                    "capacity": exp_setup[0][67],
-                    "frequency": exp_setup[0][68],
-                    "contemp": exp_setup[0][69]
+                    "arc": json.loads(exp_setup[0][65]),
+                    "capacity": exp_setup[0][66],
+                    "frequency": exp_setup[0][67],
+                    "contemp": exp_setup[0][68]
                     },
                     {
-                    "arc": json.loads(exp_setup[0][70]),
-                    "capacity": exp_setup[0][71],
-                    "frequency": exp_setup[0][72],
-                    "contemp": exp_setup[0][73]
+                    "arc": json.loads(exp_setup[0][69]),
+                    "capacity": exp_setup[0][70],
+                    "frequency": exp_setup[0][71],
+                    "contemp": exp_setup[0][72]
                     },
                     {
-                    "arc": json.loads(exp_setup[0][50]),
-                    "capacity":exp_setup[0][51],
-                    "frequency": exp_setup[0][52],
-                    "contemp": exp_setup[0][53]
+                    "arc": json.loads(exp_setup[0][49]),
+                    "capacity":exp_setup[0][50],
+                    "frequency": exp_setup[0][51],
+                    "contemp": exp_setup[0][52]
                     }
                 ],
                 "initial": [
+                    json.loads(exp_setup[0][73]),
                     json.loads(exp_setup[0][74]),
                     json.loads(exp_setup[0][75]),
                     json.loads(exp_setup[0][76]),
-                    json.loads(exp_setup[0][77]),
-                    json.loads(exp_setup[0][78])
+                    json.loads(exp_setup[0][77])
                 ]
                 }
             
@@ -328,7 +315,7 @@ class Tester():
                     flag_external_service,
                     logic_threshold,
                     input_threshold) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-                """,(self.exp_id, self.timestamp, self.objective, self.name, self.Freq_Sync, 
+                """,(self.exp_id, self.helper.get_time_now()[0], self.objective, self.name, self.Freq_Sync, 
                         self.Freq_Valid, self.Freq_Service, self.delta_t_treshold, self.flag_API, 
                         self.rct_threshold, self.rct_queue, self.flag_external_service, self.logic_threshold, 
                         self.input_threshold))
@@ -339,28 +326,30 @@ class Tester():
         if branching == False:        
             with sqlite3.connect(self.exp_db_path) as exp_db:
                 exp_db.execute(f"""CREATE TABLE IF NOT EXISTS machine_{machine_id} (
-                    model_name TEXT PRIMARY KEY,
+                    model_id INTEGER PRIMARY KEY,
+                    model_name TEXT,
                     predecessors TEXT,
                     successors TEXT,
                     frequency INTEGER,
                     capacity INTEGER,
                     contemp INTEGER,
                     cluster INTEGER,
-                    worked_time INTEGER
+                    worked_time TEXT
                 )
                 """)
                 exp_db.commit()
         elif branching == True:
             with sqlite3.connect(self.exp_db_path) as exp_db:
                 exp_db.execute(f"""CREATE TABLE IF NOT EXISTS machine_{machine_id} (
-                    model_name TEXT PRIMARY KEY,
+                    model_id INTEGER PRIMARY KEY,
+                    model_name TEXT,
                     predecessors TEXT,
                     successors TEXT,
                     frequency INTEGER,
                     capacity INTEGER,
                     contemp INTEGER,
                     cluster INTEGER,
-                    worked_time INTEGER,
+                    worked_time TEXT,
                     allocation_counter INTEGER DEFAULT 0
                 )
                 """)
@@ -371,7 +360,8 @@ class Tester():
         if converging == False:        
             with sqlite3.connect(self.exp_db_path) as exp_db:
                 exp_db.execute(f"""CREATE TABLE IF NOT EXISTS queue_{queue_id} (
-                    model_name TEXT PRIMARY KEY,
+                    model_id INTEGER PRIMARY KEY,
+                    model_name TEXT,
                     arc TEXT,
                     capacity INTEGER,
                     frequency INTEGER,
@@ -383,8 +373,9 @@ class Tester():
                 exp_db.commit()
         elif converging == True:
             with sqlite3.connect(self.exp_db_path) as exp_db:
-                exp_db.execute(f"""CREATE TABLE IF NOT EXISTS machine_{queue_id} (
-                    model_name TEXT PRIMARY KEY,
+                exp_db.execute(f"""CREATE TABLE IF NOT EXISTS queue_{queue_id} (
+                    model_id INTEGER PRIMARY KEY,
+                    model_name TEXT,
                     arc_1 TEXT,
                     capacity_1 INTEGER,
                     frequency_1 INTEGER,
@@ -411,12 +402,12 @@ class Tester():
                 frequency,
                 contemp,
                 n_parts) VALUES (?,?,?,?,?,?)
-                """,(model_name, 
-                    model_dict['arcs'][arc_id]['arc'],
+                """,(str(model_name), 
+                    json.dumps(model_dict['arcs'][arc_id]['arc']),
                     model_dict['arcs'][arc_id]['capacity'],
                     model_dict['arcs'][arc_id]['frequency'],
                     model_dict['arcs'][arc_id]['contemp'],
-                    model_dict['initial'][0][queue_id-1]))
+                    json.dumps(model_dict['initial'][queue_id-1])))
             
             else:
                 cursor.execute(f"""INSERT INTO queue_{queue_id} (
@@ -432,16 +423,16 @@ class Tester():
                 contemp_2,
 
                 n_parts) VALUES (?,?,?,?,?,?,?,?,?,?)
-                """,(model_name, 
-                    model_dict['arcs'][arc_id]['arc'],
+                """,(str(model_name), 
+                    json.dumps(model_dict['arcs'][arc_id]['arc']),
                     model_dict['arcs'][arc_id]['capacity'],
                     model_dict['arcs'][arc_id]['frequency'],
                     model_dict['arcs'][arc_id]['contemp'],
-                    model_dict['arcs'][arc_id_secondary]['arc'],
+                    json.dumps(model_dict['arcs'][arc_id_secondary]['arc']),
                     model_dict['arcs'][arc_id_secondary]['capacity'],
                     model_dict['arcs'][arc_id_secondary]['frequency'],
                     model_dict['arcs'][arc_id_secondary]['contemp'],
-                    model_dict['initial'][0][queue_id-1]))
+                    json.dumps(model_dict['initial'][queue_id-1])))
             
             exp_db.commit()
     
@@ -460,17 +451,17 @@ class Tester():
                 contemp,
                 cluster,
                 worked_time) VALUES (?,?,?,?,?,?,?,?)
-                """,(model_name, 
-                    model_dict['nodes'][machine_id-1]['predecessors'],
-                    model_dict['nodes'][machine_id-1]['successors'],
+                """,(str(model_name), 
+                    json.dumps(model_dict['nodes'][machine_id-1]['predecessors']),
+                    json.dumps(model_dict['nodes'][machine_id-1]['successors']),
                     model_dict['nodes'][machine_id-1]['frequency'],
                     model_dict['nodes'][machine_id-1]['capacity'],
                     model_dict['nodes'][machine_id-1]['contemp'],
                     model_dict['nodes'][machine_id-1]['cluster'],
-                    model_dict['nodes'][machine_id-1]['worked_time']))
+                    json.dumps(model_dict['nodes'][machine_id-1]['worked_time'])))
 
             #--- write allocation counter for machine 2    
-            cursor.execute(f"""UPDATE machine_2 SET allocation_counter = {model_dict['nodes'][1]['allocation_counter']} WHERE model_name = {model_name}""")
+            cursor.execute(f"""UPDATE machine_2 SET allocation_counter = {model_dict['nodes'][1]['allocation_counter']} WHERE model_name = '{model_name}'""")
             
             #--- save changes
             exp_db.commit()
@@ -482,4 +473,26 @@ class Tester():
             self.write_queue_table(queue_id = 4, arc_id=2,model_dict = model_dict, model_name = model_name, arc_id_secondary=None)   
             self.write_queue_table(queue_id = 5, arc_id=3,model_dict = model_dict, model_name = model_name, arc_id_secondary=4)   
 
+    #--- main function to call and create all the required machine and queue tables in exp_database
+    def create_json_model_table(self):
+        #--- create tables for machines and queues
+        self.create_exp_machines_table(machine_id = 1, branching = False)
+        self.create_exp_machines_table(machine_id = 2, branching = True)
+        self.create_exp_machines_table(machine_id = 3, branching = False)
+        self.create_exp_machines_table(machine_id = 4, branching = False)
+        self.create_exp_machines_table(machine_id = 5, branching = False)
+        
+        self.create_exp_queues_table(queue_id = 1, converging = False)
+        self.create_exp_queues_table(queue_id = 2, converging = False)
+        self.create_exp_queues_table(queue_id = 3, converging = False)
+        self.create_exp_queues_table(queue_id = 4, converging = False)
+        self.create_exp_queues_table(queue_id = 5, converging = True)
 
+    #--- assign exp_id to the 'recent' experiment in the allexp_database
+    def assign_exp_id(self,exp_id):
+        with sqlite3.connect(self.allexp_path) as allexp:
+            cursor = allexp.cursor()
+            cursor.execute(f"""UPDATE {self.allexp_table} SET exp_id = {exp_id} WHERE exp_id = 'recent'""")
+            allexp.commit()
+
+    #--- get objective
