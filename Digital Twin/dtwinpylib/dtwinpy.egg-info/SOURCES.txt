@@ -10,7 +10,7 @@ dtwinpy/interfaceAPI.py
 dtwinpy/interfaceDB.py
 dtwinpy/services.py
 dtwinpy/synchronizer.py
-dtwinpy/test_sound.py
+dtwinpy/tester.py
 dtwinpy/updator.py
 dtwinpy/validator.py
 dtwinpy.egg-info/PKG-INFO
