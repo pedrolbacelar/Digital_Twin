@@ -45,7 +45,7 @@ importlib.reload(dtwinpylib.dtwinpy.services)"""
 
 
 class Digital_Twin():
-    def __init__(self, name, copied_realDB= False,model_path= None, ip_address= None, initial= True, targeted_part_id= None, targeted_cluster= None, until= None, digital_database_path= None, real_database_path= None, ID_database_path= None, experimental_database_path= None, Freq_Sync= 1000, Freq_Valid= 10000, delta_t_treshold= 100, logic_threshold= 0.75, input_threshold= 0.75, rct_threshold= 0.02, queue_position= 2, Freq_Service = None, part_type= "A", loop_type= "closed", maxparts = None, template= False, keepDB= True, plot= False, verbose= True, flag_API= False, flag_external_service= False, flag_publish= True, rct_queue= 3):
+    def __init__(self, name, copied_realDB= False,model_path= None, ip_address= None, initial= True, targeted_part_id= None, targeted_cluster= None, until= None, digital_database_path= None, real_database_path= None, ID_database_path= None, experimental_database_path= None, Freq_Sync= 1000, Freq_Valid= 10000, delta_t_treshold= 100, logic_threshold= 0.75, input_threshold= 0.75, rct_threshold= 0.02, queue_position= 2, Freq_Service = None, part_type= "A", loop_type= "closed", maxparts = None, template= False, keepDB= True, plot= False, verbose= True, flag_API= False, flag_external_service= False, flag_publish= True, flag_validation= False, rct_queue= 3):
         self.helper = Helper()
         #--- Model Parameters
         self.name = name
@@ -86,6 +86,7 @@ class Digital_Twin():
             print("Interface API created....")
         self.flag_external_service = flag_external_service
         self.flag_publish = flag_publish
+        self.flag_validation = flag_validation
 
         #--- Time intervals
         (initial_time_str, initial_timestamp) = self.helper.get_time_now()
@@ -576,7 +577,7 @@ class Digital_Twin():
             self.helper.printer(f"[Internal Service] System Synchronized. Next Sync (n° {self.counter_Sync}): {nexttime}", 'blue')
         
         # ====================== Running Validation ======================
-        if  self.flag_time_to_validate:
+        if  self.flag_time_to_validate and self.flag_validation:
             # --------------------- BEFORE SERVICES SETTINGS ---------------------
             # --- User Interface
             (current_time_str, x) = self.helper.get_time_now()

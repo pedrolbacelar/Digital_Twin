@@ -1,19 +1,35 @@
+from dtwinpylib.dtwinpy.helper import Helper
+from dtwinpylib.dtwinpy.interfaceDB import Database
 
+#--- Commom Libraries
 import sqlite3
 import json
 import os
-from dtwinpylib.dtwinpy.helper import Helper
 import shutil
 import sys
+from matplotlib import pyplot as plt
+
 
 class Tester():
-    def __init__(self, exp_id = 'recent'):
+    def __init__(self, exp_id = 'recent', name= None):
         
         #--- attributes from allexp_database
         self.allexp_path = 'allexp_database.db'
         self.allexp_table = 'experiment_setup'
         self.exp_id = exp_id
         self.helper = Helper()
+
+        #--- Create the experimental database (if name)
+        if name != None:
+            self.name = name
+            #-- exp path
+            self.exp_db_path = f"databases/{self.name}/exp_database.db"
+            #-- create a Database object
+            self.exp_db = Database(
+                exp_database_path= self.exp_db_path,
+                experimental_mode= True
+            )
+        
         
     def initiate(self):
         #--- loading the experiment setup from allexp
@@ -496,3 +512,87 @@ class Tester():
             allexp.commit()
 
     #--- get objective
+
+
+class Plotter():
+    def __init__(self, exp_database_path, figures_path= None,  show= False, save= True):
+        #--- Experimental Database
+        self.exp_database_path = exp_database_path
+        self.exp_database = Database(
+            database_path= self.exp_database_path
+        )
+
+        #--- Figures Folder
+        self.figures_path = figures_path
+
+        #--- Common flags
+        self.show = show
+        self.save = save
+
+    #--- Basic Functions ---
+    def ADD_complemts(self, title, xlable, ylable):
+        """ Adds title, x lable and y lable"""
+
+        plt.title(title)
+        plt.xlabel(xlable)
+        plt.ylabel(ylable)
+    
+    def set_max_min(self, xlim= None, ylim= None):
+        """ Set max and min for x and y. Receive vectors"""
+        if xlim:
+            plt.xlim(xlim)
+        if ylim:
+            plt.ylim(ylim)
+
+    def save_fig(self, name):
+        """Function takes the figure path and save the given figure using the given name"""
+        path_to_save = f"{self.figures_path}/{name}.png"
+        
+        print(f"path to save fig: {path_to_save}")
+
+        plt.savefig(path_to_save)
+
+
+    def plot_valid_indicators(self, threshold= None, adjust = True):
+        """
+        This functions plots the validation indicators (logic and input) from
+        the experimental database. If threshold is given, the function also
+        trace the line of the threshold in the plot.
+        """
+
+        #--- Read logic indicators
+        (logic_indicators, timestamp) = self.exp_database.read_ValidIndicator('logic_indicator')
+        print(f"logic_indicators: {logic_indicators}")
+
+        #--- read input indicators
+        (input_indicators, timestamp) = self.exp_database.read_ValidIndicator('input_indicator')
+        print(f"input_indicators: {input_indicators}")
+
+        print(f"timestamp: {timestamp}")
+
+        #--- Add complements
+        self.ADD_complemts(
+            title= "Validation Indicators",
+            xlable= "Timestamp (secs)",
+            ylable= "Indicator (%)"
+        )
+
+        #--- Plot logic indicator
+        plt.plot(timestamp, logic_indicators, marker='o', label= 'logic_indicator')
+
+        #--- Plot input indicator
+        plt.plot(timestamp, input_indicators, marker= 'x', label= 'input_indicator')
+
+        #--- Add threshold line
+        if threshold:   plt.axhline(threshold, color='red', linestyle='--', label='Indicator Threshold')
+        
+        #--- Adjust the scale of the graph
+        if adjust: self.set_max_min(ylim=[0, 1.05])
+        
+        #--- Save
+        if self.save:
+            self.save_fig("Validation_Indicators")
+
+        #--- Show
+        if self.show:
+            plt.show()

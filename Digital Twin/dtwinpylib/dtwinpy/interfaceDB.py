@@ -983,3 +983,26 @@ class Database():
             """, (tstr, t, logic_indicator, input_indicator, model_in, model_out))
 
             db.commit()
+
+    # --------- Read valid indicators ---------
+    def read_ValidIndicator(self, indicator_name):
+        with sqlite3.connect(self.database_path) as db:
+            indicator = db.execute(
+                f"""
+                SELECT {indicator_name} FROM valid_indicators
+                """
+            ).fetchall()
+
+            # --- Fix tuple
+            for i in range(len(indicator)): indicator[i] = indicator[i][0] 
+
+            timestamp = db.execute(
+                """
+                SELECT timestamp_real FROM valid_indicators
+                """
+            ).fetchall()
+
+            # --- Fix tuple
+            for i in range(len(timestamp)): timestamp[i] = timestamp[i][0] 
+
+            return (indicator, timestamp)
