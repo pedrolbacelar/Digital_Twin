@@ -101,6 +101,16 @@ def save_results(exp_id):
             json_model = json.load(file)
             test.write_json_model(model_dict=json_model, model_name=model)
 
+    #--- 11. calculate CT
+    #-- calculate throughput and cycle time of system
+    #-- find last part to exit the system
+    #-- find number of parts finished
+    #-- find CT of each parts finished
+    #-- plot CT time of each part
+    print("calculating CT of system and parts")
+    real_db_path = f"{root_folder}/{folder_name}/databases/real_database.db"
+    test.calculate_CT(real_db_path=real_db_path)
+
     #--- finally. write exp_id into the allexp_database if exp_id given is recent
     print(f"Assiging the new exp_id to the 'recent' experiment in allexp_database.")
     test.assign_exp_id(folder_name)
