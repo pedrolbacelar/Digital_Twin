@@ -596,3 +596,35 @@ class Plotter():
         #--- Show
         if self.show:
             plt.show()
+
+    def plot_RCT_paths(self):
+        """
+        This functions plots the validation indicators (logic and input) from
+        the experimental database. If threshold is given, the function also
+        trace the line of the threshold in the plot.
+        """
+
+        #--- Read RCT paths
+        (rct_path1, rct_path2, timestamp) = self.exp_database.read_RCT_path()
+
+        #--- Add complements
+        self.ADD_complemts(
+            title= "RCT Paths 1 and 2",
+            xlable= "Timestamp (secs)",
+            ylable= "RCT"
+        )
+
+        #--- Plot logic indicator
+        plt.plot(timestamp, rct_path1, marker='o', label= 'Path 1 (Queue 3)')
+
+        #--- Plot input indicator
+        plt.plot(timestamp, rct_path2, marker= 'o', label= 'Path 2 (Queue 4)')
+
+        
+        #--- Save
+        if self.save:
+            self.save_fig("RCT_Path")
+
+        #--- Show
+        if self.show:
+            plt.show()

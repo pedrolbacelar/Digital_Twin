@@ -1006,3 +1006,25 @@ class Database():
             for i in range(len(timestamp)): timestamp[i] = timestamp[i][0] 
 
             return (indicator, timestamp)
+    
+    def read_RCT_path(self):
+        with sqlite3.connect(self.database_path) as db:
+            # --- Get timestamp
+            timestamp = db.execute("""SELECT timestamp_real FROM RCTpaths""").fetchall()
+            # --- Fix tuple
+            for i in range(len(timestamp)): timestamp[i] = timestamp[i][0] 
+
+            # --- Get rct from path 1
+            rct_path1 = db.execute("""SELECT RCT_path1 FROM RCTpaths""").fetchall()
+            # --- Fix tuple
+            for i in range(len(rct_path1)): rct_path1[i] = rct_path1[i][0] 
+
+            # --- Get rct from path 2
+            rct_path2 = db.execute("""SELECT RCT_path2 FROM RCTpaths""").fetchall()
+            # --- Fix tuple
+            for i in range(len(rct_path2)): rct_path2[i] = rct_path2[i][0] 
+
+            return (rct_path1, rct_path2, timestamp)
+
+
+
