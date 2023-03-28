@@ -106,8 +106,10 @@ def save_results(exp_id):
     #-- find last part to exit the system
     #-- find number of parts finished
     #-- find CT of each parts finished
-    print("calculating CT of system and parts")
+    #-- write to results table
+    print("calculating CT (system & parts) and writing to results table ...")
     real_db_path = f"{root_folder}/{folder_name}/databases/real_database.db"
+    test.create_results_table()
     test.calculate_CT(real_db_path=real_db_path)
 
     #--- finally. write exp_id into the allexp_database and exp_database setup_data table if exp_id given is recent

@@ -526,14 +526,17 @@ class Tester():
         with sqlite3.connect(self.exp_db_path) as exp_db:
             exp_db.execute(f"""CREATE TABLE IF NOT EXISTS global_results (
                 result_id INTEGER PRIMARY KEY,
-                run_duration INTEGER,
+                run_time INTEGER,
                 start_time INTEGER,
                 finish_time INTEGER,
-                number_of_parts processed INTEGER,
-                throughput per seconds FLOAT,
-                thourhput per hour FLOAT
-                system_CT FLOAT
-                parts_finished
+                last_part TEXT,
+                number_of_parts_processed INTEGER,
+                throughput_per_seconds FLOAT,
+                thourhput_per_hour FLOAT,
+                CT_system FLOAT,
+                List_parts_finished  TEXT,
+                CT_parts TEXT,
+                average_CT FLOAT
                 )
                 """)
             exp_db.commit()
@@ -545,11 +548,11 @@ class Tester():
 
             # first and last trace of started nd finished.
             cursor.execute("SELECT * FROM real_log LIMIT 1")
-            first_start_event = cursor.fetchone()[-1]
+            first_start_time = cursor.fetchone()[-1]
 
             cursor.execute("SELECT * FROM real_log WHERE machine_id = ? AND activity_type = ? ORDER BY rowid DESC LIMIT 1", ('Machine 5','Finished'))
             event = cursor.fetchall()
-            last_finish_event = event[0][-1]
+            last_finish_time = event[0][-1]
             last_part = event[0][4]
             print(f"last_part to exit is: {last_part}")
             
@@ -558,13 +561,15 @@ class Tester():
             count = cursor.fetchone()[0]
 
         #---throughput
-        run_time = last_finish_event - first_start_event
+        run_time = last_finish_time - first_start_time
         throughput_second = count/run_time #--- parts/second
-        throughput_hour = (count*3600)/run_time
-        ct_piece = run_time/count
+        throughput_hour = (count*3600)/run_time #--- parts/hour
+        ct_system = run_time/count
 
-        print(f"start: {first_start_event}\nstop: {last_finish_event}\nnumber of parts: {count}\nduration: {run_time}\nthroughput per seconds: {throughput_second}\nthourhput per hour: {throughput_hour}\nct_system: {ct_piece}")
+
+        print(f"start: {first_start_time}\nstop: {last_finish_time}\nnumber of parts: {count}\nduration: {run_time}\nthroughput per seconds: {throughput_second}\nthourhput per hour: {throughput_hour}\nct_system: {ct_system}")
         
+        #--- part level cycle time
         CT_part_time = []
         CT_part_list = []
         #--- cycle time of parts
@@ -582,10 +587,36 @@ class Tester():
                 if finish != []:
                     CT_part_time.append(finish[0][0] - start[0][0])
                     CT_part_list.append(value[0])
-
+        average_CT = np.mean(CT_part_time)
         print(f"parts finished: {CT_part_list}")
         print(f"cycle time of individual parts: {CT_part_time}")
-        print(f"average cycle time of parts: {np.mean(CT_part_time)}")
+        print(f"average cycle time of parts: {average_CT}")
+
+        with sqlite3.connect(self.exp_db_path) as exp_db:
+            cursor = exp_db.cursor()
+            cursor.execute(f"""INSERT INTO results (
+            run_time,
+            start_time,
+            finish_time,
+            last_part,
+            number_of_parts_processed,
+            throughput_per_seconds,
+            thourhput_per_hour,
+            CT_system,
+            List_parts_finished ,
+            CT_parts,
+            average_CT FLOAT) VALUES (?,?,?,?,?,?,?,?,?,?,?)
+            """,(run_time,
+                first_start_time,
+                last_finish_time,
+                str(last_part),
+                count,
+                throughput_second,
+                throughput_hour,
+                ct_system,
+                json.dumps(CT_part_list),
+                json.dumps(CT_part_time),
+                average_CT))
 
 
 
