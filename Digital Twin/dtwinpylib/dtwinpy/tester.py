@@ -5,18 +5,21 @@ from dtwinpylib.dtwinpy.interfaceDB import Database
 import sqlite3
 import json
 import os
+from dtwinpylib.dtwinpy.helper import Helper
+import numpy as np
 import shutil
 import sys
 from matplotlib import pyplot as plt
 
 
 class Tester():
-    def __init__(self, exp_id = 'recent', name= None):
+    def __init__(self, exp_id = 'recent', name= None, exp_db_path = None):
         
         #--- attributes from allexp_database
         self.allexp_path = 'allexp_database.db'
         self.allexp_table = 'experiment_setup'
         self.exp_id = exp_id
+        self.exp_db_path = exp_db_path
         self.helper = Helper()
 
         #--- Create the experimental database (if name)
@@ -504,14 +507,70 @@ class Tester():
         self.create_exp_queues_table(queue_id = 4, converging = False)
         self.create_exp_queues_table(queue_id = 5, converging = True)
 
-    #--- assign exp_id to the 'recent' experiment in the allexp_database
+    #--- assign exp_id to the 'recent' experiment in the allexp_database and exp_database
     def assign_exp_id(self,exp_id):
         with sqlite3.connect(self.allexp_path) as allexp:
             cursor = allexp.cursor()
-            cursor.execute(f"""UPDATE {self.allexp_table} SET exp_id = {exp_id} WHERE exp_id = 'recent'""")
+            cursor.execute(f"""UPDATE {self.allexp_table} SET exp_id = '{exp_id}' WHERE exp_id = 'recent'""")
             allexp.commit()
+        with sqlite3.connect(self.allexp_path) as exp_db:
+            cursor = exp_db.cursor()
+            cursor.execute(f"""UPDATE {self.allexp_table} SET exp_id = '{exp_id}' WHERE exp_id = 'recent'""")
+        self.exp_id = exp_id
 
-    #--- get objective
+
+    def calculate_CT(self, real_db_path):
+        with sqlite3.connect(real_db_path) as real_db:
+            cursor = real_db.cursor()
+
+            # first and last trace of started nd finished.
+            cursor.execute("SELECT * FROM real_log LIMIT 1")
+            first_start_event = cursor.fetchone()[-1]
+
+            cursor.execute("SELECT * FROM real_log WHERE machine_id = ? AND activity_type = ? ORDER BY rowid DESC LIMIT 1", ('Machine 5','Finished'))
+            event = cursor.fetchall()
+            last_finish_event = event[0][-1]
+            last_part = event[0][4]
+            print(last_part)
+            
+            # count number of times machine 5 appears with activity as finished
+            cursor.execute("SELECT COUNT(*) FROM real_log WHERE machine_id = ? AND activity_type = ?", ('Machine 5','Finished'))
+            count = cursor.fetchone()[0]
+
+        #---throughput
+        run_time = last_finish_event - first_start_event
+        throughput_second = count/run_time #--- parts/second
+        throughput_hour = (count*60)/run_time
+        ct_piece = run_time/count
+
+        print(f" start {first_start_event}, stop {last_finish_event}, number of parts {count}, duration {run_time}, throughput per seconds: {throughput_second}, thourhput per hour: {throughput_hour}, ct_piece {ct_piece}")
+        
+        CT_part_time = []
+        CT_part_list = []
+        #--- cycle time of parts
+        with sqlite3.connect(real_db_path) as real_db:
+            cursor = real_db.cursor()
+            # get a list of the unique values in the column
+            values = cursor.execute("SELECT DISTINCT part_id FROM real_log").fetchall()
+            print(values)
+            # iterate over the values in the column
+            for value in values:
+                if value[0] == last_part:
+                    break
+                # execute the query with the current value
+                start = cursor.execute(f"""SELECT timestamp_real FROM real_log WHERE part_id = '{value[0]}' AND machine_id = 'Machine 1' AND activity_type = 'Started'""").fetchall()
+
+                finish = cursor.execute(f"""SELECT timestamp_real FROM real_log WHERE part_id = '{value[0]}' AND machine_id = 'Machine 5' AND activity_type = 'Finished'""").fetchall()
+                print(start,finish,value[0])
+                if finish != []:
+                    CT_part_time.append(finish[0][0] - start[0][0])
+                    CT_part_list.append(value[0])
+
+        print(CT_part_list)
+        print(CT_part_time)
+        print(np.mean(CT_part_time))
+
+
 
 
 class Plotter():
