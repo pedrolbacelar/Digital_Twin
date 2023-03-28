@@ -11,6 +11,8 @@ plotter = Plotter(
     figures_path= figures_path
 )
 
-plotter.plot_valid_indicators(threshold= 0.69)
+#plotter.plot_valid_indicators(threshold= 0.69)
 
-plotter.plot_RCT_paths()
+#plotter.plot_RCT_paths()
+
+plotter.plot_queues_occupation(stacked= True)

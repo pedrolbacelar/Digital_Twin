@@ -1007,6 +1007,7 @@ class Database():
 
             return (indicator, timestamp)
     
+    # --------- Read RCT Paths ---------
     def read_RCT_path(self):
         with sqlite3.connect(self.database_path) as db:
             # --- Get timestamp
@@ -1025,6 +1026,49 @@ class Database():
             for i in range(len(rct_path2)): rct_path2[i] = rct_path2[i][0] 
 
             return (rct_path1, rct_path2, timestamp)
+    
+    # --------- Read Queue Occupation ---------
+    def read_queue_occupation(self, queue_id):
+        """ Read the evolution of queue occupation for a given queue"""
+        #--- Create the occupation vector to store the queue length after every Sync
+        occupation_vector = []
+
+        with sqlite3.connect(self.database_path) as db:
+            #--- Create the table name
+            table = f'queue_{queue_id}'
+
+            #--- Extract all the strings ("lists")
+            list_parts = db.execute(
+                f"""
+                SELECT n_parts FROM {table}
+                """
+            ).fetchall()
+
+            # --- Fix tuple
+            for i in range(len(list_parts)): list_parts[i] = list_parts[i][0] 
+
+            #--- Loop to extracted results to convert into a list and count the length
+            
+            # -------- Add the last element first ('initial') --------
+            str_list= list_parts[-1]
+            #--- convert in list
+            created_list = eval(str_list)
+            occupation_vector.append(len(created_list))
+            # ---------------------------------------------------------
+
+            for i in range(len(list_parts) -1):
+                #--- Take the string (list)
+                str_list= list_parts[i]
+
+                #--- convert in list
+                created_list = eval(str_list)
+
+                #--- Length
+                occupation_vector.append(len(created_list))
+        
+        #--- Return the occupation vector
+        return occupation_vector
+
 
 
 

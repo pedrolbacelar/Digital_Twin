@@ -282,6 +282,10 @@ class Updator():
                     new_process_time = update_result[-1]
                     new_process_time = round(new_process_time)
 
+                    if new_process_time < 0:
+                        self.helper.printer(f"[ERROR][updator.py/run()] New Process Time calculated is negative for {machine_name}!", 'red')
+                        self.helper.printer(f"Machine Trace: {machine_trace}")
+
                 #--- System not Deterministic: Take the distribution parameters
                 if not flag_deterministic:
                     #--- Take the whole parameters
