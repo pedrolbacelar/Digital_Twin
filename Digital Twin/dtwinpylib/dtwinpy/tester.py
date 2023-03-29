@@ -619,6 +619,8 @@ class Tester():
                 json.dumps(CT_part_list),
                 json.dumps(CT_part_time),
                 average_CT))
+            
+            exp_db.commit()
 
     #--- create rt_process_time_log
     def create_rt_process_time_log(self):
