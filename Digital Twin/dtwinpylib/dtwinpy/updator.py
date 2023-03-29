@@ -300,8 +300,9 @@ class Updator():
                 if not flag_deterministic:
                     #--- Take the whole parameters
                     dist_name = update_result[0]
-                    parameter_a = update_result[1]
-                    parameter_b = update_result[2]
+                    parameter_a = round(update_result[1][0])
+                    parameter_b = round(update_result[1][1])
+                    if parameter_b == 0: parameter_b= 1
 
                     (new_process_time) = [dist_name, parameter_a, parameter_b]
 

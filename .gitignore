@@ -1,5 +1,2 @@
-*.pyc
 *.cpython-311.pyc
-
-*.pyc
-*.pyc
+Digital Twin/dtwinpylib/__pycache__

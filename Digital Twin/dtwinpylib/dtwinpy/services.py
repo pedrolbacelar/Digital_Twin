@@ -473,6 +473,9 @@ class Service_Handler():
             #--- Create the gain vector
             gain_vect = []
 
+            #--- Remove the AS IS gain, because it's not in the vector of possible paths
+            rcts_paths.pop(0)
+
             #--- For each RCT of that part
             for rct in rcts_paths:
                 #--- Calculate the RCT Indicator (how close it's from the worst scenario)
@@ -487,9 +490,10 @@ class Service_Handler():
             #--- Compare the higher gain with the threshold
             highets_gain = max(gain_vect)
             
+            """
             #--- Remove the AS IS gain, because it's not in the vector of possible paths
             gain_vect.pop(0)
-
+            """
 
             if highets_gain >= rct_threshold:
                 #-- Rise the feedback flag
@@ -693,10 +697,10 @@ class Service_Handler():
         part_id = int(re.findall(r'\d+', part_name)[0])
 
         #--- Get the first path
-        path_1 = rct_dict[part_name][1]
+        path_1 = rct_dict[part_name][0] # path_1 = rct_dict[part_name][1]
 
         #--- Get the second path
-        path_2 = rct_dict[part_name][2]
+        path_2 = rct_dict[part_name][1] # path_2 = rct_dict[part_name][2]
 
         #--- Get the feedback flag (if need to implement or not the feedback)
         feedback_flag = publish_results[0]

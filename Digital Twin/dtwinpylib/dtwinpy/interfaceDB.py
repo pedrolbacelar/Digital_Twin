@@ -748,9 +748,9 @@ class Database():
                 return DB.execute(f"SELECT event_id FROM {table} WHERE {column1}=? AND {column2}= ? ", (condition1, condition2)).fetchall()
 
 
-    def update_column(self, table, column, line_id, new_value, current_time_str_):
+    def update_column(self, table, column, line_id, new_value):
         with sqlite3.connect(self.database_path) as DB:
-            DB.execute(f"UPDATE {table} SET {column} = ?, current_time_str= ? WHERE event_id = ?", (new_value, current_time_str_, line_id))
+            DB.execute(f"UPDATE {table} SET {column} = ? WHERE event_id = ?", (new_value, line_id))
             DB.commit()
 
     # ============================ ID DATABASE ============================

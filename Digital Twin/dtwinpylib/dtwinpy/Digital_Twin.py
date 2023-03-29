@@ -131,8 +131,8 @@ class Digital_Twin():
 
     
         #--- Figure path
-        if not os.path.exists(f"figures"):
-            os.makedirs(f"figures/")
+        if not os.path.exists(f"figures/{self.name}"):
+            os.makedirs(f"figures/{self.name}")
 
         #------ Model JSON ------
 

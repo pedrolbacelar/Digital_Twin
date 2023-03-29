@@ -13,27 +13,50 @@ from matplotlib import pyplot as plt
 
 
 class Tester():
-    def __init__(self, exp_id = 'recent', name= None, exp_db_path = None):
+    def __init__(self, exp_id = 'recent', from_data_generation= False):
         
         #--- attributes from allexp_database
         self.allexp_path = 'allexp_database.db'
         self.allexp_table = 'experiment_setup'
         self.exp_id = exp_id
-        self.exp_db_path = exp_db_path
         self.helper = Helper()
+        self.from_data_generation = from_data_generation
 
-        #--- Create the experimental database (if name)
-        if name != None:
-            self.name = name
-            #-- exp path
+
+        #--------------- LOAD SETUP -----------------
+        self.load_exp_setup()
+        print(f"'{self.exp_id}' experiment is loaded")
+        #-------------------------------------------
+
+        #------------------------------- experimental database & Figure path ------------------------------
+        if self.from_data_generation == False:
             self.exp_db_path = f"databases/{self.name}/exp_database.db"
-            #-- create a Database object
+            self.figures_folder = f"figures/{self.name}"
+
+        if self.from_data_generation == True:
+            self.exp_db_path = f"data_generation/{self.exp_id}/databases/exp_database.db"
+            self.figures_folder = f"data_generation/{self.exp_id}/figures"
+        
+        print("|-- Printing Paths:")
+        print(f"|---- Experimental Database Path: {self.exp_db_path}")
+        print(f"|---- Figures Folder Path: {self.figures_folder}")
+        #------------------------------------------------------------------------------------------
+        
+        #-- Figures Folder
+        if not os.path.exists(self.figures_folder):
+            os.makedirs(self.figures_folder)
+            print(f"Folder {self.figures_folder} created...")
+         
+        #-- create a Database object
+        try:
             self.exp_db = Database(
-                exp_database_path= self.exp_db_path,
+                database_path= self.exp_db_path,
                 experimental_mode= True
             )
-        
-        
+        except sqlite3.OperationalError:
+            self.helper.printer(f"[ERROR][tester.py/__init__()] It was not possible to open the database path: {self.exp_db_path}. Check it out! Skiping...", 'red')
+    
+    # ----- Deafult procedures to deal with allexp_db -----   
     def initiate(self):
         #--- loading the experiment setup from allexp
         self.load_exp_setup()
@@ -49,9 +72,39 @@ class Tester():
         self.write_setup()          #--- write setup data from allexp_db to exp_db setup_data table
         self.create_rt_process_time_log()
         
-        
-        
+    # ----- Plotting -----
+    def plot(self, show_plot= False):
+        """
+        Plot all the data available after an experiment. The function includes the following plots:
+        - Validation Indicators
+        - RCT paths
+        - Queue Occupation
+        """
+        if not os.path.exists(self.exp_db_path):
+            self.helper.printer(f"[WARNING][tester.py/__init__()] The experimental database path: {self.exp_db_path} doesn't exist! SKIPING PLOT")
 
+        
+        else:
+            # ----------- CREATE PLOTTER ---------------
+            plotter = Plotter(
+                exp_database_path= self.exp_db_path,
+                figures_path= self.figures_folder,
+                show= show_plot,
+                save= True
+            )
+            # -------------------------------------------
+
+            # ------------- PLOT VALIDATION INDICATORS ----------
+            plotter.plot_valid_indicators(threshold= self.input_threshold)
+            # ---------------------------------------------------
+
+            # ------------- PLOT RCT PATH -------------
+            plotter.plot_RCT_paths()
+            # -----------------------------------------
+
+            # ------------- PLOT QUEUE OCCUPATION -------------
+            plotter.plot_queues_occupation()
+            # --------------------------------------------------
 
 #-------------------------------------------------------------------------------------------------
 #---------------------------------------- MAIN FUNCTIONS -----------------------------------------
@@ -665,6 +718,8 @@ class Tester():
 
 class Plotter():
     def __init__(self, exp_database_path, figures_path= None,  show= False, save= True):
+        self.helper = Helper()
+
         #--- Experimental Database
         self.exp_database_path = exp_database_path
         self.exp_database = Database(
@@ -702,7 +757,7 @@ class Plotter():
         """Function takes the figure path and save the given figure using the given name"""
         path_to_save = f"{self.figures_path}/{name}.png"
         
-        print(f"path to save fig: {path_to_save}")
+        print(f"Saving figure in the path {path_to_save}")
 
         plt.savefig(path_to_save)
 
@@ -713,43 +768,48 @@ class Plotter():
         the experimental database. If threshold is given, the function also
         trace the line of the threshold in the plot.
         """
+        #---------
+        plt.clf()
+        #---------
 
         #--- Read logic indicators
         (logic_indicators, timestamp) = self.exp_database.read_ValidIndicator('logic_indicator')
-        print(f"logic_indicators: {logic_indicators}")
 
         #--- read input indicators
         (input_indicators, timestamp) = self.exp_database.read_ValidIndicator('input_indicator')
-        print(f"input_indicators: {input_indicators}")
 
-        print(f"timestamp: {timestamp}")
-
-        #--- Add complements
-        self.ADD_complemts(
-            title= "Validation Indicators",
-            xlable= "Timestamp (secs)",
-            ylable= "Indicator (%)"
-        )
-
-        #--- Plot logic indicator
-        plt.plot(timestamp, logic_indicators, marker='o', label= 'logic_indicator')
-
-        #--- Plot input indicator
-        plt.plot(timestamp, input_indicators, marker= 'x', label= 'input_indicator')
-
-        #--- Add threshold line
-        if threshold:   plt.axhline(threshold, color='red', linestyle='--', label='Indicator Threshold')
+        #--- Check if there is any data:
+        if len(input_indicators) <= 1:
+            self.helper.printer(f"[ERROR][tester.py/plot_valid_indicators()] Not enough data to plot validation indicators... SKIPING PLOT")
         
-        #--- Adjust the scale of the graph
-        if adjust: self.set_max_min(ylim=[0, 1.05])
-        
-        #--- Save
-        if self.save:
-            self.save_fig("Validation_Indicators")
+        else:
 
-        #--- Show
-        if self.show:
-            plt.show()
+            #--- Plot logic indicator
+            plt.plot(timestamp, logic_indicators, marker='o', label= 'logic_indicator')
+
+            #--- Plot input indicator
+            plt.plot(timestamp, input_indicators, marker= 'x', label= 'input_indicator')
+
+            #--- Add threshold line
+            if threshold:   plt.axhline(threshold, color='red', linestyle='--', label='Indicator Threshold')
+            
+            #--- Adjust the scale of the graph
+            if adjust: self.set_max_min(ylim=[0, 1.05])
+
+            #--- Add complements
+            self.ADD_complemts(
+                title= "Validation Indicators",
+                xlable= "Timestamp (secs)",
+                ylable= "Indicator (%)"
+            )
+            
+            #--- Save
+            if self.save:
+                self.save_fig("Validation_Indicators")
+
+            #--- Show
+            if self.show:
+                plt.show()
 
     def plot_RCT_paths(self):
         """
@@ -757,6 +817,9 @@ class Plotter():
         the experimental database. If threshold is given, the function also
         trace the line of the threshold in the plot.
         """
+        #---------
+        plt.clf()
+        #---------
 
         #--- Read RCT paths
         (rct_path1, rct_path2, timestamp) = self.exp_database.read_RCT_path()
@@ -788,6 +851,10 @@ class Plotter():
         Loop through the queues table to get the amount of parts in the queue
         after each synchronization. Plot this amount over time.
         """
+        #---------
+        plt.clf()
+        #---------
+        
         #--- Create a dictionary to store the occupation of each queue
         queue_occupation = {}
 
@@ -817,7 +884,7 @@ class Plotter():
                 if marker > len(self.markers): marker = 0
 
                 # ------------------ PLOT ----------------------
-                plt.plot(
+                plt.step(
                     x_vector, 
                     queue_occupation[f'Queue {queue_id}'],
                     label= f'Queue {queue_id}',
@@ -858,6 +925,10 @@ class Plotter():
             plt.show()
 
         # --------------------- COMPARE QUEUE 3 AND QUEUE 4 ---------------------
+        #---------
+        plt.clf()
+        #---------
+        
         marker = 2
         if stacked == False:
             for i in range(2, 4): 
@@ -868,7 +939,7 @@ class Plotter():
                 if marker > len(self.markers): marker = 0
 
                 # ------------------ PLOT ----------------------
-                plt.plot(
+                plt.step(
                     x_vector, 
                     queue_occupation[f'Queue {queue_id}'],
                     label= f'Queue {queue_id}',
