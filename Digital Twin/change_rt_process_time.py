@@ -26,8 +26,9 @@ client.on_message = on_message
 
 client.loop_start()
 
+
 #----------------------------------- INPUT DATA ----------------------------------------
-process = ['NULL',17,60,'NULL',10]  #--- process _time_vector default= [11,17,60,38,10]
+process = [54,45,60,45,10]  #--- process _time_vector default= [11,17,60,38,10]
 #---------------------------------------------------------------------------------------
 
 load_unload_time = [9,8,10,8,8]
