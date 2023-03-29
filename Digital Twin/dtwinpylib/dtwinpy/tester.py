@@ -928,7 +928,7 @@ class Plotter():
         #---------
         plt.clf()
         #---------
-        
+
         marker = 2
         if stacked == False:
             for i in range(2, 4): 
@@ -976,3 +976,32 @@ class Plotter():
         #--- Show
         if self.show:
             plt.show()
+
+    def plot_comparative_parts_CT(self):
+        """
+        This function take the total time of a simulation from the table results and
+        with that runs a simulation using the digital model from the Digital Twin. Extracting
+        the cycle of each part from the results and from the digital simulation it's possible
+        to plot for each part.
+
+        IMPORTANT: Don't use this funtion in a system were the RCT was publishing the decisions,
+        because than running a normal simulation would not have the right policy
+        """
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
