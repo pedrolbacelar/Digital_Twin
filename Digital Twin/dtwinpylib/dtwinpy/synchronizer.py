@@ -85,6 +85,13 @@ class Zone():
             #-- Increment the initial condition indicator
             self.Zone_initial += 1
 
+            print(f"[SYNC] {self.machine.get_name()} started with part already been processed!")
+            print(f"--- From the Digital Mode: ---")
+            print(f"machine_working: {self.machine_working}")
+            print(f"last_started_time: {self.last_started_time}")
+            print(f"initial_part: {initial_part.get_name()}")
+
+
         # ------- DOUBLE CHECK -------
         self.check_inital_working_machine()
 
@@ -131,8 +138,7 @@ class Zone():
             self.helper.printer(f"[WARNING][synchronizer.py/Mstarted()] {part_id} was not found in elements vector of the queue", "yellow")
             #print(f"[WARNING][synchronizer.py/Mstarted()] {part_id} was not found in elements vector of the queue")
             print("This might happen if the element is an initial part. If that not the case, CHECK IT OUT!")
-            print(f"printing the list of parts in the queue: {self.parts_ids_in_queue}")
-    
+            print(f"printing the list of parts in the queue: {self.parts_ids_in_queue}")    
     def Mfinished(self, part_id):
         #-- In the case that this was the part that the machine started the simulation
         if self.flag_initial_working == True:
@@ -150,9 +156,7 @@ class Zone():
         if part_id in self.parts_ids_in_machine:
             self.parts_ids_in_machine.remove(part_id)
         else:
-            self.helper.printer(f"[WARNING][synchronizer.py/Mstarted()] {part_id} was not found in elements vector of the machine", "yellow")
-
-       
+            self.helper.printer(f"[WARNING][synchronizer.py/Mstarted()] {part_id} was not found in elements vector of the machine", "yellow")     
     def next_allocation(self, queue_allocated):
             # --- Check if it's a branching machine
             if self.machine.get_branch() != None:
@@ -188,9 +192,15 @@ class Zone():
             self.machine_working_initial_part = self.machine_worked_time[1]
 
         # ---------- CHECK ------------
-        if (self.machine.get_initial_part() != None and self.machine_worked_time != 0):
-            self.helper.printer(f"[ERROR][synchronizer.py/check_inital_working_machine()] The model thinks that there is no part")
+        if (self.machine_working == 0 and self.machine_worked_time != 0):
+            self.helper.printer(f"[ERROR][synchronizer.py/check_inital_working_machine()] The Sync thinks that there is no part in the machine, but actually the worked time in the model is different than 0", 'red')
+            print(f"--- From the Digital Mode: ---")
+            print(f"machine_working: {self.machine_working}")
+            print(f"last_started_time: {self.last_started_time}")
 
+            print(f"--- From the Model JSON: ---")
+            print(f"machine_worked_time_initial: {self.machine_worked_time_initial}")
+            print(f"machine_working_initial_part: {self.machine_working_initial_part}")
 
 
     def self_validation(self, Verbose = True):
