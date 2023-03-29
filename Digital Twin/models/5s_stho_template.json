@@ -3,14 +3,14 @@
         {
             "activity": 1,
             "predecessors": [
-                7
+                5
             ],
             "successors": [
-                2,3
+                2
             ],
             "frequency": 999,
             "capacity": 1,
-            "contemp": ["norm", 5000, 500],
+            "contemp": ["norm", 11, 2],
             "cluster": 1,
             "worked_time": 0
         },
@@ -20,26 +20,28 @@
                 1
             ],
             "successors": [
+                3,
                 4
             ],
             "frequency": 999,
             "capacity": 1,
-            "contemp": ["norm", 3500, 350],
+            "contemp": ["norm", 17, 2],
             "cluster": 2,
-            "worked_time": 0
+            "worked_time": 0,
+            "allocation_counter": 0
         },
         {
             "activity": 3,
             "predecessors": [
-                1
+                2
             ],
             "successors": [
-                6
+                5
             ],
             "frequency": 999,
             "capacity": 1,
-            "contemp": ["norm", 1026, 350],
-            "cluster": 2,
+            "contemp": ["norm", 60, 2],
+            "cluster": 3,
             "worked_time": 0
         },
         {
@@ -48,57 +50,29 @@
                 2
             ],
             "successors": [
-                7
+                5
             ],
             "frequency": 999,
             "capacity": 1,
-            "contemp": ["norm", 5000, 400],
-            "cluster": 2,
+            "contemp": ["norm", 38, 2],
+            "cluster": 3,
             "worked_time": 0
         },
         {
             "activity": 5,
             "predecessors": [
-                2
-            ],
-            "successors": [
-                7
-            ],
-            "frequency": 999,
-            "capacity": 1,
-            "contemp": ["norm", 2000, 200],
-            "cluster": 2,
-            "worked_time": 0
-        },
-        {
-            "activity": 6,
-            "predecessors": [
-                3
-            ],
-            "successors": [
-                7
-            ],
-            "frequency": 999,
-            "capacity": 1,
-            "contemp": ["norm", 2000, 200],
-            "cluster": 2,
-            "worked_time": 0
-        },
-        {
-            "activity": 7,
-            "predecessors": [
-                4,5,6
+                3,
+                4
             ],
             "successors": [
                 1
             ],
             "frequency": 999,
             "capacity": 1,
-            "contemp": ["norm", 2000, 200],
-            "cluster": 2,
+            "contemp": ["norm", 10, 2],
+            "cluster": 4,
             "worked_time": 0
         }
-
     ],
     "arcs": [
         {
@@ -108,16 +82,16 @@
             ],
             "capacity": 10,
             "frequency": 1000,
-            "contemp": 1
+            "contemp": 11
         },
         {
             "arc": [
-                1,
+                2,
                 3
             ],
             "capacity": 10,
             "frequency": 1000,
-            "contemp": 1
+            "contemp": 23
         },
         {
             "arc": [
@@ -126,67 +100,51 @@
             ],
             "capacity": 10,
             "frequency": 1000,
-            "contemp": 1
-        },
-        {
-            "arc": [
-                2,
-                5
-            ],
-            "capacity": 10,
-            "frequency": 1000,
-            "contemp": 1
+            "contemp": 20
         },
         {
             "arc": [
                 3,
-                6
+                5
             ],
             "capacity": 10,
             "frequency": 1000,
-            "contemp": 1
+            "contemp": 11
         },
         {
             "arc": [
                 4,
-                7
+                5
             ],
             "capacity": 10,
             "frequency": 1000,
-            "contemp": 1
+            "contemp": 6
         },
         {
             "arc": [
                 5,
-                7
-            ],
-            "capacity": 10,
-            "frequency": 1000,
-            "contemp": 1
-        },
-        {
-            "arc": [
-                6,
-                7
-            ],
-            "capacity": 10,
-            "frequency": 1000,
-            "contemp": 1
-        },
-        {
-            "arc": [
-                7,
                 1
             ],
-            "capacity": 10,
+            "capacity": 12,
             "frequency": 1000,
-            "contemp": 1
+            "contemp": 9
         }
     ],
-    "initial":[
-        ["Part 1"],
-        ["Part 2"],
-        [],
+    "initial": [
+        [
+            "Part 1",
+            "Part 2",
+            "Part 3",
+            "Part 4",
+            "Part 5",
+            "Part 6",
+            "Part 7",
+            "Part 8",
+            "Part 9",
+            "Part 10",
+            "Part 11",
+            "Part 12"
+        ],
         [],
         [],
         [],

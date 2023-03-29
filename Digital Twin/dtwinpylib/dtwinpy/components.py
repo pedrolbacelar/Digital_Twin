@@ -266,6 +266,8 @@ class Machine():
                 if self.worked_time != 0:
                     #-- machine has an initial part to be processed
                     self.part_in_machine = self.initial_part
+                    # [NEW]
+                    self.simtype = None
 
 
                 #-- Lower the flag that we finish the process

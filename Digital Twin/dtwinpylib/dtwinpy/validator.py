@@ -17,8 +17,9 @@ importlib.reload(dtwinpylib.dtwinpy.interfaceDB)"""
 
 
 class Validator():
-    def __init__(self, digital_model, simtype, real_database_path, start_time, end_time, generate_digital_model, id_database_path= False,copied_realDB= False, delta_t_treshold= 100):
+    def __init__(self, digital_model, simtype, real_database_path, start_time, end_time, generate_digital_model, id_database_path= False,copied_realDB= False, delta_t_treshold= 100, plot= False):
         self.helper = Helper()
+        self.plot = plot
         self.digital_model = digital_model
         self.generate_digital_model= generate_digital_model
         self.simtype = simtype
@@ -291,8 +292,10 @@ class Validator():
         #--- Update each existing machine in the model
 
         #--- Extract the unique parts IDs from the real log
-        machines_ids = self.real_database.get_distinct_values(column= "machine_id", table="real_log")
-        
+        # [OLD] machines_ids = self.real_database.get_distinct_values(column= "machine_id", table="real_log")
+        machines_ids = self.real_database.get_machines_with_completed_traces()
+
+
         # For every machine that was USED in the real world
         # We iterate the within the machines id because it's possible that
         # the simulation has more machines rather than the real log, because
@@ -351,6 +354,7 @@ class Validator():
                 elif event[1] == 'Finished':
                     finished_time = event[0]
                 
+
                 #--- Calculate the process time
                 if started_time != None and finished_time != None:
                     processed_time = finished_time - started_time
@@ -363,6 +367,15 @@ class Validator():
                     finished_time = None
                     processed_time = None
 
+                
+                if finished_time != None and started_time == None:
+                    #--- reset local started and finished time for the next cycle
+                    started_time = None
+                    finished_time = None
+                    processed_time = None
+
+
+                """
                 #--- In the case of part that already was in the machine (worked_time)
                 if finished_time != None and started_time == None:
                     processed_time = finished_time
@@ -374,6 +387,7 @@ class Validator():
                     started_time = None
                     finished_time = None
                     processed_time = None
+                """
             
             #--- Add machine trace to the matrix of all machines traces
             matrix_ptime_qTDS[machine_id[0]] = (machine_trace)
@@ -419,9 +433,28 @@ class Validator():
             for i in range(len(u)):
                 if u[i] == 1.0:
                     pos_one = i
+                    try:
+                        u[pos_one]=umax # change 1 to 0.99 to avoid infinity in dist.ppf function
+                        return(u,pos_one)
+                    except UnboundLocalError:
+                        self.helper.printer(f"[ERROR][validator.py/generate_Xs_machine()] 'pos_one not defined. Checking if the U is correct", 'red')
+                        print(f"U: {u}")
+                        self.helper.kill()
+                    break
+            else:
+                self.helper.printer("[ERROR][validator.py/generate_Xs_machine()] value 1 not found in 'u' variable", 'red')
+                print(f"u: {u}")
+                print("Printing input parameters...")
+                print(f"loc = {loc}")
+                print(f"scale = {scale}")
+                print(f"distribution= {distribution}")
+                print(f"Xr = {Xr}")
+
+                return(u,[])
             #pos_one = np.where(u == 1.0)
-            u[pos_one]=umax # change 1 to 0.99 to avoid infinity in dist.ppf function
-            return(u,pos_one)
+            
+            
+            
 
         # -----------------------------------------------------
         # Function for Generating dedicated disrtibutions
@@ -470,6 +503,7 @@ class Validator():
         sse=np.zeros(900)
 
         # Deriving randomness from Xr and generating Xs
+        
         for ii in range(899,498,-1):
             umax[ii]=0.91+(ii*0.0001)
             Xsf=Xs
@@ -486,18 +520,34 @@ class Validator():
                 u,pos_one = randomness(ECDF(Xr),umax[ii],Xr) # calculate inverse transform of ecdf.
                 Xs = (dist.ppf(u, a, b, loc, scale))    # generate distribution Xs.
 
-            diff[ii]=abs(Xs[pos_one]-Xr[pos_one])   # Calculate error in the highest value due to impact of umax
-            #sse[ii]=np.sum(np.square(Xr-Xs))
-            
-            if diff[ii]>diff[ii+1]:
-                Xs=Xsf
+            if pos_one != []:
+                diff[ii]=abs(Xs[pos_one]-Xr[pos_one])   # Calculate error in the highest value due to impact of umax
+                #sse[ii]=np.sum(np.square(Xr-Xs))
+                if diff[ii]>diff[ii+1]:
+                    Xs=Xsf
+                    break
+            else:
+                
                 break
-
-        i=range(1,len(Xr)+1)
-        plt.plot(i,Xr,color='blue')
-        plt.plot(i,Xs,color='red')
-        plt.show()
         
+        if self.plot == True:
+            i=range(1,len(Xr)+1)
+            plt.plot(i,Xr,color='blue')
+            plt.plot(i,Xs,color='red')
+            plt.show()
+
+        if Xs[0] != int or Xs[0] != float:
+            self.helper.printer(f"[ERROR][validator.py/generate_Xs_machine()] The Xs vector is not a made by numbers! Check the U vector:", 'red')
+            print(f"u: {u}")
+            print("|--- Printing input parameters...")
+            print(f"loc = {loc}")
+            print(f"scale = {scale}")
+            print(f"distribution= {distribution}")
+            print(f"Xr = {Xr}")
+            print("|--- Printing output")
+            print(f"Xs= {Xs}")
+
+
         return(Xs)
     # =======================================================================
 
@@ -608,7 +658,10 @@ class Validator():
         
         #--- Loop to correlated each Xs with Xr
         # The loop can also be seem as loop through the machines
-        machines_ids = self.real_database.get_distinct_values(column= "machine_id", table="real_log")
+        # [OLD] machines_ids = self.real_database.get_distinct_values(column= "machine_id", table="real_log")
+        # ------- GET MACHINES IDs ONLY OF COMPLETED TRACE (START -> FINISH) -------
+        machines_ids = self.real_database.get_machines_with_completed_traces()
+        
         for machine_id in machines_ids:
             
             # For this machine_id, find the machine object with the same id
@@ -624,10 +677,13 @@ class Validator():
                         scale = machine_process_time[2]
 
                         Xr_vector = Xr_matrix[machine.get_name()]
-                        print(Xr_vector)
+                        print(f"machine name: {machine.get_name()}")
+                        print(f"Xr_vector: {Xr_vector}")
 
                         Xs_vector = self.generate_Xs_machine(loc= loc, scale= scale, distribution= dist, Xr= Xr_vector)
                         self.matrix_ptime_qTDS[machine.get_name()] = (Xs_vector)
+                        
+                        break
                     
                     else:
                         #--- WRONG!!! This bellow implementation is wrong. The goal here is not to copy and paste
