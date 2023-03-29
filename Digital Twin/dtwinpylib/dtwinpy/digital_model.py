@@ -992,7 +992,44 @@ class Model():
             for machine in self.machines_vector:
                 if machine.get_id() == machine_id:
                     return machine
+    def get_terminated_parts(self):
+        return self.terminator.get_all_items()
+    def get_parts_CT_ordered(self):
+        #--- Get the finished Parts and each Time
+        parts_finished = self.terminator.get_all_items()
 
+        #--- Number of finished parts in the simulation
+        number_parts = len(parts_finished)
+
+        #--- create empty lists
+        parts_finished_time = []
+        parts_finished_id = []
+        parts_finished_id_ASIS = []
+        parts_creation_time = []
+
+        #---Create the list with parts ID
+        for part in parts_finished:
+            parts_finished_id.append(part.get_id())
+            parts_finished_id_ASIS.append(part.get_id())
+        
+        #--- Sort the list in ascending
+        parts_finished_id.sort()
+
+        #--- Adjust the sort of other variables following the ID sort
+        for id in parts_finished_id:
+            for part in parts_finished:
+                if part.get_id() == id:
+                    parts_finished_time.append(part.get_termination())
+                    parts_creation_time.append(part.get_creation())
+                    break
+        
+        #--- Calculate parts cycle time
+        parts_cycle_time = []
+        for i in range(number_parts):
+            #-- calculate individual CT
+            parts_cycle_time.append(parts_finished_time[i] - parts_creation_time[i])
+        
+        return (parts_finished_id,parts_cycle_time)
     # ==============================================
 
     # ================= SETs =================

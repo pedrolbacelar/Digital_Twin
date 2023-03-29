@@ -9,6 +9,7 @@ import shutil
 import os
 import re
 import sys
+import json
 
 
 
@@ -183,6 +184,7 @@ class Helper():
             sys.exit()
         """
 
+
     #--- Delete models (except by one specific file)
     def delete_old_model(self, folder_path, file_to_save):
         print(f"Deleting existing model (excepted by '{file_to_save}') from the relative folder path:'{folder_path}'")
@@ -195,5 +197,5 @@ class Helper():
                 model_counter += 1
         print(f"Done! Deleted {model_counter} successfuly")
 
-
-        
+    def convert_stringVect_to_listVect(self, stringVect):
+        return json.loads(stringVect)

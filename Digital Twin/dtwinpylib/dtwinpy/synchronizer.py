@@ -20,7 +20,7 @@ importlib.reload(dtwinpylib.dtwinpy.validator)"""
 
 class Zone():
     def __init__(self, machine, queue_list):
-        self.help = Helper()
+        self.helper = Helper()
         self.name = "Zone of " + machine.get_name()
         self.machine = machine
         self.zoneID = self.machine.get_id()
@@ -85,6 +85,9 @@ class Zone():
             #-- Increment the initial condition indicator
             self.Zone_initial += 1
 
+        # ------- DOUBLE CHECK -------
+        self.check_inital_working_machine()
+
 
 
     #--- A part entered the Zone
@@ -125,7 +128,7 @@ class Zone():
             # entered the zone and it's leaveing, I don't care about it.
             self.parts_ids_in_queue.remove(part_id)
         else:
-            self.help.printer(f"[WARNING][synchronizer.py/Mstarted()] {part_id} was not found in elements vector of the queue", "yellow")
+            self.helper.printer(f"[WARNING][synchronizer.py/Mstarted()] {part_id} was not found in elements vector of the queue", "yellow")
             #print(f"[WARNING][synchronizer.py/Mstarted()] {part_id} was not found in elements vector of the queue")
             print("This might happen if the element is an initial part. If that not the case, CHECK IT OUT!")
             print(f"printing the list of parts in the queue: {self.parts_ids_in_queue}")
@@ -147,7 +150,7 @@ class Zone():
         if part_id in self.parts_ids_in_machine:
             self.parts_ids_in_machine.remove(part_id)
         else:
-            self.help.printer(f"[WARNING][synchronizer.py/Mstarted()] {part_id} was not found in elements vector of the machine", "yellow")
+            self.helper.printer(f"[WARNING][synchronizer.py/Mstarted()] {part_id} was not found in elements vector of the machine", "yellow")
 
        
     def next_allocation(self, queue_allocated):
@@ -171,7 +174,24 @@ class Zone():
                 else:
                     self.next_queue_position = queue_position + 1
 
-    
+    def check_inital_working_machine(self):
+        model_path = self.digital_model.get_model_path()
+        with open(model_path, 'r+') as model_file:
+            data = json.load(model_file)
+            #--- For each machine (node)
+            for node in data['nodes']:
+                if node['activity'] == self.machine.get_id():
+                    self.machine_worked_time = node['worked_time']
+        
+        if self.machine_worked_time != 0:
+            self.machine_worked_time_initial = self.machine_worked_time[0]
+            self.machine_working_initial_part = self.machine_worked_time[1]
+
+        # ---------- CHECK ------------
+        if (self.machine.get_initial_part() != None and self.machine_worked_time != 0):
+            self.helper.printer(f"[ERROR][synchronizer.py/check_inital_working_machine()] The model thinks that there is no part")
+
+
 
     def self_validation(self, Verbose = True):
         #--- Use the data from the simulation (digital log)
@@ -558,6 +578,11 @@ class Synchronizer():
                     #--- For each machine (node)
                     for node in data['nodes']:
                         if node['activity'] == current_machine.get_id():
+                            # ISSUE #278: Sometimes Sync was not updating, maybe the flag initial was being updated wrong somewhere
+                            # because it came from the digital model, and we're running Sync very fast or even some change in
+                            # validation that change this property of the machine object
+
+                            # [OLD]
                             node['worked_time'] = (Delta_T_started, parts_id_in_machine) 
  
                             #---- Write Back the Changes
