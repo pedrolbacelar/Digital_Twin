@@ -14,7 +14,6 @@ my_ip = factory_ip
 #--- create test object and replace the initial.json in the models folder
 test = Tester()
 test.initiate()
-print(f"'{test.exp_id}' experiment is loaded")
 
 #--- Create a Digital Twin object with the require inputs
 mydt = Digital_Twin(
