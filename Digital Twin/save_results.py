@@ -42,16 +42,16 @@ def save_results(exp_id):
         markdown_file.write(additional_comments + "\n\n")
     else: markdown_file.write("## None\n")
 
-    #--- 5. copying the definition file
-    if dt_name == "5s_determ":
-        print("Copying mydt.py ...")
-        mydt_path = "mydt.py"
-    else:
-        print(f"Copying {dt_name}.py ...")
-        mydt_path = f"{dt_name}.py"
+    # #--- 5. copying the definition file
+    # if dt_name == "5s_determ":
+    #     print("Copying mydt.py ...")
+    #     mydt_path = "mydt.py"
+    # else:
+    #     print(f"Copying {dt_name}.py ...")
+    #     mydt_path = f"{dt_name}.py"
 
-    my_folder = "data_generation/" + folder_name
-    shutil.copy(mydt_path, my_folder)
+    # my_folder = "data_generation/" + folder_name
+    # shutil.copy(mydt_path, my_folder)
 
     #--- 7. replacing replicator_db
     print("Creating replicated database ...")
@@ -73,8 +73,8 @@ def save_results(exp_id):
     shutil.copytree(models_folder_path, os.path.join(root_folder, folder_name, "models"))
 
     #--- 9. Copy a databases folder into the created folder and rename it to 'databases'
-    models_folder_path = f"databases/{dt_name}"
-    shutil.copytree(models_folder_path, os.path.join(root_folder, folder_name, "databases"))
+    databases_folder_path = f"databases/{dt_name}"
+    shutil.copytree(databases_folder_path, os.path.join(root_folder, folder_name, "databases"))
     markdown_file.close()
     
     #--- 9. replacing replicator_db
@@ -111,6 +111,16 @@ def save_results(exp_id):
     real_db_path = f"{root_folder}/{folder_name}/databases/real_database.db"
     test.create_results_table()
     test.calculate_CT(real_db_path=real_db_path)
+
+    #--- 12. plot some results
+    #-- figures are plotted into fgures folder in the root
+    test.figures_folder = f"figures/{dt_name}"
+    test.plot()
+
+    #--- 13. copy and paste the figures folder
+    
+    shutil.copytree(test.figures_folder, os.path.join(root_folder, folder_name, "figures"))
+
 
     #--- finally. write exp_id into the allexp_database and exp_database setup_data table if exp_id given is recent
     if exp_id == 'recent':
