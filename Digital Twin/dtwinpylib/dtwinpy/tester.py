@@ -28,8 +28,13 @@ class Tester():
         self.from_data_generation = from_data_generation
 
 
-        #--------------- LOAD SETUP -----------------
-        self.load_exp_setup()
+
+    # ----- Deafult procedures to deal with allexp_db -----   
+    def initiate(self):
+               #--------------- LOAD SETUP -----------------
+        self.load_exp_setup()      
+        self.replace_initial_json() #--- replace initial json in models folder
+
         print(f"'{self.exp_id}' experiment is loaded")
         #-------------------------------------------
 
@@ -47,11 +52,14 @@ class Tester():
         print(f"|---- Figures Folder Path: {self.figures_folder}")
         #------------------------------------------------------------------------------------------
         
+        #-- delete the existing exp_database in the databases folder
+        self.delete_exp_database()  #--- delete existing exp_database to create new
+
         #-- Figures Folder
         if not os.path.exists(self.figures_folder):
             os.makedirs(self.figures_folder)
             print(f"Folder {self.figures_folder} created...")
-         
+
         #-- create a Database object
         try:
             self.exp_db = Database(
@@ -60,22 +68,12 @@ class Tester():
             )
         except sqlite3.OperationalError:
             self.helper.printer(f"[ERROR][tester.py/__init__()] It was not possible to open the database path: {self.exp_db_path}. Check it out! Skiping...", 'red')
-    
+     
         
-
-
-    # ----- Deafult procedures to deal with allexp_db -----   
-    def initiate(self):
-        #--- loading the experiment setup from allexp
-        self.load_exp_setup()
-        self.replace_initial_json()
-
-
-        self.exp_db_path = f"databases/{self.name}/exp_database.db"
+        
+        
         self.exp_setup_table = "setup_data"
 
-        
-        self.delete_exp_database()  #--- delete existing exp_database to create new
         self.create_exp_database()  #--- create new exp_db and create setup_data table
         self.write_setup()          #--- write setup data from allexp_db to exp_db setup_data table
         self.create_rt_process_time_log()
@@ -214,7 +212,8 @@ class Tester():
                 n_parts_Q3 INTEGER DEFAULT '[]',
                 n_parts_Q4 INTEGER DEFAULT '[]',
                 n_parts_Q5 INTEGER DEFAULT '[]',
-                flag_publish TEXT DEFAULT True
+                flag_publish TEXT DEFAULT True,
+                flag_validation  TEXT DEFAULT True
             )
             """)
             allexp.commit()
@@ -234,12 +233,13 @@ class Tester():
             self.Freq_Service= exp_setup[0][5]
             self.delta_t_treshold=exp_setup[0][6]
             self.flag_API= True if exp_setup[0][7] == 'True' else False
-            self.rct_threshold= exp_setup[0][8]
+            self.rct_threshold= -1
             self.rct_queue= exp_setup[0][9]
             self.flag_external_service= True if exp_setup[0][10] == 'True' else False
             self.logic_threshold= exp_setup[0][11]
             self.input_threshold= exp_setup[0][12]
             self.flag_publish= True if exp_setup[0][78] == 'True' else False
+            self.flag_validation= True if exp_setup[0][79] == 'True' else False
 
             self.initial_json = {
                 "nodes": [
@@ -249,7 +249,7 @@ class Tester():
                     "successors": json.loads(exp_setup[0][14]),
                     "frequency": exp_setup[0][15],
                     "capacity": exp_setup[0][16],
-                    "contemp": exp_setup[0][17],
+                    "contemp": json.loads(exp_setup[0][17]),
                     "cluster": exp_setup[0][18],
                     "worked_time": exp_setup[0][19]
                     },
@@ -259,7 +259,7 @@ class Tester():
                     "successors": json.loads(exp_setup[0][21]),
                     "frequency": exp_setup[0][22],
                     "capacity": exp_setup[0][23],
-                    "contemp": exp_setup[0][24],
+                    "contemp": json.loads(exp_setup[0][24]),
                     "cluster": exp_setup[0][25],
                     "worked_time": exp_setup[0][26],
                     "allocation_counter": exp_setup[0][27]
@@ -270,7 +270,7 @@ class Tester():
                     "successors": json.loads(exp_setup[0][29]),
                     "frequency": exp_setup[0][30],
                     "capacity": exp_setup[0][31],
-                    "contemp": exp_setup[0][32],
+                    "contemp": json.loads(exp_setup[0][32]),
                     "cluster": exp_setup[0][33],
                     "worked_time": exp_setup[0][34]
                     },
@@ -280,7 +280,7 @@ class Tester():
                     "successors": json.loads(exp_setup[0][36]),
                     "frequency": exp_setup[0][37],
                     "capacity": exp_setup[0][38],
-                    "contemp": exp_setup[0][39],
+                    "contemp": json.loads(exp_setup[0][39]),
                     "cluster": exp_setup[0][40],
                     "worked_time": exp_setup[0][41]
                     },
@@ -290,7 +290,7 @@ class Tester():
                     "successors": json.loads(exp_setup[0][43]),
                     "frequency": exp_setup[0][44],
                     "capacity": exp_setup[0][45],
-                    "contemp": exp_setup[0][46],
+                    "contemp": json.loads(exp_setup[0][46]),
                     "cluster": exp_setup[0][47],
                     "worked_time": exp_setup[0][48]
                     }
@@ -373,7 +373,9 @@ class Tester():
                     rct_queue INTEGER DEFAULT 2,
                     flag_external_service INTEGER DEFAULT 'True',
                     logic_threshold FLOAT DEFAULT 0.8,
-                    input_threshold FLOAT DEFAULT 0.8
+                    input_threshold FLOAT DEFAULT 0.8,
+                    flag_publish TEXT DEFAULT True,
+                    flag_validation  TEXT DEFAULT True
                     )
                     """)
                 exp_db.commit()
@@ -396,11 +398,13 @@ class Tester():
                     rct_queue,
                     flag_external_service,
                     logic_threshold,
-                    input_threshold) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                    input_threshold,
+                    flag_publish,
+                    flag_validation) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                 """,(self.exp_id, self.helper.get_time_now()[0], self.objective, self.name, self.Freq_Sync, 
                         self.Freq_Valid, self.Freq_Service, self.delta_t_treshold, str(self.flag_API), 
                         self.rct_threshold, self.rct_queue, str(self.flag_external_service), self.logic_threshold, 
-                        self.input_threshold))
+                        self.input_threshold, str(self.flag_publish), str(self.flag_validation)))
                 exp_db.commit()
 
     #--- create exp_models_tables for all machines
@@ -538,7 +542,7 @@ class Tester():
                     json.dumps(model_dict['nodes'][machine_id-1]['successors']),
                     model_dict['nodes'][machine_id-1]['frequency'],
                     model_dict['nodes'][machine_id-1]['capacity'],
-                    model_dict['nodes'][machine_id-1]['contemp'],
+                    json.dumps(model_dict['nodes'][machine_id-1]['contemp']),
                     model_dict['nodes'][machine_id-1]['cluster'],
                     json.dumps(model_dict['nodes'][machine_id-1]['worked_time'])))
 

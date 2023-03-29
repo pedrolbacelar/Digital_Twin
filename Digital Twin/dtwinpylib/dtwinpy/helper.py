@@ -171,18 +171,19 @@ class Helper():
             self.printer(f"---- Digital Twin was killed at {tstr} ----", 'red')
             sys.exit()
 
-        #- Delete ID database
+        #- Delete Experimental database
         """
         try:
             os.remove(exp_database_path)
-            print(f"|-- ID Database deleted successfuly from {exp_database_path}")
+            print(f"|-- Experimental Database deleted successfuly from {exp_database_path}")
         except FileNotFoundError:
-            self.printer(f"[WARNING][helper.py/delete_databases()] The ID Database doesn't exist yet in the path '{exp_database_path}', proceding without deleting...")
+            self.printer(f"[WARNING][helper.py/delete_databases()] The Experimental Database doesn't exist yet in the path '{exp_database_path}', proceding without deleting...")
         except PermissionError:
-            self.printer(f"[ERROR][helper.py/delete_databases()] The ID Database is busy somewhere, please close and try again.", 'red')
+            self.printer(f"[ERROR][helper.py/delete_databases()] The Experimental Database is busy somewhere, please close and try again.", 'red')
             self.printer(f"---- Digital Twin was killed at {tstr} ----", 'red')
             sys.exit()
         """
+
 
     #--- Delete models (except by one specific file)
     def delete_old_model(self, folder_path, file_to_save):

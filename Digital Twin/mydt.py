@@ -31,7 +31,7 @@ mydt = Digital_Twin(
     flag_publish = test.flag_publish,
     logic_threshold= test.logic_threshold,
     input_threshold= test.input_threshold,
-    flag_validation=False)
+    flag_validation=test.flag_validation)
 
 mydt.run()
 
