@@ -47,6 +47,7 @@ class Tester():
         self.delete_exp_database()  #--- delete existing exp_database to create new
         self.create_exp_database()  #--- create new exp_db and create setup_data table
         self.write_setup()          #--- write setup data from allexp_db to exp_db setup_data table
+        self.create_rt_process_time_log()
         
         
         
@@ -541,7 +542,7 @@ class Tester():
                 """)
             exp_db.commit()
 
-
+    #--- calculate CT and TH of system & parts and write to results table
     def calculate_CT(self, real_db_path):
         with sqlite3.connect(real_db_path) as real_db:
             cursor = real_db.cursor()
@@ -592,6 +593,7 @@ class Tester():
         print(f"cycle time of individual parts: {CT_part_time}")
         print(f"average cycle time of parts: {average_CT}")
 
+        #--- write to results table in exp_db
         with sqlite3.connect(self.exp_db_path) as exp_db:
             cursor = exp_db.cursor()
             cursor.execute(f"""INSERT INTO results (
@@ -618,7 +620,45 @@ class Tester():
                 json.dumps(CT_part_time),
                 average_CT))
 
+    #--- create rt_process_time_log
+    def create_rt_process_time_log(self):
+        with sqlite3.connect(self.exp_db_path) as exp_db:
+            exp_db.execute(f"""CREATE TABLE IF NOT EXISTS rt_process_time_log (
+                publish_id INTEGER PRIMARY KEY,
+                publish_time_real INTEGER,
+                publish_time_str TEXT,
+                Machine_1 INTEGER DEFAULT NULL,
+                Machine_2 INTEGER DEFAULT NULL,
+                Machine_3 INTEGER DEFAULT NULL,
+                Machine_4 INTEGER DEFAULT NULL,
+                Machine_5 INTEGER DEFAULT NULL
+                )
+                """)
+            exp_db.commit()
 
+    #--- for writing process time change of real tein in real time basis
+    #-- to be used in change_rt_process_time.py
+    def write_rt_process_time_log(self, process_time_vector):
+        time = self.helper.get_time_now()
+        with sqlite3.connect(self.exp_db_path) as exp_db:
+            cursor = exp_db.cursor()
+            cursor.execute(f"""INSERT INTO rt_process_time_log (
+                publish_time_real,
+                publish_time_str,
+                Machine_1,
+                Machine_2,
+                Machine_3,
+                Machine_4,
+                Machine_5) VALUES (?,?,?,?,?,?,?)
+                """,
+                (time[1], 
+                time[0],
+                process_time_vector[0],
+                process_time_vector[1],
+                process_time_vector[2],
+                process_time_vector[3],
+                process_time_vector[4]))
+            exp_db.commit()
 
 
 class Plotter():
