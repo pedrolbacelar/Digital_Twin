@@ -296,8 +296,7 @@ class Broker_Manager():
                 table= "real_log",
                 column= "part_id",
                 line_id= line_id,
-                new_value= part_id,
-                current_time_str_= current_time_str
+                new_value= part_id
             )
 
         except IndexError:
