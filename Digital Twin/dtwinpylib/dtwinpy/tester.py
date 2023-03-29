@@ -1,5 +1,6 @@
 from dtwinpylib.dtwinpy.helper import Helper
 from dtwinpylib.dtwinpy.interfaceDB import Database
+from dtwinpylib.dtwinpy.Digital_Twin import Digital_Twin
 
 #--- Commom Libraries
 import sqlite3
@@ -14,7 +15,11 @@ from matplotlib import pyplot as plt
 
 class Tester():
     def __init__(self, exp_id = 'recent', from_data_generation= False):
-        
+        # ------ Create a Digital Twin object ------
+        self.mydt = Digital_Twin(name= self.name)
+        self.initial_digital_mode = self.mydt.generate_digital_model()
+        self.intial_WIP = self.initial_digital_mode.get_all_parts()
+
         #--- attributes from allexp_database
         self.allexp_path = 'allexp_database.db'
         self.allexp_table = 'experiment_setup'
@@ -56,6 +61,9 @@ class Tester():
         except sqlite3.OperationalError:
             self.helper.printer(f"[ERROR][tester.py/__init__()] It was not possible to open the database path: {self.exp_db_path}. Check it out! Skiping...", 'red')
     
+        
+
+
     # ----- Deafult procedures to deal with allexp_db -----   
     def initiate(self):
         #--- loading the experiment setup from allexp
@@ -88,6 +96,7 @@ class Tester():
             # ----------- CREATE PLOTTER ---------------
             plotter = Plotter(
                 exp_database_path= self.exp_db_path,
+                plotterDT= self.mydt,
                 figures_path= self.figures_folder,
                 show= show_plot,
                 save= True
@@ -596,7 +605,12 @@ class Tester():
             exp_db.commit()
 
     #--- calculate CT and TH of system & parts and write to results table
-    def calculate_CT(self, real_db_path):
+    def calculate_CT(self, real_db_path, WIP_parts):
+        #--- Create a list with name of the initial parts
+        intial_parts= []
+        for part in WIP_parts:
+            intial_parts.append(part.get_name())
+
         with sqlite3.connect(real_db_path) as real_db:
             cursor = real_db.cursor()
 
@@ -634,8 +648,22 @@ class Tester():
             # iterate over the values in the column
             for value in values:
                 # execute the query with the current value
+                part_name = value[0]
+                flag_initial = True
+                try:
+                    index = intial_parts.index(part_name)
+                    print(f"{part_name} is an initial part...")
+                    
+                except ValueError:
+                    flag_initial = False
+                
                 start = cursor.execute(f"""SELECT timestamp_real FROM real_log WHERE part_id = '{value[0]}' AND machine_id = 'Machine 1' AND activity_type = 'Started'""").fetchall()
 
+                if flag_initial == True:
+                    start_intial = cursor.execute(f"""SELECT timestamp_real FROM real_log WHERE  machine_id = 'Machine 1' AND activity_type = 'Started'""").fetchall()
+                    start_intial = start_intial[0][0]
+
+                
                 finish = cursor.execute(f"""SELECT timestamp_real FROM real_log WHERE part_id = '{value[0]}' AND machine_id = 'Machine 5' AND activity_type = 'Finished'""").fetchall()
                 # print(start,finish,value[0])
                 if finish != []:
@@ -717,8 +745,9 @@ class Tester():
 
 
 class Plotter():
-    def __init__(self, exp_database_path, figures_path= None,  show= False, save= True):
+    def __init__(self, exp_database_path, plotterDT, figures_path= None,  show= False, save= True):
         self.helper = Helper()
+        self.plotterDT = plotterDT
 
         #--- Experimental Database
         self.exp_database_path = exp_database_path
@@ -824,19 +853,18 @@ class Plotter():
         #--- Read RCT paths
         (rct_path1, rct_path2, timestamp) = self.exp_database.read_RCT_path()
 
-        #--- Add complements
-        self.ADD_complemts(
-            title= "RCT Paths 1 and 2",
-            xlable= "Timestamp (secs)",
-            ylable= "RCT"
-        )
-
         #--- Plot logic indicator
         plt.plot(timestamp, rct_path1, marker='o', label= 'Path 1 (Queue 3)')
 
         #--- Plot input indicator
         plt.plot(timestamp, rct_path2, marker= 'o', label= 'Path 2 (Queue 4)')
 
+        #--- Add complements
+        self.ADD_complemts(
+            title= "RCT Paths 1 and 2",
+            xlable= "Timestamp (secs)",
+            ylable= "RCT"
+        )
         
         #--- Save
         if self.save:
@@ -987,7 +1015,69 @@ class Plotter():
         IMPORTANT: Don't use this funtion in a system were the RCT was publishing the decisions,
         because than running a normal simulation would not have the right policy
         """
+        #---------
+        plt.clf()
+        #---------
+
+        # --------------------- PHYSICAL TWIN ------------------------------
+        #--- Get the total time of simulation from the results table
+        total_time = self.exp_database.get_global_result('run_time')
+
+        #--- Get the list of finished parts and CT from the results table
+        str_parts_vector_real = self.exp_database.get_global_result('List_parts_finished')
+        str_CT_vector_real = self.exp_database.get_global_result('CT_parts')
+
+        #-- Convert string vector into a list vector
+        list_parts_vector_real = self.helper.convert_stringVect_to_listVect(str_parts_vector_real)
+        list_CT_vector_real = self.helper.convert_stringVect_to_listVect(str_CT_vector_real)
+
+        #-- Get only parts id
+        for i in range(len(list_parts_vector_real)): list_parts_vector_real[i] = self.helper.extract_int(list_parts_vector_real[i])
         
+        #-------------------------------------------------------------------
+
+        #------------- RUN DIGITAL SIMULATION -----------
+        digital_model = self.plotterDT.generate_digital_model(until= total_time)
+        digital_model.run()
+        #------------------------------------------------
+
+        #--- Get finished parts and cycle from digital model
+        (list_parts_vector_digital, list_CT_vector_digital) = digital_model.get_parts_CT_ordered()
+        
+
+        # ----- PLOT real Parts-CTs -----
+        plt.plot(
+            list_parts_vector_real,
+            list_CT_vector_real,
+            marker='o',
+            label= 'Physical Twin'
+        )
+        # --------------------------------
+
+        # ----- PLOT digital Parts-CTs -----
+        plt.plot(
+            list_parts_vector_digital,
+            list_CT_vector_digital,
+            marker='o',
+            label= 'Digital Twin'
+        )
+        # --------------------------------
+
+        #--- Add complements
+        self.ADD_complemts(
+            title= "Part-CT Phsycial x Digital",
+            xlable= "Parts ID",
+            ylable= "Cycle Time"
+        )
+
+
+        #--- Save
+        if self.save:
+            self.save_fig("Part-CT")
+
+        #--- Show
+        if self.show:
+            plt.show()
 
 
 

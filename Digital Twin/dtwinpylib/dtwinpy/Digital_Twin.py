@@ -347,7 +347,7 @@ class Digital_Twin():
         return self.digital_model
     
     #--- Run normally the Digital Model and analyze the results
-    def run_digital_model(self, plot= True, maxparts = None, until = None, targeted_part_id = None, targeted_cluster= None, verbose= True, generate_model = True):
+    def run_digital_model(self, plot= False, maxparts = None, until = None, targeted_part_id = None, targeted_cluster= None, verbose= True, generate_model = True):
         if generate_model == True:
             if maxparts == None:
                 maxparts = self.maxparts

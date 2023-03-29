@@ -9,6 +9,7 @@ import shutil
 import os
 import re
 import sys
+import json
 
 
 
@@ -171,6 +172,7 @@ class Helper():
             sys.exit()
 
         #- Delete ID database
+        """
         try:
             os.remove(exp_database_path)
             print(f"|-- ID Database deleted successfuly from {exp_database_path}")
@@ -180,6 +182,7 @@ class Helper():
             self.printer(f"[ERROR][helper.py/delete_databases()] The ID Database is busy somewhere, please close and try again.", 'red')
             self.printer(f"---- Digital Twin was killed at {tstr} ----", 'red')
             sys.exit()
+        """
 
     #--- Delete models (except by one specific file)
     def delete_old_model(self, folder_path, file_to_save):
@@ -192,3 +195,6 @@ class Helper():
                 print(f"File '{file_name}' deleted...")
                 model_counter += 1
         print(f"Done! Deleted {model_counter} successfuly")
+
+    def convert_stringVect_to_listVect(self, stringVect):
+        return json.loads(stringVect)

@@ -1069,6 +1069,16 @@ class Database():
         #--- Return the occupation vector
         return occupation_vector
 
-
+    # --------- Get specific value from one column of the Result table ---------
+    def get_global_result(self, result):
+        """ Get a specific result from a column from the result table"""
+        with sqlite3.connect(self.database_path) as db:
+            result = db.execute(
+                f"""
+                SELECT {result} from results
+                """
+            ).fetchone()
+        
+        return result[0]
 
 
