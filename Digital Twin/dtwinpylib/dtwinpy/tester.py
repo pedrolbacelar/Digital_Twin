@@ -578,7 +578,7 @@ class Tester():
     #--- create results table
     def create_results_table(self):
         with sqlite3.connect(self.exp_db_path) as exp_db:
-            exp_db.execute(f"""CREATE TABLE IF NOT EXISTS global_results (
+            exp_db.execute(f"""CREATE TABLE IF NOT EXISTS results (
                 result_id INTEGER PRIMARY KEY,
                 run_time INTEGER,
                 start_time INTEGER,
@@ -660,7 +660,7 @@ class Tester():
             CT_system,
             List_parts_finished ,
             CT_parts,
-            average_CT FLOAT) VALUES (?,?,?,?,?,?,?,?,?,?,?)
+            average_CT) VALUES (?,?,?,?,?,?,?,?,?,?,?)
             """,(run_time,
                 first_start_time,
                 last_finish_time,
