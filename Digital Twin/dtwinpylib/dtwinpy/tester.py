@@ -335,8 +335,8 @@ class Tester():
                     logic_threshold,
                     input_threshold) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                 """,(self.exp_id, self.helper.get_time_now()[0], self.objective, self.name, self.Freq_Sync, 
-                        self.Freq_Valid, self.Freq_Service, self.delta_t_treshold, self.flag_API, 
-                        self.rct_threshold, self.rct_queue, self.flag_external_service, self.logic_threshold, 
+                        self.Freq_Valid, self.Freq_Service, self.delta_t_treshold, str(self.flag_API), 
+                        self.rct_threshold, self.rct_queue, str(self.flag_external_service), self.logic_threshold, 
                         self.input_threshold))
                 exp_db.commit()
 
@@ -509,14 +509,34 @@ class Tester():
 
     #--- assign exp_id to the 'recent' experiment in the allexp_database and exp_database
     def assign_exp_id(self,exp_id):
+        #--- updating in allexp
         with sqlite3.connect(self.allexp_path) as allexp:
             cursor = allexp.cursor()
             cursor.execute(f"""UPDATE {self.allexp_table} SET exp_id = '{exp_id}' WHERE exp_id = 'recent'""")
             allexp.commit()
-        with sqlite3.connect(self.allexp_path) as exp_db:
+        #--- updating in exp_db
+        with sqlite3.connect(self.exp_db_path) as exp_db:
             cursor = exp_db.cursor()
-            cursor.execute(f"""UPDATE {self.allexp_table} SET exp_id = '{exp_id}' WHERE exp_id = 'recent'""")
+            cursor.execute(f"""UPDATE setup_data SET exp_id = '{exp_id}' WHERE exp_id = 'recent'""")
+            exp_db.commit()
         self.exp_id = exp_id
+
+    #--- create results table
+    def create_results_table(self):
+        with sqlite3.connect(self.exp_db_path) as exp_db:
+            exp_db.execute(f"""CREATE TABLE IF NOT EXISTS global_results (
+                result_id INTEGER PRIMARY KEY,
+                run_duration INTEGER,
+                start_time INTEGER,
+                finish_time INTEGER,
+                number_of_parts processed INTEGER,
+                throughput per seconds FLOAT,
+                thourhput per hour FLOAT
+                system_CT FLOAT
+                parts_finished
+                )
+                """)
+            exp_db.commit()
 
 
     def calculate_CT(self, real_db_path):
@@ -531,7 +551,7 @@ class Tester():
             event = cursor.fetchall()
             last_finish_event = event[0][-1]
             last_part = event[0][4]
-            print(last_part)
+            print(f"last_part to exit is: {last_part}")
             
             # count number of times machine 5 appears with activity as finished
             cursor.execute("SELECT COUNT(*) FROM real_log WHERE machine_id = ? AND activity_type = ?", ('Machine 5','Finished'))
@@ -540,10 +560,10 @@ class Tester():
         #---throughput
         run_time = last_finish_event - first_start_event
         throughput_second = count/run_time #--- parts/second
-        throughput_hour = (count*60)/run_time
+        throughput_hour = (count*3600)/run_time
         ct_piece = run_time/count
 
-        print(f" start {first_start_event}, stop {last_finish_event}, number of parts {count}, duration {run_time}, throughput per seconds: {throughput_second}, thourhput per hour: {throughput_hour}, ct_piece {ct_piece}")
+        print(f"start: {first_start_event}\nstop: {last_finish_event}\nnumber of parts: {count}\nduration: {run_time}\nthroughput per seconds: {throughput_second}\nthourhput per hour: {throughput_hour}\nct_system: {ct_piece}")
         
         CT_part_time = []
         CT_part_list = []
@@ -552,23 +572,20 @@ class Tester():
             cursor = real_db.cursor()
             # get a list of the unique values in the column
             values = cursor.execute("SELECT DISTINCT part_id FROM real_log").fetchall()
-            print(values)
             # iterate over the values in the column
             for value in values:
-                if value[0] == last_part:
-                    break
                 # execute the query with the current value
                 start = cursor.execute(f"""SELECT timestamp_real FROM real_log WHERE part_id = '{value[0]}' AND machine_id = 'Machine 1' AND activity_type = 'Started'""").fetchall()
 
                 finish = cursor.execute(f"""SELECT timestamp_real FROM real_log WHERE part_id = '{value[0]}' AND machine_id = 'Machine 5' AND activity_type = 'Finished'""").fetchall()
-                print(start,finish,value[0])
+                # print(start,finish,value[0])
                 if finish != []:
                     CT_part_time.append(finish[0][0] - start[0][0])
                     CT_part_list.append(value[0])
 
-        print(CT_part_list)
-        print(CT_part_time)
-        print(np.mean(CT_part_time))
+        print(f"parts finished: {CT_part_list}")
+        print(f"cycle time of individual parts: {CT_part_time}")
+        print(f"average cycle time of parts: {np.mean(CT_part_time)}")
 
 
 
