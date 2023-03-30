@@ -442,7 +442,7 @@ class Validator():
                         self.helper.kill()
                     break
             else:
-                self.helper.printer("[ERROR][validator.py/generate_Xs_machine()] value 1 not found in 'u' variable", 'red')
+                self.helper.printer("[WARNING][validator.py/generate_Xs_machine()] value 1 not found in 'u' variable")
                 print(f"u: {u}")
                 print("Printing input parameters...")
                 print(f"loc = {loc}")
@@ -537,7 +537,7 @@ class Validator():
             plt.show()
 
         if Xs[0] != int or Xs[0] != float:
-            self.helper.printer(f"[ERROR][validator.py/generate_Xs_machine()] The Xs vector is not a made by numbers! Check the U vector:", 'red')
+            self.helper.printer(f"[WARNING][validator.py/generate_Xs_machine()] The Xs vector is not a made by numbers! Check the U vector:", 'red')
             print(f"u: {u}")
             print("|--- Printing input parameters...")
             print(f"loc = {loc}")
