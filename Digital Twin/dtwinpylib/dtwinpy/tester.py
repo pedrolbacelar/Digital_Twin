@@ -26,27 +26,27 @@ class Tester():
         self.helper = Helper()
         self.from_data_generation = from_data_generation
         
+        #--------------- LOAD SETUP -----------------
+        self.load_exp_setup()
+
+        # ------ Create a Digital Twin object ------
+        self.mydt = Digital_Twin(name= self.name, keepModels= True)
+        self.initial_digital_mode = self.mydt.generate_digital_model()
+        self.intial_WIP = self.initial_digital_mode.get_all_parts()
+
+        #------------------------------- experimental database & Figure path ------------------------------
+        if self.from_data_generation == False:
+            self.exp_db_path = f"databases/{self.name}/exp_database.db"
+            self.figures_folder = f"figures/{self.name}"
+
+        if self.from_data_generation == True:
+            self.exp_db_path = f"data_generation/{self.exp_id}/databases/exp_database.db"
+            self.figures_folder = f"data_generation/{self.exp_id}/figures"
         
-        if name != None:
-            self.name = name
-            # ------ Create a Digital Twin object ------
-            self.mydt = Digital_Twin(name= self.name)
-            self.initial_digital_mode = self.mydt.generate_digital_model()
-            self.intial_WIP = self.initial_digital_mode.get_all_parts()
-
-            #------------------------------- experimental database & Figure path ------------------------------
-            if self.from_data_generation == False:
-                self.exp_db_path = f"databases/{self.name}/exp_database.db"
-                self.figures_folder = f"figures/{self.name}"
-
-            if self.from_data_generation == True:
-                self.exp_db_path = f"data_generation/{self.exp_id}/databases/exp_database.db"
-                self.figures_folder = f"data_generation/{self.exp_id}/figures"
-            
-            print("|-- Printing Paths:")
-            print(f"|---- Experimental Database Path: {self.exp_db_path}")
-            print(f"|---- Figures Folder Path: {self.figures_folder}")
-            #------------------------------------------------------------------------------------------
+        print("|-- Printing Paths:")
+        print(f"|---- Experimental Database Path: {self.exp_db_path}")
+        print(f"|---- Figures Folder Path: {self.figures_folder}")
+        #------------------------------------------------------------------------------------------
 
         
 
@@ -54,7 +54,7 @@ class Tester():
 
     # ----- Deafult procedures to deal with allexp_db -----   
     def initiate(self):
-               #--------------- LOAD SETUP -----------------
+        #--------------- LOAD SETUP -----------------
         self.load_exp_setup()      
         self.replace_initial_json() #--- replace initial json in models folder
 
@@ -678,7 +678,7 @@ class Tester():
             flag_initial = True
             try:
                 part_index = intial_parts.index(part_name)
-                print(f"{part_name} is an initial part...")
+                #print(f"{part_name} is an initial part...")
                 
             except ValueError:
                 flag_initial = False
@@ -720,7 +720,7 @@ class Tester():
                 
             except ValueError:
                 flag_finished = False
-                print(f"{next_part_name} didn't finished the cycle...")
+                #print(f"{next_part_name} didn't finished the cycle...")
             
             if flag_finished == True:
                 CT_start_dictionary[next_part_name] = next_start_time
@@ -740,8 +740,8 @@ class Tester():
         # ---------------------------------------------------------------------------------
 
         # ---------- WRITE dictionary results in the vector ----------
-        print(f"CT_finish_dictionary: {CT_finish_dictionary}")
-        print(f"CT_start_dictionary: {CT_start_dictionary}")
+        #print(f"CT_finish_dictionary: {CT_finish_dictionary}")
+        #print(f"CT_start_dictionary: {CT_start_dictionary}")
 
         for key_part in CT_start_dictionary:
             CT_parts_name_vector.append(key_part)
@@ -807,8 +807,6 @@ class Tester():
         (CT_part_list, CT_part_time) = self.calculate_CT_complete(real_db_path, WIP_parts)
 
         average_CT = np.mean(CT_part_time)
-        print(f"* parts finished: {CT_part_list}")
-        print(f"* cycle time of individual parts: {CT_part_time}")
         print(f"average cycle time of parts: {average_CT}")
 
         #--- write to results table in exp_db

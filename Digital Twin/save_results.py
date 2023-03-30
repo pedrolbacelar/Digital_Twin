@@ -109,8 +109,7 @@ def save_results(exp_id):
     #-- write to results table
     print("calculating CT (system & parts) and writing to results table ...")
     real_db_path = f"{root_folder}/{folder_name}/databases/real_database.db"
-    test.create_results_table()
-    test.calculate_CT(real_db_path=real_db_path)
+    test.run_analysis(real_db_path=real_db_path)
 
     #--- 12. plot some results
     #-- figures are plotted into fgures folder in the root

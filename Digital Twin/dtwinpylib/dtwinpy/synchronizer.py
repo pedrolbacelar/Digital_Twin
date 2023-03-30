@@ -19,8 +19,9 @@ importlib.reload(dtwinpylib.dtwinpy.validator)"""
 
 
 class Zone():
-    def __init__(self, machine, queue_list):
+    def __init__(self, machine, queue_list, digital_model= None):
         self.helper = Helper()
+        self.digital_model = digital_model
         self.name = "Zone of " + machine.get_name()
         self.machine = machine
         self.zoneID = self.machine.get_id()
@@ -326,7 +327,7 @@ class Synchronizer():
             machine_queues_in_list = machine.get_queue_in()
 
             #--- create a temp Zone object
-            new_zone = Zone(machine= machine, queue_list= machine_queues_in_list)
+            new_zone = Zone(machine= machine, queue_list= machine_queues_in_list, digital_model= self.digital_model)
 
             #--- add the Zone object in the dictionary of zones
             self.zones_dict[machine_name] = new_zone
