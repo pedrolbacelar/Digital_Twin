@@ -1,11 +1,12 @@
 import paho.mqtt.client as mqtt
 import json
 from dtwinpylib.dtwinpy.tester import Tester
+from dtwinpylib.dtwinpy.helper import Helper
 from time import sleep
 
-
+helper = Helper()
 test = Tester()
-test.exp_db_path = "databases/5s_determ/exp_database.db"
+test.exp_db_path = "databases/5s_stho/exp_database.db"
 myip = "127.0.0.1"
 factory_ip = "192.168.0.50"
 
@@ -32,30 +33,29 @@ client.loop_start()
 
 
 #----------------------------------- INPUT DATA ----------------------------------------
-process1 = ['NULL','NULL',35,60,'NULL']  #--- process _time_vector default= [11,17,60,38,10]
-process2 = ['NULL','NULL',60,35,'NULL']
+wait_interval = 1
+process1 = ['NULL','NULL',55,35,'NULL']  #--- process _time_vector default= [11,17,60,38,10]
 matrix_process = [
-    process1,
-    process2
+    process1
 ]
 #---------------------------------------------------------------------------------------
 
 load_unload_time = [9,8,10,8,8]
 
 
-wait_interval = 250
+
 process_counter = 0
 
 print(f"Automatic Change of Process time activated...")
-print(f"Process times to be send:")
+print(f"|--- Process times to be send:")
 for process in matrix_process:
-    print(f"process: {process}")
+    print(f"|------ process: {process}")
 
 while process_counter < len(matrix_process):
     # --------------------------------- WAITING TIME --------------------------------------
-    print(f"Sleeping for {wait_interval}...")
+    helper.printer(f"Sleeping for {wait_interval}...", 'purple')
     sleep(wait_interval)
-    print(f"Waking up and preparing payloads...")
+    helper.printer(f" ---------- Waking up and preparing payloads... ----------", 'purple')
     #---------------------------------------------------------------------------------------
 
     #----------------- CURRENT PROCESS TO SEND -----------------

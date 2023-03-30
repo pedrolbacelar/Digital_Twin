@@ -25,10 +25,8 @@ class Tester():
         self.exp_id = exp_id
         self.helper = Helper()
         self.from_data_generation = from_data_generation
-        
-        #--------------- LOAD SETUP -----------------
-        self.load_exp_setup()
-
+    
+    def initiate_for_analysis(self):
         # ------ Create a Digital Twin object ------
         self.mydt = Digital_Twin(name= self.name, keepModels= True)
         self.initial_digital_mode = self.mydt.generate_digital_model()
@@ -43,6 +41,9 @@ class Tester():
             self.exp_db_path = f"data_generation/{self.exp_id}/databases/exp_database.db"
             self.figures_folder = f"data_generation/{self.exp_id}/figures"
         
+        #--- generate the path of the real database
+        self.real_database_path = self.exp_db_path.replace('exp', 'real')
+
         print("|-- Printing Paths:")
         print(f"|---- Experimental Database Path: {self.exp_db_path}")
         print(f"|---- Figures Folder Path: {self.figures_folder}")
@@ -70,6 +71,7 @@ class Tester():
             self.exp_db_path = f"data_generation/{self.exp_id}/databases/exp_database.db"
             self.figures_folder = f"data_generation/{self.exp_id}/figures"
         
+        #
         print("|-- Printing Paths:")
         print(f"|---- Experimental Database Path: {self.exp_db_path}")
         print(f"|---- Figures Folder Path: {self.figures_folder}")
@@ -135,6 +137,10 @@ class Tester():
             # ------------- PLOT QUEUE OCCUPATION -------------
             plotter.plot_queues_occupation()
             # --------------------------------------------------
+
+            # ------------- PLOT COMPARATIVE CT ----------------
+            # only for system with alternating policy
+            if self.flag_publish == False: plotter.plot_comparative_parts_CT()
 
     # ----- Analyses -----
     def run_analysis(self, real_db_path):
@@ -1230,6 +1236,10 @@ class Plotter():
             plt.show()
 
         # ------------------------- ERROR PLOT -------------------------
+        #---------
+        plt.clf()
+        #---------
+
         #--- Calculates the common len
         len_digital = len(list_CT_vector_digital)
         len_real = len(list_CT_vector_real)
@@ -1307,6 +1317,10 @@ class Plotter():
             plt.show()
 
         # ---------- PLOT ERROR BAR EVOLUTION ----------
+        #---------
+        plt.clf()
+        #---------
+        
         plt.plot(
             list_parts_vector_digital,
             list_CT_vector_digital,
@@ -1331,11 +1345,22 @@ class Plotter():
         if self.show:
             plt.show()
         
+    def plot_comparative_RCT(self):
+        """
+        This function calculates the RCT for all the parts in the perspective of machine 2.
+        In this way is possible to compare with the predicted RCT from the Digital Twin with
+        the actual path that the part took.
+        """
 
-
-
-
-
+        #--- Get the Real RCT and the predicted RCT (for both path) from the real log
+        (parts_name_finished_vec, RCT_real, RCT_path1_vec, RCT_path2_vec) = self.exp_database.get_real_RCT(self.real_database_path)
+        
+        #--- Convert the list of parts names in integers ids
+        parts_finished_ids_vec = []
+        for part_name in parts_name_finished_vec: parts_finished_ids_vec.append(self.helper.extract_int(part_name))
+            
+        linestyle= 'dashdot'
+    
 
 
 

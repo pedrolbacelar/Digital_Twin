@@ -8,6 +8,8 @@ import json
 def save_results(exp_id):
     test=Tester(exp_id = exp_id)
     test.load_exp_setup()
+    test.initiate_for_analysis()
+    
     dt_name = test.name
 
     global folder_name

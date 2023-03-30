@@ -1081,4 +1081,65 @@ class Database():
         
         return result[0]
 
+    def get_real_RCT(self, real_database_path):
+        """ Calculates the RCT of the parts from the real log when they are in the branch machine (Machine 2)"""
+        #--- Take the name and time of the parts that finish the simulation
+        with sqlite3.connect(real_database_path) as db:
+            #-- Get name of parts finished by Machine 5
+            parts_name_finished_vec = db.execute("SELECT part_id FROM real_log WHERE machine_id= ? and activity_type= ?", ('Machine 5', 'Finished')).fetchall()
+            parts_time_finished_vec = db.execute("SELECT timestamp_real FROM real_log WHERE machine_id= ? and activity_type= ?", ('Machine 5', 'Finished')).fetchall()
+            #-- convert tuple
+            parts_name_finished_vec = self.helper.convert_tuple_vector_to_list(parts_name_finished_vec)
+            parts_time_finished_vec = self.helper.convert_tuple_vector_to_list(parts_time_finished_vec)
+
+
+        #--- Take the finish time in machine 1 (branch machine) only for the parts that exits the system
+        # NOTE: We know that the DT is calculating the RCT based on the first position of the queue and
+        # here we're taking when the machine starts, but this is okay. The maximun error will be the process
+        # time of the first machine... 
+        with sqlite3.connect(real_database_path) as db:
+            parts_time_start_vec = []
+            for part_name in parts_name_finished_vec:
+                #--- Get start time 
+                parts_time_start = db.execute("SELECT timestamp_real FROM real_log WHERE machine_id= ? and activity_type= ? and part_id= ?", ('Machine 2', 'Started', part_name)).fetchall()
+                parts_time_start_vec.append(parts_time_start[0])
+
+        #--- Calculate the RCT based on the finish and start time
+        RCT_real = []
+        for i in range(len(parts_name_finished_vec)):
+            #--- Parameters
+            part_name = parts_name_finished_vec[i]
+            start_time = parts_time_start_vec[i]
+            finish_time = parts_time_finished_vec[i]
+
+            #--- RCT
+            RCT = finish_time - start_time
+            RCT_real.append(RCT)
+
+        #--- Takes the RCT predicted by the Digital Twin for each part finished in the system
+        RCT_path1_vec = []
+        RCT_path2_vec = []
+
+        for part_name in parts_name_finished_vec:
+            with sqlite3.connect(real_database_path) as db:
+                RCT_raw = db.execute("SELECT RCT_path1, RCT_path2 WHERE partid = ?", (part_name,))
+
+                #--- take the most recent in case of recalculation
+                RCT_raw = RCT_raw[-1]
+
+                #--- Takes for each path
+                rct_path1 = RCT_raw[0]
+                rct_path2 = RCT_raw[1]
+
+                #--- Add into the vector
+                RCT_path1_vec.append(rct_path1)
+                RCT_path2_vec.append(rct_path2)
+        
+        return (parts_name_finished_vec, RCT_real, RCT_path1_vec, RCT_path2_vec)
+
+
+
+
+
+
 
