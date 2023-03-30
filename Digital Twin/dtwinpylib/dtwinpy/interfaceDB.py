@@ -1102,7 +1102,7 @@ class Database():
             for part_name in parts_name_finished_vec:
                 #--- Get start time 
                 parts_time_start = db.execute("SELECT timestamp_real FROM real_log WHERE machine_id= ? and activity_type= ? and part_id= ?", ('Machine 2', 'Started', part_name)).fetchall()
-                parts_time_start_vec.append(parts_time_start[0])
+                parts_time_start_vec.append(parts_time_start[0][0])
 
         #--- Calculate the RCT based on the finish and start time
         RCT_real = []
@@ -1121,8 +1121,8 @@ class Database():
         RCT_path2_vec = []
 
         for part_name in parts_name_finished_vec:
-            with sqlite3.connect(real_database_path) as db:
-                RCT_raw = db.execute("SELECT RCT_path1, RCT_path2 WHERE partid = ?", (part_name,))
+            with sqlite3.connect(self.database_path) as db:
+                RCT_raw = db.execute("SELECT RCT_path1, RCT_path2 FROM RCTpaths WHERE partid = ?", (part_name,)).fetchall()
 
                 #--- take the most recent in case of recalculation
                 RCT_raw = RCT_raw[-1]

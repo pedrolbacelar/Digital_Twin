@@ -896,6 +896,9 @@ class Plotter():
             database_path= self.exp_database_path
         )
 
+        #--- Real database path
+        self.real_database_path = self.exp_database_path.replace('exp', 'real')
+
         #--- Figures Folder
         self.figures_path = figures_path
 
@@ -1320,7 +1323,7 @@ class Plotter():
         #---------
         plt.clf()
         #---------
-        
+
         plt.plot(
             list_parts_vector_digital,
             list_CT_vector_digital,
@@ -1358,10 +1361,52 @@ class Plotter():
         #--- Convert the list of parts names in integers ids
         parts_finished_ids_vec = []
         for part_name in parts_name_finished_vec: parts_finished_ids_vec.append(self.helper.extract_int(part_name))
-            
+                
+        #---------
+        plt.clf()
+        #---------
         linestyle= 'dashdot'
-    
+        #--- Plot REAL RCT for each finished part
+        plt.plot(
+            parts_finished_ids_vec, 
+            RCT_real, 
+            marker='o',
+            linestyle= linestyle,
+            label= 'Physical RCT'
+        )
 
+        #--- Plot Predicted RCT Path 1 RCT for each finished part
+        plt.plot(
+            parts_finished_ids_vec, 
+            RCT_path1_vec, 
+            marker='o',
+            linestyle= linestyle,
+            label= 'Predicted RCT Path 1 (Queue 3)'
+        )
+
+        #--- Plot Predicted RCT Path 2 RCT for each finished part
+        plt.plot(
+            parts_finished_ids_vec, 
+            RCT_path2_vec, 
+            marker='o',
+            linestyle= linestyle,
+            label= 'Predicted RCT Path 2 (Queue 4)'
+        )
+
+        #--- Add complements
+        self.ADD_complemts(
+            title= "Comparing Real RCT with DT predictions",
+            xlable= "Timestamp (secs)",
+            ylable= "RCT"
+        )
+        
+        #--- Save
+        if self.save:
+            self.save_fig("Real_RCT")
+
+        #--- Show
+        if self.show:
+            plt.show()
 
 
 

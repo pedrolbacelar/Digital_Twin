@@ -8,7 +8,7 @@ import sqlite3
 allexp_database_path = 'allexp_database.db'
 
 ############## EXPERIMENT OBJECTIVE ##############
-objective= "Normal test without publishing RCT, but with delta_t_treshold= 20. Trying to push validation until the limit"
+objective= "Without Publishing RCT and adding a change in the process time of machine 1 and 5 for a higher one. Delta t now is 20 (10 to 40 for both)"
 ##################################################
 
 ################################ INPUT PARAMETERS ################################
