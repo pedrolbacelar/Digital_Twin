@@ -49,104 +49,10 @@ exp_db_path = 'databases/CT/exp_database.db'
 real_db_path = 'databases/CT/real_database.db'
 fig_path = 'figures/CT'
 
-with sqlite3.connect(exp_db_path) as exp_db:
-    exp_db.execute(f"""CREATE TABLE IF NOT EXISTS results (
-        result_id INTEGER PRIMARY KEY,
-        run_time INTEGER,
-        start_time INTEGER,
-        finish_time INTEGER,
-        last_part TEXT,
-        number_of_parts_processed INTEGER,
-        throughput_per_seconds FLOAT,
-        thourhput_per_hour FLOAT,
-        CT_system FLOAT,
-        List_parts_finished  TEXT,
-        CT_parts TEXT,
-        average_CT FLOAT
-        )
-        """)
-    exp_db.commit()
 
-def calculate_CT(real_db_path, exp_db_path):
-    with sqlite3.connect(real_db_path) as real_db:
-        cursor = real_db.cursor()
+tester = Tester(name= "CT")
+tester.run_analysis(real_db_path)
 
-        # first and last trace of started nd finished.
-        cursor.execute("SELECT * FROM real_log LIMIT 1")
-        first_start_time = cursor.fetchone()[-1]
-
-        cursor.execute("SELECT * FROM real_log WHERE machine_id = ? AND activity_type = ? ORDER BY rowid DESC LIMIT 1", ('Machine 5','Finished'))
-        event = cursor.fetchall()
-        last_finish_time = event[0][-1]
-        last_part = event[0][4]
-        print(f"last_part to exit is: {last_part}")
-        
-        # count number of times machine 5 appears with activity as finished
-        cursor.execute("SELECT COUNT(*) FROM real_log WHERE machine_id = ? AND activity_type = ?", ('Machine 5','Finished'))
-        count = cursor.fetchone()[0]
-
-    #---throughput
-    run_time = last_finish_time - first_start_time
-    throughput_second = count/run_time #--- parts/second
-    throughput_hour = (count*3600)/run_time #--- parts/hour
-    ct_system = run_time/count
-
-
-    print(f"start: {first_start_time}\nstop: {last_finish_time}\nnumber of parts: {count}\nduration: {run_time}\nthroughput per seconds: {throughput_second}\nthourhput per hour: {throughput_hour}\nct_system: {ct_system}")
-    
-    #--- part level cycle time
-    CT_part_time = []
-    CT_part_list = []
-    #--- cycle time of parts
-    with sqlite3.connect(real_db_path) as real_db:
-        cursor = real_db.cursor()
-        # get a list of the unique values in the column
-        values = cursor.execute("SELECT DISTINCT part_id FROM real_log").fetchall()
-        # iterate over the values in the column
-        for value in values:
-            # execute the query with the current value
-            start = cursor.execute(f"""SELECT timestamp_real FROM real_log WHERE part_id = '{value[0]}' AND machine_id = 'Machine 1' AND activity_type = 'Started'""").fetchall()
-
-            finish = cursor.execute(f"""SELECT timestamp_real FROM real_log WHERE part_id = '{value[0]}' AND machine_id = 'Machine 5' AND activity_type = 'Finished'""").fetchall()
-            # print(start,finish,value[0])
-            if finish != []:
-                CT_part_time.append(finish[0][0] - start[0][0])
-                CT_part_list.append(value[0])
-    average_CT = np.mean(CT_part_time)
-    print(f"parts finished: {CT_part_list}")
-    print(f"cycle time of individual parts: {CT_part_time}")
-    print(f"average cycle time of parts: {average_CT}")
-
-    #--- write to results table in exp_db
-    with sqlite3.connect(exp_db_path) as exp_db:
-        cursor = exp_db.cursor()
-        cursor.execute(f"""INSERT INTO results (
-        run_time,
-        start_time,
-        finish_time,
-        last_part,
-        number_of_parts_processed,
-        throughput_per_seconds,
-        thourhput_per_hour,
-        CT_system,
-        List_parts_finished ,
-        CT_parts,
-        average_CT) VALUES (?,?,?,?,?,?,?,?,?,?,?)
-        """,(run_time,
-            first_start_time,
-            last_finish_time,
-            str(last_part),
-            count,
-            throughput_second,
-            throughput_hour,
-            ct_system,
-            json.dumps(CT_part_list),
-            json.dumps(CT_part_time),
-            average_CT))
-        
-        exp_db.commit()
-
-calculate_CT(real_db_path, exp_db_path)
 
 mydt = Digital_Twin(name= "CT")
 plotter = Plotter(
@@ -157,3 +63,67 @@ plotter = Plotter(
 )
 
 plotter.plot_comparative_parts_CT()
+
+
+"""
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Generate some sample data
+x = np.linspace(0, 10, 20)
+y1 = np.sin(x)
+y2 = np.sin(x) + np.random.normal(0, 0.1, 20)
+
+# Compute the error bars for each data point
+err1 = 0.1 * np.ones_like(x)
+err2 = 0.2 * np.ones_like(x)
+
+# Create a line plot of the data
+#plt.plot(x, y1, label='Ideal', marker= 'o')
+plt.plot(x, y2, label='Digital', marker= 'o')
+
+# Add error bars to show the range of the data points
+plt.errorbar(x, y2, yerr=err2, linestyle='None', capsize=3, color='orange')
+
+# Add labels and title
+plt.xlabel('Time')
+plt.ylabel('Value')
+plt.title('Comparison of Digital and Physical Simulations with Ideal')
+
+# Add a legend
+plt.legend()
+
+# Show the plot
+plt.show()
+"""
+
+"""
+import matplotlib.pyplot as plt
+
+# generate some data
+x = [1, 2, 3, 4, 5]
+y1 = [10, 20, 30, 40, 50]
+y2 = [2, 1, 3, 7, 2]
+
+# create the figure and the first axis
+fig, ax1 = plt.subplots()
+
+# plot the first data set
+ax1.plot(x, y1, color='blue')
+ax1.set_xlabel('X-axis')
+ax1.set_ylabel('Raw error', color='blue')
+
+# create the second axis
+ax2 = ax1.twinx()
+
+# plot the second data set
+ax2.plot(x, y2, color='red')
+ax2.set_ylabel('Percentage of error', color='red')
+
+# add a legend
+ax1.legend(['Raw error'], loc='upper left')
+ax2.legend(['Percentage of error'], loc='upper right')
+
+plt.show()
+"""
+

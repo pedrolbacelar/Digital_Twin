@@ -199,3 +199,8 @@ class Helper():
 
     def convert_stringVect_to_listVect(self, stringVect):
         return json.loads(stringVect)
+    
+    def convert_tuple_vector_to_list(self, tuple_vector):
+        for i in range(len(tuple_vector)):
+            tuple_vector[i] = tuple_vector[i][0]
+        return tuple_vector

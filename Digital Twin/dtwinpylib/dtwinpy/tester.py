@@ -11,21 +11,44 @@ import numpy as np
 import shutil
 import sys
 from matplotlib import pyplot as plt
+import re
+from natsort import natsort_keygen
+
+
 
 
 class Tester():
-    def __init__(self, exp_id = 'recent', from_data_generation= False):
-        # ------ Create a Digital Twin object ------
-        self.mydt = Digital_Twin(name= self.name)
-        self.initial_digital_mode = self.mydt.generate_digital_model()
-        self.intial_WIP = self.initial_digital_mode.get_all_parts()
-
+    def __init__(self, exp_id = 'recent', from_data_generation= False, name= None):
         #--- attributes from allexp_database
         self.allexp_path = 'allexp_database.db'
         self.allexp_table = 'experiment_setup'
         self.exp_id = exp_id
         self.helper = Helper()
         self.from_data_generation = from_data_generation
+        
+        
+        if name != None:
+            self.name = name
+            # ------ Create a Digital Twin object ------
+            self.mydt = Digital_Twin(name= self.name)
+            self.initial_digital_mode = self.mydt.generate_digital_model()
+            self.intial_WIP = self.initial_digital_mode.get_all_parts()
+
+            #------------------------------- experimental database & Figure path ------------------------------
+            if self.from_data_generation == False:
+                self.exp_db_path = f"databases/{self.name}/exp_database.db"
+                self.figures_folder = f"figures/{self.name}"
+
+            if self.from_data_generation == True:
+                self.exp_db_path = f"data_generation/{self.exp_id}/databases/exp_database.db"
+                self.figures_folder = f"data_generation/{self.exp_id}/figures"
+            
+            print("|-- Printing Paths:")
+            print(f"|---- Experimental Database Path: {self.exp_db_path}")
+            print(f"|---- Figures Folder Path: {self.figures_folder}")
+            #------------------------------------------------------------------------------------------
+
+        
 
 
 
@@ -113,6 +136,13 @@ class Tester():
             plotter.plot_queues_occupation()
             # --------------------------------------------------
 
+    # ----- Analyses -----
+    def run_analysis(self, real_db_path):
+        #--- Create global results table
+        self.create_results_table()
+
+        #--- Calculate main global results
+        self.calculate_CT(real_db_path= real_db_path, WIP_parts= self.intial_WIP)
 #-------------------------------------------------------------------------------------------------
 #---------------------------------------- MAIN FUNCTIONS -----------------------------------------
 #-------------------------------------------------------------------------------------------------
@@ -608,12 +638,119 @@ class Tester():
                 """)
             exp_db.commit()
 
-    #--- calculate CT and TH of system & parts and write to results table
-    def calculate_CT(self, real_db_path, WIP_parts):
+    #--- complete CT of each part (considering waiting time)
+    def calculate_CT_complete(self, real_db_path, WIP_parts):
         #--- Create a list with name of the initial parts
         intial_parts= []
+        initial_parts_id = []
         for part in WIP_parts:
             intial_parts.append(part.get_name())
+            initial_parts_id.append(part.get_id())
+        
+        #--- Get the highest part id
+        print(f"initial_parts_id: {initial_parts_id}")
+        last_part_id = max(initial_parts_id)
+
+        #--- Define vectors
+        CT_parts_name_vector = []
+        CT_parts_time_vector = []
+        CT_start_dictionary = {}
+        CT_finish_dictionary = {}
+
+        # ------ Connect with the real database ------
+        with sqlite3.connect(real_db_path) as db:
+            #-- Get name of parts finished by Machine 5
+            parts_name_finished = db.execute("SELECT part_id FROM real_log WHERE machine_id= ? and activity_type= ?", ('Machine 5', 'Finished')).fetchall()
+            parts_time_finished = db.execute("SELECT timestamp_real FROM real_log WHERE machine_id= ? and activity_type= ?", ('Machine 5', 'Finished')).fetchall()
+            
+            #-- convert tuple
+            parts_name_finished = self.helper.convert_tuple_vector_to_list(parts_name_finished)
+            parts_time_finished = self.helper.convert_tuple_vector_to_list(parts_time_finished)
+
+            #--- Get the global start time of the simulation
+            start_time_global = db.execute("SELECT timestamp_real FROM real_log WHERE event_id= ?", (1,)).fetchall()
+            start_time_global= self.helper.convert_tuple_vector_to_list(start_time_global)
+            start_time_global = start_time_global[0]
+
+        #--- Cycle time for initial parts
+        for part_name in parts_name_finished:
+            # ------------ CHECK FOR INITIAL PART ------------
+            flag_initial = True
+            try:
+                part_index = intial_parts.index(part_name)
+                print(f"{part_name} is an initial part...")
+                
+            except ValueError:
+                flag_initial = False
+            # -------------------------------------------------
+
+            if flag_initial == True:
+                CT_start_dictionary[part_name] = start_time_global
+
+                # ----------- CHECK FOR FINISHED TIME -------------
+                flag_initial_finished = True
+                try: 
+                    part_index = parts_name_finished.index(part_name)
+                except ValueError:
+                    flag_initial_finished = False
+
+                if flag_initial_finished == True:
+                    finished_time = parts_time_finished[part_index]
+                    CT_finish_dictionary[part_name] = finished_time
+            
+        #--- Cycle time for parts higher than the previous last_part_id
+        for i in range(len(parts_name_finished)):
+            part_name = parts_name_finished[i]
+
+            #-- Extract the ID of the part finished
+            part_finished_id = self.helper.extract_int(part_name)
+
+            #-- Update next id and last id
+            next_part_id = last_part_id + 1
+            last_part_id += 1
+            next_part_name = f'Part {next_part_id}'
+
+            #-- Get the finished (started for the next part)
+            next_start_time = parts_time_finished[i]
+
+            #-- Check if that part finished the next cycle
+            flag_finished = True
+            try:
+                part_index = parts_name_finished.index(next_part_name)
+                
+            except ValueError:
+                flag_finished = False
+                print(f"{next_part_name} didn't finished the cycle...")
+            
+            if flag_finished == True:
+                CT_start_dictionary[next_part_name] = next_start_time
+
+                #-- Since the part was finished, looks for the Finished time of that part
+                finished_time = parts_time_finished[part_index]
+                CT_finish_dictionary[next_part_name] = finished_time
+
+        #--- Order the dictionaries based on the numerical order
+        # Define a function to split the keys into alphabetical and numerical parts
+        # Generate a key function using natsort_keygen() to sort the keys in natural numerical order
+        key_func = natsort_keygen()
+    
+        # --------------------------------- ORDERING --------------------------------------
+        CT_start_dictionary = dict(sorted(CT_start_dictionary.items(), key=lambda x: key_func(x[0])))
+        CT_finish_dictionary = dict(sorted(CT_finish_dictionary.items(), key=lambda x: key_func(x[0])))
+        # ---------------------------------------------------------------------------------
+
+        # ---------- WRITE dictionary results in the vector ----------
+        print(f"CT_finish_dictionary: {CT_finish_dictionary}")
+        print(f"CT_start_dictionary: {CT_start_dictionary}")
+
+        for key_part in CT_start_dictionary:
+            CT_parts_name_vector.append(key_part)
+            CT_parts_time_vector.append(CT_finish_dictionary[key_part] - CT_start_dictionary[key_part])
+        
+        return (CT_parts_name_vector, CT_parts_time_vector)
+
+    #--- calculate CT and TH of system & parts and write to results table
+    def calculate_CT(self, real_db_path, WIP_parts):
 
         with sqlite3.connect(real_db_path) as real_db:
             cursor = real_db.cursor()
@@ -641,9 +778,11 @@ class Tester():
 
         print(f"start: {first_start_time}\nstop: {last_finish_time}\nnumber of parts: {count}\nduration: {run_time}\nthroughput per seconds: {throughput_second}\nthourhput per hour: {throughput_hour}\nct_system: {ct_system}")
         
+
         #--- part level cycle time
         CT_part_time = []
         CT_part_list = []
+        """
         #--- cycle time of parts
         with sqlite3.connect(real_db_path) as real_db:
             cursor = real_db.cursor()
@@ -653,29 +792,23 @@ class Tester():
             for value in values:
                 # execute the query with the current value
                 part_name = value[0]
-                flag_initial = True
-                try:
-                    index = intial_parts.index(part_name)
-                    print(f"{part_name} is an initial part...")
-                    
-                except ValueError:
-                    flag_initial = False
-                
-                start = cursor.execute(f"""SELECT timestamp_real FROM real_log WHERE part_id = '{value[0]}' AND machine_id = 'Machine 1' AND activity_type = 'Started'""").fetchall()
 
-                if flag_initial == True:
-                    start_intial = cursor.execute(f"""SELECT timestamp_real FROM real_log WHERE  machine_id = 'Machine 1' AND activity_type = 'Started'""").fetchall()
-                    start_intial = start_intial[0][0]
+                start = cursor.execute(f"SELECT timestamp_real FROM real_log WHERE part_id = '{value[0]}' AND machine_id = 'Machine 1' AND activity_type = 'Started'").fetchall()
 
                 
-                finish = cursor.execute(f"""SELECT timestamp_real FROM real_log WHERE part_id = '{value[0]}' AND machine_id = 'Machine 5' AND activity_type = 'Finished'""").fetchall()
+                finish = cursor.execute(f"SELECT timestamp_real FROM real_log WHERE part_id = '{value[0]}' AND machine_id = 'Machine 5' AND activity_type = 'Finished'").fetchall()
                 # print(start,finish,value[0])
                 if finish != []:
                     CT_part_time.append(finish[0][0] - start[0][0])
                     CT_part_list.append(value[0])
+        """
+
+        # ----------------- CALCULATE CT FOR EACH PART -----------------
+        (CT_part_list, CT_part_time) = self.calculate_CT_complete(real_db_path, WIP_parts)
+
         average_CT = np.mean(CT_part_time)
-        print(f"parts finished: {CT_part_list}")
-        print(f"cycle time of individual parts: {CT_part_time}")
+        print(f"* parts finished: {CT_part_list}")
+        print(f"* cycle time of individual parts: {CT_part_time}")
         print(f"average cycle time of parts: {average_CT}")
 
         #--- write to results table in exp_db
@@ -1048,6 +1181,21 @@ class Plotter():
         #--- Get finished parts and cycle from digital model
         (list_parts_vector_digital, list_CT_vector_digital) = digital_model.get_parts_CT_ordered()
         
+        #--- Excludes Extra Parts
+        if len(list_CT_vector_digital) > len(list_CT_vector_real):
+            extra_parts = len(list_CT_vector_digital) - len(list_CT_vector_real)
+            for i in range(extra_parts): 
+                list_CT_vector_digital.pop()
+                list_parts_vector_digital.pop()
+
+        if len(list_CT_vector_real) > len(list_CT_vector_digital):
+            extra_parts = len(list_CT_vector_real) - len(list_CT_vector_digital)
+            for i in range(extra_parts): 
+                list_CT_vector_real.pop()
+                list_parts_vector_real.pop()
+
+
+
 
         # ----- PLOT real Parts-CTs -----
         plt.plot(
@@ -1083,7 +1231,108 @@ class Plotter():
         if self.show:
             plt.show()
 
+        # ------------------------- ERROR PLOT -------------------------
+        #--- Calculates the common len
+        len_digital = len(list_CT_vector_digital)
+        len_real = len(list_CT_vector_real)
+        common_len = min(len_digital, len_real)
 
+        #--- Creates a error vector
+        error_vector = []
+        error_vector_relative = []
+        error_parts = []
+
+        #--- Fullfil the error vector
+        for i in range(common_len):
+            #-- Add the parts id
+            error_parts.append(list_parts_vector_real[i])
+
+            #-- Calculates the error
+            error = abs(list_CT_vector_digital[i] - list_CT_vector_real[i])
+            error_vector.append(error)
+
+            #-- Error Relative
+            error_relative = error / list_CT_vector_real[i]
+            error_vector_relative.append(error_relative)
+            
+
+        
+        # ---------- PLOT ERROR EVOLUTION ----------
+        fig, ax1 = plt.subplots()
+
+        ax1.plot(
+            error_parts,
+            error_vector,
+            marker='o',
+            label= 'Raw Error'
+        )
+
+        ax1.set_xlabel('Part IDs')
+        ax1.set_ylabel('Raw error')
+        ax1.set_title("Raw Error between phsyical and digital system")
+
+        #--- Save
+        if self.save:
+            self.save_fig("ERROR_CT_raw")
+
+        #--- Show
+        if self.show:
+            plt.show()
+
+
+        # create the second axis
+        #ax2 = ax1.twinx()
+        fig, ax2 = plt.subplots()
+
+        ax2.plot(
+            error_parts, 
+            error_vector_relative, 
+            marker='^',
+            label= "Percentage Error",
+            color= 'red'
+        )
+        ax2.set_ylabel('Percentage of error')
+        ax2.set_title("Relative Error between phsyical and digital system")
+
+
+        # add a legend
+        ax1.legend(['Raw error'], loc='upper left')
+        ax2.legend(['Percentage of error'], loc='upper right')
+
+
+        #--- Save
+        if self.save:
+            self.save_fig("ERROR_CT_rel")
+
+        #--- Show
+        if self.show:
+            plt.show()
+
+        # ---------- PLOT ERROR BAR EVOLUTION ----------
+        plt.plot(
+            list_parts_vector_digital,
+            list_CT_vector_digital,
+            marker='o',
+            label= 'ERROR Bar'
+        )
+
+        plt.errorbar(list_parts_vector_digital, list_CT_vector_digital, yerr=error_vector, linestyle='None', capsize=5, color='orange')
+
+        #--- Add complements
+        self.ADD_complemts(
+            title= "Error BAR between Phsycial x Digital",
+            xlable= "Parts ID",
+            ylable= "Cycle Time"
+        )
+
+        #--- Save
+        if self.save:
+            self.save_fig("Part_CT_error_bar")
+
+        #--- Show
+        if self.show:
+            plt.show()
+        
 
 
 
