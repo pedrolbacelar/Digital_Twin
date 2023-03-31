@@ -27,6 +27,7 @@ class Tester():
         self.from_data_generation = from_data_generation
     
     def initiate_for_analysis(self):
+        self.load_exp_setup()
         # ------ Create a Digital Twin object ------
         self.mydt = Digital_Twin(name= self.name, keepModels= True)
         self.initial_digital_mode = self.mydt.generate_digital_model()
@@ -142,6 +143,7 @@ class Tester():
             # only for system with alternating policy
             if self.flag_publish == False: plotter.plot_comparative_parts_CT()
 
+
     # ----- Analyses -----
     def run_analysis(self, real_db_path):
         #--- Create global results table
@@ -149,6 +151,19 @@ class Tester():
 
         #--- Calculate main global results
         self.calculate_CT(real_db_path= real_db_path, WIP_parts= self.intial_WIP)
+
+    def plot_utilization(self):
+        utilization_dict = self.run_utilization()
+        plotter = Plotter(
+                exp_database_path= self.exp_db_path,
+                plotterDT= self.mydt,
+                figures_path= self.figures_folder,
+                show= False,
+                save= True
+            )
+        
+        plotter.plot_utilization(utilization_dict)
+
 #-------------------------------------------------------------------------------------------------
 #---------------------------------------- MAIN FUNCTIONS -----------------------------------------
 #-------------------------------------------------------------------------------------------------
@@ -624,6 +639,46 @@ class Tester():
             exp_db.commit()
         self.exp_id = exp_id
 
+    #--- for writing process time change of real tein in real time basis
+    #-- to be used in change_rt_process_time.py
+    def write_rt_process_time_log(self, process_time_vector):
+        time = self.helper.get_time_now()
+        with sqlite3.connect(self.exp_db_path) as exp_db:
+            cursor = exp_db.cursor()
+            cursor.execute(f"""INSERT INTO rt_process_time_log (
+                publish_time_real,
+                publish_time_str,
+                Machine_1,
+                Machine_2,
+                Machine_3,
+                Machine_4,
+                Machine_5) VALUES (?,?,?,?,?,?,?)
+                """,
+                (time[1], 
+                time[0],
+                process_time_vector[0],
+                process_time_vector[1],
+                process_time_vector[2],
+                process_time_vector[3],
+                process_time_vector[4]))
+            exp_db.commit()
+
+    #--- create rt_process_time_log
+    def create_rt_process_time_log(self):
+        with sqlite3.connect(self.exp_db_path) as exp_db:
+            exp_db.execute(f"""CREATE TABLE IF NOT EXISTS rt_process_time_log (
+                publish_id INTEGER PRIMARY KEY,
+                publish_time_real INTEGER,
+                publish_time_str TEXT,
+                Machine_1 INTEGER DEFAULT NULL,
+                Machine_2 INTEGER DEFAULT NULL,
+                Machine_3 INTEGER DEFAULT NULL,
+                Machine_4 INTEGER DEFAULT NULL,
+                Machine_5 INTEGER DEFAULT NULL
+                )
+                """)
+            exp_db.commit()
+
     #--- create results table
     def create_results_table(self):
         with sqlite3.connect(self.exp_db_path) as exp_db:
@@ -644,6 +699,7 @@ class Tester():
                 """)
             exp_db.commit()
 
+    # =============================== ANALYSIS FUNCTIONS =====================================
     #--- complete CT of each part (considering waiting time)
     def calculate_CT_complete(self, real_db_path, WIP_parts):
         #--- Create a list with name of the initial parts
@@ -844,46 +900,146 @@ class Tester():
             
             exp_db.commit()
 
-    #--- create rt_process_time_log
-    def create_rt_process_time_log(self):
-        with sqlite3.connect(self.exp_db_path) as exp_db:
-            exp_db.execute(f"""CREATE TABLE IF NOT EXISTS rt_process_time_log (
-                publish_id INTEGER PRIMARY KEY,
-                publish_time_real INTEGER,
-                publish_time_str TEXT,
-                Machine_1 INTEGER DEFAULT NULL,
-                Machine_2 INTEGER DEFAULT NULL,
-                Machine_3 INTEGER DEFAULT NULL,
-                Machine_4 INTEGER DEFAULT NULL,
-                Machine_5 INTEGER DEFAULT NULL
-                )
-                """)
-            exp_db.commit()
+    def calculate_utilization(self,real_database_path, start_time_id, end_time_id, machine_id):
+        # ----------- SUPPORTING FUNCTION -----------
+        def update_utilization_end_id(real_database_path, start_time_id, end_time_id, machine_id):
+            with sqlite3.connect(real_database_path) as db:
+                #--- Read activity type (started and Finished) and event_id for a specific machien within a range
+                read_machine_events = db.execute("SELECT activity_type, event_id FROM real_log WHERE machine_id= ? and event_id>=? AND event_id<=?",
+                    (machine_id, start_time_id, end_time_id)).fetchall()
+                
+                machine_acitivities= []
+                machine_events_id = []
+                for i in range(len(read_machine_events)):
+                    machine_acitivities.append(read_machine_events[i][0])
+                    machine_events_id.append(read_machine_events[i][1])
 
-    #--- for writing process time change of real tein in real time basis
-    #-- to be used in change_rt_process_time.py
-    def write_rt_process_time_log(self, process_time_vector):
-        time = self.helper.get_time_now()
-        with sqlite3.connect(self.exp_db_path) as exp_db:
-            cursor = exp_db.cursor()
-            cursor.execute(f"""INSERT INTO rt_process_time_log (
-                publish_time_real,
-                publish_time_str,
-                Machine_1,
-                Machine_2,
-                Machine_3,
-                Machine_4,
-                Machine_5) VALUES (?,?,?,?,?,?,?)
-                """,
-                (time[1], 
-                time[0],
-                process_time_vector[0],
-                process_time_vector[1],
-                process_time_vector[2],
-                process_time_vector[3],
-                process_time_vector[4]))
-            exp_db.commit()
+                #--- Flag to indicates if there is a finished before a start
+                flag_last_is_started = False
 
+                #--- Just the last value that matters, because for a specific machine either it's finish or started
+                #------------ MACHINE LAST EVENT: STARTED -------------
+                if machine_acitivities[-1] == 'Started':
+                    # If the last event is Started, it means that the previous one was Finished and tha
+                    # you should consider its end time id
+                    print(f"{machine_id} last trace is 'Started', updating the end time id from {end_time_id} to {machine_events_id[-2]}")
+                    end_time_id = machine_events_id[-2]
+                    flag_last_is_started = True
+
+                if machine_acitivities[-1] == 'Finished':
+                    # Everything fine...
+                    pass
+
+                return end_time_id
+        
+        #--- Update end time checking the last trace:
+        end_time_id= update_utilization_end_id(real_database_path, start_time_id, end_time_id, machine_id)
+
+        # connect to the database
+        conn = sqlite3.connect(real_database_path)
+        c = conn.cursor()
+
+        # query the database for the machine's events within the given period
+        c.execute("SELECT * FROM real_log WHERE machine_id=? AND event_id>=? AND event_id<=?",
+                (machine_id, start_time_id, end_time_id))
+        rows = c.fetchall()
+
+        # calculate the total time the machine spent working within the given period
+        total_working_time = 0
+        last_start_time = None
+        for row in rows:
+            if row[3] == 'Started':
+                last_start_time = row[7]
+            elif row[3] == 'Finished' and last_start_time is not None:
+                total_working_time += row[7] - last_start_time
+                last_start_time = None
+        
+        # calculate the initial time
+        c.execute("SELECT MIN(timestamp_real) FROM real_log WHERE event_id >= ? AND event_id <= ?", 
+                (start_time_id, end_time_id))
+        initial_time = c.fetchone()[0]
+
+        # calculate the total time within the given period
+        c.execute("SELECT MAX(timestamp_real) FROM real_log WHERE event_id>=? AND event_id<=?",
+                (start_time_id, end_time_id))
+        final_time = c.fetchone()[0] 
+
+        # calculate the total time
+        total_time = final_time - initial_time
+
+        # calculate the utilization rate
+        utilization_rate = (total_working_time / total_time) * 100
+
+        print(f"--- Utilization Rate: {utilization_rate} %")
+        print(f"--- Total Working Time: {total_working_time}")
+        print(f"--- Total Time: {total_time}")
+
+        # close the connection
+        conn.close()
+
+        return utilization_rate
+
+    def run_utilization(self):
+        """
+        Calculates the evolution of utilization of each machine trhough the simulation and also
+        the total utilization rate of each machine.
+        """
+        
+        #--- List of machine's name
+        machines_name = ['Machine 1', 'Machine 2', 'Machine 3', 'Machine 4', 'Machine 5']
+        
+        #--- Initial Pointers
+        start_time_id= 1
+        end_time_id= 3
+
+        #--- step (delta) between events id being analyzed
+        id_step = 2
+
+        #--- Dictionary to store the utilization for each machine
+        utilization_dict = {}
+        global_utilization_dict = {}
+
+        #--- Count the number of rows in the database
+        with sqlite3.connect(self.real_database_path) as db:
+            max_end_id = db.execute('SELECT COUNT(*) FROM real_log').fetchone()[0]
+
+        #--- calculate the evolution of utilization
+        for machine_name in machines_name:
+            #-- Temporary to store data
+            temp_utilization_vec = []
+            end_time_id= 3
+
+            while end_time_id <= max_end_id:
+
+                #--- Try to calculate the utilization
+                try:
+                    #-- calculate utilization for a given range
+                    machine_utilization = self.calculate_utilization(self.real_database_path, start_time_id, end_time_id, machine_name)
+                    
+                    #-- Add datapoint in the temporary vector
+                    temp_utilization_vec.append(machine_utilization)
+                
+                except:
+                    print(f"[WARINING] For some reason it was not possible to calculate the utilization for {machine_name}... Maybe because that machine didn't appeared within the following range of pointers: Start Time ID: {start_time_id} End Time ID: {end_time_id}")
+            
+                #--- Increment the end pointer, and keep always the start pointer
+                end_time_id += id_step
+
+
+            #--- After finishing the loop, add it into the dictionary
+            utilization_dict[machine_name]= temp_utilization_vec
+
+            #--- Global
+            machine_global_utilization= self.calculate_utilization(self.real_database_path, start_time_id, max_end_id, machine_name)
+            global_utilization_dict[machine_name] = machine_global_utilization
+
+        
+        print(" --------- Utilization Global ---------")
+        for key_name in global_utilization_dict:
+            print(f"[{key_name}]: {global_utilization_dict[key_name]}")
+
+        return utilization_dict
+    
 
 class Plotter():
     def __init__(self, exp_database_path, plotterDT, figures_path= None,  show= False, save= True):
@@ -1408,10 +1564,83 @@ class Plotter():
         if self.show:
             plt.show()
 
+    def plot_utilization(self, utilization_dict):
+        plt.clf()
+        linestyle = "dotted"
+        # ----------- PLOT OF ALL MACHINES TOEGETHER -----------
+        for key_name in utilization_dict:
+            #--- Create the x vector
+            intervals_x= []
+            for i in range(len(utilization_dict[key_name])): intervals_x.append(i+1)
 
+            #--- Plot for that machine
+            plt.plot(
+                intervals_x,
+                utilization_dict[key_name],
+                marker='o',
+                linestyle= linestyle,
+                label= key_name
+            )
 
+            #--- Add complements
+            self.ADD_complemts(
+                title= "Cumulative Utilization",
+                xlable= "intervals (secs)",
+                ylable= "Utilization (%)"
+            )
+        
+        #--- Save
+        if self.save:
+            self.save_fig("global_utilization")
 
+        #--- Show
+        if self.show:
+            plt.show()
 
+        # ----------- PLOT Machine 3 x 4 -----------
+        
+        plt.clf()
+        #--- Create the x vector
+        intervals_x= []
+        for i in range(len(utilization_dict['Machine 3'])): intervals_x.append(i+1)
+
+        #--- Plot for that machine
+        plt.plot(
+            intervals_x,
+            utilization_dict['Machine 3'],
+            marker='o',
+            linestyle= linestyle,
+            label= 'Machine 3'
+        )
+        # -----------------------------------------
+
+        #--- Create the x vector
+        intervals_x= []
+        for i in range(len(utilization_dict['Machine 4'])): intervals_x.append(i+1)
+
+        #--- Plot for that machine
+        plt.plot(
+            intervals_x,
+            utilization_dict['Machine 4'],
+            marker='o',
+            linestyle= linestyle,
+            label= 'Machine 4'
+        )
+
+        #--- Add complements
+        self.ADD_complemts(
+            title= "Cumulative Utilization between Machine 3 and 4",
+            xlable= "intervals (secs)",
+            ylable= "Utilization (%)"
+        )
+        
+        #--- Save
+        if self.save:
+            self.save_fig("utilization_3_4")
+
+        #--- Show
+        if self.show:
+            plt.show()
 
 
 

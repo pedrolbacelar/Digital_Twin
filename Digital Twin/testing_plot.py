@@ -5,6 +5,7 @@ from dtwinpylib.dtwinpy.helper import Helper
 import sqlite3
 import json
 import numpy as np
+from matplotlib import pyplot as plt
 helper= Helper()
 
 
@@ -31,13 +32,12 @@ plotter.plot_valid_indicators(threshold= 0.69)
 exp_database_path= 'data_generation/3.30.16.41/databases/exp_database.db'
 fig_path = 'data_generation/3.30.16.41/figures'
 
+exp_id = '3.30.19.26'
 
 
 with sqlite3.connect("allexp_database.db") as db:
     all_exp_ids = db.execute(
-        """
-        SELECT exp_id FROM experiment_setup
-        """
+        "SELECT exp_id FROM experiment_setup"
     ).fetchall()
 
     #--- Adjust tuple
@@ -45,13 +45,9 @@ with sqlite3.connect("allexp_database.db") as db:
 
 
 for exp_id in all_exp_ids:
-    #tester = Tester(exp_id=exp_id, from_data_generation= True)
-    #tester.plot(show_plot= False)
-
+    """
     exp_database_path= f'data_generation/{exp_id}/databases/exp_database.db'
     fig_path = f'data_generation/{exp_id}/figures'
-
-
     mydt = Digital_Twin(name= 'None', keepModels= True)
     plotter = Plotter(
     exp_database_path= exp_database_path,
@@ -59,22 +55,18 @@ for exp_id in all_exp_ids:
     figures_path= fig_path,
     show= False
     )
-
+    """
+    
     try:
-        plotter.plot_comparative_RCT()
+        #plotter.plot_comparative_RCT()
+        
+        tester = Tester(exp_id=exp_id, from_data_generation= True)
+        tester.initiate_for_analysis()
+        tester.plot_utilization()
     except:
         helper.printer(f"It was not possible to plot for {exp_id}")
 
 
-#exp_db_path = 'databases/CT/exp_database.db'
-#real_db_path = 'databases/CT/real_database.db'
-#fig_path = 'figures/CT'
-
-
-
-
-#tester = Tester(name= "CT")
-#tester.run_analysis(real_db_path)
 
 
 
