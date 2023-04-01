@@ -787,4 +787,52 @@ class Service_Handler():
     # =================================================================================
 
     # ================================== RCT Tracking ==================================
-    
+    def run_RCT_tracking(self, palletID):
+        """
+        Run RCT tracking for a specific palletID. The function should translate the palletID to
+        a PID. For this specific PID, the function runs a simulation until the PID get finished
+        and based on that calculates the RCT. Ideally, this function is called every time that the
+        service is required (align with Synchronization). After every prediction the function saves
+        the RCT in a table of the exp_database writing the PID and the RCT. So when the PID is finished
+        a new PID is created for the same palletID and the calculation continues. In the end, with this function
+        (since the DT is aligned and updated) it will be possible to have a more precise prediction.
+
+        TODO:
+        1) Extract the PID for a given PalletID
+        2) Run a simulation for this targeted PID
+        3) Calculate the Remaining Cycle Time for that target PID
+        4) Write the PID and RCT in a table
+        
+        WARNINGS:
+        1) In the physical system when the last machine finished a PID it takes a while to 
+        be created a ne PID (needs to reach the first machine again)
+        """
+
+        # ------------- Extract PID for a given PalletID -------------
+        PID = self.ID_database.get_PID_from_PalletID(palletID)
+        # ------------------------------------------------------------
+
+        # ------------- Run simulation for a PID -------------
+        targeted_PID = self.helper.extract_int(PID)
+        # --- Generate a new model
+        self.digital_model =  self.generate_digital_model(targeted_part_id= targeted_PID)
+
+        # --- Check if the PID is in the simulation
+        part_in_model = self.digital_model.check_partID_in_simulation(PID)
+
+        if part_in_model == True:
+            # --- Run the simulation
+            self.digital_model.run()
+            # -----------------------------------------------------
+
+            # ------------- Calculates the RCT -------------
+            RCT = self.digital_model.calculate_RCT(part_id_selected= targeted_PID)
+            # ----------------------------------------------
+
+            # ------------- Write the results -------------
+            self.exp_database.write_RCTtracking(PID= targeted_PID, RCT= RCT, palletID= palletID)
+
+            self.helper.printer(f"RCT Tracking for {PID} ({palletID}) done. RCT: {RCT}. Writing into the database", 'brown')
+
+        else:
+            self.helper.printer(f"[WARNING] Not possible to track the RCT of the {PID} because the part was not found in the model. Possibly the {palletID} didn't manage to get in the Machine 1 yet.")

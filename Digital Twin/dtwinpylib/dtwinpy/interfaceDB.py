@@ -114,6 +114,9 @@ class Database():
             # --- Create table for RCT path
             self.create_RCTpaths_table()
 
+            # --- Create table for RCT tracking
+            self.create_RCTtracking_table()
+
             
 
         if event_table == "digital_log":
@@ -176,7 +179,6 @@ class Database():
                 db.commit()
     
     def create_valid_indicator_table(self):
-        # TODO: Finish up
         with sqlite3.connect(self.database_path) as db:
                 # --- Create table of validator indicators
                 db.execute("""
@@ -210,7 +212,20 @@ class Database():
             
             """)
 
-
+    def create_RCTtracking_table(self):
+        with sqlite3.connect(self.database_path) as db:
+            db.execute(
+                """
+                CREATE TABLE IF NOT EXISTS RCTtracking (
+                line_id INTEGER PRIMARY KEY,
+                current_time_str TEXT,
+                timestamp_real INTEGER,
+                PID TEXT,
+                RCT INTEGER,
+                palletID TEXT
+                )
+                """
+            )
 
     # -------- Setting Functions --------
     def rename_digital_to_real(self):
@@ -778,7 +793,13 @@ class Database():
                 return "x"
             else:
                 return result[0]
-            
+
+    # --------- Get a PID for a given PalletID ---------
+    def get_PID_from_PalletID(self, palletID):
+        with sqlite3.connect(self.database_path) as db:
+            PID = db.execute("SELECT PID from ID WHERE palletID= ?", (palletID,)).fetchone()[0]
+            return PID
+
     # --------- Database Replicator Function ---------
     def replicate_database(self):
         
@@ -1137,9 +1158,62 @@ class Database():
         
         return (parts_name_finished_vec, RCT_real, RCT_path1_vec, RCT_path2_vec)
 
+    # --------- Write the RCT tracking ---------
+    def write_RCTtracking(self, PID, RCT, palletID):
+        with sqlite3.connect(self.database_path) as db:
+            #-- Get time
+            (tstr, t)= self.helper.get_time_now()
 
+            #-- Write into the database
+            db.execute(
+                """
+                INSERT INTO RCTtracking (current_time_str, timestamp_real, PID, RCT, palletID)
+                VALUES (?, ?, ?, ?, ?)
+                """, (tstr, t, PID, RCT, palletID)
+            )
 
+            db.commit()
 
+    def get_real_RCTtracking(self, real_database_path, PID):
+        """
+        This function receives a PID and look through the real database to calculate
+        for every event that happen what was the RCT in the perspective of that event.
+        """
 
+        with sqlite3.connect(real_database_path) as db:
+            #-- Time in which the PID was finished
+            finished_time = db.execute("SELECT timestamp_real FROM real_log WHERE part_id= ? and machine_id= ? and activity_type= ?", (PID, 'Machine 5', 'Finished')).fetchone()[0]
 
+            #-- Get all the timestamp where the PID appeared
+            start_time = db.execute("SELECT timestamp_real FROM real_log WHERE part_id= ?", (PID,)).fetchall()
+            timestamp = start_time
+
+            #-- convert tuples
+            start_time = self.helper.convert_tuple_vector_to_list(start_time)
+            #timestamp = self.helper.convert_tuple_vector_to_list(timestamp)
+
+            #--- Calculate the RCT in the perspective of all events
+            rct_evolution = []
+            for start_time_event in start_time:
+                rct = finished_time - start_time_event
+                rct_evolution.append(rct)
+            
+        return (rct_evolution, timestamp)
+    
+    def get_digital_RCTtracking(self, PID):
+        """
+        This function takes the RCT calculated by the Digital Twin
+        """
+        PID = int(self.helper.extract_int(PID))
+
+        with sqlite3.connect(self.database_path) as db:
+            #--- Extract RCT and Timestamp
+            RCT = db.execute("SELECT RCT FROM RCTtracking WHERE PID= ?", (PID,)).fetchall()
+            timestamp = db.execute("SELECT timestamp_real FROM RCTtracking WHERE PID= ?", (PID,)).fetchall()
+
+            #--- Convert tuple
+            RCT = self.helper.convert_tuple_vector_to_list(RCT)
+            timestamp = self.helper.convert_tuple_vector_to_list(timestamp)
+
+        return (RCT, timestamp)
 

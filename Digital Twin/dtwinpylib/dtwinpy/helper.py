@@ -204,3 +204,11 @@ class Helper():
         for i in range(len(tuple_vector)):
             tuple_vector[i] = tuple_vector[i][0]
         return tuple_vector
+    
+    def adjust_relative_vector(self, vector):
+        first_value = vector[0]
+        for i in range(len(vector)):
+            relative_value = vector[i] - first_value
+            vector[i] = relative_value
+        
+        return vector

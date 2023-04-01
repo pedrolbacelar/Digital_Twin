@@ -44,6 +44,7 @@ with sqlite3.connect("allexp_database.db") as db:
     for i in range(len(all_exp_ids)): all_exp_ids[i] = all_exp_ids[i][0]
 
 
+
 for exp_id in all_exp_ids:
     """
     exp_database_path= f'data_generation/{exp_id}/databases/exp_database.db'
@@ -57,6 +58,7 @@ for exp_id in all_exp_ids:
     )
     """
     
+    """
     try:
         #plotter.plot_comparative_RCT()
         
@@ -65,7 +67,20 @@ for exp_id in all_exp_ids:
         tester.plot_utilization()
     except:
         helper.printer(f"It was not possible to plot for {exp_id}")
+    """
+name = 'debug_tracking'
+exp_database_path= f'databases/{name}/exp_database.db'
+fig_path = f'figures/{name}'
+mydt = Digital_Twin(name= name, keepModels= True)
 
+plotter = Plotter(
+    exp_database_path= exp_database_path,
+    plotterDT= mydt,
+    figures_path= fig_path,
+    show= True
+)
+
+plotter.plot_RCTtracking()
 
 
 

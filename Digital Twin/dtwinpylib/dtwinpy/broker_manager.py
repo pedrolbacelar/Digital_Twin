@@ -158,8 +158,6 @@ class Broker_Manager():
         #----- Clean the selected Branch Queue for this UID that now has a new PID
         self.ID_database.write_selected_branch_queue(UID= unique_ID, selected_queue= None)
 
-
-
     def part_ID_translator(self, unique_ID):
         """
         This function takes a UID and searches in the PID dictionary for the related PID. The function returns
@@ -224,8 +222,6 @@ class Broker_Manager():
 
         #--- Write the information into the real database
         self.real_database.write_event('real_log', 0, machine_id, status, part_id, queue_id, current_time_str, current_timestamp)
-
-
 
     def part_id_handler(self, message_translated):
         """
@@ -534,6 +530,11 @@ class Broker_Manager():
             )
             
             except ConnectionRefusedError:
+                self.helper.printer(f"[ERROR][broker_manager.py/publish_setting_action()] Mosquitto / Broker is not running in the IP address '{self.ip_address}'", 'red')
+                self.helper.printer(f"---- Digital Twin was killed ----", 'red')
+                sys.exit()
+
+            except TimeoutError:
                 self.helper.printer(f"[ERROR][broker_manager.py/publish_setting_action()] Mosquitto / Broker is not running in the IP address '{self.ip_address}'", 'red')
                 self.helper.printer(f"---- Digital Twin was killed ----", 'red')
                 sys.exit()

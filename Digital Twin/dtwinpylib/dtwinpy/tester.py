@@ -164,6 +164,18 @@ class Tester():
         
         plotter.plot_utilization(utilization_dict)
 
+    def plot_RCTtracking(self):
+        plotter = Plotter(
+                exp_database_path= self.exp_db_path,
+                plotterDT= self.mydt,
+                figures_path= self.figures_folder,
+                show= True,
+                save= True
+            )
+        
+        plotter.plot_RCTtracking()
+        
+
 #-------------------------------------------------------------------------------------------------
 #---------------------------------------- MAIN FUNCTIONS -----------------------------------------
 #-------------------------------------------------------------------------------------------------
@@ -1045,6 +1057,7 @@ class Plotter():
     def __init__(self, exp_database_path, plotterDT, figures_path= None,  show= False, save= True):
         self.helper = Helper()
         self.plotterDT = plotterDT
+        plt.clf()
 
         #--- Experimental Database
         self.exp_database_path = exp_database_path
@@ -1642,6 +1655,55 @@ class Plotter():
         if self.show:
             plt.show()
 
+    def plot_RCTtracking(self):
+        """
+        This function plot the comparation between RCT evolution of a specific part tracked by
+        the Digital Twin and by the Real System.
+        """
 
+        #--- Get the distinc (unique) PIDs calculates by the Digital Twin
+        PIDs_tracked = self.exp_database.get_distinct_values('PID', 'RCTtracking')
 
+        #--- For every PIDs tracked
+        for PID in PIDs_tracked:
+            PID = f'Part {PID[0]}'
+            #--- Take the REAL RCT and timestamp for that PID
+            (rct_real, timestamp_real) = self.exp_database.get_real_RCTtracking(self.real_database_path, PID)
+            timestamp_real = self.helper.adjust_relative_vector(timestamp_real)
+
+            #--- Take the DIGITAL RCT and timestamp for that PID
+            (rct_digital, timestamp_digital) = self.exp_database.get_digital_RCTtracking(PID)
+            timestamp_digital = self.helper.adjust_relative_vector(timestamp_digital)
+
+            #--- PLOT RCT real
+            plt.plot(
+                timestamp_real,
+                rct_real,
+                marker='o',
+                label= f'[{PID}] RCT Real'
+            )
+
+            #--- PLOT RCT digital
+            plt.plot(
+                timestamp_digital,
+                rct_digital,
+                marker='o',
+                linestyle= 'dashdot',
+                label= f'[{PID}] RCT Digital'
+            )
+
+        #--- Add complements
+        self.ADD_complemts(
+            title= "RCT Tracking",
+            xlable= "Timestamp",
+            ylable= "RCT"
+        )
+        
+        #--- Save
+        if self.save:
+            self.save_fig("rct_tracking")
+
+        #--- Show
+        if self.show:
+            plt.show()
 

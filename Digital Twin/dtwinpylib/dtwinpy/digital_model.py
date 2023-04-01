@@ -974,6 +974,34 @@ class Model():
             for part in parts_in_queue:
                 self.parts_vector.append(part)
         return self.parts_vector
+    def get_working_parts(self):
+        working_parts_vec = []
+        for machine in self.machines_vector:
+            initial_part = machine.get_initial_part()
+            if initial_part != None: working_parts_vec.append(initial_part)
+        
+        return working_parts_vec
+    def check_partID_in_simulation(self, part_id):
+        #--- Separate vector of parts
+        working_parts_vec = self.get_working_parts()
+        queue_parts_vec = self.get_all_parts()
+        #--- Merge parts 
+        all_parts = []
+        for part in working_parts_vec:
+            all_parts.append(part)
+        for part in queue_parts_vec:
+            all_parts.append(part)
+        
+        #--- Check if the selected part in within the all parts:
+        flag_found = False
+        for part in all_parts:
+            if part_id == part.get_name():
+                flag_found = True
+        
+        return flag_found
+
+
+
     def get_model_constrains(self):
         return (self.until, self.maxparts, self.targeted_part_id, self.targeted_cluster)
     def get_database_path(self):
