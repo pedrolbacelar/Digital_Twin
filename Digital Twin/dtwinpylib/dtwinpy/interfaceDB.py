@@ -1184,12 +1184,22 @@ class Database():
             #-- Time in which the PID was finished
             finished_time = db.execute("SELECT timestamp_real FROM real_log WHERE part_id= ? and machine_id= ? and activity_type= ?", (PID, 'Machine 5', 'Finished')).fetchone()[0]
 
+            #--- First time (considering waiting time in the first queue)
+            start_time_initial = db.execute("SELECT timestamp_real FROM real_log WHERE event_id= ?", (1,)).fetchone()[0]
+
             #-- Get all the timestamp where the PID appeared
-            start_time = db.execute("SELECT timestamp_real FROM real_log WHERE part_id= ?", (PID,)).fetchall()
+            start_time_rest = db.execute("SELECT timestamp_real FROM real_log WHERE part_id= ?", (PID,)).fetchall()
+            #-- convert tuples
+            start_time_rest = self.helper.convert_tuple_vector_to_list(start_time_rest)
+
+            #--- Merge all the start time with the initial
+            start_time = [start_time_initial]
+            for time in start_time_rest:
+                start_time.append(time)
+            
             timestamp = start_time
 
-            #-- convert tuples
-            start_time = self.helper.convert_tuple_vector_to_list(start_time)
+            
             #timestamp = self.helper.convert_tuple_vector_to_list(timestamp)
 
             #--- Calculate the RCT in the perspective of all events

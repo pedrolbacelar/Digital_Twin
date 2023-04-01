@@ -14,7 +14,7 @@ mydt = Digital_Twin(
     name= 'debug_tracking',
     template= True, 
     Freq_Sync= 2, 
-    Freq_Valid= 90, 
+    Freq_Valid= 60, 
     Freq_Service= 2, 
     delta_t_treshold= 25,
     ip_address=my_ip,
@@ -25,7 +25,8 @@ mydt = Digital_Twin(
     flag_publish = False,
     logic_threshold= 0.7,
     input_threshold= 0.7,
-    flag_validation= True,
-    keepDB= True)
+    flag_validation= False,
+    keepDB= True,
+    palletID_tracked= 'Pallet 12')
 
 mydt.run()
