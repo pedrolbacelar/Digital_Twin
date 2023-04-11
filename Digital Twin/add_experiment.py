@@ -8,7 +8,7 @@ import sqlite3
 allexp_database_path = 'allexp_database.db'
 
 ############## EXPERIMENT OBJECTIVE ##############
-objective= "use case: RCT Publidh true. start with mirrored stations with high processing time. Then drop the processing time of one of the machine."
+objective= "to run the physical system with RCT publish off. Main goal is to run zone 3 and 4 with equal processing time which is equal to the average of the processing time used in the use case after the processing time drop in machine 3."
 ##################################################
 
 ################################ INPUT PARAMETERS ################################
@@ -25,14 +25,14 @@ logic_threshold= 0.7
 input_threshold= 0.7
 
 flag_API= "False"
-flag_publish= "True"
-flag_validation= "True"  
+flag_publish= "False"
+flag_validation= "False"  
 flag_external_service= "True"
 
 contemp_M1= '["norm", 11, 2]'
 contemp_M2= '["norm", 17, 2]'
-contemp_M3= '["norm", 80, 2]'
-contemp_M4= '["norm", 80, 2]'
+contemp_M3= '["norm", 52.5, 2]'
+contemp_M4= '["norm", 52.5, 2]'
 contemp_M5= '["norm", 10, 2]'
 ###################################################################################### 
 
