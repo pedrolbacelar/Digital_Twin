@@ -404,7 +404,13 @@ class Tester():
                     json.loads(exp_setup[0][77])
                 ]
                 }
-            
+
+    def get_setup(self):
+        """
+        Return the basic setups 'selfs' of the specific Tester object
+        """      
+        return (self.exp_db_path, self.figures_folder, self.mydt)
+
     #--- replace the existing initial json file in models folder with the data from allexp_database
     def replace_initial_json(self):
         json_path = f"models/{self.name}/initial.json"
@@ -1107,7 +1113,7 @@ class Plotter():
         plt.savefig(path_to_save)
 
 
-    def plot_valid_indicators(self, threshold= None, adjust = True):
+    def plot_valid_indicators(self, threshold= 0.7, adjust = True):
         """
         This functions plots the validation indicators (logic and input) from
         the experimental database. If threshold is given, the function also
@@ -1568,7 +1574,7 @@ class Plotter():
         #--- Add complements
         self.ADD_complemts(
             title= "Comparing Real RCT with DT predictions",
-            xlable= "Timestamp (secs)",
+            xlable= "Parts IDs",
             ylable= "RCT"
         )
         
@@ -1669,25 +1675,31 @@ class Plotter():
 
         #--- For every PIDs tracked
         for PID in PIDs_tracked:
+            #---------
+            plt.clf()
+            #---------
+             
             PID = f'Part {PID[0]}'
             #--- Take the REAL RCT and timestamp for that PID
-            (rct_real, timestamp_real) = self.exp_database.get_real_RCTtracking(self.real_database_path, PID)
-            timestamp_real = self.helper.adjust_relative_vector(timestamp_real)
+            (rct_real, timestamp_real, flag_part_completed) = self.exp_database.get_real_RCTtracking(self.real_database_path, PID)
+            
+            if flag_part_completed == True:
+                timestamp_real = self.helper.adjust_relative_vector(timestamp_real)
 
-            #--- Take the DIGITAL RCT and timestamp for that PID
-            (rct_digital, timestamp_digital) = self.exp_database.get_digital_RCTtracking(PID)
-            timestamp_digital = self.helper.adjust_relative_vector(timestamp_digital)
+                #--- Take the DIGITAL RCT and timestamp for that PID
+                (rct_digital, timestamp_digital) = self.exp_database.get_digital_RCTtracking(PID)
+                timestamp_digital = self.helper.adjust_relative_vector(timestamp_digital)
 
-            #--- PLOT RCT real
-            plt.plot(
-                timestamp_real,
-                rct_real,
-                marker='o',
-                label= f'[{PID}] RCT Real'
-            )
+                #--- PLOT RCT real
+                plt.plot(
+                    timestamp_real,
+                    rct_real,
+                    marker='o',
+                    label= f'[{PID}] RCT Real'
+                )
 
-            #--- PLOT RCT digital
-            plt.plot(
+                #--- PLOT RCT digital
+                plt.plot(
                 timestamp_digital,
                 rct_digital,
                 marker='o',
@@ -1695,18 +1707,18 @@ class Plotter():
                 label= f'[{PID}] RCT Digital'
             )
 
-        #--- Add complements
-        self.ADD_complemts(
-            title= "RCT Tracking",
-            xlable= "Timestamp",
-            ylable= "RCT"
-        )
-        
-        #--- Save
-        if self.save:
-            self.save_fig("rct_tracking")
+                #--- Add complements
+                self.ADD_complemts(
+                    title= "RCT Tracking",
+                    xlable= "Timestamp",
+                    ylable= "RCT"
+                )
+                
+                #--- Save
+                if self.save:
+                    self.save_fig(f"tracking/rct_tracking_{PID}")
 
-        #--- Show
-        if self.show:
-            plt.show()
+                #--- Show
+                if self.show:
+                    plt.show()
 

@@ -29,6 +29,8 @@ plotter.plot_valid_indicators(threshold= 0.69)
 
 #plotter.plot_queues_occupation(stacked= True)
 """
+
+"""
 exp_database_path= 'data_generation/3.30.16.41/databases/exp_database.db'
 fig_path = 'data_generation/3.30.16.41/figures'
 
@@ -43,10 +45,10 @@ with sqlite3.connect("allexp_database.db") as db:
     #--- Adjust tuple
     for i in range(len(all_exp_ids)): all_exp_ids[i] = all_exp_ids[i][0]
 
+"""
 
-
-for exp_id in all_exp_ids:
-    """
+#for exp_id in all_exp_ids:
+"""
     exp_database_path= f'data_generation/{exp_id}/databases/exp_database.db'
     fig_path = f'data_generation/{exp_id}/figures'
     mydt = Digital_Twin(name= 'None', keepModels= True)
@@ -56,9 +58,9 @@ for exp_id in all_exp_ids:
     figures_path= fig_path,
     show= False
     )
-    """
+"""
     
-    """
+"""
     try:
         #plotter.plot_comparative_RCT()
         
@@ -67,7 +69,9 @@ for exp_id in all_exp_ids:
         tester.plot_utilization()
     except:
         helper.printer(f"It was not possible to plot for {exp_id}")
-    """
+"""
+
+
 name = 'debug_tracking'
 exp_database_path= f'databases/{name}/exp_database.db'
 fig_path = f'figures/{name}'
@@ -81,6 +85,8 @@ plotter = Plotter(
 )
 
 plotter.plot_RCTtracking()
+
+
 
 
 

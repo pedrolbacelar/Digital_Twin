@@ -1179,13 +1179,24 @@ class Database():
         This function receives a PID and look through the real database to calculate
         for every event that happen what was the RCT in the perspective of that event.
         """
-
+        flag_part_completed = False
         with sqlite3.connect(real_database_path) as db:
             #-- Time in which the PID was finished
-            finished_time = db.execute("SELECT timestamp_real FROM real_log WHERE part_id= ? and machine_id= ? and activity_type= ?", (PID, 'Machine 5', 'Finished')).fetchone()[0]
+            finished_time = db.execute("SELECT timestamp_real FROM real_log WHERE part_id= ? and machine_id= ? and activity_type= ?", (PID, 'Machine 5', 'Finished')).fetchone()
+            
+            # ----------- CHECK IF THE PART WAS FINISHED -----------
+            if finished_time == None:
+                flag_part_completed = False
+                return ([], [], flag_part_completed)
+            
+            if finished_time != None:
+                flag_part_completed = True
+                finished_time = finished_time[0]
+            # -------------------------------------------------------
 
             #--- First time (considering waiting time in the first queue)
             start_time_initial = db.execute("SELECT timestamp_real FROM real_log WHERE event_id= ?", (1,)).fetchone()[0]
+            
 
             #-- Get all the timestamp where the PID appeared
             start_time_rest = db.execute("SELECT timestamp_real FROM real_log WHERE part_id= ?", (PID,)).fetchall()
@@ -1193,7 +1204,12 @@ class Database():
             start_time_rest = self.helper.convert_tuple_vector_to_list(start_time_rest)
 
             #--- Merge all the start time with the initial
-            start_time = [start_time_initial]
+            # ### [HARD CODED] ###
+            PID_number = self.helper.extract_int(PID)
+            if PID_number <= 12:
+                start_time = [start_time_initial]
+            else:
+                start_time = []
             for time in start_time_rest:
                 start_time.append(time)
             
@@ -1208,7 +1224,7 @@ class Database():
                 rct = finished_time - start_time_event
                 rct_evolution.append(rct)
             
-        return (rct_evolution, timestamp)
+        return (rct_evolution, timestamp, flag_part_completed)
     
     def get_digital_RCTtracking(self, PID):
         """
