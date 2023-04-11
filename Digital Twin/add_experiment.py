@@ -8,7 +8,7 @@ import sqlite3
 allexp_database_path = 'allexp_database.db'
 
 ############## EXPERIMENT OBJECTIVE ##############
-objective= "Without Publishing RCT and adding a change in the process time of machine 1 and 5 for a higher one. Delta t now is 20 (10 to 40 for both)"
+objective= "use case: RCT Publidh true. start with mirrored stations with high processing time. Then drop the processing time of one of the machine."
 ##################################################
 
 ################################ INPUT PARAMETERS ################################
@@ -25,14 +25,14 @@ logic_threshold= 0.7
 input_threshold= 0.7
 
 flag_API= "False"
-flag_publish= "False"
+flag_publish= "True"
 flag_validation= "True"  
 flag_external_service= "True"
 
 contemp_M1= '["norm", 11, 2]'
 contemp_M2= '["norm", 17, 2]'
-contemp_M3= '["norm", 60, 2]'
-contemp_M4= '["norm", 38, 2]'
+contemp_M3= '["norm", 80, 2]'
+contemp_M4= '["norm", 80, 2]'
 contemp_M5= '["norm", 10, 2]'
 ###################################################################################### 
 

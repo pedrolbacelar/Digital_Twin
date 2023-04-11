@@ -122,6 +122,8 @@ def save_results(exp_id):
     
     shutil.copytree(test.figures_folder, os.path.join(root_folder, folder_name, "figures"))
 
+    #--- 14. deleting old figures folder
+    test.delete_figures()
 
     #--- finally. write exp_id into the allexp_database and exp_database setup_data table if exp_id given is recent
     if exp_id == 'recent':

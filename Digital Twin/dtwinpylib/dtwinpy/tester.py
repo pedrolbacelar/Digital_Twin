@@ -419,6 +419,9 @@ class Tester():
         else:
             print(f"No exp_database was found. New one will be created.")
 
+    def delete_figures(self):
+        self.helper.delete_figures(self.figures_folder)
+
     #--- to create exp_database and experimental_data table
     def create_exp_database(self):
         with sqlite3.connect(self.exp_db_path) as exp_db:

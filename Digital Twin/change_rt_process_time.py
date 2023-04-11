@@ -34,7 +34,7 @@ client.loop_start()
 
 #----------------------------------- INPUT DATA ----------------------------------------
 wait_interval = 1
-process1 = [32,'NULL',60,'NULL','NULL']  #--- process _time_vector default= [11,17,60,38,10]
+process1 = ['NULL','NULL',25,'NULL','NULL']  #--- process _time_vector default= [11,17,60,38,10]
 matrix_process = [
     process1
 ]

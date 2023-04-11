@@ -197,6 +197,18 @@ class Helper():
                 model_counter += 1
         print(f"Done! Deleted {model_counter} successfuly")
 
+    def delete_figures(self, folder_path):
+        print(f"Deleting existing figures from the relative folder path:'{folder_path}'")
+        
+        for file_name in os.listdir(folder_path):
+            file_path = os.path.join(folder_path, file_name)
+            os.remove(file_path)
+            print(f"File '{file_name}' deleted...")
+
+        print(f"Done! Deleted Figures successfuly")
+
+
+
     def convert_stringVect_to_listVect(self, stringVect):
         return json.loads(stringVect)
     
