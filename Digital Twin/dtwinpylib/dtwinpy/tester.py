@@ -1710,8 +1710,8 @@ class Plotter():
                 #--- Add complements
                 self.ADD_complemts(
                     title= "RCT Tracking",
-                    xlable= "Timestamp",
-                    ylable= "RCT"
+                    xlable= "Relative Timestamp (s)",
+                    ylable= "RCT (s)"
                 )
                 
                 #--- Save
