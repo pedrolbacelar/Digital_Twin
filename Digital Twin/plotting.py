@@ -65,7 +65,7 @@ def plotting(exp_ids, plots= ["plot_valid_indicators", "plot_RCT_paths", "plot_q
 
 ############# Running #############
 exp_ids = ["4.11.15.46", "4.11.17.26"]
-exp_ids = ["4.11.17.26"]
+exp_ids = ["4.11.15.46"]
 
 #plots= ["plot_comparative_RCT", "plot_utilization", "plot_RCTtracking"]
 plots= ["plot_RCTtracking"]
