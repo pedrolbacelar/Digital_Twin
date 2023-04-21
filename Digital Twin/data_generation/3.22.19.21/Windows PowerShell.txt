@@ -1,0 +1,240 @@
+PS D:\POLIMI\Digital twins\Digital_Twin\Digital Twin> python .\mydt.py
+Importing the libraries.....
+pygame 2.3.0 (SDL 2.24.2, Python 3.11.2)
+Hello from the pygame community. https://www.pygame.org/contribute.html
+API object created for '5s_Model' using 'premium' account.
+Deleting existing model (excepted by 'initial.json') from the relative folder path:'models/5s_determ'
+File '1679508055_1.json' deleted...
+File '1679508058_2.json' deleted...
+File '1679508062_3.json' deleted...
+File '1679508068_4.json' deleted...
+File '1679508075_5.json' deleted...
+File '1679508087_6.json' deleted...
+File '1679508094_7.json' deleted...
+File '1679508104_8.json' deleted...
+File '1679508111_9.json' deleted...
+File '1679508124_10.json' deleted...
+File '1679508132_11.json' deleted...
+File '1679508140_12.json' deleted...
+File '1679508146_13.json' deleted...
+File '1679508150_14.json' deleted...
+File '1679508161_15.json' deleted...
+File '1679508165_16.json' deleted...
+File '1679508171_17.json' deleted...
+File '1679508179_18.json' deleted...
+File '1679508186_19.json' deleted...
+File '1679508194_20.json' deleted...
+File '1679508197_21.json' deleted...
+File '1679508205_22.json' deleted...
+File '1679508210_23.json' deleted...
+File '1679508216_24.json' deleted...
+File '1679508228_25.json' deleted...
+File '1679508235_26.json' deleted...
+File '1679508244_27.json' deleted...
+File '1679508249_28.json' deleted...
+File '1679508253_29.json' deleted...
+File '1679508269_30.json' deleted...
+File '1679508277_31.json' deleted...
+File '1679508282_32.json' deleted...
+File '1679508292_33.json' deleted...
+File '1679508301_34.json' deleted...
+File '1679508309_35.json' deleted...
+File '1679508314_36.json' deleted...
+File '1679508323_37.json' deleted...
+File '1679508327_38.json' deleted...
+File '1679508338_39.json' deleted...
+File '1679508346_40.json' deleted...
+File '1679508358_41.json' deleted...
+File '1679508365_42.json' deleted...
+File '1679508377_43.json' deleted...
+File '1679508383_44.json' deleted...
+File '1679508397_45.json' deleted...
+File '1679508403_46.json' deleted...
+File '1679508413_47.json' deleted...
+File '1679508419_48.json' deleted...
+File '1679508423_49.json' deleted...
+File '1679508437_50.json' deleted...
+File '1679508444_51.json' deleted...
+File '1679508457_52.json' deleted...
+File '1679508463_53.json' deleted...
+File '1679508476_54.json' deleted...
+File '1679508482_55.json' deleted...
+File '1679508494_56.json' deleted...
+Done! Deleted 56 successfuly
+--- printing databases paths ---
+Digital Database: 'databases/5s_determ/digital_database.db'
+Real Database: 'databases/5s_determ/real_database.db'
+ID Database: 'databases/5s_determ/ID_database.db'
+22 March 19:21:16 |[WARNING][__init__()] Not given a WIP, trying to use WIP from model .json...
+|- Deleting existing databases...
+22 March 19:21:16 |[WARNING][broker_manager.py/delete_databases()] The Digital Database doesn't exist yet in the path 'databases/5s_determ/digital_database.db', proceding without deleting...
+|-- Real Database deleted successfuly from databases/5s_determ/real_database.db
+|-- ID Database deleted successfuly from databases/5s_determ/ID_database.db
+Broker Manager internally created for publishing feedback...
+22 March 19:21:16 |---- Digital Twin '5s_determ' created sucessfully ----
+ 22 March 19:21:16 |Physical system is requested to start remotely.
+Waiting for the physical system
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+Starting operations ...
+22 March 19:21:28 |[Internal Service] Starting Synchronization n° 1
+--- Model Path being used: models/5s_determ/1679509289_1.json
+---------- Pointer Status Initial ----------
+Start Time: 1679509277
+Start Time ID: 1
+
+End Time: 1679509279
+End Time ID: 1
+-------------------------------------
+-------- Printing the traces: --------
+(1, None, 'Machine 3', 'Started', 'Part 7', 'Queue 3', '22 March 19:21:23', 1679509279)
+---------- Pointer Status Updated ----------
+Start Time: 1679509277
+Start Time ID: 1
+
+End Time: 1679509279
+End Time ID: 1
+-------------------------------------
+parts_zero: []
+ 22 March 19:21:28 |-----------------------------------------------------------------
+ 22 March 19:21:28 |Big picture BEFORE Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9']
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10', 'Part 11']
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: []
+ 22 March 19:21:28 |-----------------------------------------------------------------
+--------- Step by Step Sync ---------
+ 22 March 19:21:28 |Event - machine_name: Machine 3, status: Started, part_id: Part 7, queue_name: Queue 3
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 8', 'Part 9']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10', 'Part 11']
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: []
+ 22 March 19:21:28 |-----------------------------------------------------------------
+ 22 March 19:21:28 |Big picture AFTER Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 8', 'Part 9']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10', 'Part 11']
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: []
+ 22 March 19:21:28 |-----------------------------------------------------------------
+Following data was PUT successfully to 'station_status' aspect: [{"_time": "2023-03-22T18:21:28.974883Z", "station_1": false, "station_2": false, "station_3": true, "station_4": false, "station_5": false}]
+Following data was PUT successfully to 'queue_status' aspect: [{"_time": "2023-03-22T18:21:29.764162Z", "queue_1": 3, "queue_2": 3, "queue_3": 3, "queue_4": 2, "queue_5": 1}]
+22 March 19:21:30 |[Internal Service] System Synchronized. Next Sync (n° 2): 22 March 19:21:33
+22 March 19:21:32 |[Internal Service] Starting Synchronization n° 2
+--- Model Path being used: models/5s_determ/1679509293_2.json
+---------- Pointer Status Initial ----------
+Start Time: 1679509279
+Start Time ID: 1
+
+End Time: 1679509293
+End Time ID: 8
+-------------------------------------
+ 22 March 19:21:32 |[interfaceDB.py/update_end_time] (Waiting 0 sec) Not found 'Started' after the end_time: 1679509293. Sleeping for 1 seconds and trying again
+ 22 March 19:21:33 |[interfaceDB.py/update_end_time] (Waiting 1 sec) Not found 'Started' after the end_time: 1679509293. Sleeping for 1 seconds and trying again
+ 22 March 19:21:34 |[interfaceDB.py/update_end_time] (Waiting 2 sec) Not found 'Started' after the end_time: 1679509293. Sleeping for 1 seconds and trying again
+ 22 March 19:21:35 |[interfaceDB.py/update_end_time] (Waiting 3 sec) Not found 'Started' after the end_time: 1679509293. Sleeping for 1 seconds and trying again
+ 22 March 19:21:36 |[interfaceDB.py/update_end_time] (Waiting 4 sec) Not found 'Started' after the end_time: 1679509293. Sleeping for 1 seconds and trying again
+ 22 March 19:21:37 |[interfaceDB.py/update_end_time] (Waiting 5 sec) Not found 'Started' after the end_time: 1679509293. Sleeping for 1 seconds and trying again
+ 22 March 19:21:38 |[interfaceDB.py/update_end_time] Pointer End Time updated from 8 to 9
+-------- Printing the traces: --------
+(1, None, 'Machine 3', 'Started', 'Part 7', 'Queue 3', '22 March 19:21:23', 1679509279)
+(2, None, 'Machine 5', 'Started', 'Part 12', 'Queue 5', '22 March 19:21:21', 1679509279)
+(3, None, 'Machine 4', 'Started', 'Part 10', 'Queue 4', '22 March 19:21:21', 1679509279)
+(4, None, 'Machine 2', 'Started', 'Part 4', 'Queue 2', '22 March 19:21:22', 1679509279)
+(5, None, 'Machine 1', 'Started', 'Part 1', 'Queue 1', '22 March 19:21:23', 1679509279)
+(6, None, 'Machine 5', 'Finished', 'Part 12', 'Queue 1', '22 March 19:21:28', 1679509289)
+(7, None, 'Machine 1', 'Finished', 'Part 1', 'Queue 2', '22 March 19:21:30', 1679509291)
+(8, None, 'Machine 1', 'Started', 'Part 2', 'Queue 1', '22 March 19:21:36', 1679509292)
+(9, None, 'Machine 2', 'Finished', 'Part 4', 'Queue 3', '22 March 19:21:36', 1679509297)
+---------- Pointer Status Updated ----------
+Start Time: 1679509279
+Start Time ID: 1
+
+End Time: 1679509297
+End Time ID: 9
+-------------------------------------
+parts_zero: []
+ 22 March 19:21:38 |-----------------------------------------------------------------
+ 22 March 19:21:38 |Big picture BEFORE Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 8', 'Part 9']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10', 'Part 11']
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: []
+ 22 March 19:21:38 |-----------------------------------------------------------------
+--------- Step by Step Sync ---------
+22 March 19:21:38 |[WARNING][synchronizer.py/Mstarted()] Part 7 was not found in elements vector of the queue
+This might happen if the element is an initial part. If that not the case, CHECK IT OUT!
+printing the list of parts in the queue: ['Part 8', 'Part 9']
+ 22 March 19:21:38 |Event - machine_name: Machine 3, status: Started, part_id: Part 7, queue_name: Queue 3
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 8', 'Part 9']
+Part in Machine: ['Part 7', 'Part 7']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10', 'Part 11']
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: []
+22 March 19:21:38 |[ERROR][synchronizer.py/positioning_discovery()] A different number of parts in the system was detected. Check for parts duplications or external interference!
+22 March 19:21:38 ||-- Previous number: 12, New number: 13
+22 March 19:21:38 |---- Digital Twin was killed ----
+PS D:\POLIMI\Digital twins\Digital_Twin\Digital Twin>

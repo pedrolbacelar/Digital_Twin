@@ -1,5 +1,8 @@
 #--- Importing Database components
 from .interfaceDB import Database
+from .helper import Helper
+
+#--- Common Libraries
 import numpy as np
 import matplotlib.pyplot as plt
 import sqlite3
@@ -14,21 +17,36 @@ importlib.reload(dtwinpylib.dtwinpy.interfaceDB)"""
 
 
 class Validator():
-    def __init__(self, digital_model, simtype, real_database_path):
+    def __init__(self, digital_model, simtype, real_database_path, start_time, end_time, generate_digital_model, id_database_path= False,copied_realDB= False, delta_t_treshold= 100, plot= False):
+        self.helper = Helper()
+        self.plot = plot
         self.digital_model = digital_model
+        self.generate_digital_model= generate_digital_model
         self.simtype = simtype
+        self.delta_t_treshold = delta_t_treshold
         # qTDS: each row is the list of process time for each part
         self.matrix_ptime_qTDS = None 
         # TDS: each row is the list of process time for each machine
         self.matrix_ptime_TDS = None
+        self.copied_realDB = copied_realDB
 
         #--- Database
         # The real database is going to be create by the broker,
         # here we're just getting the object that point to that
         # database. That's why we don't initialize it.
-        self.real_database = Database(database_path=real_database_path, event_table= "real_log")
+        self.start_time = start_time
+        self.end_time = end_time
+
+        if simtype == "TDS":
+            feature_usingDB= "valid_logic"
+        if simtype == "qTDS":
+            feature_usingDB= "valid_input"
+
+        #--- Databases
+        self.real_database = Database(database_path=real_database_path, event_table= "real_log", feature_usingDB= feature_usingDB, start_time=start_time, end_time=end_time, copied_realDB= copied_realDB)
         self.digital_database = self.digital_model.get_model_database()
         self.real_database_path = self.real_database.get_database_path()
+        self.id_database = Database(database_path=id_database_path, event_table= "ID")
 
         #--- Change the name of the table in database if it's digital to real
         with sqlite3.connect(self.real_database_path) as db:
@@ -43,14 +61,26 @@ class Validator():
     # ======================= TRACE DRIVEN SIMULATION ======================= 
     #--- For a specific part ID return the related vector of ptime_TDS
     def get_part_TDS(self, part):
-        return self.matrix_ptime_TDS[part.get_id() - 1]
-    
+        """
+        This function receives a part object and look into the dictionary of parts traces
+        in order to get the correct trace of that part.
+        """
+        try:
+            return self.matrix_ptime_TDS[part.get_name()]
+        except KeyError:
+            self.helper.printer(f"[WARNING][validator.py/get_part_TDS()] Trying to get the trace of {part.get_name()}, but no traces was created for that part", "yellow")
+            print("If you're running a short simulation, it's possible that the part was in the simulation, but didn't had time to appear in the trace, otherwise CHECK IT OUT")
+
     #--- Get the number of parts given in the TDS
     def get_len_TDS(self):
         return len(self.matrix_ptime_TDS)
     
     #--- Initial Setup of TDS
     def set_TDS(self):
+        """
+        This function is responsible to take the traces of each part extracted from the real log and
+        add it for the respective part. 
+        """
         #--- List for all parts in the simulation
         part_list = []
         #--- Get the existing parts already allocated in the Queues
@@ -67,16 +97,19 @@ class Validator():
             if machine.get_initial_part() != None:
                 part = machine.get_initial_part()
                 part_list.append(part)
-                # Note 1: I can do this because the even the Validator being called after the simulation,
+                # Note 1: I can do this because the Validator is being called after the simulation,
                 # after assigned, we don't change the initial part of a machine
-                # Note 2: In this case, I first add all the parts in the queues and after the parts in the machines
-                # This logic is okay, because the logic for naming parts is also being like that.
+                
         
         #--- give for each part the ptime_TDS list 
-        # TODO: Maybe use dictionaries to get pricesly the parts
         for part in part_list:
             current_ptime_TDS = self.get_part_TDS(part)
             part.set_ptime_TDS(current_ptime_TDS)
+
+        #--- Set the simulation type for all the machines
+        for machine in self.machines_vector:
+            #--- Set the type of Simulation
+            machine.set_simtype("TDS")
 
         #--- Extra adjust for initial parts (parts in WIP) already in middle of the simulation
         # Since this parts are already in the simulation, the TDS generated
@@ -84,10 +117,73 @@ class Validator():
         # cluster 2 and the system has 4 cluster. My TDS will have only 3 elements
         # (c2,c3,c4). But in cluster 2 i will take in element in position 2, so c3. 
         # To fix that we put some extra 0 in the beginning equivalent to the number
-        # of cluster that I already been through
+        # of cluster that I already been through.
+        #
+        # This fix is only for parts that are positionated in Queues, because the parts
+        # that are inside of machine are already going to have their own quick fix. We do
+        # all of this just to get the rigth queue, and based on the queue figure out the 
+        # the cluster of machine. Here I don't need to have the dictionary, because I'm
+        # changing each part at time.
         
-        #--- Get all initial parts from the simulation
+        #--- Get all initial parts in queues from the simulation
         initial_parts = self.digital_model.get_all_parts()
+
+        #--- Get the parts names that appears in traces
+        #parts_in_trace = self.real_database.get_distinct_values(column= "part_id", table="real_log")
+        parts_in_trace = self.real_database.get_parts_with_completed_traces()
+        parts_in_trace_names = []
+        # Take only the string from the database
+        for part in parts_in_trace:
+            parts_in_trace_names.append(part[0])
+
+        #--- Try to match parts in simulation with parts in trace
+        parts_to_remove = []
+        for part in initial_parts:
+            
+            # Try to see if the part from the model is within the parts of trace
+            try:
+                parts_in_trace_names.index(part.get_name())
+
+            except ValueError:
+                print(f"{part.get_name()} was not found in the parts of trace... Removing part from the list")
+                parts_to_remove.append(part)
+
+        #--- Remove parts
+        for part in parts_to_remove:
+            initial_parts.remove(part)
+        
+        if len(parts_to_remove) > 0:
+            print("----------------  Cleaning Parts for TDS  ----------------")
+            print("Not all the parts in the system appeared in the traces. Printing parts that didn't appeared:")
+            for part in parts_to_remove:
+                print(f"|-- {part.get_name()}")
+            print("Printing parts that appeared and are being considered for TDS:")
+            for part in initial_parts:
+                print(f"|-- {part.get_name()}")
+            print("------------------------------------------------------------")
+
+            
+
+        """
+        initial_copy = initial_parts
+        for i in range(len(initial_copy)):
+            pos = 
+            part = initial_parts[i]
+            # Loop for each simulation part
+            flag_in_trace = False
+            for part_in_trace_name in parts_in_trace:
+                # Loop for each trace part name
+                if part.get_name() == part_in_trace_name[0]:
+                    # Found a the simulation part in the trace, don't need to keep chasing
+                    flag_in_trace = True
+                    break
+            
+            #--- Check if the part was found in some of the traces
+            if flag_in_trace == False:
+                # The part was in the simulation and did't appeared in the trace, removing...
+                initial_parts.remove(part)
+                pass
+        """
 
         #--- Assign the queue object to the part
         for part in initial_parts:
@@ -104,14 +200,20 @@ class Validator():
             if part_queue != None and part_queue.get_id() != 1:
                 part_cluster = part_queue.get_cluster()
                 part.quick_TDS_fix(part_cluster)
+                print(f"--- Part name {part.get_name()} quick done. Part Cluster: {part_cluster}")
+                print(f"All process time for each cluster:{part.get_all_ptime_TDS()}")
+                print(f"Process time of the first cluster: {part.get_ptime_TDS(part_cluster - 1)}")
         
-        #--- Set the simulation type for all the machines
-        for machine in self.machines_vector:
-            #--- Set the type of Simulation
-            machine.set_simtype("TDS")
 
     #--- Generate the traces of TDS based on the real Event Log
     def generate_TDS_traces(self):
+        """
+        This function is used to create the traces of each part. By 'traces' we mean the process
+        time that each part takes for each cluster of machine in the simulation. For that the function
+        read the selected session of the database and look for the specific path that a part took. Finally
+        the function adds this path in a dictionary that has as key the part name and as value the vector
+        with the path.
+        """
 
         #--- Extract the unique parts IDs from the real log
         part_ids = self.real_database.get_distinct_values(column= "part_id", table="real_log")
@@ -123,13 +225,14 @@ class Validator():
         part_ids = sorted(part_ids, key=sort_key)
         
         #--- Create matrix to store trace of process time for each part
-        matrix_ptime_TDS = []
+        #[OLD] matrix_ptime_TDS = [] 
+        matrix_ptime_TDS = {}
         part_matrix_full_trace = []
 
         #--- Loop for each part of the simulation
         for part_id in part_ids:
             #--- Get the full trace for each part
-            part_full_trace = self.real_database.get_time_activity_of_column(column= "part_id", table="real_log", column_id= part_id)
+            part_full_trace = self.real_database.get_time_activity_of_column(column= "part_id", table="real_log", column_id= part_id[0])
             part_matrix_full_trace.append(part_full_trace)
 
             #--- Initiate as blank values
@@ -138,6 +241,7 @@ class Validator():
             processed_time = None
             part_trace = []
 
+            #--- For each event in the path of each part
             for event in part_full_trace:
                 #--- Extract the Started and Finished time
                 if event[1] == 'Started':
@@ -157,7 +261,7 @@ class Validator():
                     finished_time = None
                     processed_time = None
                 
-                #--- In the case of part that already was in the machine (worked_time)
+                #--- AVOID: In the case of part that already was in the machine (worked_time)
                 if finished_time != None and started_time == None:
                     processed_time = finished_time
 
@@ -171,7 +275,8 @@ class Validator():
 
             
             #--- Add part trace to the matrix of all parts traces
-            matrix_ptime_TDS.append(part_trace)
+            #[OLD] matrix_ptime_TDS.append(part_trace)
+            matrix_ptime_TDS[part_id[0]] = part_trace
             
         #--- Return the matrix of traces
         return matrix_ptime_TDS
@@ -187,8 +292,10 @@ class Validator():
         #--- Update each existing machine in the model
 
         #--- Extract the unique parts IDs from the real log
-        machines_ids = self.real_database.get_distinct_values(column= "machine_id", table="real_log")
-        
+        # [OLD] machines_ids = self.real_database.get_distinct_values(column= "machine_id", table="real_log")
+        machines_ids = self.real_database.get_machines_with_completed_traces()
+
+
         # For every machine that was USED in the real world
         # We iterate the within the machines id because it's possible that
         # the simulation has more machines rather than the real log, because
@@ -231,7 +338,7 @@ class Validator():
         #--- Loop for each part of the simulation
         for machine_id in machines_ids:
             #--- Get the full trace for each machine
-            machine_full_trace = self.real_database.get_time_activity_of_column(column= "machine_id", table="real_log", column_id=machine_id)
+            machine_full_trace = self.real_database.get_time_activity_of_column(column= "machine_id", table="real_log", column_id=machine_id[0])
             machine_matrix_full_trace.append(machine_full_trace)
 
             #--- Initiate as blank values
@@ -247,6 +354,7 @@ class Validator():
                 elif event[1] == 'Finished':
                     finished_time = event[0]
                 
+
                 #--- Calculate the process time
                 if started_time != None and finished_time != None:
                     processed_time = finished_time - started_time
@@ -259,6 +367,15 @@ class Validator():
                     finished_time = None
                     processed_time = None
 
+                
+                if finished_time != None and started_time == None:
+                    #--- reset local started and finished time for the next cycle
+                    started_time = None
+                    finished_time = None
+                    processed_time = None
+
+
+                """
                 #--- In the case of part that already was in the machine (worked_time)
                 if finished_time != None and started_time == None:
                     processed_time = finished_time
@@ -270,6 +387,7 @@ class Validator():
                     started_time = None
                     finished_time = None
                     processed_time = None
+                """
             
             #--- Add machine trace to the matrix of all machines traces
             matrix_ptime_qTDS[machine_id[0]] = (machine_trace)
@@ -315,9 +433,28 @@ class Validator():
             for i in range(len(u)):
                 if u[i] == 1.0:
                     pos_one = i
+                    try:
+                        u[pos_one]=umax # change 1 to 0.99 to avoid infinity in dist.ppf function
+                        return(u,pos_one)
+                    except UnboundLocalError:
+                        self.helper.printer(f"[ERROR][validator.py/generate_Xs_machine()] 'pos_one not defined. Checking if the U is correct", 'red')
+                        print(f"U: {u}")
+                        self.helper.kill()
+                    break
+            else:
+                self.helper.printer("[WARNING][validator.py/generate_Xs_machine()] value 1 not found in 'u' variable")
+                print(f"u: {u}")
+                print("Printing input parameters...")
+                print(f"loc = {loc}")
+                print(f"scale = {scale}")
+                print(f"distribution= {distribution}")
+                print(f"Xr = {Xr}")
+
+                return(u,[])
             #pos_one = np.where(u == 1.0)
-            u[pos_one]=umax # change 1 to 0.99 to avoid infinity in dist.ppf function
-            return(u,pos_one)
+            
+            
+            
 
         # -----------------------------------------------------
         # Function for Generating dedicated disrtibutions
@@ -366,6 +503,7 @@ class Validator():
         sse=np.zeros(900)
 
         # Deriving randomness from Xr and generating Xs
+        
         for ii in range(899,498,-1):
             umax[ii]=0.91+(ii*0.0001)
             Xsf=Xs
@@ -382,18 +520,34 @@ class Validator():
                 u,pos_one = randomness(ECDF(Xr),umax[ii],Xr) # calculate inverse transform of ecdf.
                 Xs = (dist.ppf(u, a, b, loc, scale))    # generate distribution Xs.
 
-            diff[ii]=abs(Xs[pos_one]-Xr[pos_one])   # Calculate error in the highest value due to impact of umax
-            #sse[ii]=np.sum(np.square(Xr-Xs))
-            
-            if diff[ii]>diff[ii+1]:
-                Xs=Xsf
+            if pos_one != []:
+                diff[ii]=abs(Xs[pos_one]-Xr[pos_one])   # Calculate error in the highest value due to impact of umax
+                #sse[ii]=np.sum(np.square(Xr-Xs))
+                if diff[ii]>diff[ii+1]:
+                    Xs=Xsf
+                    break
+            else:
+                
                 break
-
-        i=range(1,len(Xr)+1)
-        plt.plot(i,Xr,color='blue')
-        plt.plot(i,Xs,color='red')
-        plt.show()
         
+        if self.plot == True:
+            i=range(1,len(Xr)+1)
+            plt.plot(i,Xr,color='blue')
+            plt.plot(i,Xs,color='red')
+            plt.show()
+
+        if Xs[0] != int or Xs[0] != float:
+            self.helper.printer(f"[WARNING][validator.py/generate_Xs_machine()] The Xs vector is not a made by numbers! Check the U vector:")
+            print(f"u: {u}")
+            print("|--- Printing input parameters...")
+            print(f"loc = {loc}")
+            print(f"scale = {scale}")
+            print(f"distribution= {distribution}")
+            print(f"Xr = {Xr}")
+            print("|--- Printing output")
+            print(f"Xs= {Xs}")
+
+
         return(Xs)
     # =======================================================================
 
@@ -420,6 +574,18 @@ class Validator():
     # ======================== Sequence Comparing Methods ========================
 
     def LCSS(self, Sequence1, Sequence1_time, Sequence2, Sequence2_time, delta_t, order = False):
+        
+        # we take the smallest sequence as first sequence to get the indicator value not greater than 1.0
+        if len(Sequence1) > len(Sequence2):
+            alt = Sequence1
+            alt_time = Sequence1_time
+            Sequence1 = Sequence2
+            Sequence1_time = Sequence2_time
+            Sequence2 = alt
+            Sequence2_time = alt_time
+        else:
+            pass
+        
         # initialize the lengths of the two input vectors
         m, n = len(Sequence1), len(Sequence2)
         
@@ -447,7 +613,12 @@ class Validator():
 
         
         #--- Similarity Indicator
-        indicator = len(lcss) / min(m,n)
+        indicator = len(lcss) / max(m,n)
+        print("-------------------------------------")
+        print("Printing LCSS Event sequence...")
+        for i in range(len(lcss)):
+            print(f"[{i}] {lcss_time[i]} - {lcss[i]}")
+        print("-------------------------------------")
 
         # return the longest common sub-sequence
         return (lcss, lcss_time, indicator)
@@ -487,7 +658,10 @@ class Validator():
         
         #--- Loop to correlated each Xs with Xr
         # The loop can also be seem as loop through the machines
-        machines_ids = self.real_database.get_distinct_values(column= "machine_id", table="real_log")
+        # [OLD] machines_ids = self.real_database.get_distinct_values(column= "machine_id", table="real_log")
+        # ------- GET MACHINES IDs ONLY OF COMPLETED TRACE (START -> FINISH) -------
+        machines_ids = self.real_database.get_machines_with_completed_traces()
+        
         for machine_id in machines_ids:
             
             # For this machine_id, find the machine object with the same id
@@ -503,10 +677,13 @@ class Validator():
                         scale = machine_process_time[2]
 
                         Xr_vector = Xr_matrix[machine.get_name()]
-                        print(Xr_vector)
+                        print(f"machine name: {machine.get_name()}")
+                        print(f"Xr_vector: {Xr_vector}")
 
                         Xs_vector = self.generate_Xs_machine(loc= loc, scale= scale, distribution= dist, Xr= Xr_vector)
                         self.matrix_ptime_qTDS[machine.get_name()] = (Xs_vector)
+                        
+                        break
                     
                     else:
                         #--- WRONG!!! This bellow implementation is wrong. The goal here is not to copy and paste
@@ -534,15 +711,6 @@ class Validator():
         #-- generate Xr = Xs
         self.matrix_ptime_TDS= self.generate_TDS_traces()
 
-        # --------- Interface ----------
-        print("=== matrix_ptime_qTDS ===")
-        for key in self.matrix_ptime_qTDS:
-            print(f"{key}: {self.matrix_ptime_qTDS[key]}")
-
-        print("=== matrix_ptime_TDS ===")
-        for j in range(len(self.matrix_ptime_TDS)):
-            print(f"Part {j+1}: {self.matrix_ptime_TDS[j]}")
-
         #--- Setup initial Traces
         if self.simtype == "TDS":
             #--- Set the TDS for each part
@@ -552,7 +720,52 @@ class Validator():
             #--- Set the qTDS for each machine and also the simtype
             self.set_qTDS()
 
+        # --------- Interface ----------
+        print("-----------------------------------------------------------------------------------------")
+        print("=== matrix_ptime_qTDS ===")
+        if len(self.matrix_ptime_qTDS) == 0:
+            print("[VALIDATOR] Simulation Deterministic - No correlation of randoness needed")
+        else:
+            for key in self.matrix_ptime_qTDS:
+                print(f"{key}: {self.matrix_ptime_qTDS[key]}")
+        
+        print()
+
+        print("=== matrix_ptime_TDS ===")
+        for key in self.matrix_ptime_TDS:
+            print(f"{key}: {self.matrix_ptime_TDS[key]}")
+            # [OLD] print(f"Part {j+1}: {self.matrix_ptime_TDS[j]}")
+        print("-----------------------------------------------------------------------------------------")
+
     def run(self):
+
+        # --- Update the Digital Model before running anything ---
+        # --- Get model constrains
+        (until, maxparts, targeted_part_id, targeted_cluster) = self.digital_model.get_model_constrains()
+
+        # --- Update the duration of the simulation in case that none of other parameters was give
+        # (also for that you need to have start and end time)
+        if (until, maxparts, targeted_part_id, targeted_cluster) == (None, None, None, None) and (self.start_time != None and self.end_time != None):
+            #--- Get the current duration between start and finish trace
+            until = self.real_database.get_current_durantion()
+            #-- adjust to run until the end
+            until += 1
+
+            #--- Set this new stop condition in the model
+            self.digital_model.set_until(until)
+            self.helper.printer(f"[Validator] Duration of the TDS and qTDS being used: {until}", 'brown')
+
+        
+        # ------- Assign Parts Queue Branches selected -------
+        parts_branch_queue = self.id_database.read_parts_branch_queue()
+        for machine in self.machines_vector:
+            machine.set_parts_branch_queue(parts_branch_queue)
+    
+
+        # [OLD] self.digital_model = self.generate_digital_model(until= until)
+        # Maybe this is a very wrong approach, because you're generating new components after
+        # already made changes in the property of them before. Inside of the Features (validator,
+        # synchronizer, etc we shouldn't create new modules, just update them!)
 
         # obs: I can run the simulation direct because the machines already have the type of simulation
         if self.simtype == "TDS":
@@ -567,13 +780,17 @@ class Validator():
             (Yr_time, Yr_event) = self.generate_event_sequence(database= self.real_database, table= "real_log")
             
             #--- Compare Event Sequence
-            (lcss, lcss_time, lcss_indicator) = self.LCSS(Sequence1= Ys_event, Sequence1_time= Ys_time, Sequence2= Yr_event, Sequence2_time= Yr_time, delta_t=100)
-            print("--- LCSS Sequence ---")
-            print(lcss)
-            print("--- LCSS Time ---")
-            print(lcss_time)
-            print(f">>> LCSS Indicator: {lcss_indicator}")
+            (lcss, lcss_time, lcss_indicator) = self.LCSS(Sequence1= Ys_event, Sequence1_time= Ys_time, Sequence2= Yr_event, Sequence2_time= Yr_time, delta_t= self.delta_t_treshold)
             
+            #--- User Interface
+            print("==================== LOGIC VALIDATION ====================")
+            print("---- Real Sequence:")
+            for i in range(len(Yr_event)):
+                print(f"{Yr_time[i]} | {Yr_event[i]}")
+            print("---- Digital Sequence:")
+            for i in range(len(Ys_time)):
+                print(f"{Ys_time[i]} | {Ys_event[i]}")
+            print(f">>> LCSS Indicator Logic: {lcss_indicator}")
             print("=========================================================")
 
             return((lcss, lcss_time, lcss_indicator))
@@ -590,15 +807,18 @@ class Validator():
             (Yr_time, Yr_event) = self.generate_event_sequence(database= self.real_database, table= "real_log")
 
             #--- Compare Event Sequence
-            (lcss, lcss_time, lcss_indicator) = self.LCSS(Sequence1= Ys_event, Sequence1_time= Ys_time, Sequence2= Yr_event, Sequence2_time= Yr_time, delta_t=2000)
-            print("--- LCSS Sequence ---")
-            print(lcss)
-            print("--- LCSS Time ---")
-            print(lcss_time)
-            print(f">>> LCSS Indicator: {lcss_indicator}")                        
-
-
-            print("===============================================================")
+            (lcss, lcss_time, lcss_indicator) = self.LCSS(Sequence1= Ys_event, Sequence1_time= Ys_time, Sequence2= Yr_event, Sequence2_time= Yr_time, delta_t= self.delta_t_treshold)
+            
+            #--- User Interface
+            print("==================== INPUT VALIDATION ====================")
+            print("---- Real Sequence:")
+            for i in range(len(Yr_time)):
+                print(f"{Yr_time[i]} | {Yr_event[i]}")
+            print("---- Digital Sequence:")
+            for i in range(len(Ys_time)):
+                print(f"{Ys_time[i]} | {Ys_event[i]}")
+            print(f">>> LCSS Indicator Input: {lcss_indicator}")
+            print("=========================================================")
 
             return((lcss, lcss_time, lcss_indicator))
     # =======================================================================

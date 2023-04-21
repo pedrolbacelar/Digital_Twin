@@ -1,0 +1,732 @@
+PS D:\POLIMI\Digital twins\Digital_Twin\Digital Twin> python .\rct.py
+pygame 2.3.0 (SDL 2.24.2, Python 3.11.2)
+Hello from the pygame community. https://www.pygame.org/contribute.html
+Deleting existing model (excepted by 'initial.json') from the relative folder path:'models/5s_determ'
+Done! Deleted 0 successfuly
+--- printing databases paths ---
+Digital Database: 'databases/5s_determ/digital_database.db'
+Real Database: 'databases/5s_determ/real_database.db'
+ID Database: 'databases/5s_determ/ID_database.db'
+IP address not provided, Broker Manager not created. Considering an offiline enviorment
+23 March 19:16:22 |---- Digital Twin '5s_determ' created sucessfully ----
+==========  Reading the Model: 5s_determ  ==========
+===> Big Picture
+Total number of Machines: 5
+Total number of Queues: 5
+
+===>Detailed view of Queues:
+----------------
+Queue 1
+Arc links: [5, 1]
+Capacity: 12
+Queue Lenght: 0
+----------------
+Queue 2
+Arc links: [1, 2]
+Capacity: 10
+|-- Parts stored: Part 1
+|-- Parts stored: Part 2
+|-- Parts stored: Part 3
+|-- Parts stored: Part 4
+Queue Lenght: 4
+----------------
+Queue 3
+Arc links: [2, 3]
+Capacity: 10
+Queue Lenght: 0
+----------------
+Queue 4
+Arc links: [2, 4]
+Capacity: 10
+|-- Parts stored: Part 5
+|-- Parts stored: Part 6
+|-- Parts stored: Part 7
+Queue Lenght: 3
+----------------
+Queue 5
+Arc links: None
+Capacity: 20
+Queue Lenght: 0
+
+===>Detailed view of Machines:
+----------------
+> Machine 1
+--Queue In:--
+Queue 1
+--Queue Out:--
+Queue 2
+Machine Cluster: 1
+----------------
+> Machine 2
+--Queue In:--
+Queue 2
+--Queue Out:--
+Queue 3
+Queue 4
+Machine Cluster: 2
+Branching Machine: Branch 1 | Machine 2
+|-- Conveyor towards Queue 3
+|-- Conveyor towards Queue 4
+----------------
+> Machine 3
+--Queue In:--
+Queue 3
+--Queue Out:--
+Queue 5
+Machine Cluster: 3
+----------------
+> Machine 4
+--Queue In:--
+Queue 4
+--Queue Out:--
+Queue 5
+Machine Cluster: 3
+----------------
+> Machine 5
+--Queue In:--
+Queue 5
+--Queue Out:--
+Queue 1
+Machine Cluster: 4
+digital_database_path: databases/5s_determ/digital_database.db
+ID_database_path: databases/5s_determ/ID_database.db
+ 23 March 19:16:22 |Running Path Scenarios Generation....
+====== Paths Created ======
+---- Path 1 ----
+Conveyor towards Queue 3
+---- Path 2 ----
+Conveyor towards Queue 4
+========================
+-----  generate_path_scenarios results -----
+path_scenarios : [[<dtwinpylib.dtwinpy.components.Conveyor object at 0x0000026CD72994D0>], [<dtwinpylib.dtwinpy.components.Conveyor object at 0x0000026CD7298990>]]
+ 23 March 19:16:22 |Getting Parts Making Decisions....
+ 23 March 19:16:22 |Running Path Simulation....
+--- Parts Making Decisions: ---
+Part 4
+23 March 19:16:22 |------- Part 4 is making a decision... Starting paths simulations -------
+====================================== Simulation AS IS for Part 4 ======================================
+parts_branch_queue_vect = [('Part 19', None), ('Part 15', None), ('Part 17', None), ('Part 18', None), ('Part 14', None), ('Part 20', None), ('Part 16', None)]
+### ============ Simulation Started ============ ###
+Time: 0 - [Machine 2] got Part 1 from Queue 2 (capacity= 3)
+Time: 0 - [Machine 4] got Part 5 from Queue 4 (capacity= 2)
+! Using 'alternated' policy to allocate Part 1 to Queue 3
+Time: 18 - [Conveyor towards Queue 3] GOT Part 1
+Time: 18 - [Machine 2] got Part 2 from Queue 2 (capacity= 2)
+! Using 'alternated' policy to allocate Part 2 to Queue 4
+Time: 36 - [Conveyor towards Queue 4] GOT Part 2
+Time: 36 - [Machine 2] got Part 3 from Queue 2 (capacity= 1)
+! Using 'alternated' policy to allocate Part 5 to Queue 5
+Time: 40 - [Conveyor towards Queue 5] GOT Part 5
+Time: 40 - [Machine 4] got Part 6 from Queue 4 (capacity= 1)
+Time: 41 - [Conveyor towards Queue 3] PUT Part 1 in the Queue 3
+Time: 42 - [Machine 3] got Part 1 from Queue 3 (capacity= 0)
+Time: 51 - [Conveyor towards Queue 5] PUT Part 5 in the Queue 5
+Time: 52 - [Machine 5] got Part 5 from Queue 5 (capacity= 0)
+! Using 'alternated' policy to allocate Part 3 to Queue 3
+Time: 54 - [Conveyor towards Queue 3] GOT Part 3
+Time: 54 - [Machine 2] got Part 4 from Queue 2 (capacity= 0)
+Time: 56 - [Conveyor towards Queue 4] PUT Part 2 in the Queue 4
+! Using 'alternated' policy to allocate Part 5 to Queue 1
+Time: 62 - [Terminator] xxx Part 5 terminated xxx
+Time: 62 - [Terminator] Part 8 replaced
+Time: 62 - [Conveyor towards Queue 1] GOT Part 8
+Time: 71 - [Conveyor towards Queue 1] PUT Part 8 in the Queue 1
+! Using 'alternated' policy to allocate Part 4 to Queue 4
+Time: 72 - [Conveyor towards Queue 4] GOT Part 4
+Time: 72 - [Machine 1] got Part 8 from Queue 1 (capacity= 0)
+Time: 77 - [Conveyor towards Queue 3] PUT Part 3 in the Queue 3
+! Using 'alternated' policy to allocate Part 6 to Queue 5
+Time: 80 - [Conveyor towards Queue 5] GOT Part 6
+Time: 80 - [Machine 4] got Part 7 from Queue 4 (capacity= 1)
+! Using 'alternated' policy to allocate Part 8 to Queue 2
+Time: 82 - [Conveyor towards Queue 2] GOT Part 8
+Time: 91 - [Conveyor towards Queue 5] PUT Part 6 in the Queue 5
+Time: 92 - [Machine 5] got Part 6 from Queue 5 (capacity= 0)
+Time: 92 - [Conveyor towards Queue 4] PUT Part 4 in the Queue 4
+Time: 93 - [Conveyor towards Queue 2] PUT Part 8 in the Queue 2
+Time: 94 - [Machine 2] got Part 8 from Queue 2 (capacity= 0)
+! Using 'alternated' policy to allocate Part 1 to Queue 5
+Time: 102 - [Conveyor towards Queue 5] GOT Part 1
+Time: 102 - [Machine 3] got Part 3 from Queue 3 (capacity= 0)
+! Using 'alternated' policy to allocate Part 6 to Queue 1
+Time: 102 - [Terminator] xxx Part 6 terminated xxx
+Time: 102 - [Terminator] Part 9 replaced
+Time: 102 - [Conveyor towards Queue 1] GOT Part 9
+Time: 111 - [Conveyor towards Queue 1] PUT Part 9 in the Queue 1
+! Using 'alternated' policy to allocate Part 8 to Queue 3
+Time: 112 - [Conveyor towards Queue 3] GOT Part 8
+Time: 112 - [Machine 1] got Part 9 from Queue 1 (capacity= 0)
+Time: 113 - [Conveyor towards Queue 5] PUT Part 1 in the Queue 5
+Time: 114 - [Machine 5] got Part 1 from Queue 5 (capacity= 0)
+! Using 'alternated' policy to allocate Part 7 to Queue 5
+Time: 120 - [Conveyor towards Queue 5] GOT Part 7
+Time: 120 - [Machine 4] got Part 2 from Queue 4 (capacity= 1)
+! Using 'alternated' policy to allocate Part 9 to Queue 2
+Time: 122 - [Conveyor towards Queue 2] GOT Part 9
+! Using 'alternated' policy to allocate Part 1 to Queue 1
+Time: 124 - [Terminator] xxx Part 1 terminated xxx
+Time: 124 - [Terminator] Part 10 replaced
+Time: 124 - [Conveyor towards Queue 1] GOT Part 10
+Time: 131 - [Conveyor towards Queue 5] PUT Part 7 in the Queue 5
+Time: 132 - [Machine 5] got Part 7 from Queue 5 (capacity= 0)
+Time: 133 - [Conveyor towards Queue 2] PUT Part 9 in the Queue 2
+Time: 133 - [Conveyor towards Queue 1] PUT Part 10 in the Queue 1
+Time: 134 - [Machine 1] got Part 10 from Queue 1 (capacity= 0)
+Time: 134 - [Machine 2] got Part 9 from Queue 2 (capacity= 0)
+Time: 135 - [Conveyor towards Queue 3] PUT Part 8 in the Queue 3
+! Using 'alternated' policy to allocate Part 7 to Queue 1
+Time: 142 - [Terminator] xxx Part 7 terminated xxx
+Time: 142 - [Terminator] Part 11 replaced
+Time: 142 - [Conveyor towards Queue 1] GOT Part 11
+! Using 'alternated' policy to allocate Part 10 to Queue 2
+Time: 144 - [Conveyor towards Queue 2] GOT Part 10
+Time: 151 - [Conveyor towards Queue 1] PUT Part 11 in the Queue 1
+! Using 'alternated' policy to allocate Part 9 to Queue 4
+Time: 152 - [Conveyor towards Queue 4] GOT Part 9
+Time: 152 - [Machine 1] got Part 11 from Queue 1 (capacity= 0)
+Time: 155 - [Conveyor towards Queue 2] PUT Part 10 in the Queue 2
+Time: 156 - [Machine 2] got Part 10 from Queue 2 (capacity= 0)
+! Using 'alternated' policy to allocate Part 2 to Queue 5
+Time: 160 - [Conveyor towards Queue 5] GOT Part 2
+Time: 160 - [Machine 4] got Part 4 from Queue 4 (capacity= 0)
+! Using 'alternated' policy to allocate Part 3 to Queue 5
+Time: 162 - [Conveyor towards Queue 5] GOT Part 3
+Time: 162 - [Machine 3] got Part 8 from Queue 3 (capacity= 0)
+! Using 'alternated' policy to allocate Part 11 to Queue 2
+Time: 162 - [Conveyor towards Queue 2] GOT Part 11
+Time: 171 - [Conveyor towards Queue 5] PUT Part 2 in the Queue 5
+Time: 172 - [Machine 5] got Part 2 from Queue 5 (capacity= 0)
+Time: 172 - [Conveyor towards Queue 4] PUT Part 9 in the Queue 4
+Time: 173 - [Conveyor towards Queue 2] PUT Part 11 in the Queue 2
+Time: 173 - [Conveyor towards Queue 5] PUT Part 3 in the Queue 5
+! Using 'alternated' policy to allocate Part 10 to Queue 3
+Time: 174 - [Conveyor towards Queue 3] GOT Part 10
+Time: 174 - [Machine 2] got Part 11 from Queue 2 (capacity= 0)
+! Using 'alternated' policy to allocate Part 2 to Queue 1
+Time: 182 - [Terminator] xxx Part 2 terminated xxx
+Time: 182 - [Terminator] Part 12 replaced
+Time: 182 - [Conveyor towards Queue 1] GOT Part 12
+Time: 182 - [Machine 5] got Part 3 from Queue 5 (capacity= 0)
+Time: 191 - [Conveyor towards Queue 1] PUT Part 12 in the Queue 1
+! Using 'alternated' policy to allocate Part 11 to Queue 4
+Time: 192 - [Conveyor towards Queue 4] GOT Part 11
+! Using 'alternated' policy to allocate Part 3 to Queue 1
+Time: 192 - [Terminator] xxx Part 3 terminated xxx
+Time: 192 - [Terminator] Part 13 replaced
+Time: 192 - [Conveyor towards Queue 1] GOT Part 13
+Time: 192 - [Machine 1] got Part 12 from Queue 1 (capacity= 0)
+Time: 197 - [Conveyor towards Queue 3] PUT Part 10 in the Queue 3
+! Using 'alternated' policy to allocate Part 4 to Queue 5
+Time: 200 - [Conveyor towards Queue 5] GOT Part 4
+Time: 200 - [Machine 4] got Part 9 from Queue 4 (capacity= 0)
+Time: 201 - [Conveyor towards Queue 1] PUT Part 13 in the Queue 1
+! Using 'alternated' policy to allocate Part 12 to Queue 2
+Time: 202 - [Conveyor towards Queue 2] GOT Part 12
+Time: 202 - [Machine 1] got Part 13 from Queue 1 (capacity= 0)
+Time: 211 - [Conveyor towards Queue 5] PUT Part 4 in the Queue 5
+! Using 'alternated' policy to allocate Part 13 to Queue 2
+Time: 212 - [Conveyor towards Queue 2] GOT Part 13
+Time: 212 - [Machine 5] got Part 4 from Queue 5 (capacity= 0)
+Time: 212 - [Conveyor towards Queue 4] PUT Part 11 in the Queue 4
+Time: 213 - [Conveyor towards Queue 2] PUT Part 12 in the Queue 2
+Time: 214 - [Machine 2] got Part 12 from Queue 2 (capacity= 0)
+! Using 'alternated' policy to allocate Part 8 to Queue 5
+Time: 222 - [Conveyor towards Queue 5] GOT Part 8
+Time: 222 - [Machine 3] got Part 10 from Queue 3 (capacity= 0)
+! Using 'alternated' policy to allocate Part 4 to Queue 1
+Time: 222 - [Terminator] xxx Part 4 terminated xxx
+Time: 222 - [Terminator] Part 14 replaced
+Time: 222 - [Conveyor towards Queue 1] GOT Part 14
+=== Reading all the events from table: digital_log ===
+(1, 0, 'Machine 2', 'Started', 'Part 1', 'Queue 2', None, None)
+(2, 0, 'Machine 4', 'Started', 'Part 5', 'Queue 4', None, None)
+(3, 18, 'Machine 2', 'Finished', 'Part 1', 'Queue 3', None, None)
+(4, 18, 'Machine 2', 'Started', 'Part 2', 'Queue 2', None, None)
+(5, 36, 'Machine 2', 'Finished', 'Part 2', 'Queue 4', None, None)
+(6, 36, 'Machine 2', 'Started', 'Part 3', 'Queue 2', None, None)
+(7, 40, 'Machine 4', 'Finished', 'Part 5', 'Queue 5', None, None)
+(8, 40, 'Machine 4', 'Started', 'Part 6', 'Queue 4', None, None)
+(9, 42, 'Machine 3', 'Started', 'Part 1', 'Queue 3', None, None)
+(10, 52, 'Machine 5', 'Started', 'Part 5', 'Queue 5', None, None)
+(11, 54, 'Machine 2', 'Finished', 'Part 3', 'Queue 3', None, None)
+(12, 54, 'Machine 2', 'Started', 'Part 4', 'Queue 2', None, None)
+(13, 62, 'Machine 5', 'Finished', 'Part 5', 'Queue 1', None, None)
+(14, 72, 'Machine 2', 'Finished', 'Part 4', 'Queue 4', None, None)
+(15, 72, 'Machine 1', 'Started', 'Part 8', 'Queue 1', None, None)
+(16, 80, 'Machine 4', 'Finished', 'Part 6', 'Queue 5', None, None)
+(17, 80, 'Machine 4', 'Started', 'Part 7', 'Queue 4', None, None)
+(18, 82, 'Machine 1', 'Finished', 'Part 8', 'Queue 2', None, None)
+(19, 92, 'Machine 5', 'Started', 'Part 6', 'Queue 5', None, None)
+(20, 94, 'Machine 2', 'Started', 'Part 8', 'Queue 2', None, None)
+(21, 102, 'Machine 3', 'Finished', 'Part 1', 'Queue 5', None, None)
+(22, 102, 'Machine 3', 'Started', 'Part 3', 'Queue 3', None, None)
+(23, 102, 'Machine 5', 'Finished', 'Part 6', 'Queue 1', None, None)
+(24, 112, 'Machine 2', 'Finished', 'Part 8', 'Queue 3', None, None)
+(25, 112, 'Machine 1', 'Started', 'Part 9', 'Queue 1', None, None)
+(26, 114, 'Machine 5', 'Started', 'Part 1', 'Queue 5', None, None)
+(27, 120, 'Machine 4', 'Finished', 'Part 7', 'Queue 5', None, None)
+(28, 120, 'Machine 4', 'Started', 'Part 2', 'Queue 4', None, None)
+(29, 122, 'Machine 1', 'Finished', 'Part 9', 'Queue 2', None, None)
+(30, 124, 'Machine 5', 'Finished', 'Part 1', 'Queue 1', None, None)
+(31, 132, 'Machine 5', 'Started', 'Part 7', 'Queue 5', None, None)
+(32, 134, 'Machine 1', 'Started', 'Part 10', 'Queue 1', None, None)
+(33, 134, 'Machine 2', 'Started', 'Part 9', 'Queue 2', None, None)
+(34, 142, 'Machine 5', 'Finished', 'Part 7', 'Queue 1', None, None)
+(35, 144, 'Machine 1', 'Finished', 'Part 10', 'Queue 2', None, None)
+(36, 152, 'Machine 2', 'Finished', 'Part 9', 'Queue 4', None, None)
+(37, 152, 'Machine 1', 'Started', 'Part 11', 'Queue 1', None, None)
+(38, 156, 'Machine 2', 'Started', 'Part 10', 'Queue 2', None, None)
+(39, 160, 'Machine 4', 'Finished', 'Part 2', 'Queue 5', None, None)
+(40, 160, 'Machine 4', 'Started', 'Part 4', 'Queue 4', None, None)
+(41, 162, 'Machine 3', 'Finished', 'Part 3', 'Queue 5', None, None)
+(42, 162, 'Machine 3', 'Started', 'Part 8', 'Queue 3', None, None)
+(43, 162, 'Machine 1', 'Finished', 'Part 11', 'Queue 2', None, None)
+(44, 172, 'Machine 5', 'Started', 'Part 2', 'Queue 5', None, None)
+(45, 174, 'Machine 2', 'Finished', 'Part 10', 'Queue 3', None, None)
+(46, 174, 'Machine 2', 'Started', 'Part 11', 'Queue 2', None, None)
+(47, 182, 'Machine 5', 'Finished', 'Part 2', 'Queue 1', None, None)
+(48, 182, 'Machine 5', 'Started', 'Part 3', 'Queue 5', None, None)
+(49, 192, 'Machine 2', 'Finished', 'Part 11', 'Queue 4', None, None)
+(50, 192, 'Machine 5', 'Finished', 'Part 3', 'Queue 1', None, None)
+(51, 192, 'Machine 1', 'Started', 'Part 12', 'Queue 1', None, None)
+(52, 200, 'Machine 4', 'Finished', 'Part 4', 'Queue 5', None, None)
+(53, 200, 'Machine 4', 'Started', 'Part 9', 'Queue 4', None, None)
+(54, 202, 'Machine 1', 'Finished', 'Part 12', 'Queue 2', None, None)
+(55, 202, 'Machine 1', 'Started', 'Part 13', 'Queue 1', None, None)
+(56, 212, 'Machine 1', 'Finished', 'Part 13', 'Queue 2', None, None)
+(57, 212, 'Machine 5', 'Started', 'Part 4', 'Queue 5', None, None)
+(58, 214, 'Machine 2', 'Started', 'Part 12', 'Queue 2', None, None)
+(59, 222, 'Machine 3', 'Finished', 'Part 8', 'Queue 5', None, None)
+(60, 222, 'Machine 3', 'Started', 'Part 10', 'Queue 3', None, None)
+(61, 222, 'Machine 5', 'Finished', 'Part 4', 'Queue 1', None, None)
+### ============ Simulation Done ============ ###
+> Predicting RCT for Part 4...
+> RCT for Part 4: 222
+parts_branch_queue_vect = [('Part 19', None), ('Part 15', None), ('Part 17', None), ('Part 18', None), ('Part 14', None), ('Part 20', None), ('Part 16', None)]
+====================================== Running Scenario for Part 4 | Path 1 ======================================
+--- Showing Path for Part 4 ---
+|-- Conveyor towards Queue 3
+---
+### ============ Simulation Started ============ ###
+Time: 0 - [Machine 2] got Part 1 from Queue 2 (capacity= 3)
+Time: 0 - [Machine 4] got Part 5 from Queue 4 (capacity= 2)
+! Using 'alternated' policy to allocate Part 1 to Queue 3
+Time: 18 - [Conveyor towards Queue 3] GOT Part 1
+Time: 18 - [Machine 2] got Part 2 from Queue 2 (capacity= 2)
+! Using 'alternated' policy to allocate Part 2 to Queue 4
+Time: 36 - [Conveyor towards Queue 4] GOT Part 2
+Time: 36 - [Machine 2] got Part 3 from Queue 2 (capacity= 1)
+! Using 'alternated' policy to allocate Part 5 to Queue 5
+Time: 40 - [Conveyor towards Queue 5] GOT Part 5
+Time: 40 - [Machine 4] got Part 6 from Queue 4 (capacity= 1)
+Time: 41 - [Conveyor towards Queue 3] PUT Part 1 in the Queue 3
+Time: 42 - [Machine 3] got Part 1 from Queue 3 (capacity= 0)
+Time: 51 - [Conveyor towards Queue 5] PUT Part 5 in the Queue 5
+Time: 52 - [Machine 5] got Part 5 from Queue 5 (capacity= 0)
+! Using 'alternated' policy to allocate Part 3 to Queue 3
+Time: 54 - [Conveyor towards Queue 3] GOT Part 3
+Time: 54 - [Machine 2] got Part 4 from Queue 2 (capacity= 0)
+Time: 56 - [Conveyor towards Queue 4] PUT Part 2 in the Queue 4
+! Using 'alternated' policy to allocate Part 5 to Queue 1
+Time: 62 - [Terminator] xxx Part 5 terminated xxx
+Time: 62 - [Terminator] Part 8 replaced
+Time: 62 - [Conveyor towards Queue 1] GOT Part 8
+Time: 71 - [Conveyor towards Queue 1] PUT Part 8 in the Queue 1
+Time: 72 - [Conveyor towards Queue 3] GOT Part 4
+Time: 72 - [Machine 1] got Part 8 from Queue 1 (capacity= 0)
+Time: 77 - [Conveyor towards Queue 3] PUT Part 3 in the Queue 3
+! Using 'alternated' policy to allocate Part 6 to Queue 5
+Time: 80 - [Conveyor towards Queue 5] GOT Part 6
+Time: 80 - [Machine 4] got Part 7 from Queue 4 (capacity= 1)
+! Using 'alternated' policy to allocate Part 8 to Queue 2
+Time: 82 - [Conveyor towards Queue 2] GOT Part 8
+Time: 91 - [Conveyor towards Queue 5] PUT Part 6 in the Queue 5
+Time: 92 - [Machine 5] got Part 6 from Queue 5 (capacity= 0)
+Time: 93 - [Conveyor towards Queue 2] PUT Part 8 in the Queue 2
+Time: 94 - [Machine 2] got Part 8 from Queue 2 (capacity= 0)
+Time: 95 - [Conveyor towards Queue 3] PUT Part 4 in the Queue 3
+! Using 'alternated' policy to allocate Part 1 to Queue 5
+Time: 102 - [Conveyor towards Queue 5] GOT Part 1
+Time: 102 - [Machine 3] got Part 3 from Queue 3 (capacity= 1)
+! Using 'alternated' policy to allocate Part 6 to Queue 1
+Time: 102 - [Terminator] xxx Part 6 terminated xxx
+Time: 102 - [Terminator] Part 9 replaced
+Time: 102 - [Conveyor towards Queue 1] GOT Part 9
+Time: 111 - [Conveyor towards Queue 1] PUT Part 9 in the Queue 1
+! Using 'alternated' policy to allocate Part 8 to Queue 4
+Time: 112 - [Conveyor towards Queue 4] GOT Part 8
+Time: 112 - [Machine 1] got Part 9 from Queue 1 (capacity= 0)
+Time: 113 - [Conveyor towards Queue 5] PUT Part 1 in the Queue 5
+Time: 114 - [Machine 5] got Part 1 from Queue 5 (capacity= 0)
+! Using 'alternated' policy to allocate Part 7 to Queue 5
+Time: 120 - [Conveyor towards Queue 5] GOT Part 7
+Time: 120 - [Machine 4] got Part 2 from Queue 4 (capacity= 0)
+! Using 'alternated' policy to allocate Part 9 to Queue 2
+Time: 122 - [Conveyor towards Queue 2] GOT Part 9
+! Using 'alternated' policy to allocate Part 1 to Queue 1
+Time: 124 - [Terminator] xxx Part 1 terminated xxx
+Time: 124 - [Terminator] Part 10 replaced
+Time: 124 - [Conveyor towards Queue 1] GOT Part 10
+Time: 131 - [Conveyor towards Queue 5] PUT Part 7 in the Queue 5
+Time: 132 - [Machine 5] got Part 7 from Queue 5 (capacity= 0)
+Time: 132 - [Conveyor towards Queue 4] PUT Part 8 in the Queue 4
+Time: 133 - [Conveyor towards Queue 2] PUT Part 9 in the Queue 2
+Time: 133 - [Conveyor towards Queue 1] PUT Part 10 in the Queue 1
+Time: 134 - [Machine 1] got Part 10 from Queue 1 (capacity= 0)
+Time: 134 - [Machine 2] got Part 9 from Queue 2 (capacity= 0)
+! Using 'alternated' policy to allocate Part 7 to Queue 1
+Time: 142 - [Terminator] xxx Part 7 terminated xxx
+Time: 142 - [Terminator] Part 11 replaced
+Time: 142 - [Conveyor towards Queue 1] GOT Part 11
+! Using 'alternated' policy to allocate Part 10 to Queue 2
+Time: 144 - [Conveyor towards Queue 2] GOT Part 10
+Time: 151 - [Conveyor towards Queue 1] PUT Part 11 in the Queue 1
+! Using 'alternated' policy to allocate Part 9 to Queue 3
+Time: 152 - [Conveyor towards Queue 3] GOT Part 9
+Time: 152 - [Machine 1] got Part 11 from Queue 1 (capacity= 0)
+Time: 155 - [Conveyor towards Queue 2] PUT Part 10 in the Queue 2
+Time: 156 - [Machine 2] got Part 10 from Queue 2 (capacity= 0)
+! Using 'alternated' policy to allocate Part 2 to Queue 5
+Time: 160 - [Conveyor towards Queue 5] GOT Part 2
+Time: 160 - [Machine 4] got Part 8 from Queue 4 (capacity= 0)
+! Using 'alternated' policy to allocate Part 3 to Queue 5
+Time: 162 - [Conveyor towards Queue 5] GOT Part 3
+Time: 162 - [Machine 3] got Part 4 from Queue 3 (capacity= 0)
+! Using 'alternated' policy to allocate Part 11 to Queue 2
+Time: 162 - [Conveyor towards Queue 2] GOT Part 11
+Time: 171 - [Conveyor towards Queue 5] PUT Part 2 in the Queue 5
+Time: 172 - [Machine 5] got Part 2 from Queue 5 (capacity= 0)
+Time: 173 - [Conveyor towards Queue 2] PUT Part 11 in the Queue 2
+Time: 173 - [Conveyor towards Queue 5] PUT Part 3 in the Queue 5
+! Using 'alternated' policy to allocate Part 10 to Queue 4
+Time: 174 - [Conveyor towards Queue 4] GOT Part 10
+Time: 174 - [Machine 2] got Part 11 from Queue 2 (capacity= 0)
+Time: 175 - [Conveyor towards Queue 3] PUT Part 9 in the Queue 3
+! Using 'alternated' policy to allocate Part 2 to Queue 1
+Time: 182 - [Terminator] xxx Part 2 terminated xxx
+Time: 182 - [Terminator] Part 12 replaced
+Time: 182 - [Conveyor towards Queue 1] GOT Part 12
+Time: 182 - [Machine 5] got Part 3 from Queue 5 (capacity= 0)
+Time: 191 - [Conveyor towards Queue 1] PUT Part 12 in the Queue 1
+! Using 'alternated' policy to allocate Part 11 to Queue 3
+Time: 192 - [Conveyor towards Queue 3] GOT Part 11
+! Using 'alternated' policy to allocate Part 3 to Queue 1
+Time: 192 - [Terminator] xxx Part 3 terminated xxx
+Time: 192 - [Terminator] Part 13 replaced
+Time: 192 - [Conveyor towards Queue 1] GOT Part 13
+Time: 192 - [Machine 1] got Part 12 from Queue 1 (capacity= 0)
+Time: 194 - [Conveyor towards Queue 4] PUT Part 10 in the Queue 4
+! Using 'alternated' policy to allocate Part 8 to Queue 5
+Time: 200 - [Conveyor towards Queue 5] GOT Part 8
+Time: 200 - [Machine 4] got Part 10 from Queue 4 (capacity= 0)
+Time: 201 - [Conveyor towards Queue 1] PUT Part 13 in the Queue 1
+! Using 'alternated' policy to allocate Part 12 to Queue 2
+Time: 202 - [Conveyor towards Queue 2] GOT Part 12
+Time: 202 - [Machine 1] got Part 13 from Queue 1 (capacity= 0)
+Time: 211 - [Conveyor towards Queue 5] PUT Part 8 in the Queue 5
+! Using 'alternated' policy to allocate Part 13 to Queue 2
+Time: 212 - [Conveyor towards Queue 2] GOT Part 13
+Time: 212 - [Machine 5] got Part 8 from Queue 5 (capacity= 0)
+Time: 213 - [Conveyor towards Queue 2] PUT Part 12 in the Queue 2
+Time: 214 - [Machine 2] got Part 12 from Queue 2 (capacity= 0)
+Time: 215 - [Conveyor towards Queue 3] PUT Part 11 in the Queue 3
+! Using 'alternated' policy to allocate Part 4 to Queue 5
+Time: 222 - [Conveyor towards Queue 5] GOT Part 4
+Time: 222 - [Machine 3] got Part 9 from Queue 3 (capacity= 1)
+! Using 'alternated' policy to allocate Part 8 to Queue 1
+Time: 222 - [Terminator] xxx Part 8 terminated xxx
+Time: 222 - [Terminator] Part 14 replaced
+Time: 222 - [Conveyor towards Queue 1] GOT Part 14
+Time: 223 - [Conveyor towards Queue 2] PUT Part 13 in the Queue 2
+Time: 231 - [Conveyor towards Queue 1] PUT Part 14 in the Queue 1
+! Using 'alternated' policy to allocate Part 12 to Queue 4
+Time: 232 - [Conveyor towards Queue 4] GOT Part 12
+Time: 232 - [Machine 2] got Part 13 from Queue 2 (capacity= 0)
+Time: 232 - [Machine 1] got Part 14 from Queue 1 (capacity= 0)
+Time: 233 - [Conveyor towards Queue 5] PUT Part 4 in the Queue 5
+Time: 234 - [Machine 5] got Part 4 from Queue 5 (capacity= 0)
+! Using 'alternated' policy to allocate Part 10 to Queue 5
+Time: 240 - [Conveyor towards Queue 5] GOT Part 10
+! Using 'alternated' policy to allocate Part 14 to Queue 2
+Time: 242 - [Conveyor towards Queue 2] GOT Part 14
+! Using 'alternated' policy to allocate Part 4 to Queue 1
+Time: 244 - [Terminator] xxx Part 4 terminated xxx
+Time: 244 - [Terminator] Part 15 replaced
+Time: 244 - [Conveyor towards Queue 1] GOT Part 15
+=== Reading all the events from table: digital_log ===
+(1, 0, 'Machine 2', 'Started', 'Part 1', 'Queue 2', None, None)
+(2, 0, 'Machine 4', 'Started', 'Part 5', 'Queue 4', None, None)
+(3, 18, 'Machine 2', 'Finished', 'Part 1', 'Queue 3', None, None)
+(4, 18, 'Machine 2', 'Started', 'Part 2', 'Queue 2', None, None)
+(5, 36, 'Machine 2', 'Finished', 'Part 2', 'Queue 4', None, None)
+(6, 36, 'Machine 2', 'Started', 'Part 3', 'Queue 2', None, None)
+(7, 40, 'Machine 4', 'Finished', 'Part 5', 'Queue 5', None, None)
+(8, 40, 'Machine 4', 'Started', 'Part 6', 'Queue 4', None, None)
+(9, 42, 'Machine 3', 'Started', 'Part 1', 'Queue 3', None, None)
+(10, 52, 'Machine 5', 'Started', 'Part 5', 'Queue 5', None, None)
+(11, 54, 'Machine 2', 'Finished', 'Part 3', 'Queue 3', None, None)
+(12, 54, 'Machine 2', 'Started', 'Part 4', 'Queue 2', None, None)
+(13, 62, 'Machine 5', 'Finished', 'Part 5', 'Queue 1', None, None)
+(14, 72, 'Machine 2', 'Finished', 'Part 4', 'Queue 3', None, None)
+(15, 72, 'Machine 1', 'Started', 'Part 8', 'Queue 1', None, None)
+(16, 80, 'Machine 4', 'Finished', 'Part 6', 'Queue 5', None, None)
+(17, 80, 'Machine 4', 'Started', 'Part 7', 'Queue 4', None, None)
+(18, 82, 'Machine 1', 'Finished', 'Part 8', 'Queue 2', None, None)
+(19, 92, 'Machine 5', 'Started', 'Part 6', 'Queue 5', None, None)
+(20, 94, 'Machine 2', 'Started', 'Part 8', 'Queue 2', None, None)
+(21, 102, 'Machine 3', 'Finished', 'Part 1', 'Queue 5', None, None)
+(22, 102, 'Machine 3', 'Started', 'Part 3', 'Queue 3', None, None)
+(23, 102, 'Machine 5', 'Finished', 'Part 6', 'Queue 1', None, None)
+(24, 112, 'Machine 2', 'Finished', 'Part 8', 'Queue 4', None, None)
+(25, 112, 'Machine 1', 'Started', 'Part 9', 'Queue 1', None, None)
+(26, 114, 'Machine 5', 'Started', 'Part 1', 'Queue 5', None, None)
+(27, 120, 'Machine 4', 'Finished', 'Part 7', 'Queue 5', None, None)
+(28, 120, 'Machine 4', 'Started', 'Part 2', 'Queue 4', None, None)
+(29, 122, 'Machine 1', 'Finished', 'Part 9', 'Queue 2', None, None)
+(30, 124, 'Machine 5', 'Finished', 'Part 1', 'Queue 1', None, None)
+(31, 132, 'Machine 5', 'Started', 'Part 7', 'Queue 5', None, None)
+(32, 134, 'Machine 1', 'Started', 'Part 10', 'Queue 1', None, None)
+(33, 134, 'Machine 2', 'Started', 'Part 9', 'Queue 2', None, None)
+(34, 142, 'Machine 5', 'Finished', 'Part 7', 'Queue 1', None, None)
+(35, 144, 'Machine 1', 'Finished', 'Part 10', 'Queue 2', None, None)
+(36, 152, 'Machine 2', 'Finished', 'Part 9', 'Queue 3', None, None)
+(37, 152, 'Machine 1', 'Started', 'Part 11', 'Queue 1', None, None)
+(38, 156, 'Machine 2', 'Started', 'Part 10', 'Queue 2', None, None)
+(39, 160, 'Machine 4', 'Finished', 'Part 2', 'Queue 5', None, None)
+(40, 160, 'Machine 4', 'Started', 'Part 8', 'Queue 4', None, None)
+(41, 162, 'Machine 3', 'Finished', 'Part 3', 'Queue 5', None, None)
+(42, 162, 'Machine 3', 'Started', 'Part 4', 'Queue 3', None, None)
+(43, 162, 'Machine 1', 'Finished', 'Part 11', 'Queue 2', None, None)
+(44, 172, 'Machine 5', 'Started', 'Part 2', 'Queue 5', None, None)
+(45, 174, 'Machine 2', 'Finished', 'Part 10', 'Queue 4', None, None)
+(46, 174, 'Machine 2', 'Started', 'Part 11', 'Queue 2', None, None)
+(47, 182, 'Machine 5', 'Finished', 'Part 2', 'Queue 1', None, None)
+(48, 182, 'Machine 5', 'Started', 'Part 3', 'Queue 5', None, None)
+(49, 192, 'Machine 2', 'Finished', 'Part 11', 'Queue 3', None, None)
+(50, 192, 'Machine 5', 'Finished', 'Part 3', 'Queue 1', None, None)
+(51, 192, 'Machine 1', 'Started', 'Part 12', 'Queue 1', None, None)
+(52, 200, 'Machine 4', 'Finished', 'Part 8', 'Queue 5', None, None)
+(53, 200, 'Machine 4', 'Started', 'Part 10', 'Queue 4', None, None)
+(54, 202, 'Machine 1', 'Finished', 'Part 12', 'Queue 2', None, None)
+(55, 202, 'Machine 1', 'Started', 'Part 13', 'Queue 1', None, None)
+(56, 212, 'Machine 1', 'Finished', 'Part 13', 'Queue 2', None, None)
+(57, 212, 'Machine 5', 'Started', 'Part 8', 'Queue 5', None, None)
+(58, 214, 'Machine 2', 'Started', 'Part 12', 'Queue 2', None, None)
+(59, 222, 'Machine 3', 'Finished', 'Part 4', 'Queue 5', None, None)
+(60, 222, 'Machine 3', 'Started', 'Part 9', 'Queue 3', None, None)
+(61, 222, 'Machine 5', 'Finished', 'Part 8', 'Queue 1', None, None)
+(62, 232, 'Machine 2', 'Finished', 'Part 12', 'Queue 4', None, None)
+(63, 232, 'Machine 2', 'Started', 'Part 13', 'Queue 2', None, None)
+(64, 232, 'Machine 1', 'Started', 'Part 14', 'Queue 1', None, None)
+(65, 234, 'Machine 5', 'Started', 'Part 4', 'Queue 5', None, None)
+(66, 240, 'Machine 4', 'Finished', 'Part 10', 'Queue 5', None, None)
+(67, 242, 'Machine 1', 'Finished', 'Part 14', 'Queue 2', None, None)
+(68, 244, 'Machine 5', 'Finished', 'Part 4', 'Queue 1', None, None)
+### ============ Simulation Done ============ ###
+> Predicting RCT for Part 4...
+> RCT for Part 4: 244
+parts_branch_queue_vect = [('Part 19', None), ('Part 15', None), ('Part 17', None), ('Part 18', None), ('Part 14', None), ('Part 20', None), ('Part 16', None)]
+====================================== Running Scenario for Part 4 | Path 2 ======================================
+--- Showing Path for Part 4 ---
+|-- Conveyor towards Queue 4
+---
+### ============ Simulation Started ============ ###
+Time: 0 - [Machine 2] got Part 1 from Queue 2 (capacity= 3)
+Time: 0 - [Machine 4] got Part 5 from Queue 4 (capacity= 2)
+! Using 'alternated' policy to allocate Part 1 to Queue 3
+Time: 18 - [Conveyor towards Queue 3] GOT Part 1
+Time: 18 - [Machine 2] got Part 2 from Queue 2 (capacity= 2)
+! Using 'alternated' policy to allocate Part 2 to Queue 4
+Time: 36 - [Conveyor towards Queue 4] GOT Part 2
+Time: 36 - [Machine 2] got Part 3 from Queue 2 (capacity= 1)
+! Using 'alternated' policy to allocate Part 5 to Queue 5
+Time: 40 - [Conveyor towards Queue 5] GOT Part 5
+Time: 40 - [Machine 4] got Part 6 from Queue 4 (capacity= 1)
+Time: 41 - [Conveyor towards Queue 3] PUT Part 1 in the Queue 3
+Time: 42 - [Machine 3] got Part 1 from Queue 3 (capacity= 0)
+Time: 51 - [Conveyor towards Queue 5] PUT Part 5 in the Queue 5
+Time: 52 - [Machine 5] got Part 5 from Queue 5 (capacity= 0)
+! Using 'alternated' policy to allocate Part 3 to Queue 3
+Time: 54 - [Conveyor towards Queue 3] GOT Part 3
+Time: 54 - [Machine 2] got Part 4 from Queue 2 (capacity= 0)
+Time: 56 - [Conveyor towards Queue 4] PUT Part 2 in the Queue 4
+! Using 'alternated' policy to allocate Part 5 to Queue 1
+Time: 62 - [Terminator] xxx Part 5 terminated xxx
+Time: 62 - [Terminator] Part 8 replaced
+Time: 62 - [Conveyor towards Queue 1] GOT Part 8
+Time: 71 - [Conveyor towards Queue 1] PUT Part 8 in the Queue 1
+Time: 72 - [Conveyor towards Queue 4] GOT Part 4
+Time: 72 - [Machine 1] got Part 8 from Queue 1 (capacity= 0)
+Time: 77 - [Conveyor towards Queue 3] PUT Part 3 in the Queue 3
+! Using 'alternated' policy to allocate Part 6 to Queue 5
+Time: 80 - [Conveyor towards Queue 5] GOT Part 6
+Time: 80 - [Machine 4] got Part 7 from Queue 4 (capacity= 1)
+! Using 'alternated' policy to allocate Part 8 to Queue 2
+Time: 82 - [Conveyor towards Queue 2] GOT Part 8
+Time: 91 - [Conveyor towards Queue 5] PUT Part 6 in the Queue 5
+Time: 92 - [Machine 5] got Part 6 from Queue 5 (capacity= 0)
+Time: 92 - [Conveyor towards Queue 4] PUT Part 4 in the Queue 4
+Time: 93 - [Conveyor towards Queue 2] PUT Part 8 in the Queue 2
+Time: 94 - [Machine 2] got Part 8 from Queue 2 (capacity= 0)
+! Using 'alternated' policy to allocate Part 1 to Queue 5
+Time: 102 - [Conveyor towards Queue 5] GOT Part 1
+Time: 102 - [Machine 3] got Part 3 from Queue 3 (capacity= 0)
+! Using 'alternated' policy to allocate Part 6 to Queue 1
+Time: 102 - [Terminator] xxx Part 6 terminated xxx
+Time: 102 - [Terminator] Part 9 replaced
+Time: 102 - [Conveyor towards Queue 1] GOT Part 9
+Time: 111 - [Conveyor towards Queue 1] PUT Part 9 in the Queue 1
+! Using 'alternated' policy to allocate Part 8 to Queue 4
+Time: 112 - [Conveyor towards Queue 4] GOT Part 8
+Time: 112 - [Machine 1] got Part 9 from Queue 1 (capacity= 0)
+Time: 113 - [Conveyor towards Queue 5] PUT Part 1 in the Queue 5
+Time: 114 - [Machine 5] got Part 1 from Queue 5 (capacity= 0)
+! Using 'alternated' policy to allocate Part 7 to Queue 5
+Time: 120 - [Conveyor towards Queue 5] GOT Part 7
+Time: 120 - [Machine 4] got Part 2 from Queue 4 (capacity= 1)
+! Using 'alternated' policy to allocate Part 9 to Queue 2
+Time: 122 - [Conveyor towards Queue 2] GOT Part 9
+! Using 'alternated' policy to allocate Part 1 to Queue 1
+Time: 124 - [Terminator] xxx Part 1 terminated xxx
+Time: 124 - [Terminator] Part 10 replaced
+Time: 124 - [Conveyor towards Queue 1] GOT Part 10
+Time: 131 - [Conveyor towards Queue 5] PUT Part 7 in the Queue 5
+Time: 132 - [Machine 5] got Part 7 from Queue 5 (capacity= 0)
+Time: 132 - [Conveyor towards Queue 4] PUT Part 8 in the Queue 4
+Time: 133 - [Conveyor towards Queue 2] PUT Part 9 in the Queue 2
+Time: 133 - [Conveyor towards Queue 1] PUT Part 10 in the Queue 1
+Time: 134 - [Machine 1] got Part 10 from Queue 1 (capacity= 0)
+Time: 134 - [Machine 2] got Part 9 from Queue 2 (capacity= 0)
+! Using 'alternated' policy to allocate Part 7 to Queue 1
+Time: 142 - [Terminator] xxx Part 7 terminated xxx
+Time: 142 - [Terminator] Part 11 replaced
+Time: 142 - [Conveyor towards Queue 1] GOT Part 11
+! Using 'alternated' policy to allocate Part 10 to Queue 2
+Time: 144 - [Conveyor towards Queue 2] GOT Part 10
+Time: 151 - [Conveyor towards Queue 1] PUT Part 11 in the Queue 1
+! Using 'alternated' policy to allocate Part 9 to Queue 3
+Time: 152 - [Conveyor towards Queue 3] GOT Part 9
+Time: 152 - [Machine 1] got Part 11 from Queue 1 (capacity= 0)
+Time: 155 - [Conveyor towards Queue 2] PUT Part 10 in the Queue 2
+Time: 156 - [Machine 2] got Part 10 from Queue 2 (capacity= 0)
+! Using 'alternated' policy to allocate Part 2 to Queue 5
+Time: 160 - [Conveyor towards Queue 5] GOT Part 2
+Time: 160 - [Machine 4] got Part 4 from Queue 4 (capacity= 1)
+! Using 'alternated' policy to allocate Part 3 to Queue 5
+Time: 162 - [Conveyor towards Queue 5] GOT Part 3
+! Using 'alternated' policy to allocate Part 11 to Queue 2
+Time: 162 - [Conveyor towards Queue 2] GOT Part 11
+Time: 171 - [Conveyor towards Queue 5] PUT Part 2 in the Queue 5
+Time: 172 - [Machine 5] got Part 2 from Queue 5 (capacity= 0)
+Time: 173 - [Conveyor towards Queue 2] PUT Part 11 in the Queue 2
+Time: 173 - [Conveyor towards Queue 5] PUT Part 3 in the Queue 5
+! Using 'alternated' policy to allocate Part 10 to Queue 4
+Time: 174 - [Conveyor towards Queue 4] GOT Part 10
+Time: 174 - [Machine 2] got Part 11 from Queue 2 (capacity= 0)
+Time: 175 - [Conveyor towards Queue 3] PUT Part 9 in the Queue 3
+Time: 176 - [Machine 3] got Part 9 from Queue 3 (capacity= 0)
+! Using 'alternated' policy to allocate Part 2 to Queue 1
+Time: 182 - [Terminator] xxx Part 2 terminated xxx
+Time: 182 - [Terminator] Part 12 replaced
+Time: 182 - [Conveyor towards Queue 1] GOT Part 12
+Time: 182 - [Machine 5] got Part 3 from Queue 5 (capacity= 0)
+Time: 191 - [Conveyor towards Queue 1] PUT Part 12 in the Queue 1
+! Using 'alternated' policy to allocate Part 11 to Queue 3
+Time: 192 - [Conveyor towards Queue 3] GOT Part 11
+! Using 'alternated' policy to allocate Part 3 to Queue 1
+Time: 192 - [Terminator] xxx Part 3 terminated xxx
+Time: 192 - [Terminator] Part 13 replaced
+Time: 192 - [Conveyor towards Queue 1] GOT Part 13
+Time: 192 - [Machine 1] got Part 12 from Queue 1 (capacity= 0)
+Time: 194 - [Conveyor towards Queue 4] PUT Part 10 in the Queue 4
+! Using 'alternated' policy to allocate Part 4 to Queue 5
+Time: 200 - [Conveyor towards Queue 5] GOT Part 4
+Time: 200 - [Machine 4] got Part 8 from Queue 4 (capacity= 1)
+Time: 201 - [Conveyor towards Queue 1] PUT Part 13 in the Queue 1
+! Using 'alternated' policy to allocate Part 12 to Queue 2
+Time: 202 - [Conveyor towards Queue 2] GOT Part 12
+Time: 202 - [Machine 1] got Part 13 from Queue 1 (capacity= 0)
+Time: 211 - [Conveyor towards Queue 5] PUT Part 4 in the Queue 5
+! Using 'alternated' policy to allocate Part 13 to Queue 2
+Time: 212 - [Conveyor towards Queue 2] GOT Part 13
+Time: 212 - [Machine 5] got Part 4 from Queue 5 (capacity= 0)
+Time: 213 - [Conveyor towards Queue 2] PUT Part 12 in the Queue 2
+Time: 214 - [Machine 2] got Part 12 from Queue 2 (capacity= 0)
+Time: 215 - [Conveyor towards Queue 3] PUT Part 11 in the Queue 3
+! Using 'alternated' policy to allocate Part 4 to Queue 1
+Time: 222 - [Terminator] xxx Part 4 terminated xxx
+Time: 222 - [Terminator] Part 14 replaced
+Time: 222 - [Conveyor towards Queue 1] GOT Part 14
+=== Reading all the events from table: digital_log ===
+(1, 0, 'Machine 2', 'Started', 'Part 1', 'Queue 2', None, None)
+(2, 0, 'Machine 4', 'Started', 'Part 5', 'Queue 4', None, None)
+(3, 18, 'Machine 2', 'Finished', 'Part 1', 'Queue 3', None, None)
+(4, 18, 'Machine 2', 'Started', 'Part 2', 'Queue 2', None, None)
+(5, 36, 'Machine 2', 'Finished', 'Part 2', 'Queue 4', None, None)
+(6, 36, 'Machine 2', 'Started', 'Part 3', 'Queue 2', None, None)
+(7, 40, 'Machine 4', 'Finished', 'Part 5', 'Queue 5', None, None)
+(8, 40, 'Machine 4', 'Started', 'Part 6', 'Queue 4', None, None)
+(9, 42, 'Machine 3', 'Started', 'Part 1', 'Queue 3', None, None)
+(10, 52, 'Machine 5', 'Started', 'Part 5', 'Queue 5', None, None)
+(11, 54, 'Machine 2', 'Finished', 'Part 3', 'Queue 3', None, None)
+(12, 54, 'Machine 2', 'Started', 'Part 4', 'Queue 2', None, None)
+(13, 62, 'Machine 5', 'Finished', 'Part 5', 'Queue 1', None, None)
+(14, 72, 'Machine 2', 'Finished', 'Part 4', 'Queue 4', None, None)
+(15, 72, 'Machine 1', 'Started', 'Part 8', 'Queue 1', None, None)
+(16, 80, 'Machine 4', 'Finished', 'Part 6', 'Queue 5', None, None)
+(17, 80, 'Machine 4', 'Started', 'Part 7', 'Queue 4', None, None)
+(18, 82, 'Machine 1', 'Finished', 'Part 8', 'Queue 2', None, None)
+(19, 92, 'Machine 5', 'Started', 'Part 6', 'Queue 5', None, None)
+(20, 94, 'Machine 2', 'Started', 'Part 8', 'Queue 2', None, None)
+(21, 102, 'Machine 3', 'Finished', 'Part 1', 'Queue 5', None, None)
+(22, 102, 'Machine 3', 'Started', 'Part 3', 'Queue 3', None, None)
+(23, 102, 'Machine 5', 'Finished', 'Part 6', 'Queue 1', None, None)
+(24, 112, 'Machine 2', 'Finished', 'Part 8', 'Queue 4', None, None)
+(25, 112, 'Machine 1', 'Started', 'Part 9', 'Queue 1', None, None)
+(26, 114, 'Machine 5', 'Started', 'Part 1', 'Queue 5', None, None)
+(27, 120, 'Machine 4', 'Finished', 'Part 7', 'Queue 5', None, None)
+(28, 120, 'Machine 4', 'Started', 'Part 2', 'Queue 4', None, None)
+(29, 122, 'Machine 1', 'Finished', 'Part 9', 'Queue 2', None, None)
+(30, 124, 'Machine 5', 'Finished', 'Part 1', 'Queue 1', None, None)
+(31, 132, 'Machine 5', 'Started', 'Part 7', 'Queue 5', None, None)
+(32, 134, 'Machine 1', 'Started', 'Part 10', 'Queue 1', None, None)
+(33, 134, 'Machine 2', 'Started', 'Part 9', 'Queue 2', None, None)
+(34, 142, 'Machine 5', 'Finished', 'Part 7', 'Queue 1', None, None)
+(35, 144, 'Machine 1', 'Finished', 'Part 10', 'Queue 2', None, None)
+(36, 152, 'Machine 2', 'Finished', 'Part 9', 'Queue 3', None, None)
+(37, 152, 'Machine 1', 'Started', 'Part 11', 'Queue 1', None, None)
+(38, 156, 'Machine 2', 'Started', 'Part 10', 'Queue 2', None, None)
+(39, 160, 'Machine 4', 'Finished', 'Part 2', 'Queue 5', None, None)
+(40, 160, 'Machine 4', 'Started', 'Part 4', 'Queue 4', None, None)
+(41, 162, 'Machine 3', 'Finished', 'Part 3', 'Queue 5', None, None)
+(42, 162, 'Machine 1', 'Finished', 'Part 11', 'Queue 2', None, None)
+(43, 172, 'Machine 5', 'Started', 'Part 2', 'Queue 5', None, None)
+(44, 174, 'Machine 2', 'Finished', 'Part 10', 'Queue 4', None, None)
+(45, 174, 'Machine 2', 'Started', 'Part 11', 'Queue 2', None, None)
+(46, 176, 'Machine 3', 'Started', 'Part 9', 'Queue 3', None, None)
+(47, 182, 'Machine 5', 'Finished', 'Part 2', 'Queue 1', None, None)
+(48, 182, 'Machine 5', 'Started', 'Part 3', 'Queue 5', None, None)
+(49, 192, 'Machine 2', 'Finished', 'Part 11', 'Queue 3', None, None)
+(50, 192, 'Machine 5', 'Finished', 'Part 3', 'Queue 1', None, None)
+(51, 192, 'Machine 1', 'Started', 'Part 12', 'Queue 1', None, None)
+(52, 200, 'Machine 4', 'Finished', 'Part 4', 'Queue 5', None, None)
+(53, 200, 'Machine 4', 'Started', 'Part 8', 'Queue 4', None, None)
+(54, 202, 'Machine 1', 'Finished', 'Part 12', 'Queue 2', None, None)
+(55, 202, 'Machine 1', 'Started', 'Part 13', 'Queue 1', None, None)
+(56, 212, 'Machine 1', 'Finished', 'Part 13', 'Queue 2', None, None)
+(57, 212, 'Machine 5', 'Started', 'Part 4', 'Queue 5', None, None)
+(58, 214, 'Machine 2', 'Started', 'Part 12', 'Queue 2', None, None)
+(59, 222, 'Machine 5', 'Finished', 'Part 4', 'Queue 1', None, None)
+### ============ Simulation Done ============ ###
+> Predicting RCT for Part 4...
+> RCT for Part 4: 222
+____________________________________________
+------ RCT Services Results: ------
+Part 4: [222, 244, 222]
+____________________________________________
+ 23 March 19:16:27 |Running RCT Checking....
+----- RCT Check Results ----
+gain_dict: {'Part 4': [-0.0990990990990992, 0.0]}
+feeback_dict:  {'Part 4': (False, 0, 0.0)}
+ 23 March 19:16:27 |XXX No Path found with gain higher than 2.0% XXX
+PS D:\POLIMI\Digital twins\Digital_Twin\Digital Twin>

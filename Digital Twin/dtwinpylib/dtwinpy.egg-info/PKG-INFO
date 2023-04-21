@@ -1,15 +1,6 @@
 Metadata-Version: 2.1
 Name: dtwinpy
-Version: 0.0.3.3
-Summary: First Digital Model, Validation, Sync
+Version: 0.0.3.9
+Summary: First Functional mydt.run
 Author: Pedro Bacelar and Alex
 License: MIT
-
-dtwinpy: Digital Twin Library
-
-Library for creating Digital Twins of productions systems and simulations models based on Discrete Even Simulation and Simpy. 
-
-The project is being developed by Pedro Bacelar and Alex Chalissery, both Master studetns at Politecnico di Milano.
-
-Contact us:
-pedroluis.bacelar@mail.polimi.it

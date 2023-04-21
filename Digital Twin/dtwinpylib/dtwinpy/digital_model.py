@@ -1,6 +1,8 @@
+#--- Common Libraries
 import simpy
 import json
 import matplotlib.pyplot as plt
+import sys
 
 #--- Import simulation components
 from .components import Part
@@ -13,32 +15,34 @@ from .components import Branch
 
 #--- Importing Database components
 from .interfaceDB import Database
+from .helper import Helper
 
 #--- Reload Package
 
-import importlib
+"""import importlib
 import dtwinpylib
 #reload this specifc module to upadte the class
 importlib.reload(dtwinpylib.dtwinpy.components)
-importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
+importlib.reload(dtwinpylib.dtwinpy.interfaceDB)"""
 # This is different from when you're importing the package direct because here the module has the same
 # name as the library, so we start importing from the library root for the software understand that we are 
 # importing the folder and not the library
 
 #--- Class Model
 class Model():
-    def __init__(self, name, model_path, database_path, initial= False, until= None, part_type= "A", loop_type= "closed", maxparts = None, targeted_part_id= None, targeted_machine_id= None):
+    def __init__(self, name, model_path, database_path, initial= False, until= None, part_type= "A", loop_type= "closed", maxparts = None, targeted_part_id= None, targeted_cluster= None):
         #-- Main Model Properties
         self.name = name
         self.model_path = model_path
         self.env = simpy.Environment()
+        self.helper = Helper()
 
         #--- Stop conditions
         self.until = until
         self.exit = self.env.event()
         self.maxparts = maxparts
         self.targeted_part_id = targeted_part_id
-        self.targeted_machine_id = targeted_machine_id
+        self.targeted_cluster = targeted_cluster
 
         #-- Database Properties
         self.database_path = database_path
@@ -142,6 +146,40 @@ class Model():
             #--- Update the queue_index to go for the next queue
             queue_index += 1
 
+    def check_queue_capacity(self):
+        """
+        This function looks through the 'initial', counts the number of parts positioned
+        and compare it with the queue capacity. If it's higher than the queue capacity,
+        the digital model is killed. This code needs to run after model translator, 
+        because of merging queues.
+        """
+        #--- Load the json data
+        with open(self.model_path) as json_file:
+            # Assign it in data
+            data = json.load(json_file)
+
+        #--- Loop through initial queues
+        for i in range(len(data["initial"])):
+            queue_initial = data["initial"][i]
+            assigned_capacity = len(queue_initial)
+            
+            #--- Find the related queue
+            # note: i starts with 0, queue id starts with 1
+            for queue in self.queues_vector:
+                if queue.get_id() == i + 1:
+                    # Found it!
+                    model_capacity= queue.get_capacity()
+                    break
+            
+            #--- Compare the assigned capacity and the model capacity
+            if assigned_capacity > model_capacity:
+                self.helper.printer(f"[ERROR][digital_model.py/check_queue_capacity()] Assigned parts in queue is higher than maximum capacity.", 'red')
+                self.helper.printer(f"|-- Queue: {i+1}, Assigned number of parts: {assigned_capacity}, Max Capacity: {model_capacity}. Please make the correct changes in the model: '{self.model_path}'", 'red', False)
+
+                self.helper.printer(f"---- Digital Model was killed ----", 'red')
+                sys.exit()
+
+
     # ----- Find parts alreayd working within machine -----
     def discovery_working_parts(self):
 
@@ -190,18 +228,19 @@ class Model():
         for the part with the highest ID to be the last_part_id.
         """
         #--- Started id
-        highest_id = "Part 0"
+        highest_id = 0
         
         #--- For all the parts in the model
         for part in self.all_part_in_model:
-            part_id = part.get_name()
+            part_id = part.get_id()
 
             #--- If the current part id is higher than the last highest value, we have a new high value
             if part_id > highest_id:
                 highest_id = part_id
 
         #--- Assign the last part id with the highest value
-        self.last_part_id = int(''.join(filter(str.isdigit, highest_id)))
+        #self.last_part_id = int(''.join(filter(str.isdigit, highest_id)))
+        self.last_part_id = highest_id
 
         #--- Assign the last part id to all the machines
         for machine in self.machines_vector:
@@ -431,15 +470,74 @@ class Model():
     # ----- Stopd condition in a specific machine -----
     def setting_stop_machines(self):
         """
-        For the specific selected machine (targeted_machine_id) specify what is the id of the
+        For the specific selected machine (targeted_cluster) specify what is the id of the
         part that the machine shoudl stop when it arrives. 
         """
         #--- For each existing machine
         for machine in self.machines_vector:
             #--- If the machines has the same ID of the selected machine
-            if machine.get_id() == self.targeted_machine_id:
+            if machine.get_cluster() == self.targeted_cluster:
                 #--- Tells for that specific machine for which part id it should stop
                 machine.set_stop_for_id(self.targeted_part_id)
+    
+    # ----- Getting and updating the model with last allocation counter -----
+    def changing_allocation_counter(self):
+        """
+        This function is used after a simulation is runned. The goal here is to get the last
+        alternating policy used by branching machines and set it for that machine. Thus, in this way,
+        when the machine starts the simulation again it's going to remember what was the last selected machine.
+        """
+        #--- For each branching machine (where the allocation policy make sense)
+        for branch in self.branches:
+            machine = branch.get_branch_machine()
+
+            #--- Get the last allocation counter of that machine
+            last_allocation_counter = machine.get_allocation_counter()
+
+            #--- Set in the model this allocation for that machine
+            #--- Open the json file
+            with open(self.model_path, 'r+') as model_file:
+                #--- Import json data
+                data = json.load(model_file)
+                for node in data['nodes']:
+                    #--- Macth the node with the current machine
+                    if node['activity'] == machine.get_id():
+                        # Found the right machine
+                        node['allocation_counter'] = last_allocation_counter
+
+                        #---- Write Back the Changes
+                        # Move the file pointer to the beginning of the file
+                        model_file.seek(0)
+                        # Write the modified data back to the file
+                        json.dump(data, model_file)
+                        # Truncate any remaining data in the file
+                        model_file.truncate()
+    
+    # ----- Setting the last allocation counter for branching machines -----
+    def setting_allocation_counter(self):
+        """
+        This function is used before the simulation. It reads the json model and updated
+        for branching machine the last value used in the alternation policy for allocation counter
+        """
+        #--- For each branching machine (where the allocation policy make sense)
+        for branch in self.branches:
+            machine = branch.get_branch_machine()
+
+            #--- Open the json file
+            with open(self.model_path) as model_file:
+                #--- Import json data
+                data = json.load(model_file)
+                for node in data['nodes']:
+                    #--- Macth the node with the current machine
+                    if node['activity'] == machine.get_id():
+                        # Found the right machine
+                        #-- Get the counter from the model
+                        allocation_counter = node['allocation_counter']
+                        
+                        #-- Set the counter into the machine
+                        machine.set_allocation_counter(allocation_counter)
+
+
     # =======================================================
 
     # ================== TRANSLATOR ==================
@@ -490,7 +588,7 @@ class Model():
                 self.machines_vector.append(Machine(env= self.env, id= node['activity'],freq= node['frequency'],capacity= node['capacity'], 
                 process_time= node['contemp'], database= self.Database, cluster= node['cluster'],
                 terminator= self.terminator, loop= self.loop_type, exit= self.exit, maxparts= self.maxparts,
-                targeted_part_id= self.targeted_part_id))
+                targeted_part_id= self.targeted_part_id, until= self.until))
             
             self.machines_vector[-1].set_final_machine(True)
             #====================================================================
@@ -528,8 +626,7 @@ class Model():
         # --- Discover the last part id and assign to the machines
         self.find_last_part_id()
 
-        # --- Setting the part id to stop the simulation for the right machine
-        self.setting_stop_machines()
+        
         #====================================================================
 
 
@@ -547,6 +644,22 @@ class Model():
         #--- Discovery Branching machines, create Branch object and assigned it
         self.branch_discovery()
         #=====================================================================
+
+        #========================== Setting Targeted Part ID ==================
+        # --- Setting the part id to stop the simulation for the right machine
+        self.setting_stop_machines()
+        #======================================================================
+
+        #========================== Setting Allocation Counter ================
+        # --- Setting the last allocation counter for branching machines
+        self.setting_allocation_counter()
+        #======================================================================
+
+        #========================== Check for Bugs ==========================
+        #--- Check if the assigned parts in the queues are higher than the capacity
+        self.check_queue_capacity()
+        #======================================================================
+
 
     # ================================================
 
@@ -585,6 +698,13 @@ class Model():
         self.Database.read_all_events(self.event_table)
 
         print("### ============ Simulation Done ============ ###")
+
+        # Note: Since we run multiple internal simulations, like TDS and qTDS, we can not
+        # change the model json for ever run. Only Sync and Model update should be allowed
+        # to change the model!
+
+        #--- Getting the last allocation counter of the branching machines and updating the json file
+        #self.changing_allocation_counter()
     # ===============================================
 
     # ================== ANALYSES ==================
@@ -598,7 +718,7 @@ class Model():
         #--- Get the finished Parts and each Time
         parts_finished = self.terminator.get_all_items()
 
-        if len(parts_finished) != 0:
+        if len(parts_finished) >= 3:
             #--- Number of finished parts in the simulation
             number_parts = len(parts_finished)
 
@@ -685,9 +805,8 @@ class Model():
             throughput()
         
         else:
-            print("[ERROR][digital_model.py / analyze_result()] No parts finished in the simulation")
+            self.helper.printer("[WARNING][digital_model.py / analyze_result()] No parts finished in the simulation or less than 2", "yellow")
         
-    
     # ----- Calculate the RCT from the previous simulation -----
     def calculate_RCT(self, part_id_selected= None, batch= None):
         """
@@ -760,6 +879,83 @@ class Model():
                     return (last_part_RCT)
 
             print(f"[ERROR] Number of parts in batch higher than the number of parts simulated")
+    
+    def calculate_Batch_RCT(self, batch_vector, verbose= True):
+        """
+        This function calculates the RCT for batch. Batch is a vector with the name of the parts (ids).
+        The functions checks the first creation time and the last termination time to calculate the RCT.
+        At the moment, there is no stop condition for a batch in the model (like targeted_part_id), so
+        the simulation runs more than necessary. A good stop condition is:
+        ' Run the model for a max parts higher than the highest part id of the batch '
+
+        input format:
+        batch_vector = ['Part 1', 'Part 3', 'Part 2', 'Part 5', ...]
+
+        return format:
+        rct: INTEGR
+        """
+
+        # --- Create corners variables
+        lowest_creation_time = 100000
+        highest_termination_time = 0
+
+        # --- Create a place holder vector to put the part objects of the batch vector
+        batch_vector_obj = []
+
+        #--- Get the finished Parts in the ordered that was finished
+        parts_finished = self.terminator.get_all_items()
+
+        # --- For each string (part name) within the batch_vector, tries to match with a finished part
+        for part_name in batch_vector:
+            # -- Flag for finding parts
+            flag_found_part = False
+
+            for part in parts_finished:
+                if part_name == part.get_name():
+                    batch_vector_obj.append(part)
+                    flag_found_part = True
+        
+            # --- Check for any missing part
+            if flag_found_part == False:
+                self.helper.printer(f"[ERROR][digital_model.py/calculate_Batch_RCT()] {part_name} not found within the list of finished parts. Maximum number of parts being produced by the model: {self.maxparts}. Considere running the system for a higher 'maxparts'", 'red')
+                self.helper.kill()
+        
+        # --- For all the parts in the batch vector, look for the one with lowest creation time
+        for part in batch_vector_obj:
+            # -- Get the creation time
+            part_creation_time = part.get_creation()
+
+            # -- Get the termination time
+            part_termination_time = part.get_termination()
+            
+            # -- Check if it's the lowest creation
+            if part_creation_time < lowest_creation_time:
+                lowest_creation_time = part_creation_time
+                lowest_part = part
+            
+            # -- Check if it's the highest termination
+            if part_termination_time > highest_termination_time:
+                highest_termination_time = part_termination_time
+                highest_part = part
+
+        # --- Calculate the RCT of the batch by subtracting the highest termination by the lowest creation
+        bacth_rct = highest_part.get_termination() - lowest_part.get_creation()
+
+        # ------------- VERBOSE -------------
+        if verbose== True:
+            print("-------- BATCH RCT PREDICTION --------")
+            print(f"|-- Parts within the batch:")
+            for part in batch_vector_obj:
+                print(f"|---- {part.get_name()}")
+            print()
+            print(f"|-- First Part to be created: {lowest_part.get_name()}")
+            print(f"|---- Creation Time: {lowest_part.get_creation()}")
+            print(f"|-- Last Part to be finished: {highest_part.get_name()}")
+            print(f"|---- Termination Time: {highest_part.get_termination()}")
+            print(f" ----------- RCT Batch: {bacth_rct} -----------")
+
+        return bacth_rct
+
     # ==============================================
 
     # ================= GETS =======================
@@ -778,7 +974,101 @@ class Model():
             for part in parts_in_queue:
                 self.parts_vector.append(part)
         return self.parts_vector
+    def get_working_parts(self):
+        working_parts_vec = []
+        for machine in self.machines_vector:
+            initial_part = machine.get_initial_part()
+            if initial_part != None: working_parts_vec.append(initial_part)
+        
+        return working_parts_vec
+    def check_partID_in_simulation(self, part_id):
+        #--- Separate vector of parts
+        working_parts_vec = self.get_working_parts()
+        queue_parts_vec = self.get_all_parts()
+        #--- Merge parts 
+        all_parts = []
+        for part in working_parts_vec:
+            all_parts.append(part)
+        for part in queue_parts_vec:
+            all_parts.append(part)
+        
+        #--- Check if the selected part in within the all parts:
+        flag_found = False
+        for part in all_parts:
+            if part_id == part.get_name():
+                flag_found = True
+        
+        return flag_found
+
+
+
+    def get_model_constrains(self):
+        return (self.until, self.maxparts, self.targeted_part_id, self.targeted_cluster)
+    def get_database_path(self):
+        return self.database_path
+    def get_selected_machine(self, machine_name= None, machine_id= None):
+        """
+        This function receives a machine name or a machine id and looks through all the 
+        existing machines objects, and return the related object
+        """
+        if machine_name != None:
+            for machine in self.machines_vector:
+                if machine.get_name() == machine_name:
+                    return machine
+
+        if machine_id != None:
+            for machine in self.machines_vector:
+                if machine.get_id() == machine_id:
+                    return machine
+    def get_terminated_parts(self):
+        return self.terminator.get_all_items()
+    def get_parts_CT_ordered(self):
+        #--- Get the finished Parts and each Time
+        parts_finished = self.terminator.get_all_items()
+
+        #--- Number of finished parts in the simulation
+        number_parts = len(parts_finished)
+
+        #--- create empty lists
+        parts_finished_time = []
+        parts_finished_id = []
+        parts_finished_id_ASIS = []
+        parts_creation_time = []
+
+        #---Create the list with parts ID
+        for part in parts_finished:
+            parts_finished_id.append(part.get_id())
+            parts_finished_id_ASIS.append(part.get_id())
+        
+        #--- Sort the list in ascending
+        parts_finished_id.sort()
+
+        #--- Adjust the sort of other variables following the ID sort
+        for id in parts_finished_id:
+            for part in parts_finished:
+                if part.get_id() == id:
+                    parts_finished_time.append(part.get_termination())
+                    parts_creation_time.append(part.get_creation())
+                    break
+        
+        #--- Calculate parts cycle time
+        parts_cycle_time = []
+        for i in range(number_parts):
+            #-- calculate individual CT
+            parts_cycle_time.append(parts_finished_time[i] - parts_creation_time[i])
+        
+        return (parts_finished_id,parts_cycle_time)
     # ==============================================
+
+    # ================= SETs =================
+    def set_targeted_part_id(self, value):
+        self.targeted_part_id = value
+    def set_targeted_cluster(self, value):
+        self.targeted_cluster= value
+    def set_until(self, value):
+        self.until = value
+
+
 
     def verbose(self):
         print(f"==========  Reading the Model: {self.name}  ==========")

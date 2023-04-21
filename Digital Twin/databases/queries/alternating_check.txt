@@ -1,0 +1,5 @@
+-- database: c:\Users\pedro\Github_repos\Digital_Twin\Digital Twin\databases\5s_determ\digital_database.db
+
+-- Use the ▷ button in the top right corner to run the entire file.
+
+SELECT * FROM "digital_log" WHERE machine_id= 'Machine 2' AND activity_type= 'Finished';

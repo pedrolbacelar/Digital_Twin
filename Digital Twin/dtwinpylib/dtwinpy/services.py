@@ -1,5 +1,7 @@
 #--- Import DT Features
 from .broker_manager import Broker_Manager
+from .interfaceDB import Database
+from .helper import Helper
 
 #--- Common Libraries
 from matplotlib import pyplot as plt
@@ -38,17 +40,36 @@ class Service_Handler():
     the most optimized path.
 
     """
-    def __init__(self, name, generate_digital_model, broker_manager):
+    def __init__(self, name, generate_digital_model, broker_manager, rct_threshold= 0.02, queue_position= 2, flag_publish= True):
+        self.helper = Helper()
         self.name = name
         self.generate_digital_model = generate_digital_model
         self.digital_model = generate_digital_model(verbose= False)
         self.broker_manager = broker_manager
+        self.flag_publish = flag_publish
+        
+
+        #--- Create an ID database for updating the RCT policy (using branch queues)
+        digital_database_path = self.digital_model.get_database_path()
+        print(f"digital_database_path: {digital_database_path}")
+        ID_database_path = digital_database_path.replace("digital","ID")
+        print(f"ID_database_path: {ID_database_path}")
+        self.ID_database = Database(database_path= ID_database_path, event_table= "ID")
+        exp_database_path = digital_database_path.replace("digital", "exp")
+        print(f"exp_database_path: {exp_database_path}")
+        self.exp_database = Database(database_path= exp_database_path)
+
+        #--- Parameters
+        self.rct_threshold= rct_threshold
+        self.queue_position= queue_position
 
         #--- Get the components from the digital model
         self.branches = self.digital_model.get_branches()
         (self.machines_vector, self.queues_vector) = self.digital_model.get_model_components()
         self.part_vector = self.digital_model.get_all_parts()
     
+    # ============================== RCT Service ==============================
+    # ---------- Return a vector with all the branches choices ----------
     def get_branch_choices(self):
         """
         Function to return a vector with all the branches choices. 
@@ -70,6 +91,7 @@ class Service_Handler():
 
         return branches_choices
 
+    # ---------- Return a vector with all the parts making decisions ----------
     def get_parts_making_decisions(self, queue_position = 2):
         """
         This functions look through digital model and search for parts within
@@ -79,6 +101,9 @@ class Service_Handler():
         time to the calculation, that's why it's an input. As default, the
         queue_position is 2 (the second position of the queue, not the 3° position)
         """
+        (tstr, t)= self.helper.get_time_now()
+        self.helper.printer(f"Getting Parts Making Decisions....", 'brown')
+
         parts_making_decisions = []
 
         #--- For each existing branching point
@@ -91,11 +116,18 @@ class Service_Handler():
                 parts_in_queue = queue.get_all_items()
 
                 #-- Check if the queue has a part in the right position
-                if len(parts_in_queue) >= queue_position - 1:
+                if len(parts_in_queue) > queue_position - 1:
                     parts_making_decisions.append(parts_in_queue[queue_position - 1])
+
+                else:
+                    #--- No parts making decision
+
+
+                    return False
 
         return parts_making_decisions
 
+    # ---------- Return the combination of path scenarios ----------
     def generate_path_scenarios(self, verbose = False):
         """
         ## Description
@@ -107,6 +139,9 @@ class Service_Handler():
         2) Based on this create a matrix of combinations (each line in the matrix is
         a different path that will need to be evaluated)
         """
+        (tstr, t)= self.helper.get_time_now()
+        self.helper.printer(f"Running Path Scenarios Generation....", 'brown')
+        
         #--- Function to generate combinations recusively
         def generate_combinations(matrix):
             def generate_combinations_helper(matrix, current_index, current_combination, combinations):
@@ -138,8 +173,12 @@ class Service_Handler():
                 
                 i += 1
             print("========================")
+
+        print("-----  generate_path_scenarios results -----")
+        print(f"path_scenarios : {path_scenarios}")
         return path_scenarios
     
+    # ---------- (AVOID) Assign the paths to the parts ----------
     def assign_parts(self, SelecPath, path_scenarios, SelecPart = None):
         """
         ## Description
@@ -216,13 +255,31 @@ class Service_Handler():
         #--- Return the parts that were in branching decision to be possible to calculate their RCT
         return parts_in_branching_dm
     
-    def simulate_paths(self,possible_pathes, parts_making_decisions, verbose= False):
+    # ---------- Simulate all the scenarios ----------
+    def simulate_paths(self,possible_pathes, parts_making_decisions, verbose= True, plot= False):
+        """
+        This functions runs all the simulation for all the possible paths for each part making a decision
+        in the system. The function return the RCT predicted for each part using the following structure:
+
+        RCT dictionary (rct_dict):
+        rct_dict = {
+        "Part Name": [rct_asis, rct_path1, rct_path2, ..., rct_pathn]
+        }
+        """
+        (tstr, t)= self.helper.get_time_now()
+        self.helper.printer(f"Running Path Simulation....", 'brown')
+
         #--- Dictionary to store parts and its cycle time
         rct_dict = {}
+
+        print(f"--- Parts Making Decisions: ---")
+        for part in parts_making_decisions: print(part.get_name())
 
         #--- For each part, let's simulate all the scenarios
         for part_id in range(len(parts_making_decisions)):
             part = parts_making_decisions[part_id]
+
+            self.helper.printer(f"------- {part.get_name()} is making a decision... Starting paths simulations -------", 'green')
 
             #--- For each existing path scenario
             path_counter = 1
@@ -232,24 +289,61 @@ class Service_Handler():
 
             #--- Simulaion AS IS
             print(f"====================================== Simulation AS IS for {part.get_name()} ======================================")
-            self.digital_model = self.generate_digital_model(targeted_part_id= part.id, verbose= False)
+            # ---------------------------- GENERATE MODEL ----------------------------
+            self.digital_model = self.generate_digital_model(targeted_part_id= part.get_id(), verbose= False)
+            # ------------------------------------------------------------------------
+
+            # ----------------- GET THE NEW COMPONENTS -----------------
+            self.branches = self.digital_model.get_branches()
+            (self.machines_vector, self.queues_vector) = self.digital_model.get_model_components()
+            self.part_vector = self.digital_model.get_all_parts()
+            # -----------------------------------------------------------
+
+            # ------- Assign Parts Queue Branches selected -------
+            parts_branch_queue = self.ID_database.read_parts_branch_queue()
+            for machine in self.machines_vector:
+                machine.set_parts_branch_queue(parts_branch_queue)
+            # -----------------------------------------------------
+
+            # ------- RUN SIMULATION -------
             self.digital_model.run()
+            # ------------------------------
+
+            # -------------- GET RCT RESULT --------------
             #- Get the RCT for the Simulation AS IS
-            part_rct = self.digital_model.calculate_RCT(part_id_selected= part.id)
+            part_rct = self.digital_model.calculate_RCT(part_id_selected= part.get_id())
             rct_vector.append(part_rct)
+            # ---------------------------------------------
 
             for path_scenario in possible_pathes:
                 #--- Before assigning a new path and run a simulation, it's necessary to recreate the model (this generate new components / objects)
-                self.digital_model = self.generate_digital_model(targeted_part_id= part.id, verbose= False)
+                # ---------------------------- GENERATE MODEL ----------------------------
+                self.digital_model = self.generate_digital_model(targeted_part_id= part.get_id(), verbose= False)
+                # ------------------------------------------------------------------------
 
+                # ----------------- GET THE NEW COMPONENTS -----------------
+                self.branches = self.digital_model.get_branches()
+                (self.machines_vector, self.queues_vector) = self.digital_model.get_model_components()
+                self.part_vector = self.digital_model.get_all_parts()
+                # -----------------------------------------------------------
+
+                # ------- Assign Parts Queue Branches selected -------
+                parts_branch_queue = self.ID_database.read_parts_branch_queue()
+                for machine in self.machines_vector:
+                    machine.set_parts_branch_queue(parts_branch_queue)
+                # -----------------------------------------------------
+
+                # ------------------ SETTING BRANCH DECISION ------------------
                 #--- Get Parts from the Digital Model
                 current_parts_vector = self.digital_model.get_all_parts()
 
                 #--- Assign to that part the current path scenario being analysed 
                 for current_part in current_parts_vector:
-                    if current_part.get_id() == part_id + 1:
+                    # if current_part.get_id() == part_id + 1:
+                    if current_part.get_id() == part.get_id():
                         current_part.set_branching_path(path_scenario)
                         part_being_simulated = current_part
+                # ---------------------------------------------------------------
 
                 #--- Show the paths
                 if verbose == True:
@@ -259,11 +353,13 @@ class Service_Handler():
                         print(f"|-- {convey.get_name()}")
                     print("---")
 
-                #--- Run the simulation
+                # ------- RUN SIMULATION -------
                 self.digital_model.run()
+                # ------------------------------
 
-                #--- Get the RCT for that path simulated
+                # -------------- GET RCT RESULT --------------
                 part_rct = self.digital_model.calculate_RCT(part_id_selected= part_being_simulated.get_id())
+                # ---------------------------------------------
 
                 #--- Store the RCT of that simulation
                 rct_vector.append(part_rct)
@@ -274,12 +370,18 @@ class Service_Handler():
             #--- After finishing all the scenarios for that part, store RCT of each path
             rct_dict[part_being_simulated.get_name()] = rct_vector
 
+        # ----------------- Cleaning Stop Conditions -----------------
+        # We make this here to not have problem in integration, such as using target id to finish and not until
+        self.digital_model.set_targeted_part_id(None)
+        self.digital_model.set_targeted_cluster(None)
+
         if verbose==True:
             print("____________________________________________")
             print("------ RCT Services Results: ------")
             for key in rct_dict:
                 print(f"{key}: {rct_dict[key]}")
-
+            
+        if plot== True:
             print("------ Plot Results ------")
             #-- Count the number of scenarios
             x_scenarios = [0]
@@ -312,24 +414,31 @@ class Service_Handler():
             plt.legend()
             plt.show()
 
-            print("____________________________________________")
+        print("____________________________________________")
         
         #--- Give back the dict with the RCTs for each part
         return rct_dict
 
-    def RCT_check(self, rct_dict, rct_threshold, possible_pathes, verbose= False):
+    # ---------- Calculate the efficiency of each path ----------
+    def RCT_check(self, rct_dict, rct_threshold, possible_pathes, verbose= True, plot= False):
         """
         This function calculates the efficiency of each path comparing the path
-        with the worst path. It can be seen as the gain of choosing that path.
+        with the AS IS path. It can be seen as the gain of choosing that path.
         Thus, the worst path has 0% of gain, and the other path has something bigger.
         If the gain of the best path is not higher than the rct_threshold, than doesn't
         make sense to change the policy of the system (because both path are quite the same).
 
         feedback format:
         {
-            'Part 1': (feedback_flag, [conveyor 1, conveyor 3, ...], gain)
-            'Part 2': (feedback_flag, [conveyor 2, conveyor 4, ...], gain)
+            'Part 1': (feedback_flag, selected_path_index, gain),
+            'Part 2': (feedback_flag, selected_path_index, gain)
         }
+
+        - feedback_flag: 
+            - True: Gain of the highest path higher than the AS IS path
+            - False: Not higher
+        - selected_path_index: Index of selected path (according to the vector of possible paths)
+        - Gain: highest gain calculated
 
         TO-DO:
         1) Do the following calculation for each Part making a decision
@@ -340,6 +449,9 @@ class Service_Handler():
                 6) Store this in a new dict (gain_dict)
             7) Look to the higher gain and compare with the threshold
         """
+        (tstr, t)= self.helper.get_time_now()
+        self.helper.printer(f"Running RCT Checking....", 'brown')
+        
         #--- Create the gain dictionary
         gain_dict = {}
 
@@ -361,6 +473,9 @@ class Service_Handler():
             #--- Create the gain vector
             gain_vect = []
 
+            #--- Remove the AS IS gain, because it's not in the vector of possible paths
+            rcts_paths.pop(0)
+
             #--- For each RCT of that part
             for rct in rcts_paths:
                 #--- Calculate the RCT Indicator (how close it's from the worst scenario)
@@ -375,6 +490,11 @@ class Service_Handler():
             #--- Compare the higher gain with the threshold
             highets_gain = max(gain_vect)
             
+            """
+            #--- Remove the AS IS gain, because it's not in the vector of possible paths
+            gain_vect.pop(0)
+            """
+
             if highets_gain >= rct_threshold:
                 #-- Rise the feedback flag
                 flag_feedback = True
@@ -385,8 +505,12 @@ class Service_Handler():
             gain_dict[key] = gain_vect
             feeback_dict[key] = (flag_feedback, path_to_implement, highets_gain)
 
+        print("----- RCT Check Results ----")
+        print(f"gain_dict: {gain_dict}")
+        print(f"feeback_dict:  {feeback_dict}")
+
         #--- Plotting
-        if verbose == True:
+        if plot == True:
             plt.title("Gain of each path compared to the normal (AS-IS) path")
             plt.xlabel("Paths")
             plt.ylabel("Gain")
@@ -416,6 +540,9 @@ class Service_Handler():
             plt.show()
 
             #--- Printing the findings
+        
+        #--- Verbose
+        if verbose == True:
             for key in feeback_dict:
                 flag = feeback_dict[key][0]
                 path_index = feeback_dict[key][1]
@@ -423,19 +550,20 @@ class Service_Handler():
 
                 if flag == True:
                     print()
-                    print(f"!!!!!!!!! Optimized Path Found for {key} !!!!!!!!!")
-                    print(f"> Best Path: Path {path_index}")
+                    self.helper.printer(f"!!!!!!!!! Optimized Path Found for {key} !!!!!!!!!", 'green')
+                    print(f"> Best Path: Path {path_index + 1}")
                     print(f"> Gain: {format(highets_gain * 100, '.3f')} %") 
                     print("> Path:")
-                    for convey in possible_pathes[path_index - 1]:
+                    for convey in possible_pathes[path_index]:
                         print(f"|- {convey.get_name()}")
                 
                 else:
-                    print(f"----- No Path found with gain higher than {rct_threshold * 100}% -----")
+                    self.helper.printer(f"XXX No Path found with gain higher than {rct_threshold * 100}% XXX", 'brown')
             
         #--- Return the feedback flag and the chosen path index (dictionary)
         return feeback_dict
 
+    # ---------- Publish the feedback through MQTT ----------
     def publish_feedback(self, feedback_dict, possible_pathes):
         """
         This function is able to take the feedback dictionary with the instructions of the most optimized
@@ -455,10 +583,16 @@ class Service_Handler():
                 {'Part 1': [(convey 2, machine 1), (convey 5, machine 3), ...]}
         2) For each part, use the publishing function to pass the machine_id, part_id, and queue_id (convey id)
         """
+        
+        #--- vector to store queues selected for each part making a decision
+        queues_selected = []
+
+        #--- Vector to store highest gain of each part
+        gains = []
+
         #---- Changing the feedback format
         #--- Loop through each part in the feedback dictionary
         for part_name in feedback_dict:
-            print(f"Trying to publish: {part_name}")
             #--- Get the part id from the string
             part_id = int(re.findall(r'\d+', part_name)[0])
 
@@ -468,19 +602,36 @@ class Service_Handler():
             gain = feedback_dict[part_name][2]
 
             #--- Find the path
-            selected_path = possible_pathes[path_to_implement - 1]
+            selected_path = possible_pathes[path_to_implement]
 
             #--- Check if the flag says to change the path or keep as usual
             if feedback_flag == True:
+                (tstr, t)= self.helper.get_time_now()
+                self.helper.printer(f"Running Feedback Publishing for 'Part {part_id}'....", 'brown')
+
 
                 #--- Find the location of the current part
                 part_location = None
+
                 for part in self.part_vector:
                     #-- Found the part
                     if part.get_id() == part_id:
                         #-- Get location
                         part_location = part.get_location()
+                  
+
                 if part_location != None:
+                    #--- Find in which branch the part is to know what path should be send
+                    for branch in self.branches:
+                        #--- Get machine id
+                        branch_machine = branch.get_branch_machine()
+
+                        #--- If the id of the part location matches with the id of the machine of the branch, we found it!
+                        # part location is always minos 1 than the queue id and machine id, so a part in queue 1 has location 0...
+                        if branch_machine.get_id() == part_location + 1:
+                            selected_branch_id = branch.get_id()
+
+
                     #--- Find the branch based on the Queue ID
                     for branch in self.branches:
                         branch_queue_ins = branch.get_branch_queue_in()
@@ -495,26 +646,82 @@ class Service_Handler():
                     #---- Prepare the payload
                     #--- Since the feedback is only for the rigth next branching machine,
                     # we just care about the  conveyor in which the path selected
-                    machine_id = machine_selected.get_id()
-                    queue_id = str(selected_path[part_location].id)
-                    # part_id already there
 
-                    #--- Send the MQTT publish payload
-                    self.broker_manager.publishing(
-                        machine_id= machine_id, 
-                        part_id= part_id, 
-                        queue_id= queue_id, 
-                        topic= "RCT_server"
-                    )
+                    machine_id = str(machine_selected.get_id())
+                    queue_id = str(selected_path[selected_branch_id - 1].id)
+
+                    if self.broker_manager != None and self.flag_publish == True:
+                        #--- Send the MQTT publish payload
+                        self.broker_manager.publishing(
+                            machine_id= machine_id, 
+                            part_id= part_id, 
+                            queue_id= queue_id, 
+                            topic= "RCT_server"
+                        )
+                    
+                    if self.broker_manager == None:
+                        #--- Broker Manager no specified
+                        self.helper.printer(f"[WARNING][services.py/publish_feedback()] Broker Manager not specified, not possible to publish MQTT message. Continuing, without sending...")
+                        self.helper.printer(f"Without publishing the ID database is not receiving the queue selection to update the column branch_queue")
+
+                    if self.flag_publish == False:
+                        print(f"Predictions done, but not publishing results... Flag to Publish: {self.flag_publish}")
+
+                    print(f"--- Settings of the Prediction ---")
+                    print(f"|-- Part ID: Part {part_id}")
+                    print(f"|-- Model Path used: {self.digital_model.get_model_path()}")
+
+                    #--- Add queues selected and gains of each part
+                    queues_selected.append(queue_id)
+                    gains.append(gain)
 
                     #--- Wait a little before sending the next MQTT message to no lose it
                     print("sleeping...")
                     sleep(1)
                     print("waking up!")
 
+        return (feedback_flag, queues_selected, gains)  
+    
+    def return_first_branch(self, rct_dict, publish_results):
+        """
+        This function is used for returning some specific values from the service, in this case
+        only for the first branching machine. This values are used to send an API request in the
+        Digital Twin main code.
 
-            
-    def run_RCT_service(self, queue_position= 1, verbose= False):
+        return (part_id, path_1, path_2, queue_id)
+        """
+
+        #--- Get the first dictionary key 
+        part_name_list = list(rct_dict.keys())
+        part_name = part_name_list[0]
+        part_id = int(re.findall(r'\d+', part_name)[0])
+
+        #--- Get the first path
+        path_1 = rct_dict[part_name][0] # path_1 = rct_dict[part_name][1]
+
+        #--- Get the second path
+        path_2 = rct_dict[part_name][1] # path_2 = rct_dict[part_name][2]
+
+        #--- Get the feedback flag (if need to implement or not the feedback)
+        feedback_flag = publish_results[0]
+
+        #--- Get the part id of the first part making decision
+        queue_id = publish_results[1]
+
+        #--- Get gains for each part
+        gains = publish_results[2]
+
+
+        #--- Build a result tuple
+        rct_results = (part_id, path_1, path_2, queue_id, feedback_flag, gains)
+
+        #--- Give back the desired result
+        return rct_results
+
+
+
+    # ---------------------- RCT Service ----------------------    
+    def run_RCT_service(self, queue_position= 2, verbose= True, plot= False):
         """
         ## Description
         This run method is one of the service related to the decision making based on the 
@@ -550,17 +757,82 @@ class Service_Handler():
             9.2) If higher, return the choosen path
         10) Future: Send the choosen path to the machines of the parts
         """
+        
         #--- Get all possible combination of path based on branching
         possible_pathes = self.generate_path_scenarios(verbose= verbose)
 
         #--- Get parts in positions of making decisions
         parts_making_decisions = self.get_parts_making_decisions(queue_position= queue_position)
+        #--- Check if there are parts making decision
+        if parts_making_decisions == False:
+            (tstr,t) = self.helper.get_time_now()
+            self.helper.printer(f"[WARNING][services.py/run_RCT_service()] No parts making decisions in the system. Check if there are no parts in the position {queue_position} of any branching machines's queues in. Skiping path simulation...")
+            #--- Skip the rest of the function
+            return False
+        
+        else:
+            #--- Simulate for each path
+            rct_dict = self.simulate_paths(possible_pathes= possible_pathes, parts_making_decisions= parts_making_decisions, verbose= verbose, plot= plot)
 
-        #--- Simulate for each path
-        rct_dict = self.simulate_paths(possible_pathes= possible_pathes, parts_making_decisions= parts_making_decisions, verbose= verbose)
+            #--- Check if there are a big difference between choices
+            feedback_dict = self.RCT_check(rct_dict= rct_dict, rct_threshold= self.rct_threshold,possible_pathes = possible_pathes, verbose=verbose, plot= plot)
 
-        #--- Check if there are a big difference between choices
-        feedback_dict = self.RCT_check(rct_dict= rct_dict, rct_threshold= 0.1,possible_pathes = possible_pathes, verbose=verbose)
+            #--- Send the chosen path to the rigth machine
+            publish_results= self.publish_feedback(feedback_dict= feedback_dict, possible_pathes= possible_pathes)
+        
+            #--- Return for the first branch
+            rct_results = self.return_first_branch(rct_dict= rct_dict, publish_results= publish_results)
+            return rct_results
 
-        #--- Send the chosen path to the rigth machine
-        self.publish_feedback(feedback_dict= feedback_dict, possible_pathes= possible_pathes)
+    # =================================================================================
+
+    # ================================== RCT Tracking ==================================
+    def run_RCT_tracking(self, palletID):
+        """
+        Run RCT tracking for a specific palletID. The function should translate the palletID to
+        a PID. For this specific PID, the function runs a simulation until the PID get finished
+        and based on that calculates the RCT. Ideally, this function is called every time that the
+        service is required (align with Synchronization). After every prediction the function saves
+        the RCT in a table of the exp_database writing the PID and the RCT. So when the PID is finished
+        a new PID is created for the same palletID and the calculation continues. In the end, with this function
+        (since the DT is aligned and updated) it will be possible to have a more precise prediction.
+
+        TODO:
+        1) Extract the PID for a given PalletID
+        2) Run a simulation for this targeted PID
+        3) Calculate the Remaining Cycle Time for that target PID
+        4) Write the PID and RCT in a table
+        
+        WARNINGS:
+        1) In the physical system when the last machine finished a PID it takes a while to 
+        be created a ne PID (needs to reach the first machine again)
+        """
+
+        # ------------- Extract PID for a given PalletID -------------
+        PID = self.ID_database.get_PID_from_PalletID(palletID)
+        # ------------------------------------------------------------
+
+        # ------------- Run simulation for a PID -------------
+        targeted_PID = self.helper.extract_int(PID)
+        # --- Generate a new model
+        self.digital_model =  self.generate_digital_model(targeted_part_id= targeted_PID)
+
+        # --- Check if the PID is in the simulation
+        part_in_model = self.digital_model.check_partID_in_simulation(PID)
+
+        if part_in_model == True:
+            # --- Run the simulation
+            self.digital_model.run()
+            # -----------------------------------------------------
+
+            # ------------- Calculates the RCT -------------
+            RCT = self.digital_model.calculate_RCT(part_id_selected= targeted_PID)
+            # ----------------------------------------------
+
+            # ------------- Write the results -------------
+            self.exp_database.write_RCTtracking(PID= targeted_PID, RCT= RCT, palletID= palletID)
+
+            self.helper.printer(f"RCT Tracking for {PID} ({palletID}) done. RCT: {RCT}. Writing into the database", 'brown')
+
+        else:
+            self.helper.printer(f"[WARNING] Not possible to track the RCT of the {PID} because the part was not found in the model. Possibly the {palletID} didn't manage to get in the Machine 1 yet.")

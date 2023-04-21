@@ -1,4 +1,10 @@
+#--- Common Libraries
 import simpy
+import sys
+
+#--- Import Features
+from .helper import Helper
+
 
 #--- Import distributions
 from scipy.stats import norm
@@ -8,6 +14,7 @@ from scipy.stats import lognorm
 
 class Part():
     def __init__(self, id, type, location, creation_time, termination_time = None, ptime_TDS = None, part_queue = None):
+        self.helper = Helper()
         self.id = id
         self.name = "Part " + str(self.id)
         self.type = type
@@ -25,12 +32,16 @@ class Part():
         self.branching_path = None
 
     def quick_TDS_fix(self, current_cluster):
-        #--- Count the number of theoretical finished clusters
-        finished_clusters = current_cluster - 1
-        #--- create a new vector with zero for the finished clusters
-        new_ptime_TDS = [0] * finished_clusters + self.ptime_TDS
-        #--- Updated old vector with the new vector
-        self.ptime_TDS = new_ptime_TDS
+        try:
+            #--- Count the number of theoretical finished clusters
+            finished_clusters = current_cluster - 1
+            #--- create a new vector with zero for the finished clusters
+            new_ptime_TDS = [0] * finished_clusters + self.ptime_TDS
+            print(f"new_ptime_TDS= {new_ptime_TDS}")
+            #--- Updated old vector with the new vector
+            self.ptime_TDS = new_ptime_TDS
+        except TypeError:
+            pass
 
     def calculate_CT(self):
         self.CT = self.termination_time - self.creation_time
@@ -54,7 +65,14 @@ class Part():
     def get_all_ptime_TDS(self):
         return self.ptime_TDS
     def get_ptime_TDS(self, cluster):
-        return self.ptime_TDS[cluster]
+        try:
+            return self.ptime_TDS[cluster]
+        except:
+            print(f"In {self.name}, Trying to get process time from TDS traces of the cluster {cluster + 1}, but the part don't have traces for that cluster!")
+            print(f"Printing existing traces for each cluster:")
+            print(f"ptime_TDS: {self.get_all_ptime_TDS()}")
+            return False
+            
     def get_finished_clusters(self):
         return self.finished_clusters
     def get_part_queue(self):
@@ -95,8 +113,11 @@ class Machine():
     def __init__(self, env, id, process_time, capacity, terminator, database, worked_time= 0,
         last_part_id=None, queue_in= None, queue_out= None, conveyors_out = None, blocking_policy= "BBS", 
         freq= None, cluster= None, final_machine = False, loop = "closed", exit = None, simtype = None, 
-        ptime_qTDS = None, maxparts= None, initial_part= None, targeted_part_id= None):
+        ptime_qTDS = None, maxparts= None, initial_part= None, targeted_part_id= None, until= None):
         
+        #-- Helper
+        self.helper = Helper()
+
         #-- Main Properties
         self.env = env
         self.id = id
@@ -131,11 +152,15 @@ class Machine():
         self.working = False
         self.part_started_time = self.env.now
         self.targeted_part_id = targeted_part_id
+        self.until = until # just for timeout
 
         #--- Allocation
         self.allocation_counter = 0
         #self.allocation_policy= "first"
         self.allocation_policy= "alternated"
+        #-- Parts Selected Branch Queues
+        self.parts_branch_queue= None
+
         #--- Save the old policy before becoming a branching
         self.old_policy = self.allocation_policy
         self.conveyors_out = conveyors_out
@@ -162,7 +187,8 @@ class Machine():
     def run(self):
     
         while True:
-            
+            if self.env.now == 267:
+                pass
             ##### ============== State Machine  ==============
 
             # =================== Idle State ===================
@@ -240,6 +266,8 @@ class Machine():
                 if self.worked_time != 0:
                     #-- machine has an initial part to be processed
                     self.part_in_machine = self.initial_part
+                    # [NEW]
+                    self.simtype = None
 
 
                 #-- Lower the flag that we finish the process
@@ -250,6 +278,8 @@ class Machine():
                 #---- Trace Driven Simulation (TDS) ----
                 # Check if the comming part have trace
                 if self.validator != None:
+                    print(f"Part in machine being analysed in validation: {self.part_in_machine.get_name()}")
+                    print(f"Part total TDS traces: {self.part_in_machine.get_all_ptime_TDS()}")
                     #--- If the current part is not within the TDS range (normal simulation)
                     if self.part_in_machine.get_id() > self.validator.get_len_TDS() and self.simtype != "qTDS":
                         self.simtype = None
@@ -260,7 +290,16 @@ class Machine():
                     if self.part_in_machine.get_all_ptime_TDS() != None:
                         if self.get_cluster() > len(self.part_in_machine.get_all_ptime_TDS()) and self.simtype != "qTDS":
                             self.simtype = None
-                    
+                    #--- If the current part has TDS traces (process times) uses TDS simulation, if not use normal simulation
+                    if self.part_in_machine.get_ptime_TDS(self.get_cluster() - 1) == False and self.simtype != "qTDS":
+                        self.helper.printer(f"[WARNING][components.py/run()/'Processing'] The {self.part_in_machine.get_name()} in {self.name} didn't have a TDS trace, assigning a normal simulation...")
+                        self.simtype = None
+                    if self.part_in_machine.get_ptime_TDS(self.get_cluster() - 1) != False and self.simtype != "qTDS":
+                        self.simtype = "TDS"
+
+                    if self.worked_time != 0 and self.part_in_machine.get_ptime_TDS(self.get_cluster() - 1) == False:
+                        pass
+
                     """ [OLD: before sync]
                     if self.part_in_machine.get_all_ptime_TDS() != None:
                         if self.part_in_machine.get_finished_clusters() + 1 > len(self.part_in_machine.get_all_ptime_TDS()) and self.simtype != "qTDS":
@@ -291,14 +330,33 @@ class Machine():
 
                         #-- generate the process time following the given distribution
                         if distribution_name == 'norm':
-                            current_process_time = norm.rvs(self.process_time[1], self.process_time[2], size= 1) - self.worked_time
-                            
+                            #current_process_time = norm.rvs(self.process_time[1], self.process_time[2], size= 1) - self.worked_time
+                            current_process_time_gen = norm.rvs(self.process_time[1], self.process_time[2], size= 1)
+
                         elif distribution_name == 'expon':
-                            current_process_time = norm.rvs(self.process_time[1], self.process_time[2], size= 1) - self.worked_time
+                            #current_process_time_gen = norm.rvs(self.process_time[1], self.process_time[2], size= 1) - self.worked_time
+                            current_process_time_gen = norm.rvs(self.process_time[1], self.process_time[2], size= 1) 
 
                     else:
-                        current_process_time = self.process_time - self.worked_time
-                        
+                        #current_process_time_gen = self.process_time - self.worked_time
+                        current_process_time_gen = self.process_time
+
+                    # --- Check if the already worked time is higher than the current process time ---
+                            
+                    # Case 01: Part still being process by the machine
+                    if self.worked_time < current_process_time_gen:
+                        current_process_time = current_process_time_gen - self.worked_time
+                    
+                    # Case 02: Part already processed by the machine, but stuck inside of the machine because of BLOCKING CONDITIONS
+                    if self.worked_time > current_process_time_gen:
+                        # Since it was already process, I take just the time waited by the blocking condition
+                        current_process_time = self.worked_time - current_process_time_gen
+
+                    # Case 03: Part JUST FINISHED the process time of the machine (very rare case, but can happen)
+                    if self.worked_time == current_process_time_gen:
+                        # Sinse it just finished, assign the lowest process time possible
+                        current_process_time= 1
+
                     #=========================================================
                     yield self.env.timeout(int(current_process_time))  # processing time
                     #=========================================================
@@ -311,11 +369,11 @@ class Machine():
                     #-- If our first part still from the initial working
                     if self.worked_time != 0:
                         #-- Updated the processed time list of part considering the "supposed" finished cluster
+                        if self.part_in_machine.get_ptime_TDS(self.get_cluster() - 1) == False:
+                            pass
                         self.part_in_machine.quick_TDS_fix(self.get_cluster())
 
                     #-- Get the current cluster of that part
-                    if self.env.now== 310000:
-                        pass
                     
                     ##### Old approach before Sync ####
                     #part_current_cluster = self.part_in_machine.get_finished_clusters()
@@ -431,6 +489,40 @@ class Machine():
                     # All closed loop cases
                     # Open Loop cases that are not final machines
 
+                    # ------------------ RCT Policy Check ------------------
+                    # (only for branching machines)
+                    if self.branch != None:
+
+                        #--- Just do the process if the machine was set with the vector (from RCT server)
+                        if self.parts_branch_queue != None:
+                            # --- Take the correponding Branch Queue selection for the current part in machine
+                            for part_tuple in self.parts_branch_queue:
+                                # -- Get part name
+                                part_name = part_tuple[0]
+                                if self.part_in_machine.get_name() == 'Part 6':
+                                    pass
+                                # --- Find the part that I have inside
+                                if self.part_in_machine.get_name() == part_name:
+                                    # -- Get the selected queue for this part (that is the one that we have)
+                                    branch_queue_selected = part_tuple[1]
+
+                                    # -- Check if the part has any queue assigned
+                                    if branch_queue_selected != None:
+                                        # Store the name of the queue to put
+                                        queue_name_to_put = branch_queue_selected
+
+                                        # Change the Policy of the Machine
+                                        self.allocation_policy = "rct"
+
+                                    # -- If the part that was processed don't have a branch queue, than go back to normal
+                                    else:
+                                        self.allocation_policy = self.old_policy
+                        # #--- If the machine was not set with the vector, keep the old policy
+                        # if self.parts_branch_queue == None:
+                        #     self.allocation_policy = self.old_policy
+
+                    if self.part_in_machine.get_name() == 'Part 6':
+                        pass
                     # ------------------ Branching Policy Check ------------------
 
                     #--- Take the list of paths (conveyors) 
@@ -441,13 +533,18 @@ class Machine():
                         #--- change policy
                         self.allocation_policy = "branching"
                         
-                    else:
+                    elif self.allocation_policy != 'rct':
                         #--- Go back to the default policy
                         self.allocation_policy = self.old_policy
 
+
                     # ------------------ Choosing the Next Queue ------------------
 
+                    # ===================================================================================
+
                     # ---------------- First Queue Free Policy ----------------
+                    if self.part_in_machine.get_id() == 6:
+                        pass
                     if self.allocation_policy == "first":
                         for queue in self.queue_out:
                             if queue.get_len() >= queue.capacity: #queue  full
@@ -465,52 +562,75 @@ class Machine():
 
                     # ---------------- Alternating Policy ----------------
                     if self.allocation_policy == "alternated":
-                        if self.name == "Machine 1" and self.part_in_machine.get_name() == "Part 7":
+                        
+                        if self.name== 'Machine 2':
                             pass
+                       
                         #--- Select the Queue based on the counter
                         queue_selected = self.queue_out[self.allocation_counter]
 
+                        #--- Define the last Allocation counter as empty
+                        last_allocation_counter = None
+                        flag_allocated_queue = False
+
                         # Loop through next queue in the perspective of the counter
-                        for i in range(self.allocation_counter, len(self.queue_out)):
-                            flag_allocated_queue = False # Trying again, hope it's not full
-                                
-                            #--- Selected Queue is full
-                            """OLD
-                            if queue_selected.get_len() >= queue_selected.get_capacity() and flag_full == False:
-                                #queue_selected = self.queue_out[self.allocation_counter + i]
-                            """
+                        for i in range(self.allocation_counter, len(self.queue_out)):                                
+
                             #--- Select the current Queue to check
                             queue_selected = self.queue_out[i]
 
-                            #--- Selected Queue is available to receive an input
+                            #---------------------- SELECT AVAIALABLE QUEUE ----------------------
                             if queue_selected.get_len() < queue_selected.get_capacity():
                                 flag_allocated_queue = True
                                 last_allocation_counter = i
                                 self.queue_to_put = queue_selected
+                                print(f"! Using 'alternated' policy to allocate {self.part_in_machine.get_name()} to {self.queue_to_put.get_name()}")
                                 break
+                            #----------------------------------------------------------------------
                             
                             #--- No queue chosen and already look to all the queues (all full)
-                            if flag_allocated_queue == False and i+1 == len(self.queue_out):
-                                #-- Wait to check again later
+                            if flag_allocated_queue == False and i+1 >= len(self.queue_out):
+                                if self.env.now % 5 == 0:
+                                    print(f'Time: {self.env.now} - [ALL QUEUES FULL] {self.name} is trying to allocate {self.part_in_machine.get_name()}, but all the output queues are full for this machine!')
+                                
+                                # -------------- WAITING --------------
                                 yield self.env.timeout(self.waiting)
+                                # -------------------------------------
 
+                                # ---------------------- TIMEOUT ----------------------
+                                if self.env.now >= 1000:
+                                    self.helper.printer("[ERROR][components.py/alternating policy] TIMEOUT", 'red')
+                                    self.exit.succeed()
+                                    sys.exit()
+                                # ------------------------------------------------------
+
+                                # ------------------------ RESET VARIABLES -----------------
                                 #-- Reset the i and also the allocation to check the queues again from the begining
                                 self.allocation_counter = 0
                                 i = 0
+                                # -----------------------------------------------------------
 
-                        #--- Increase the counter for the next allocation
-                        self.allocation_counter = last_allocation_counter +  1
+                        #---------------------- In Case of None ------------------------
+                        if last_allocation_counter == None: last_allocation_counter= 0
+                        #---------------------------------------------------------------
 
-                        #--- Reset the counter if it's at maximum
-                        if self.allocation_counter > (len(self.queue_out) - 1):
+                        #---------- Increase the counter for the next allocation ---------
+                        self.allocation_counter = last_allocation_counter + 1
+                        #-----------------------------------------------------------------
+
+                        #---------------- Reset the counter if it's at maximum ----------------
+                        if self.allocation_counter >= (len(self.queue_out)):
                             self.allocation_counter = 0 # minus 1 because we're going to increase 1 anyways
-            
-                        #--- Find the right conveyor
-                        for conveyor in self.conveyors_out:
-                            if conveyor.id == self.queue_to_put.get_id():
-                                #--- Conveyor of the same selected queue
-                                conveyor_to_put = conveyor
-                                break
+                        #-----------------------------------------------------------------------
+
+                        
+                        #--- Find the right conveyor (just check the conveyor if the machine found a queue free)
+                        if flag_allocated_queue== True:
+                            for conveyor in self.conveyors_out:
+                                if conveyor.id == self.queue_to_put.get_id():
+                                    #--- Conveyor of the same selected queue
+                                    conveyor_to_put = conveyor
+                                    break
 
                     # ---------------- Branching Policy ----------------
                     if self.allocation_policy == "branching":
@@ -525,13 +645,40 @@ class Machine():
                                 self.queue_to_put = queue
                     #-------------------------------------------------------------
 
+                    # ----------------  RCT Policy ----------------
+                    if self.allocation_policy == "rct":
+                        #--- Find the rigth queue object based on the queue name
+                        for queue in self.queue_out:
+                            if queue.get_name() == queue_name_to_put:
+                                self.queue_to_put = queue
+                        
+                        print(f"! Using 'rct' policy to allocate {self.part_in_machine.get_name()} to {self.queue_to_put.get_name()}")
 
-                    #------------ Check if the Queue is not full --------------
-                    #--- Queue Selected Full
-                    if self.queue_to_put.get_len() < self.queue_to_put.get_capacity():
-                        flag_allocated_part = True
+                        #--- Find the right conveyor
+                        for conveyor in self.conveyors_out:
+                            if conveyor.id == self.queue_to_put.get_id():
+                                #--- Conveyor of the same selected queue
+                                conveyor_to_put = conveyor
+                                break
+
+                    # ============= Check if the Queue is not full =============
+                    # --------------- Alternating Policy ---------------
+                    if self.allocation_policy == "alternated":
+                        # If it's alternated, it just choose the queue when it's free
+                        # so we can use the same flag as before
+                        if flag_allocated_queue == True:
+                            flag_allocated_part = True
                     
-                    #--- Queue Not Full
+                    # --------------- First, Branching and RCT Policy ---------------
+                    if self.allocation_policy== "first" or self.allocation_policy=="branching" or self.allocation_policy=="rct":
+                        # This policies receives the queue without knowing if it's
+                        # full or not, so we need to check here:
+                        if self.queue_to_put.get_len() < self.queue_to_put.get_capacity():
+                            flag_allocated_part = True
+                        
+                    # ============= ALLOCATION (queue not full) =============
+                    if self.part_in_machine.get_name()== 'Part 10' and self.name== 'Machine 2':
+                        self 
                     if flag_allocated_part == True:
                         #--- Queue Allocated (Update digital_log)
                         # obs: makes senses to take the time just after the allocation, because in the model becuase the model generation works like that
@@ -557,7 +704,8 @@ class Machine():
                             #--- Put the part in the rigth conveyor
                             conveyor_to_put.start_transp(self.part_in_machine)
                             flag_allocated_part = True
-
+                            
+                            
                             # ------- STOP Machine condition -------
                             # --- If the machine was set to stop the simulation when finish up this part:
                             if self.flag_stop_for_id == self.part_in_machine.get_id():
@@ -610,7 +758,17 @@ class Machine():
                             #--- Terminates the simulations
                             self.exit.succeed()
                         
+                        #--- Timeout in the simulation (number of parts produced higher than maximum allowed)
+                        if self.terminator.get_len_terminated() >= 100:
+                            #--- Why you produced so many parts? Maybe the system is stuck in some kind of infinity loop!
+                            self.helper.printer("[ERROR][components.py/Machine()/run()] TIMEOUT in the simulation! More than 100 parts produced, the system might be stuck in an infinity loop, please check the stop conditions. Printing stop conditions...")
+                            print("--------- Stop Conditions ---------")
+                            print(f"|-- maxparts: {self.maxparts}")
+                            print(f"|-- until: {self.until}")
+                            print(f"|-- targeted part id: {self.targeted_part_id}")
 
+                            self.helper.printer(f"---- Simulation was killed ----", 'red')
+                            sys.exit()
                 # ============ Finished Action ============
 
                 #------------------------------------------------------
@@ -640,17 +798,6 @@ class Machine():
                     self.current_state = "Allocating"      
             # ==========================================================
 
-            #-------------------- Debuging --------------------
-            """
-            if self.part_in_machine != None:
-                if self.part_in_machine.get_name() == "Part 16":
-                    pass
-            if self.env.now == 1000:
-                pass            
-            """
-            
- 
-            #---------------------------------------------------
 
 
     #--------- Defining GETs ---------
@@ -686,7 +833,12 @@ class Machine():
         return self.conveyors_out
     def get_branch(self):
         return self.branch
-
+    def get_last_part_id(self):
+        return self.last_part_id
+    def get_worked_time(self):
+        return self.worked_time
+    def get_allocation_counter(self):
+        return self.allocation_counter
     #--------- Defining SETs ---------
     def set_queue_in(self, value):
         self.queue_in = value
@@ -724,7 +876,10 @@ class Machine():
             self.current_state = "Processing"
     def set_stop_for_id(self, part_id):
         self.flag_stop_for_id = part_id
-
+    def set_allocation_counter(self, counter):
+        self.allocation_counter = counter
+    def set_parts_branch_queue(self, tuple_vector):
+        self.parts_branch_queue= tuple_vector
     #--- Special set for queue
     def add_queue_in(self, value):
         if self.queue_in is None:

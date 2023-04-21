@@ -1,25 +1,31 @@
 #--- Import Modules
 from .interfaceDB import Database
+from .helper import Helper
 
 #--- Normal Libraries
 import paho.mqtt.client as mqtt
 import json
 from time import sleep
 import datetime
+import os
+import sys
 
 
 
-#--- Reload Package
+"""#--- Reload Package
 import importlib
 import dtwinpylib
-importlib.reload(dtwinpylib.dtwinpy.interfaceDB)
+importlib.reload(dtwinpylib.dtwinpy.interfaceDB)"""
 
 class Broker_Manager():
-    def __init__(self, ip_address, real_database_path, ID_database_path, port= 1883, keepalive= 60, topics = ['trace', 'part_id', 'RCT_server'], client = None):
+    def __init__(self, name, ip_address, real_database_path, ID_database_path, UID_to_PalletID= None, port= 1883, keepalive= 60, topics = ['trace', 'part_id', 'RCT_server'], client = None, WIP= None, keepDB= False):
         #--- Connect to the Broker
+        self.name= name
         self.ip_address= ip_address
         self.port = port
         self.keepalive = keepalive
+        self.keepDB = keepDB
+        self.helper = Helper()
 
         #--- MQTT
         self.topics = topics
@@ -27,14 +33,46 @@ class Broker_Manager():
         if client == None:
             #--- Create the client object
             self.client = mqtt.Client()
+        
+        #---- UID <> PID dictionaries
         self.UID_to_PID_dict = {}
         self.PID_to_UID_dict = {}
-        self.PID_counter = 1
         self.old_UID = 0
+        
+        if WIP == None:
+            self.helper.printer(f"[WARNING][__init__()] Not given a WIP, trying to use WIP from model .json...")
+            self.PID_counter = 1
+        if WIP != None:
+            self.PID_counter = WIP + 1
+
+        #------- UID to PALLET ID
+        if UID_to_PalletID == None:
+            self.UID_to_PalletID= {
+                "236439249": "Pallet 1",
+                "2041719249": "Pallet 2",
+                "2049810149": "Pallet 3",
+                "236629349": "Pallet 4",
+                "1721739249": "Pallet 5",
+                "28159349": "Pallet 6",
+                "44139349": "Pallet 7",
+                "601269249": "Pallet 8",
+                "20419710149": "Pallet 9",
+                "1889810149": "Pallet 10",
+                "441289249": "Pallet 11",
+                "28429249": "Pallet 12"
+            }
+        if UID_to_PalletID != None:
+            self.UID_to_PalletID = UID_to_PalletID
 
         #--- Database
         self.real_database_path = real_database_path
         self.ID_database_path = ID_database_path
+        # ----- Deleting existing database before creating the new ones -----
+        if self.keepDB == False: self.helper.delete_databases(name) #self.delete_databases()
+        if self.keepDB == True: print("Skiping deleting of databases")
+            
+
+        # ----- Create the new databases
         self.real_database = Database(database_path= self.real_database_path, event_table= "real_log")
         self.ID_database = Database(database_path= self.ID_database_path, event_table= "ID")
 
@@ -50,6 +88,15 @@ class Broker_Manager():
         #--- Add the UID with the current PID counter in the dictionary
         self.UID_to_PID_dict[unique_ID] = f"Part {self.PID_counter}"
 
+        #--- Get the PalletID for that specific UID
+        try:
+            palletID = self.UID_to_PalletID[unique_ID]
+        except KeyError:
+            self.helper.printer(f"[ERROR][broker_mager.py/part_ID_creator()] It was not possible to find a Pallet ID for the UID: {unique_ID}", 'red')
+            self.helper.printer(f"|-- Please verify if that UID is a new UID inserted in the system.", 'red')
+            self.helper.printer(f"|-- Assigning a default Pallet ID: 'None'")
+            palletID= 0
+
         #----- Add the PID with the current UID to the dictionary
         self.PID_to_UID_dict[f"Part {self.PID_counter}"] = unique_ID
 
@@ -58,17 +105,59 @@ class Broker_Manager():
             table_name= "ID",
             uid= unique_ID,
             partid= f"Part {self.PID_counter}",
-            current_time_str= current_time_str
+            current_time_str= current_time_str,
+            palletID= palletID
 
         )
+
+        #----- Clean the selected Branch Queue for this UID that now has a new PID
+        self.ID_database.write_selected_branch_queue(UID= unique_ID, selected_queue= None)
+
 
         #--- Increase the part id counter
         self.PID_counter += 1
     
-        #--- DEBUGING
-        """for key in self.UID_to_PID_dict:
-            print(f"{key} | {self.UID_to_PID_dict[key]}")"""
-    
+
+    def first_part_ID_creation(self, unique_ID):
+        """
+        This functions is just used in the first creation of unique IDs. In this cases
+        it uses the Pallet ID as Part ID.
+        """
+        #--- Get the PalletID for that specific UID
+        try:
+            palletID = self.UID_to_PalletID[unique_ID]
+        except KeyError:
+            self.helper.printer(f"[ERROR][broker_mager.py/part_ID_creator()] It was not possible to find a Pallet ID for the UID: {unique_ID}", 'red')
+            self.helper.printer(f"|-- Please verify if that UID is a new UID inserted in the system.", 'red')
+            self.helper.printer(f"|-- Assigning a default Pallet ID: 'None'")
+            palletID= 0
+
+
+        #--- Extract the ID of pallet string
+        id = self.helper.extract_int(palletID)
+
+        #--- Create the Part ID based on the Pallet ID
+        part_id = f"Part {id}"
+
+        #--- Get current time
+        (tstr, t) = self.helper.get_time_now()
+
+        #----- Add the PID and UID into the PID_UID database
+        self.ID_database.add_UID_partid(
+            table_name= "ID",
+            uid= unique_ID,
+            partid= part_id,
+            current_time_str= tstr,
+            palletID= palletID
+
+        )
+
+        #--- Add the UID with the current PID counter in the dictionary
+        self.UID_to_PID_dict[unique_ID] = part_id
+
+        #----- Clean the selected Branch Queue for this UID that now has a new PID
+        self.ID_database.write_selected_branch_queue(UID= unique_ID, selected_queue= None)
+
     def part_ID_translator(self, unique_ID):
         """
         This function takes a UID and searches in the PID dictionary for the related PID. The function returns
@@ -80,11 +169,23 @@ class Broker_Manager():
             part_id = self.UID_to_PID_dict[unique_ID]
             return part_id
         except KeyError:
-            print(f"[BROKER][broker_manager.py/part_ID_translator()] Unique ID '{unique_ID}' not found in the Dictionary!")
+            self.helper.printer(f"[ERROR][broker_manager.py/part_ID_translator()] Unique ID '{unique_ID}' not found in the Dictionary 'UID_to_PID_dict'!", 'red')
             print("printing the dicitionary....")
             for key in self.UID_to_PID_dict:
                 print(f"{key} | {self.UID_to_PID_dict[key]}")
     
+    def UID_checker(self, UID, machine):
+        """
+        Checks if the given UID already exists in the dictionary of UID. If exists it returns True,
+        if do not exists it return False.
+        """
+        try:
+            PID = self.UID_to_PID_dict[UID]
+            return True
+        except KeyError:
+            self.helper.printer(f"[WARNING][broker_manager.py/UID_checker()] Unique ID '{UID}' detected in {machine}. Adding UID into the database...")
+            return False
+
     def traces_handler(self, message_translated, current_timestamp, current_time_str):
         """
         This functions is used when a MQTT message of the topic 'traces' is received by the broker.
@@ -108,7 +209,7 @@ class Broker_Manager():
                 part_id = self.part_ID_translator(unique_id)
             except KeyError:
                 #--- ERROR: unique_ID was not found in the dictionary
-                print(f"[ERROR][broker_manager.py/traces_handler()] The Unique ID {unique_id} was not found in the PID dictionary")
+                self.helper.printer(f"[ERROR][broker_manager.py/traces_handler()] The Unique ID {unique_id} was not found in the PID dictionary", 'red')
                 print("printing the current dictionary....")
                 for key in self.UID_to_PID_dict:
                     print(f"{key} | {self.UID_to_PID_dict[key]}")
@@ -120,9 +221,7 @@ class Broker_Manager():
             part_id = "Part 0"
 
         #--- Write the information into the real database
-        self.real_database.write_event('real_log', current_timestamp, machine_id, status, part_id, queue_id, current_time_str)
-
-
+        self.real_database.write_event('real_log', 0, machine_id, status, part_id, queue_id, current_time_str, current_timestamp)
 
     def part_id_handler(self, message_translated):
         """
@@ -150,12 +249,24 @@ class Broker_Manager():
         machine_id = f"Machine {(message_translated['machine_id'])}"
         unique_ID = message_translated['part_id']
         
+        """[OLD]
         #--- If machine 1, (re)create the PID for that given UID
         if machine_id == "Machine 1":
             #--- Create the PID related to the UID and assign it in the PID dict
             if self.old_UID != unique_ID:
                 self.part_ID_creator(unique_ID, current_time_str)
                 self.old_UID = unique_ID
+        """
+        #--- Check if the current UID exist in the dictionary
+        uid_exists = self.UID_checker(unique_ID, machine_id)
+
+        #--- If the UID is not in the database, create the new PID and add it into the database
+        if uid_exists == False:
+            self.first_part_ID_creation(unique_ID)
+
+        #--- If it's Machine 1, always create a part
+        if machine_id == "Machine 1" and uid_exists == True:
+            self.part_ID_creator(unique_ID, current_time_str)
 
         #--- For all the machines (including machine 1)
         # Take the corresponded PID of the given UID
@@ -174,7 +285,7 @@ class Broker_Manager():
         
         try:
             #--- Take only the number
-            line_id = line_id_ltuple[0][0]
+            line_id = line_id_ltuple[-1][0] # Take the most recent 
 
             #--- UPDATE the part id started for the specific machine into the Real Database
             self.real_database.update_column(
@@ -185,7 +296,7 @@ class Broker_Manager():
             )
 
         except IndexError:
-            print(f"{current_time_str} | [ERROR][BROKER]: Your Broker Manager didn't find {machine_id} with 'Part 0' in the database ({self.real_database_path})")
+            self.helper.printer(f"[WARNING][BROKER]: Your Broker Manager didn't find {machine_id} with 'Part 0' in the database ({self.real_database_path}). Please, check if the previous attempt was successful.", 'yellow')
         
     def rct_handler(self, message_translated):
         """
@@ -216,7 +327,7 @@ class Broker_Manager():
             print(".")
             sleep(1)
         if rc == 0:
-            print(f"----- Connected with {self.ip_address} Successfully -----")
+            self.helper.printer(f"----- Connected with {self.ip_address} Successfully -----", 'green')
         else:
             print(f"----- Connected with {self.ip_address} FAILED -----")
 
@@ -238,6 +349,8 @@ class Broker_Manager():
         current_time = datetime.datetime.now()
         current_time_str = current_time.strftime("%d %B %H:%M:%S")
 
+        #--- Round current timestamp to get INTEGER
+        current_timestamp = round(current_timestamp)
         #--- Print the payload received
         print(f"{current_time_str} | Topic: {message_topic} | Payload Received: {message_translated}")
 
@@ -265,7 +378,50 @@ class Broker_Manager():
         #--- Submitte the right function
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
-        
+
+    # ----- Delete Existing Databases -----
+    def delete_databases(self):
+        print("|- Deleting existing databases...")
+        #--- Get current time
+        (tstr, t) = self.helper.get_time_now()
+
+        #--- Digital Database path
+        digital_database_path = f"databases/{self.name}/digital_database.db"
+        try:
+            os.remove(digital_database_path)
+            print(f"|-- Digital Database deleted successfuly from {digital_database_path}")
+
+        except FileNotFoundError:
+            self.helper.printer(f"[WARNING][broker_manager.py/delete_databases()] The Digital Database doesn't exist yet in the path '{digital_database_path}', proceding without deleting...")
+        except PermissionError:
+            self.helper.printer(f"[ERROR][broker_manager.py/delete_databases()] The Digital Database is busy somewhere, please close and try again.", 'red')
+            self.helper.printer(f"---- Digital Twin was killed ----", 'red')
+            sys.exit()
+
+
+        #- Delete Real Database
+        try:
+            os.remove(self.real_database_path)
+            print(f"|-- Real Database deleted successfuly from {self.real_database_path}")
+        except FileNotFoundError:
+            self.helper.printer(f"[WARNING][broker_manager.py/delete_databases()] The Real Database doesn't exist yet in the path '{self.real_database_path}', proceding without deleting...")
+        except PermissionError:
+            self.helper.printer(f"[ERROR][broker_manager.py/delete_databases()] The Real Database is busy somewhere, please close and try again.", 'red')
+            self.helper.printer(f"---- Digital Twin was killed ----", 'red')
+            sys.exit()
+
+        #- Delete ID database
+        try:
+            os.remove(self.ID_database_path)
+            print(f"|-- ID Database deleted successfuly from {self.ID_database_path}")
+        except FileNotFoundError:
+            self.helper.printer(f"[WARNING][broker_manager.py/delete_databases()] The ID Database doesn't exist yet in the path '{self.ID_database_path}', proceding without deleting...")
+        except PermissionError:
+            self.helper.printer(f"[ERROR][broker_manager.py/delete_databases()] The ID Database is busy somewhere, please close and try again.", 'red')
+            self.helper.printer(f"---- Digital Twin was killed at {tstr} ----", 'red')
+            sys.exit()
+
+    # ----- RUNNING -----
     def run(self):
         """
         This function is the main function of the broker manager. It will make the connection with
@@ -297,12 +453,13 @@ class Broker_Manager():
                 sleep(1)
             except KeyboardInterrupt:
                 self.condition = False
-                print(f"---- Communication with {self.ip_address} killed manually----")
+                self.helper.printer(f"---- Communication with {self.ip_address} killed manually----", 'red')
         
         #--- Stop the connection and disconnect the client
         self.client.loop_stop()
         self.client.disconnect()
 
+    # ----- PUBLISHING FROM RCT -----
     def publishing(self, machine_id, part_id, queue_id, topic= "RCT_server"):
         """
         This is a simple function to publish a topic into the Broker
@@ -337,11 +494,47 @@ class Broker_Manager():
             payload= payload_translated
         )
 
+        #--- Update the Branch Queue selected for the current part id
+        self.ID_database.write_selected_branch_queue(UID= unique_ID, selected_queue= f"Queue {queueid}")
+
         #--- Take the current time
         current_time = datetime.datetime.now()
         current_time_str = current_time.strftime("%d %B %H:%M:%S")
 
         #--- Print the payload received
-        print(f"[BROKER] {current_time_str} | Topic: {topic} | Payload Published: {payload_translated}")
+        self.helper.printer(f"[BROKER] Topic: {topic} | Payload Published: {payload_translated}", 'green')
 
-        
+    # ----- SETTING ACTION (START or STOP) -----
+    def publish_setting_action(self, action):
+        """
+        This function receive an action and publish it in the topic 'system_status'.
+        If the action is 'start', the physical system runs. If the action is 'stop'
+        the physical system stops. Important to know that this messages can just be 
+        use once to not cause problems in the physical system.
+        """
+
+        if action != 'start' and action != 'stop':
+            self.helper.printer(f"[ERROR][broker_manager.py/publish_setting_action()] Setting action not recognized! Action used: {action}. Actions available: 'start', 'stop'", 'red')
+            self.helper.printer(f"---- Digital Twin was killed ----", 'red')
+            sys.exit()
+
+        else: 
+            try:
+                #--- Make the connection with the Broker
+                self.client.connect(self.ip_address, self.port, self.keepalive)
+
+                #--- Publish the action
+                self.client.publish(
+                topic = 'system_status', 
+                payload= action
+            )
+            
+            except ConnectionRefusedError:
+                self.helper.printer(f"[ERROR][broker_manager.py/publish_setting_action()] Mosquitto / Broker is not running in the IP address '{self.ip_address}'", 'red')
+                self.helper.printer(f"---- Digital Twin was killed ----", 'red')
+                sys.exit()
+
+            except TimeoutError:
+                self.helper.printer(f"[ERROR][broker_manager.py/publish_setting_action()] Mosquitto / Broker is not running in the IP address '{self.ip_address}'", 'red')
+                self.helper.printer(f"---- Digital Twin was killed ----", 'red')
+                sys.exit()

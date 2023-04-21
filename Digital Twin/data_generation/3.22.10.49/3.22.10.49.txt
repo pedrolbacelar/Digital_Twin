@@ -1,0 +1,2343 @@
+PS D:\POLIMI\Digital twins\Digital_Twin\Digital Twin> python .\mydt.py
+Importing the libraries.....
+pygame 2.3.0 (SDL 2.24.2, Python 3.11.2)
+Hello from the pygame community. https://www.pygame.org/contribute.html
+API object created for '5s_Model' using 'premium' account.
+Deleting existing model (excepted by 'initial.json') from the relative folder path:'models/5s_determ'
+File '1679477042_1.json' deleted...
+File '1679477072_2.json' deleted...
+Done! Deleted 2 successfuly
+--- printing databases paths ---
+Digital Database: 'databases/5s_determ/digital_database.db'
+Real Database: 'databases/5s_determ/real_database.db'
+ID Database: 'databases/5s_determ/ID_database.db'
+|- Deleting existing databases...
+22 March 10:42:11 |[WARNING][broker_manager.py/delete_databases()] The Digital Database doesn't exist yet in the path 'databases/5s_determ/digital_database.db', proceding without deleting...
+|-- Real Database deleted successfuly from databases/5s_determ/real_database.db
+|-- ID Database deleted successfuly from databases/5s_determ/ID_database.db
+Broker Manager internally create for publishing feedback...
+22 March 10:42:11 |---- Digital Twin '5s_determ' created sucessfully ----
+22 March 10:42:40 |[Internal Service] Starting Synchronization n° 1
+--- Model Path being used: models/5s_determ/1679478161_1.json
+---------- Pointer Status Initial ----------
+Start Time: 1679478131
+Start Time ID: 1
+
+End Time: 1679478161
+End Time ID: 4
+-------------------------------------
+ 22 March 10:42:40 |[interfaceDB.py/update_end_time] Pointer End Time updated from 4 to 3
+---------- Pointer Status Updated ----------
+Start Time: 1679478131
+Start Time ID: 1
+
+End Time: 1679478151
+End Time ID: 3
+-------------------------------------
+parts_zero: []
+-----------------------------------------------------------------
+ 22 March 10:42:40 |Big picture BEFORE Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 1', 'Part 2', 'Part 3', 'Part 4', 'Part 5', 'Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: []
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: []
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+-----------------------------------------------------------------
+--------- Step by Step Sync ---------
+Event - machine_name: Machine 1, status: Started, part_id: Part 1, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 2', 'Part 3', 'Part 4', 'Part 5', 'Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: []
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: []
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+Event - machine_name: Machine 1, status: Finished, part_id: Part 1, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 2', 'Part 3', 'Part 4', 'Part 5', 'Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: []
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+Event - machine_name: Machine 1, status: Started, part_id: Part 2, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 3', 'Part 4', 'Part 5', 'Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: ['Part 2']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: []
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+-----------------------------------------------------------------
+ 22 March 10:42:40 |Big picture AFTER Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 3', 'Part 4', 'Part 5', 'Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: ['Part 2']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: []
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+-----------------------------------------------------------------
+Following data was PUT successfully to 'station_status' aspect: [{"_time": "2023-03-22T09:42:40.760201Z", "station_1": true, "station_2": false, "station_3": false, "station_4":false, "station_5": false}]
+Following data was PUT successfully to 'queue_status' aspect: [{"_time": "2023-03-22T09:42:41.464295Z", "queue_1": 11, "queue_2": 1, "queue_3": 0, "queue_4": 0, "queue_5": 0}]
+22 March 10:42:42 |[Internal Service] System Synchronized. Next Sync (n° 2): 22 March 10:43:11
+22 March 10:43:10 |[Internal Service] Starting Synchronization n° 2
+--- Model Path being used: models/5s_determ/1679478191_2.json
+---------- Pointer Status Initial ----------
+Start Time: 1679478152
+Start Time ID: 4
+
+End Time: 1679478191
+End Time ID: 12
+-------------------------------------
+ 22 March 10:43:10 |[interfaceDB.py/update_end_time] Not found 'Started' after the end_time: 1679478191. Sleeping for 10 seconds and trying again
+ 22 March 10:43:20 |[interfaceDB.py/update_end_time] Pointer End Time updated from 12 to13
+---------- Pointer Status Updated ----------
+Start Time: 1679478152
+Start Time ID: 4
+
+End Time: 1679478196
+End Time ID: 13
+-------------------------------------
+parts_zero: []
+-----------------------------------------------------------------
+ 22 March 10:43:20 |Big picture BEFORE Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 3', 'Part 4', 'Part 5', 'Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: ['Part 2']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: []
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+-----------------------------------------------------------------
+--------- Step by Step Sync ---------
+Event - machine_name: Machine 2, status: Started, part_id: Part 1, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 3', 'Part 4', 'Part 5', 'Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: ['Part 2']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: []
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: []
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+Event - machine_name: Machine 1, status: Finished, part_id: Part 2, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 3', 'Part 4', 'Part 5', 'Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 2']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: []
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+Event - machine_name: Machine 1, status: Started, part_id: Part 3, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 2']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: []
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+Event - machine_name: Machine 1, status: Finished, part_id: Part 3, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 2', 'Part 3']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: []
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+Event - machine_name: Machine 1, status: Started, part_id: Part 4, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 5', 'Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11','Part 12']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 2', 'Part 3']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: []
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+Event - machine_name: Machine 2, status: Finished, part_id: Part 1, queue_name: Queue 3
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 5', 'Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11','Part 12']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 2', 'Part 3']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+Event - machine_name: Machine 2, status: Started, part_id: Part 2, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 5', 'Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11','Part 12']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 3']
+Part in Machine: ['Part 2']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+Event - machine_name: Machine 1, status: Finished, part_id: Part 4, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 5', 'Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11','Part 12']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 3', 'Part 4']
+Part in Machine: ['Part 2']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+Event - machine_name: Machine 1, status: Started, part_id: Part 5, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 3', 'Part 4']
+Part in Machine: ['Part 2']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+Event - machine_name: Machine 2, status: Finished, part_id: Part 2, queue_name: Queue 4
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 3', 'Part 4']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 2']
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+-----------------------------------------------------------------
+ 22 March 10:43:20 |Big picture AFTER Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 3', 'Part 4']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 2']
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+-----------------------------------------------------------------
+Following data was PUT successfully to 'station_status' aspect: [{"_time": "2023-03-22T09:43:20.916625Z", "station_1": true, "station_2": false, "station_3": false, "station_4":false, "station_5": false}]
+Following data was PUT successfully to 'queue_status' aspect: [{"_time": "2023-03-22T09:43:21.504627Z", "queue_1": 8, "queue_2": 2, "queue_3": 1, "queue_4": 1, "queue_5": 0}]
+22 March 10:43:22 |[Internal Service] System Synchronized. Next Sync (n° 3): 22 March 10:43:41
+22 March 10:43:40 |[Internal Service] Starting Synchronization n° 3
+--- Model Path being used: models/5s_determ/1679478221_3.json
+---------- Pointer Status Initial ----------
+Start Time: 1679478197
+Start Time ID: 14
+
+End Time: 1679478221
+End Time ID: 22
+-------------------------------------
+ 22 March 10:43:40 |[interfaceDB.py/update_end_time] Not found 'Started' after the end_time: 1679478221. Sleeping for 10 seconds and trying again
+ 22 March 10:43:50 |[interfaceDB.py/update_end_time] Pointer End Time updated from 22 to23
+---------- Pointer Status Updated ----------
+Start Time: 1679478197
+Start Time ID: 14
+
+End Time: 1679478226
+End Time ID: 23
+-------------------------------------
+parts_zero: []
+-----------------------------------------------------------------
+ 22 March 10:43:50 |Big picture BEFORE Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 3', 'Part 4']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 2']
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+-----------------------------------------------------------------
+--------- Step by Step Sync ---------
+Event - machine_name: Machine 2, status: Started, part_id: Part 3, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 2']
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+Event - machine_name: Machine 1, status: Finished, part_id: Part 5, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 2']
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+Event - machine_name: Machine 3, status: Started, part_id: Part 1, queue_name: Queue 3
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: []
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 2']
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+Event - machine_name: Machine 1, status: Started, part_id: Part 6, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: []
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 2']
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+Event - machine_name: Machine 1, status: Finished, part_id: Part 6, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: []
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 2']
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+Event - machine_name: Machine 1, status: Started, part_id: Part 7, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: []
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 2']
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+Event - machine_name: Machine 2, status: Finished, part_id: Part 3, queue_name: Queue 3
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 4', 'Part 5', 'Part 6']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 3']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 2']
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+Event - machine_name: Machine 2, status: Started, part_id: Part 4, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 5', 'Part 6']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 3']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 2']
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+Event - machine_name: Machine 4, status: Started, part_id: Part 2, queue_name: Queue 4
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 5', 'Part 6']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 3']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: ['Part 2']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+Event - machine_name: Machine 1, status: Finished, part_id: Part 7, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 5', 'Part 6', 'Part 7']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 3']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: ['Part 2']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+-----------------------------------------------------------------
+ 22 March 10:43:50 |Big picture AFTER Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 5', 'Part 6', 'Part 7']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 3']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: ['Part 2']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+-----------------------------------------------------------------
+Following data was PUT successfully to 'station_status' aspect: [{"_time": "2023-03-22T09:43:50.990617Z", "station_1": false, "station_2": true, "station_3": true, "station_4": true, "station_5": false}]
+Following data was PUT successfully to 'queue_status' aspect: [{"_time": "2023-03-22T09:43:51.404611Z", "queue_1": 5, "queue_2": 4, "queue_3": 2, "queue_4": 1, "queue_5": 0}]
+22 March 10:43:51 |[Internal Service] System Synchronized. Next Sync (n° 4): 22 March 10:44:11
+22 March 10:44:10 |[Internal Service] Starting Synchronization n° 4
+--- Model Path being used: models/5s_determ/1679478251_4.json
+---------- Pointer Status Initial ----------
+Start Time: 1679478227
+Start Time ID: 24
+
+End Time: 1679478251
+End Time ID: 30
+-------------------------------------
+ 22 March 10:44:10 |[interfaceDB.py/update_end_time] Not found 'Started' after the end_time: 1679478251. Sleeping for 10 seconds and trying again
+ 22 March 10:44:20 |[interfaceDB.py/update_end_time] Pointer End Time updated from 30 to32
+---------- Pointer Status Updated ----------
+Start Time: 1679478227
+Start Time ID: 24
+
+End Time: 1679478252
+End Time ID: 32
+-------------------------------------
+parts_zero: []
+-----------------------------------------------------------------
+ 22 March 10:44:20 |Big picture BEFORE Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 5', 'Part 6', 'Part 7']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 3']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: ['Part 2']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+-----------------------------------------------------------------
+--------- Step by Step Sync ---------
+Event - machine_name: Machine 1, status: Started, part_id: Part 8, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 5', 'Part 6', 'Part 7']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 3']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: ['Part 2']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+Event - machine_name: Machine 2, status: Finished, part_id: Part 4, queue_name: Queue 4
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 5', 'Part 6', 'Part 7']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 3']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 4']
+Part in Machine: ['Part 2']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+Event - machine_name: Machine 2, status: Started, part_id: Part 5, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 6', 'Part 7']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 3']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 4']
+Part in Machine: ['Part 2']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+Event - machine_name: Machine 1, status: Finished, part_id: Part 8, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 6', 'Part 7', 'Part 8']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 3']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 4']
+Part in Machine: ['Part 2']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+Event - machine_name: Machine 1, status: Started, part_id: Part 9, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 11', 'Part 12']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 6', 'Part 7', 'Part 8']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 3']
+Part in Machine: ['Part 1']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 4']
+Part in Machine: ['Part 2']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: []
+Part in Machine: []
+Event - machine_name: Machine 3, status: Finished, part_id: Part 1, queue_name: Queue 5
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 11', 'Part 12']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 6', 'Part 7', 'Part 8']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 3']
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 4']
+Part in Machine: ['Part 2']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+Event - machine_name: Machine 3, status: Started, part_id: Part 3, queue_name: Queue 3
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 11', 'Part 12']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 6', 'Part 7', 'Part 8']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: []
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 4']
+Part in Machine: ['Part 2']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+Event - machine_name: Machine 1, status: Finished, part_id: Part 9, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 11', 'Part 12']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: []
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 4']
+Part in Machine: ['Part 2']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+Event - machine_name: Machine 2, status: Finished, part_id: Part 5, queue_name: Queue 3
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 11', 'Part 12']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 5']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 4']
+Part in Machine: ['Part 2']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+-----------------------------------------------------------------
+ 22 March 10:44:20 |Big picture AFTER Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 11', 'Part 12']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 5']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 4']
+Part in Machine: ['Part 2']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+-----------------------------------------------------------------
+Following data was PUT successfully to 'station_status' aspect: [{"_time": "2023-03-22T09:44:21.009021Z", "station_1": false, "station_2": false, "station_3": true, "station_4":true, "station_5": false}]
+Following data was PUT successfully to 'queue_status' aspect: [{"_time": "2023-03-22T09:44:21.472019Z", "queue_1": 3, "queue_2": 4, "queue_3": 2, "queue_4": 2, "queue_5": 1}]
+22 March 10:44:22 |[Internal Service] System Synchronized. Next Sync (n° 5): 22 March 10:44:41
+22 March 10:44:40 |[Internal Service] Starting Synchronization n° 5
+--- Model Path being used: models/5s_determ/1679478281_5.json
+---------- Pointer Status Initial ----------
+Start Time: 1679478253
+Start Time ID: 35
+
+End Time: 1679478281
+End Time ID: 46
+-------------------------------------
+ 22 March 10:44:40 |[interfaceDB.py/update_end_time] Not found 'Started' after the end_time: 1679478281. Sleeping for 10 seconds and trying again
+ 22 March 10:44:50 |[interfaceDB.py/update_end_time] Pointer End Time updated from 46 to48
+---------- Pointer Status Updated ----------
+Start Time: 1679478253
+Start Time ID: 35
+
+End Time: 1679478289
+End Time ID: 48
+-------------------------------------
+parts_zero: []
+-----------------------------------------------------------------
+ 22 March 10:44:50 |Big picture BEFORE Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 11', 'Part 12']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 6', 'Part 7', 'Part 8', 'Part 9']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 5']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 4']
+Part in Machine: ['Part 2']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+-----------------------------------------------------------------
+--------- Step by Step Sync ---------
+Event - machine_name: Machine 2, status: Started, part_id: Part 6, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 11', 'Part 12']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 5']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 4']
+Part in Machine: ['Part 2']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+Event - machine_name: Machine 4, status: Finished, part_id: Part 2, queue_name: Queue 5
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 11', 'Part 12']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 5']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 4']
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 2']
+Part in Machine: []
+Event - machine_name: Machine 4, status: Started, part_id: Part 4, queue_name: Queue 4
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 11', 'Part 12']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 5']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 2']
+Part in Machine: []
+22 March 10:44:50 |[WARNING][synchronizer.py/Mstarted()] Part 1 was not found in elements vector of the machine
+Machine 5 (final machine) just finisehd a part, adding a new one: Part 13 to Zone of Machine 1
+22 March 10:44:50 |[ERROR][synchronizer.py/positioning_discovery()] A different number of parts in the system was detected. Check for parts duplications or external interference! Previous number: 12, New number: 13
+Event - machine_name: Machine 5, status: Finished, part_id: Part 1, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 11', 'Part 12', 'Part 13']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 5']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 2']
+Part in Machine: []
+Event - machine_name: Machine 5, status: Started, part_id: Part 2, queue_name: Queue 5
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 11', 'Part 12', 'Part 13']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 5']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: ['Part 2']
+22 March 10:44:50 |[WARNING][synchronizer.py/Mstarted()] Part 10 was not found in elements vector of the machine
+22 March 10:44:50 |[ERROR][synchronizer.py/positioning_discovery()] A different number of parts in the system was detected. Check for parts duplications or external interference! Previous number: 13, New number: 14
+Event - machine_name: Machine 1, status: Finished, part_id: Part 10, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 11', 'Part 12', 'Part 13']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 10']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 5']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: ['Part 2']
+Event - machine_name: Machine 1, status: Started, part_id: Part 11, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 12', 'Part 13']
+Part in Machine: ['Part 11']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 10']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 5']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: ['Part 2']
+Event - machine_name: Machine 2, status: Finished, part_id: Part 6, queue_name: Queue 4
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 12', 'Part 13']
+Part in Machine: ['Part 11']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 7', 'Part 8', 'Part 9', 'Part 10']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 5']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 6']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: ['Part 2']
+Event - machine_name: Machine 2, status: Started, part_id: Part 7, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 12', 'Part 13']
+Part in Machine: ['Part 11']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 8', 'Part 9', 'Part 10']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 5']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 6']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: ['Part 2']
+Machine 5 (final machine) just finisehd a part, adding a new one: Part 14 to Zone of Machine 1
+Event - machine_name: Machine 5, status: Finished, part_id: Part 2, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 12', 'Part 13', 'Part 14']
+Part in Machine: ['Part 11']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 8', 'Part 9', 'Part 10']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 5']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 6']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+Event - machine_name: Machine 1, status: Finished, part_id: Part 11, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 12', 'Part 13', 'Part 14']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 8', 'Part 9', 'Part 10', 'Part 11']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 5']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 6']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+Event - machine_name: Machine 1, status: Started, part_id: Part 12, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 13', 'Part 14']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 8', 'Part 9', 'Part 10', 'Part 11']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 5']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 6']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+Event - machine_name: Machine 1, status: Finished, part_id: Part 12, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 13', 'Part 14']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 5']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 6']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+Event - machine_name: Machine 2, status: Finished, part_id: Part 7, queue_name: Queue 3
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 13', 'Part 14']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 5', 'Part 7']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 6']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+-----------------------------------------------------------------
+ 22 March 10:44:50 |Big picture AFTER Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 13', 'Part 14']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 5', 'Part 7']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 6']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+-----------------------------------------------------------------
+Following data was PUT successfully to 'station_status' aspect: [{"_time": "2023-03-22T09:44:51.005086Z", "station_1": null, "station_2": false, "station_3": true, "station_4": true, "station_5": null}]
+Following data was PUT successfully to 'queue_status' aspect: [{"_time": "2023-03-22T09:44:51.587089Z", "queue_1": 2, "queue_2": 5, "queue_3": 3, "queue_4": 2, "queue_5": 0}]
+22 March 10:44:52 |[Internal Service] System Synchronized. Next Sync (n° 6): 22 March 10:45:11
+22 March 10:45:10 |[Internal Service] Starting Synchronization n° 6
+--- Model Path being used: models/5s_determ/1679478311_6.json
+---------- Pointer Status Initial ----------
+Start Time: 1679478290
+Start Time ID: 49
+
+End Time: 1679478311
+End Time ID: 60
+-------------------------------------
+ 22 March 10:45:10 |[interfaceDB.py/update_end_time] Not found 'Started' after the end_time: 1679478311. Sleeping for 10 seconds and trying again
+ 22 March 10:45:20 |[interfaceDB.py/update_end_time] Pointer End Time updated from 60 to62
+---------- Pointer Status Updated ----------
+Start Time: 1679478290
+Start Time ID: 49
+
+End Time: 1679478314
+End Time ID: 62
+-------------------------------------
+parts_zero: []
+-----------------------------------------------------------------
+ 22 March 10:45:20 |Big picture BEFORE Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 13', 'Part 14']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 5', 'Part 7']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 6']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+-----------------------------------------------------------------
+--------- Step by Step Sync ---------
+Event - machine_name: Machine 1, status: Started, part_id: Part 13, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 14']
+Part in Machine: ['Part 13']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 8', 'Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 5', 'Part 7']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 6']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+Event - machine_name: Machine 2, status: Started, part_id: Part 8, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 14']
+Part in Machine: ['Part 13']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 5', 'Part 7']
+Part in Machine: ['Part 3']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 6']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+Event - machine_name: Machine 3, status: Finished, part_id: Part 3, queue_name: Queue 5
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 14']
+Part in Machine: ['Part 13']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 5', 'Part 7']
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 6']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 3']
+Part in Machine: []
+Event - machine_name: Machine 3, status: Started, part_id: Part 5, queue_name: Queue 3
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 14']
+Part in Machine: ['Part 13']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 6']
+Part in Machine: ['Part 4']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 3']
+Part in Machine: []
+Event - machine_name: Machine 4, status: Finished, part_id: Part 4, queue_name: Queue 5
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 14']
+Part in Machine: ['Part 13']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 6']
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 3', 'Part 4']
+Part in Machine: []
+Event - machine_name: Machine 4, status: Started, part_id: Part 6, queue_name: Queue 4
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 14']
+Part in Machine: ['Part 13']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 3', 'Part 4']
+Part in Machine: []
+Event - machine_name: Machine 5, status: Started, part_id: Part 3, queue_name: Queue 5
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 14']
+Part in Machine: ['Part 13']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 9', 'Part 10', 'Part 11', 'Part 12']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 4']
+Part in Machine: ['Part 3']
+Event - machine_name: Machine 1, status: Finished, part_id: Part 13, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 14']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 9', 'Part 10', 'Part 11', 'Part 12', 'Part 13']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 4']
+Part in Machine: ['Part 3']
+Event - machine_name: Machine 1, status: Started, part_id: Part 14, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 14']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 9', 'Part 10', 'Part 11', 'Part 12', 'Part 13']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 4']
+Part in Machine: ['Part 3']
+Machine 5 (final machine) just finisehd a part, adding a new one: Part 15 to Zone of Machine 1
+Event - machine_name: Machine 5, status: Finished, part_id: Part 3, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 15']
+Part in Machine: ['Part 14']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 9', 'Part 10', 'Part 11', 'Part 12', 'Part 13']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 4']
+Part in Machine: []
+Event - machine_name: Machine 2, status: Finished, part_id: Part 8, queue_name: Queue 4
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 15']
+Part in Machine: ['Part 14']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 9', 'Part 10', 'Part 11', 'Part 12', 'Part 13']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 8']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 4']
+Part in Machine: []
+Event - machine_name: Machine 5, status: Started, part_id: Part 4, queue_name: Queue 5
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 15']
+Part in Machine: ['Part 14']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 9', 'Part 10', 'Part 11', 'Part 12', 'Part 13']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 8']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: ['Part 4']
+Event - machine_name: Machine 2, status: Started, part_id: Part 9, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 15']
+Part in Machine: ['Part 14']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 10', 'Part 11', 'Part 12', 'Part 13']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 8']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: ['Part 4']
+Event - machine_name: Machine 1, status: Finished, part_id: Part 14, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 15']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 10', 'Part 11', 'Part 12', 'Part 13', 'Part 14']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 8']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: ['Part 4']
+-----------------------------------------------------------------
+ 22 March 10:45:21 |Big picture AFTER Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 15']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 10', 'Part 11', 'Part 12', 'Part 13', 'Part 14']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 8']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: ['Part 4']
+-----------------------------------------------------------------
+Following data was PUT successfully to 'station_status' aspect: [{"_time": "2023-03-22T09:45:21.349040Z", "station_1": false, "station_2": true, "station_3": true, "station_4": true, "station_5": true}]
+Following data was PUT successfully to 'queue_status' aspect: [{"_time": "2023-03-22T09:45:21.857730Z", "queue_1": 2, "queue_2": 6, "queue_3": 2, "queue_4": 2, "queue_5": 2}]
+22 March 10:45:22 |[Internal Service] System Synchronized. Next Sync (n° 7): 22 March 10:45:41
+22 March 10:45:40 |[Internal Service] Starting Synchronization n° 7
+--- Model Path being used: models/5s_determ/1679478341_7.json
+---------- Pointer Status Initial ----------
+Start Time: 1679478315
+Start Time ID: 63
+
+End Time: 1679478341
+End Time ID: 74
+-------------------------------------
+ 22 March 10:45:40 |[interfaceDB.py/update_end_time] Not found 'Started' after the end_time: 1679478341. Sleeping for 10 seconds and trying again
+ 22 March 10:45:50 |[interfaceDB.py/update_end_time] Pointer End Time updated from 74 to75
+---------- Pointer Status Updated ----------
+Start Time: 1679478315
+Start Time ID: 63
+
+End Time: 1679478345
+End Time ID: 75
+-------------------------------------
+parts_zero: []
+-----------------------------------------------------------------
+ 22 March 10:45:50 |Big picture BEFORE Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 15']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 10', 'Part 11', 'Part 12', 'Part 13', 'Part 14']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 8']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: ['Part 4']
+-----------------------------------------------------------------
+--------- Step by Step Sync ---------
+Event - machine_name: Machine 1, status: Started, part_id: Part 15, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 15']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 10', 'Part 11', 'Part 12', 'Part 13', 'Part 14']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 8']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: ['Part 4']
+Machine 5 (final machine) just finisehd a part, adding a new one: Part 16 to Zone of Machine 1
+Event - machine_name: Machine 5, status: Finished, part_id: Part 4, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 16']
+Part in Machine: ['Part 15']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 10', 'Part 11', 'Part 12', 'Part 13', 'Part 14']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 8']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+Event - machine_name: Machine 2, status: Finished, part_id: Part 9, queue_name: Queue 3
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 16']
+Part in Machine: ['Part 15']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 10', 'Part 11', 'Part 12', 'Part 13', 'Part 14']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 9']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 8']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+Event - machine_name: Machine 2, status: Started, part_id: Part 10, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 16']
+Part in Machine: ['Part 15']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 11', 'Part 12', 'Part 13', 'Part 14']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 9']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 8']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+Event - machine_name: Machine 1, status: Finished, part_id: Part 15, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 16']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 11', 'Part 12', 'Part 13', 'Part 14', 'Part 15']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 9']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 8']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+Event - machine_name: Machine 1, status: Started, part_id: Part 16, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 16']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 11', 'Part 12', 'Part 13', 'Part 14', 'Part 15']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 9']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 8']
+Part in Machine: ['Part 6']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+Event - machine_name: Machine 4, status: Finished, part_id: Part 6, queue_name: Queue 5
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 16']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 11', 'Part 12', 'Part 13', 'Part 14', 'Part 15']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 9']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 8']
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 6']
+Part in Machine: []
+Event - machine_name: Machine 4, status: Started, part_id: Part 8, queue_name: Queue 4
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 16']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 11', 'Part 12', 'Part 13', 'Part 14', 'Part 15']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 9']
+Part in Machine: ['Part 5']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 6']
+Part in Machine: []
+Event - machine_name: Machine 3, status: Finished, part_id: Part 5, queue_name: Queue 5
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 16']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 11', 'Part 12', 'Part 13', 'Part 14', 'Part 15']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 7', 'Part 9']
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 6', 'Part 5']
+Part in Machine: []
+Event - machine_name: Machine 3, status: Started, part_id: Part 7, queue_name: Queue 3
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 16']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 11', 'Part 12', 'Part 13', 'Part 14', 'Part 15']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 9']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 6', 'Part 5']
+Part in Machine: []
+Event - machine_name: Machine 5, status: Started, part_id: Part 6, queue_name: Queue 5
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 16']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 11', 'Part 12', 'Part 13', 'Part 14', 'Part 15']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 9']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 5']
+Part in Machine: ['Part 6']
+Event - machine_name: Machine 1, status: Finished, part_id: Part 16, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 11', 'Part 12', 'Part 13', 'Part 14', 'Part 15', 'Part 16']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 9']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 5']
+Part in Machine: ['Part 6']
+Event - machine_name: Machine 2, status: Finished, part_id: Part 10, queue_name: Queue 4
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 11', 'Part 12', 'Part 13', 'Part 14', 'Part 15', 'Part 16']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 9']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 5']
+Part in Machine: ['Part 6']
+-----------------------------------------------------------------
+ 22 March 10:45:52 |Big picture AFTER Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 11', 'Part 12', 'Part 13', 'Part 14', 'Part 15', 'Part 16']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 9']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 5']
+Part in Machine: ['Part 6']
+-----------------------------------------------------------------
+Following data was PUT successfully to 'station_status' aspect: [{"_time": "2023-03-22T09:45:53.017831Z", "station_1": false, "station_2": false, "station_3": true, "station_4":true, "station_5": true}]
+Following data was PUT successfully to 'queue_status' aspect: [{"_time": "2023-03-22T09:45:53.393838Z", "queue_1": 1, "queue_2": 6, "queue_3": 2, "queue_4": 2, "queue_5": 3}]
+22 March 10:45:53 |[Internal Service] System Synchronized. Next Sync (n° 8): 22 March 10:46:11
+22 March 10:46:10 |[Internal Service] Starting Synchronization n° 8
+--- Model Path being used: models/5s_determ/1679478371_8.json
+---------- Pointer Status Initial ----------
+Start Time: 1679478346
+Start Time ID: 76
+
+End Time: 1679478371
+End Time ID: 84
+-------------------------------------
+ 22 March 10:46:10 |[interfaceDB.py/update_end_time] Not found 'Started' after the end_time: 1679478371. Sleeping for 10 seconds and trying again
+ 22 March 10:46:20 |[interfaceDB.py/update_end_time] Pointer End Time updated from 84 to85
+---------- Pointer Status Updated ----------
+Start Time: 1679478346
+Start Time ID: 76
+
+End Time: 1679478372
+End Time ID: 85
+-------------------------------------
+parts_zero: []
+-----------------------------------------------------------------
+ 22 March 10:46:20 |Big picture BEFORE Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 11', 'Part 12', 'Part 13', 'Part 14', 'Part 15', 'Part 16']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 9']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 5']
+Part in Machine: ['Part 6']
+-----------------------------------------------------------------
+--------- Step by Step Sync ---------
+Event - machine_name: Machine 2, status: Started, part_id: Part 11, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 12', 'Part 13', 'Part 14', 'Part 15', 'Part 16']
+Part in Machine: ['Part 11']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 9']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 5']
+Part in Machine: ['Part 6']
+Machine 5 (final machine) just finisehd a part, adding a new one: Part 17 to Zone of Machine 1
+Event - machine_name: Machine 5, status: Finished, part_id: Part 6, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 17']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 12', 'Part 13', 'Part 14', 'Part 15', 'Part 16']
+Part in Machine: ['Part 11']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 9']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 5']
+Part in Machine: []
+Event - machine_name: Machine 5, status: Started, part_id: Part 5, queue_name: Queue 5
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 17']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 12', 'Part 13', 'Part 14', 'Part 15', 'Part 16']
+Part in Machine: ['Part 11']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 9']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: ['Part 5']
+Event - machine_name: Machine 1, status: Started, part_id: Part 17, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 17']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 12', 'Part 13', 'Part 14', 'Part 15', 'Part 16']
+Part in Machine: ['Part 11']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 9']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: ['Part 5']
+Machine 5 (final machine) just finisehd a part, adding a new one: Part 18 to Zone of Machine 1
+Event - machine_name: Machine 5, status: Finished, part_id: Part 5, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 18']
+Part in Machine: ['Part 17']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 12', 'Part 13', 'Part 14', 'Part 15', 'Part 16']
+Part in Machine: ['Part 11']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 9']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+Event - machine_name: Machine 2, status: Finished, part_id: Part 11, queue_name: Queue 3
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 18']
+Part in Machine: ['Part 17']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 12', 'Part 13', 'Part 14', 'Part 15', 'Part 16']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 9', 'Part 11']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+Event - machine_name: Machine 2, status: Started, part_id: Part 12, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 18']
+Part in Machine: ['Part 17']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 13', 'Part 14', 'Part 15', 'Part 16']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 9', 'Part 11']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+Event - machine_name: Machine 1, status: Finished, part_id: Part 17, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 18']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 13', 'Part 14', 'Part 15', 'Part 16', 'Part 17']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 9', 'Part 11']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+Event - machine_name: Machine 1, status: Started, part_id: Part 18, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 18']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 13', 'Part 14', 'Part 15', 'Part 16', 'Part 17']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 9', 'Part 11']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 8']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+Event - machine_name: Machine 4, status: Finished, part_id: Part 8, queue_name: Queue 5
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 18']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 13', 'Part 14', 'Part 15', 'Part 16', 'Part 17']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 9', 'Part 11']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 8']
+Part in Machine: []
+-----------------------------------------------------------------
+ 22 March 10:46:20 |Big picture AFTER Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 18']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 13', 'Part 14', 'Part 15', 'Part 16', 'Part 17']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 9', 'Part 11']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 8']
+Part in Machine: []
+-----------------------------------------------------------------
+Following data was PUT successfully to 'station_status' aspect: [{"_time": "2023-03-22T09:46:20.899306Z", "station_1": true, "station_2": true, "station_3": true, "station_4": false, "station_5": false}]
+Following data was PUT successfully to 'queue_status' aspect: [{"_time": "2023-03-22T09:46:21.293303Z", "queue_1": 2, "queue_2": 6, "queue_3": 3, "queue_4": 1, "queue_5": 2}]
+22 March 10:46:21 |[Internal Service] System Synchronized. Next Sync (n° 9): 22 March 10:46:41
+22 March 10:46:40 |[Internal Service] Starting Synchronization n° 9
+--- Model Path being used: models/5s_determ/1679478401_9.json
+---------- Pointer Status Initial ----------
+Start Time: 1679478373
+Start Time ID: 86
+
+End Time: 1679478401
+End Time ID: 97
+-------------------------------------
+ 22 March 10:46:40 |[interfaceDB.py/update_end_time] Not found 'Started' after the end_time: 1679478401. Sleeping for 10 seconds and trying again
+---------- Pointer Status Updated ----------
+Start Time: 1679478373
+Start Time ID: 86
+
+End Time: 1679478400
+End Time ID: 97
+-------------------------------------
+parts_zero: []
+-----------------------------------------------------------------
+ 22 March 10:46:50 |Big picture BEFORE Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 18']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 13', 'Part 14', 'Part 15', 'Part 16', 'Part 17']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 9', 'Part 11']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 8']
+Part in Machine: []
+-----------------------------------------------------------------
+--------- Step by Step Sync ---------
+Event - machine_name: Machine 4, status: Started, part_id: Part 10, queue_name: Queue 4
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 18']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 13', 'Part 14', 'Part 15', 'Part 16', 'Part 17']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 9', 'Part 11']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 8']
+Part in Machine: []
+Event - machine_name: Machine 5, status: Started, part_id: Part 8, queue_name: Queue 5
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 18']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 13', 'Part 14', 'Part 15', 'Part 16', 'Part 17']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 9', 'Part 11']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: ['Part 8']
+Event - machine_name: Machine 1, status: Finished, part_id: Part 18, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 13', 'Part 14', 'Part 15', 'Part 16', 'Part 17', 'Part 18']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 9', 'Part 11']
+Part in Machine: ['Part 7']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: ['Part 8']
+Event - machine_name: Machine 3, status: Finished, part_id: Part 7, queue_name: Queue 5
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 13', 'Part 14', 'Part 15', 'Part 16', 'Part 17', 'Part 18']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 9', 'Part 11']
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 7']
+Part in Machine: ['Part 8']
+Event - machine_name: Machine 2, status: Finished, part_id: Part 12, queue_name: Queue 4
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 13', 'Part 14', 'Part 15', 'Part 16', 'Part 17', 'Part 18']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 9', 'Part 11']
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 7']
+Part in Machine: ['Part 8']
+Event - machine_name: Machine 3, status: Started, part_id: Part 9, queue_name: Queue 3
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 13', 'Part 14', 'Part 15', 'Part 16', 'Part 17', 'Part 18']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 11']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 7']
+Part in Machine: ['Part 8']
+Event - machine_name: Machine 2, status: Started, part_id: Part 13, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 14', 'Part 15', 'Part 16', 'Part 17', 'Part 18']
+Part in Machine: ['Part 13']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 11']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 7']
+Part in Machine: ['Part 8']
+Machine 5 (final machine) just finisehd a part, adding a new one: Part 19 to Zone of Machine 1
+Event - machine_name: Machine 5, status: Finished, part_id: Part 8, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 19']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 14', 'Part 15', 'Part 16', 'Part 17', 'Part 18']
+Part in Machine: ['Part 13']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 11']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 7']
+Part in Machine: []
+Event - machine_name: Machine 5, status: Started, part_id: Part 7, queue_name: Queue 5
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 19']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 14', 'Part 15', 'Part 16', 'Part 17', 'Part 18']
+Part in Machine: ['Part 13']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 11']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: ['Part 7']
+Event - machine_name: Machine 1, status: Started, part_id: Part 19, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 19']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 14', 'Part 15', 'Part 16', 'Part 17', 'Part 18']
+Part in Machine: ['Part 13']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 11']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: ['Part 7']
+Machine 5 (final machine) just finisehd a part, adding a new one: Part 20 to Zone of Machine 1
+Event - machine_name: Machine 5, status: Finished, part_id: Part 7, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 20']
+Part in Machine: ['Part 19']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 14', 'Part 15', 'Part 16', 'Part 17', 'Part 18']
+Part in Machine: ['Part 13']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 11']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+Event - machine_name: Machine 2, status: Finished, part_id: Part 13, queue_name: Queue 3
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 20']
+Part in Machine: ['Part 19']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 14', 'Part 15', 'Part 16', 'Part 17', 'Part 18']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 11', 'Part 13']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+-----------------------------------------------------------------
+ 22 March 10:46:50 |Big picture AFTER Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 20']
+Part in Machine: ['Part 19']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 14', 'Part 15', 'Part 16', 'Part 17', 'Part 18']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 11', 'Part 13']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+-----------------------------------------------------------------
+Following data was PUT successfully to 'station_status' aspect: [{"_time": "2023-03-22T09:46:50.850593Z", "station_1": true, "station_2": false, "station_3": true, "station_4": true, "station_5": false}]
+Following data was PUT successfully to 'queue_status' aspect: [{"_time": "2023-03-22T09:46:51.416592Z", "queue_1": 3, "queue_2": 5, "queue_3": 3, "queue_4": 2, "queue_5": 1}]
+22 March 10:46:51 |[Internal Service] System Synchronized. Next Sync (n° 10): 22 March 10:47:11
+22 March 10:47:10 |[Internal Service] Starting Synchronization n° 10
+--- Model Path being used: models/5s_determ/1679478431_10.json
+---------- Pointer Status Initial ----------
+Start Time: 1679478401
+Start Time ID: 98
+
+End Time: 1679478431
+End Time ID: 109
+-------------------------------------
+ 22 March 10:47:10 |[interfaceDB.py/update_end_time] Not found 'Started' after the end_time: 1679478431. Sleeping for 10 seconds and trying again
+---------- Pointer Status Updated ----------
+Start Time: 1679478401
+Start Time ID: 98
+
+End Time: 1679478428
+End Time ID: 109
+-------------------------------------
+parts_zero: []
+-----------------------------------------------------------------
+ 22 March 10:47:20 |Big picture BEFORE Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 20']
+Part in Machine: ['Part 19']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 14', 'Part 15', 'Part 16', 'Part 17', 'Part 18']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 11', 'Part 13']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+-----------------------------------------------------------------
+--------- Step by Step Sync ---------
+Event - machine_name: Machine 2, status: Started, part_id: Part 14, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 20']
+Part in Machine: ['Part 19']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 15', 'Part 16', 'Part 17', 'Part 18']
+Part in Machine: ['Part 14']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 11', 'Part 13']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+Event - machine_name: Machine 1, status: Finished, part_id: Part 19, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 20']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 15', 'Part 16', 'Part 17', 'Part 18', 'Part 19']
+Part in Machine: ['Part 14']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 11', 'Part 13']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+Event - machine_name: Machine 1, status: Started, part_id: Part 20, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 20']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 15', 'Part 16', 'Part 17', 'Part 18', 'Part 19']
+Part in Machine: ['Part 14']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 11', 'Part 13']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: ['Part 10']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+Event - machine_name: Machine 4, status: Finished, part_id: Part 10, queue_name: Queue 5
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 20']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 15', 'Part 16', 'Part 17', 'Part 18', 'Part 19']
+Part in Machine: ['Part 14']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 11', 'Part 13']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 12']
+Part in Machine: []
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 10']
+Part in Machine: []
+Event - machine_name: Machine 4, status: Started, part_id: Part 12, queue_name: Queue 4
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 20']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 15', 'Part 16', 'Part 17', 'Part 18', 'Part 19']
+Part in Machine: ['Part 14']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 11', 'Part 13']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 10']
+Part in Machine: []
+Event - machine_name: Machine 5, status: Started, part_id: Part 10, queue_name: Queue 5
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 20']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 15', 'Part 16', 'Part 17', 'Part 18', 'Part 19']
+Part in Machine: ['Part 14']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 11', 'Part 13']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: []
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: ['Part 10']
+Event - machine_name: Machine 2, status: Finished, part_id: Part 14, queue_name: Queue 4
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 20']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 15', 'Part 16', 'Part 17', 'Part 18', 'Part 19']
+Part in Machine: []
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 11', 'Part 13']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 14']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: ['Part 10']
+Event - machine_name: Machine 2, status: Started, part_id: Part 15, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: ['Part 20']
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 16', 'Part 17', 'Part 18', 'Part 19']
+Part in Machine: ['Part 15']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 11', 'Part 13']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 14']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: ['Part 10']
+Event - machine_name: Machine 1, status: Finished, part_id: Part 20, queue_name: Queue 2
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 16', 'Part 17', 'Part 18', 'Part 19', 'Part 20']
+Part in Machine: ['Part 15']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 11', 'Part 13']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 14']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: ['Part 10']
+Machine 5 (final machine) just finisehd a part, adding a new one: Part 21 to Zone of Machine 1
+Event - machine_name: Machine 5, status: Finished, part_id: Part 10, queue_name: Queue 1
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 21']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 16', 'Part 17', 'Part 18', 'Part 19', 'Part 20']
+Part in Machine: ['Part 15']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 11', 'Part 13']
+Part in Machine: ['Part 9']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 14']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1']
+Part in Machine: []
+Event - machine_name: Machine 3, status: Finished, part_id: Part 9, queue_name: Queue 5
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 21']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 16', 'Part 17', 'Part 18', 'Part 19', 'Part 20']
+Part in Machine: ['Part 15']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 11', 'Part 13']
+Part in Machine: []
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 14']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 9']
+Part in Machine: []
+Event - machine_name: Machine 3, status: Started, part_id: Part 11, queue_name: Queue 3
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 21']
+Part in Machine: []
+Parts in Queue: ['Part 16', 'Part 17', 'Part 18', 'Part 19', 'Part 20']
+Part in Machine: ['Part 15']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 13']
+Part in Machine: ['Part 11']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 14']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 9']
+Part in Machine: []
+-----------------------------------------------------------------
+ 22 March 10:47:20 |Big picture AFTER Sync
+ ------------ ZONE ID: 1 ------------
+Parts in Queue: ['Part 10', 'Part 21']
+Part in Machine: []
+ ------------ ZONE ID: 2 ------------
+Parts in Queue: ['Part 16', 'Part 17', 'Part 18', 'Part 19', 'Part 20']
+Part in Machine: ['Part 15']
+ ------------ ZONE ID: 3 ------------
+Parts in Queue: ['Part 13']
+Part in Machine: ['Part 11']
+ ------------ ZONE ID: 4 ------------
+Parts in Queue: ['Part 14']
+Part in Machine: ['Part 12']
+ ------------ ZONE ID: 5 ------------
+Parts in Queue: ['Part 1', 'Part 9']
+Part in Machine: []
+-----------------------------------------------------------------
+Following data was PUT successfully to 'station_status' aspect: [{"_time": "2023-03-22T09:47:20.880164Z", "station_1": false, "station_2": true, "station_3": true, "station_4": true, "station_5": false}]
+Following data was PUT successfully to 'queue_status' aspect: [{"_time": "2023-03-22T09:47:21.365216Z", "queue_1": 2, "queue_2": 6, "queue_3": 2, "queue_4": 2, "queue_5": 2}]
+22 March 10:47:21 |[Internal Service] System Synchronized. Next Sync (n° 11): 22 March 10:47:41
+22 March 10:47:40 |[Internal Service] Starting Synchronization n° 11
+--- Model Path being used: models/5s_determ/1679478461_11.json
+---------- Pointer Status Initial ----------
+Start Time: 1679478429
+Start Time ID: 110
+
+End Time: 1679478461
+End Time ID: 121
+-------------------------------------
+ 22 March 10:47:40 |[interfaceDB.py/update_end_time] Not found 'Started' after the end_time: 1679478461. Sleeping for 10 seconds and trying again
+22 March 10:47:49 |---- Digital Twin '5s_determ' was killed manually ----
+PS D:\POLIMI\Digital twins\Digital_Twin\Digital Twin>
+fwd-i-search: _
