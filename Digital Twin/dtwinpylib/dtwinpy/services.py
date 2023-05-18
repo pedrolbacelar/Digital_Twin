@@ -40,13 +40,14 @@ class Service_Handler():
     the most optimized path.
 
     """
-    def __init__(self, name, generate_digital_model, broker_manager, rct_threshold= 0.02, queue_position= 2, flag_publish= True):
+    def __init__(self, name, generate_digital_model, broker_manager, rct_threshold= 0.02, queue_position= 2, flag_publish= True, replication= 1):
         self.helper = Helper()
         self.name = name
         self.generate_digital_model = generate_digital_model
         self.digital_model = generate_digital_model(verbose= False)
         self.broker_manager = broker_manager
         self.flag_publish = flag_publish
+        self.replication = replication
         
 
         #--- Create an ID database for updating the RCT policy (using branch queues)
@@ -501,6 +502,10 @@ class Service_Handler():
                 #-- Take note of the optimized path
                 path_to_implement = gain_vect.index(highets_gain) 
 
+
+            #---------- Replication Analysis ----------
+            path_to_implement= self.replication_analysis(key, rct_dict[key])
+
             #--- Update Dictionaries
             gain_dict[key] = gain_vect
             feeback_dict[key] = (flag_feedback, path_to_implement, highets_gain)
@@ -559,7 +564,8 @@ class Service_Handler():
                 
                 else:
                     self.helper.printer(f"XXX No Path found with gain higher than {rct_threshold * 100}% XXX", 'brown')
-            
+        
+        
         #--- Return the feedback flag and the chosen path index (dictionary)
         return feeback_dict
 
@@ -718,7 +724,49 @@ class Service_Handler():
         #--- Give back the desired result
         return rct_results
 
+    # ---------------------- RCT Replication Analysis ----------------------
+    def replication_analysis(self, partid, rct_dict):
+        """
+        This function is used to analyse the replication of the RCT results. 
+        return (part_id, path_1, path_2, queue_id)
+        """
+        #--- Get previous RCT results from previous replications
+        previous_RCT1 = self.exp_database.get_RCTpaths(partid)[0]
+        previous_RCT2 = self.exp_database.get_RCTpaths(partid)[1]
+        timestamp = self.exp_database.get_RCTpaths(partid)[2]
 
+        #--- Get current RCT results from current replication
+        RCT1_replication = previous_RCT1.append(rct_dict[0])
+        RCT2_replication = previous_RCT2.append(rct_dict[1])
+
+        #--- Add the current timestamp
+        current_timestamp = self.helper.get_timestamp()[1]
+        timestamp.append(current_timestamp)
+
+        #--- Calculate the relative RCT average
+        def relative_average_calculator(RCT, timestamp):
+            #--- Calculate the relative timestamp
+            relative_timestamp = []
+            for i in range(len(RCT)):
+                delta = abs(timestamp[-1] - timestamp[i])
+                relative_timestamp.append(RCT[i] - delta)
+            
+            #--- Calculate the average
+            average = sum(relative_timestamp)/len(relative_timestamp)
+
+            return average
+        
+        RCT1_average = relative_average_calculator(RCT1_replication, timestamp)
+        RCT2_average = relative_average_calculator(RCT2_replication, timestamp)
+
+        #--- Return the fastest path between average RCT1 and RCT2
+        if RCT1_average <= RCT2_average:
+            return 0
+        if RCT1_average > RCT2_average:
+            return 1
+
+
+        
 
     # ---------------------- RCT Service ----------------------    
     def run_RCT_service(self, queue_position= 2, verbose= True, plot= False):
