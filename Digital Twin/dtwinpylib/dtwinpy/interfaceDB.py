@@ -1243,3 +1243,30 @@ class Database():
 
         return (RCT, timestamp)
 
+    def get_RCTpaths(self, partid):
+        # RCT averages
+        RCT1_default = {}
+        RCT2_default = {}
+
+        #--- Get RCT1 and RCT2
+        with sqlite3.connect(self.database_path) as conn:
+            cursor = conn.cursor()
+
+            #--- RCT1
+            cursor.execute("SELECT RCT_path1 FROM RCTpaths WHERE partid = ?", (partid,))
+            RCT_path1 = cursor.fetchall()
+            RCT_path1 = self.helper.convert_tuple_vector_to_list(RCT_path1)
+            RCT1_default[partid] = RCT_path1
+
+            #--- RCT2
+            cursor.execute("SELECT RCT_path2 FROM RCTpaths WHERE partid = ?", (partid,))
+            RCT_path2 = cursor.fetchall()
+            RCT_path2 = self.helper.convert_tuple_vector_to_list(RCT_path2)
+            RCT2_default[partid] = RCT_path2
+
+            #--- Take the timestamp
+            cursor.execute("SELECT timestamp_real FROM RCTpaths WHERE partid = ?", (partid,))
+            timestamp = cursor.fetchall()
+            timestamp = self.helper.convert_tuple_vector_to_list(timestamp)
+
+            return (RCT_path1, RCT_path2, timestamp)
