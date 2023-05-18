@@ -30,8 +30,8 @@ import random
 ################################
 
 
-st_num = "5"      #--- change st_num for each code depending on the machine_id
-next_queue = "1"  #--- change next queue id if it is not a branching station # we start with 2. to change to 2, we initaite it as 3 for station 1
+st_num = "1"      #--- change st_num for each code depending on the machine_id
+next_queue = "2"  #--- change next queue id if it is not a branching station # we start with 2. to change to 2, we initaite it as 3 for station 1
    
 
 
@@ -70,7 +70,7 @@ pos_extend = 180
 process_time = 2    # advised to have no less than 5s of gap between two parts in the downstream conveyor to not have problems with pusher.
 standard_deviation = 2
 process_distribution = 'norm'
-failure_probability = 0.00001 # percent
+failure_probability = 0.00000001 # percent
 mttr = 4 # mean time to repair
 
 manual_failure = False
@@ -151,12 +151,11 @@ def on_message(client, userdata, msg):
 
     if msg.topic == "process_time":
         #-- replace ' with " and do json.loads
-        message = translate_message(msg)    #-- expected: {"macihne_id":"5","process_time":"10"}
+        message = translate_message(msg)    #-- expected: {"macihne_id":"1","process_time":"10"}
         if message["machine_id"] == st_num: 
             process_time = message['process_time']  #-- effective only in the next processing as the present processing will be done by the current_process_time set.
             Leds.set_color(Leds.LEFT, Leds.ORANGE)
             Leds.set_color(Leds.RIGHT, Leds.ORANGE)
-
 
 
 ################################
@@ -203,7 +202,7 @@ try:
 
             if queue_sensor.value() > 20 and station_status == "idle":
                 pusher.run_forever(speed_sp=pusher_speed)
-                payload_start = {"machine_id" : st_num, "status":"Started","part_id":"0","queue_id":"5"}
+                payload_start = {"machine_id" : st_num, "status":"Started","part_id":"0","queue_id":"1"}
                 client.publish(topic = "trace", payload= json.dumps(payload_start))
                 
                 print("\033[34m---------- part entering station ", st_num,"----------\033[0m")

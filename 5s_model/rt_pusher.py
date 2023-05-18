@@ -14,26 +14,26 @@ from ev3dev.ev3 import *
 
 #--- declaring optical sensors
 sensor=ColorSensor(INPUT_4)
-sensor.mode='COL-COLOR'
+sensor.mode='COL-REFLECT'
 colors=('unknown','black','blue','green','yellow','red','white','brown')
 
 #--- other variables
 system_status = "stop"
-next_station = "station_2"
+next_station = "station_3"
 policy = ["-/-"]
 part_count = 0
-pos_station_2 = 180
+pos_station_3 = 180
 pos_neutral = 0
-pos_station_3 = "-180"
+pos_station_4 = "-180"
 pusher_speed = 400
 
 #--- initializing pusher
 pusher = MediumMotor('outD')
 pusher.reset()
-pusher.run_to_abs_pos(position_sp = pos_station_2, speed_sp = pusher_speed)
-sleep(1)
-pusher.stop(stop_action='coast')
+
 print("pusher program Activated")
+stop_status = 0
+
 
 #--- defining topics to subscribe
 def on_connect(client, userdata, flags, rc):
@@ -62,31 +62,31 @@ def on_message(client, userdata, msg):
             print("Pusher is stoped")
 
     #--- part dispatch policy
-    #--- payload expected a. {"part_id":"1","policy":"2"}
-    #--- payload expected b. {"part_id":"1","policy":"3"}
+    #--- payload expected a. {"part_id":"1","policy":"3"}
+    #--- payload expected b. {"part_id":"1","policy":"4"}
     if msg.topic == "trace":
         message = json.loads(msg.payload.decode("utf-8"))
-        if message["machine_id"] == "1" and message["status"] == "Finished":
+        if message["machine_id"] == "2" and message["status"] == "Finished":
             part_count += 1
             print("in message",part_count)
             policy.append(message["queue_id"])
         
 
 
-def open_station_2():
-    print("ok. moving to station 2")
+def open_station_3():
+    print("ok. moving to station 3")
     sleep(1)
-    pusher.run_to_abs_pos(position_sp = 0, speed_sp = pusher_speed)
+    pusher.run_to_abs_pos(position_sp = -180, speed_sp = pusher_speed)
     sleep(2)
-    pusher.run_to_abs_pos(position_sp = 180, speed_sp = pusher_speed)
+    pusher.run_to_abs_pos(position_sp = 0, speed_sp = pusher_speed)
     sleep(1)
     pusher.stop(stop_action='coast')
 
-def open_station_3():
-    print("ok. moving to station 3")
-    pusher.run_to_abs_pos(position_sp = -180, speed_sp = pusher_speed)
+def open_station_4():
+    print("ok. moving to station 4")
+    pusher.run_to_abs_pos(position_sp = -360, speed_sp = pusher_speed)
     sleep(2)
-    pusher.run_to_abs_pos(position_sp = 180, speed_sp = pusher_speed)
+    pusher.run_to_abs_pos(position_sp = 0, speed_sp = pusher_speed)
     sleep(1)
     pusher.stop(stop_action='coast')
 
@@ -101,25 +101,34 @@ client.loop_start()
 try:
     while True:
         if system_status == "start":
+            stop_status = 1
             if part_count > 0:
-                #--- policy: towards station 2
-                if sensor.value() > 3 and policy[len(policy) - part_count] == "2":
-                    open_station_2()
-                    part_count -= 1
-                    print("policy to 2")
-                    next_station = "station_3"
-
                 #--- policy: towards station 3
-                elif sensor.value() > 3 and policy[len(policy) - part_count] == "3":
+                if sensor.value() > 20 and policy[len(policy) - part_count] == "3":
                     open_station_3()
                     part_count -= 1
                     print("policy to 3")
-                    next_station = "station_2"
+                    next_station = "station_4"
 
+                #--- policy: towards station 4
+                elif sensor.value() > 20 and policy[len(policy) - part_count] == "4":
+                    open_station_4()
+                    part_count -= 1
+                    print("policy to 4")
+                    next_station = "station_3"
+        elif system_status == "stop":
+            if stop_status == 1:
+              pusher.run_to_abs_pos(position_sp = 0, speed_sp = pusher_speed)
+              pusher.stop(stop_action='coast')
+              policy = ["-/-"]
+              part_count = 0
+              print("pusher stopped")
+              stop_status = 0
+            
 except KeyboardInterrupt:
     print('INTERRUPTED FROM PC')
     print('Pusher program is killed.')
-    pusher.run_to_abs_pos(position_sp = pos_neutral, speed_sp = pusher_speed)
+    # pusher.run_to_abs_pos(position_sp = 0, speed_sp = pusher_speed)
     pusher.stop(stop_action='coast')    
     client.loop_stop()    
     client.disconnect()
