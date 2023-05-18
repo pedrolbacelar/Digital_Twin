@@ -30,9 +30,9 @@ flag_validation= "True"
 flag_external_service= "True"
 
 contemp_M1= '["norm", 11, 2]'
-contemp_M2= '["norm", 17, 2]'
-contemp_M3= '["norm", 55, 2]'
-contemp_M4= '["norm", 32, 2]'
+contemp_M2= '["norm", 35, 2]'
+contemp_M3= '["norm", 90, 2]'
+contemp_M4= '["norm", 90, 2]'
 contemp_M5= '["norm", 10, 2]'
 ###################################################################################### 
 
