@@ -21,7 +21,7 @@ TODO:
 - calculate the percentage of results that are equal to 1
 """
 #--- Database path
-database_path = "data_generation/4.11.17.26/databases/exp_database.db"
+database_path = "data_generation/5.18.19.32/databases/exp_database.db"
 
 #--- read the database exp_database.db and get important
 with sqlite3.connect(database_path) as conn:

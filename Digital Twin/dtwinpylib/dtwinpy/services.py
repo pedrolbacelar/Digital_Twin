@@ -736,12 +736,16 @@ class Service_Handler():
         timestamp = self.exp_database.get_RCTpaths(partid)[2]
 
         #--- Get current RCT results from current replication
-        RCT1_replication = previous_RCT1.append(rct_dict[0])
-        RCT2_replication = previous_RCT2.append(rct_dict[1])
+        rct1 = rct_dict[0]
+        rct2 = rct_dict[1]
+        previous_RCT1.append(rct1)
+        previous_RCT2.append(rct2)
 
         #--- Add the current timestamp
-        current_timestamp = self.helper.get_timestamp()[1]
+        current_timestamp = self.helper.get_time_now()[1]
+        print(f"current_timestamp {current_timestamp}")
         timestamp.append(current_timestamp)
+        print(f"timestamp {timestamp}")
 
         #--- Calculate the relative RCT average
         def relative_average_calculator(RCT, timestamp):
@@ -756,8 +760,8 @@ class Service_Handler():
 
             return average
         
-        RCT1_average = relative_average_calculator(RCT1_replication, timestamp)
-        RCT2_average = relative_average_calculator(RCT2_replication, timestamp)
+        RCT1_average = relative_average_calculator(previous_RCT1, timestamp)
+        RCT2_average = relative_average_calculator(previous_RCT2, timestamp)
 
         #--- Return the fastest path between average RCT1 and RCT2
         if RCT1_average <= RCT2_average:

@@ -15,7 +15,7 @@ objective= "to run the physical system with RCT publish off. Main goal is to run
 dt_name= "5s_stho"
 
 Freq_Sync= 2
-Freq_Valid= 90
+Freq_Valid= 120
 Freq_Service= 2
 
 delta_t_treshold= 20
@@ -25,14 +25,14 @@ logic_threshold= 0.7
 input_threshold= 0.7
 
 flag_API= "False"
-flag_publish= "False"
-flag_validation= "False"  
+flag_publish= "True"
+flag_validation= "True"  
 flag_external_service= "True"
 
 contemp_M1= '["norm", 11, 2]'
-contemp_M2= '["norm", 17, 2]'
-contemp_M3= '["norm", 52.5, 2]'
-contemp_M4= '["norm", 52.5, 2]'
+contemp_M2= '["norm", 50, 2]'
+contemp_M3= '["norm", 90, 2]'
+contemp_M4= '["norm", 90, 2]'
 contemp_M5= '["norm", 10, 2]'
 ###################################################################################### 
 
