@@ -22,6 +22,8 @@ TODO:
 """
 #--- Database path
 database_path = "data_generation/5.18.19.32/databases/exp_database.db"
+database_path = "data_generation/4.11.19.12/databases/exp_database.db"
+
 
 #--- read the database exp_database.db and get important
 with sqlite3.connect(database_path) as conn:

@@ -8,7 +8,7 @@ import sqlite3
 allexp_database_path = 'allexp_database.db'
 
 ############## EXPERIMENT OBJECTIVE ##############
-objective= "to run the physical system with RCT publish off. Main goal is to run zone 3 and 4 with equal processing time which is equal to the average of the processing time used in the use case after the processing time drop in machine 3."
+objective= "Showing experiment to Giovanni"
 ##################################################
 
 ################################ INPUT PARAMETERS ################################
