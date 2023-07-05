@@ -1063,7 +1063,7 @@ class Tester():
     
 
 class Plotter():
-    def __init__(self, exp_database_path, plotterDT, figures_path= None,  show= False, save= True):
+    def __init__(self, exp_database_path, plotterDT= None, figures_path= None,  show= False, save= True):
         self.helper = Helper()
         self.plotterDT = plotterDT
         plt.clf()
@@ -1721,4 +1721,64 @@ class Plotter():
                 #--- Show
                 if self.show:
                     plt.show()
+
+    def plot_zigzage(self):
+        """
+        This function plot the comparation between the order of entrance and exit of parts in the system.
+        The order of entrance (x-axis) is consider to be in the crescent order of the PID. The order of
+        exit (y-axis) is the sequence of PID the the last machine finishes. Ideally the plot should be a
+        diagonal line (same order of entrance and exit). If the part is above of the line than it means that
+        the part was faster (overtook another part) than the expected, if it's lower than the diagonal it means
+        that the part was overtooked by another one.
+
+        TODO:
+        - read the real database and store the order of finish parts (function within the interfaceDB)
+        - plot the diagonal line
+        - create the x-axis vector
+        """
+
+        #--- Get the real exit order (based on the last machine)
+        exit_order = self.exp_database.get_PIDorder_finished(self.real_database_path)
+
+        #--- Get maximun PID finished
+        exit_order_numerical = []
+        for PID in exit_order:
+            exit_order_numerical.append(self.helper.extract_int(PID))
+
+        max_PID = len(exit_order_numerical)
+
+        #--- Create entrance vector (crescent order till max_PID)
+        entrance_order = []
+        for i in range(1, max_PID+1): entrance_order.append(i)
+
+        #--- Plot the diagonal line
+        plt.plot(
+            entrance_order,
+            entrance_order,
+            marker='',
+            linestyle= 'dashed',
+            label= 'Ideal Behavior'
+        )
+
+        #--- Plot the zigzage
+        plt.plot(
+            entrance_order,
+            exit_order_numerical,
+            marker='o',
+            linestyle= '',
+            label= 'Real Behavior'
+        )
+
+        #--- Add complements
+        self.ADD_complemts(
+            title= "Sequence Comparison (Ideal x Real)",
+            xlable= "Entrance Order",
+            ylable= "Exit Order"
+        )
+
+        plt.show()
+
+
+
+
 

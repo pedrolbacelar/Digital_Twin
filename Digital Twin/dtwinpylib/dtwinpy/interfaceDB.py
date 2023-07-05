@@ -1270,3 +1270,16 @@ class Database():
             timestamp = self.helper.convert_tuple_vector_to_list(timestamp)
 
             return (RCT_path1, RCT_path2, timestamp)
+
+    def get_PIDorder_finished(self, real_database_path):
+        """
+        This function takes the PID order in which the parts were finished
+        """
+        with sqlite3.connect(real_database_path) as db:
+            #--- Get PID order
+            PID_order = db.execute("SELECT part_id FROM real_log WHERE activity_type= ? AND machine_id= ?", ('Finished', 'Machine 5')).fetchall()
+            PID_order = self.helper.convert_tuple_vector_to_list(PID_order)
+
+        return PID_order
+
+        
