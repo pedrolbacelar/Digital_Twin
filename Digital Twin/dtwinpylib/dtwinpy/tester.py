@@ -1589,6 +1589,14 @@ class Plotter():
     def plot_utilization(self, utilization_dict):
         plt.clf()
         linestyle = "dotted"
+        markers = {
+            "Machine 1": "o",
+            "Machine 2": "*",
+            "Machine 3": "s",
+            "Machine 4": "^",
+            "Machine 5": "P"
+        }
+
         # ----------- PLOT OF ALL MACHINES TOEGETHER -----------
         for key_name in utilization_dict:
             #--- Create the x vector
@@ -1599,7 +1607,7 @@ class Plotter():
             plt.plot(
                 intervals_x,
                 utilization_dict[key_name],
-                marker='o',
+                marker=markers[key_name],
                 linestyle= linestyle,
                 label= key_name
             )
@@ -1607,7 +1615,7 @@ class Plotter():
             #--- Add complements
             self.ADD_complemts(
                 title= "Cumulative Utilization",
-                xlable= "intervals (secs)",
+                xlable= "Samples",
                 ylable= "Utilization (%)"
             )
         

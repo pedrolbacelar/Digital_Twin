@@ -28,7 +28,7 @@ TODO:
 database_path = "data_generation/4.11.15.46/databases/exp_database.db"
 
 #-- Use Case 2: with Digital Twin
-#database_path = "data_generation/4.11.17.26/databases/exp_database.db"
+database_path = "data_generation/4.11.17.26/databases/exp_database.db"
 
 
 #--- read the database exp_database.db and get important
@@ -212,11 +212,11 @@ plt.errorbar(partids,
 #--- Settings
 # Add labels and title
 plt.xlabel('Part ID')
-plt.ylabel('Estimated RCT [seconds]')
-plt.title('Plot RCT with Error Range')
+plt.ylabel('Estimated RCT [s]')
+plt.title('Real RCT versus Expected RCTs')
 plt.legend()
 # Display the plot
-#plt.show()
+plt.show()
 
 # ================================== Plotting ZigZag ==================================
 from dtwinpylib.dtwinpy.tester import Plotter

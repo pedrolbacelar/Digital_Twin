@@ -64,13 +64,26 @@ def plotting(exp_ids, plots= ["plot_valid_indicators", "plot_RCT_paths", "plot_q
                 plotter.plot_RCTtracking()
 
 ############# Running #############
+
+#-- Use Case 1: without Digital Twin
+database_path = "data_generation/4.11.15.46/databases/exp_database.db"
+
+#-- Use Case 2: with Digital Twin
+database_path = "data_generation/4.11.17.26/databases/exp_database.db"
+
+
 exp_ids = ["4.11.15.46", "4.11.17.26"]
 exp_ids = ["4.11.15.46"]
-exp_ids = ['6.26.18.33']
+exp_ids = ['4.11.15.46', '4.11.17.26']
+
+
+
 
 #plots= ["plot_comparative_RCT", "plot_utilization", "plot_RCTtracking"]
-plots= []
+plots= ["plot_utilization"]
+
 plotting(
-    exp_ids= exp_ids
+    exp_ids= exp_ids,
+    plots= plots
 )
 
