@@ -1,0 +1,43 @@
+sequenceDiagram
+    participant Caller
+    participant Val as Validator
+    participant RealDB as real_log
+    participant Model as Model
+    participant DigitalDB as digital_log
+    participant Part as Part
+    participant Machine as Machine
+
+    Caller->>Val: Validator simtype TDS or qTDS
+    Caller->>Val: allocate
+
+    alt simtype qTDS
+        Val->>RealDB: get_machines_with_completed_traces get_time_activity_of_column
+        RealDB-->>Val: machine traces Xr
+        Val->>Val: generate_Xs_machine per machine Xr to Xs
+        Val->>Val: matrix_ptime_qTDS set_qTDS
+        Val->>Machine: set_simtype qTDS set_ptime_qTDS
+    end
+
+    Val->>RealDB: get_distinct part_id get_time_activity_of_column part_id
+    RealDB-->>Val: part events
+    Val->>Val: generate_TDS_traces matrix_ptime_TDS
+    alt simtype TDS
+        Val->>Model: get_all_parts get_initial_part
+        Val->>Part: set_ptime_TDS for each part
+        Val->>Machine: set_simtype TDS
+        Val->>Part: quick_TDS_fix for parts not in first queue
+    end
+
+    Caller->>Val: run
+    Val->>Model: get_model_constrains set_until if needed
+    Val->>Val: id_database read_parts_branch_queue
+    Val->>Machine: set_parts_branch_queue
+    Val->>Model: run
+    Model->>Model: simulation with TDS or qTDS traces
+    Val->>DigitalDB: read_store_data digital_log
+    DigitalDB-->>Val: digital events
+    Val->>RealDB: read_store_data real_log
+    RealDB-->>Val: real events
+    Val->>Val: generate_event_sequence digital and real
+    Val->>Val: LCSS Ys Yr delta_t
+    Val-->>Caller: lcss lcss_time lcss_indicator

@@ -1,0 +1,28 @@
+flowchart LR
+    subgraph Input
+        G[Generator]
+        Q0[Queue 0]
+        Q1[Queue 1]
+    end
+    subgraph Process
+        M1[Machine 1]
+        M2[Machine 2]
+        C1[Conveyor]
+        C2[Conveyor]
+        Q2[Queue 2]
+        Q3[Queue 3]
+    end
+    subgraph Output
+        T[Terminator]
+    end
+    G --> Q0
+    G --> Q1
+    Q0 --> M1
+    Q1 --> M1
+    M1 --> C1
+    M1 --> C2
+    C1 --> Q2
+    C2 --> Q3
+    Q2 --> M2
+    Q3 --> M2
+    M2 --> T

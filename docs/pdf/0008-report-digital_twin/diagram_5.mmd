@@ -1,0 +1,31 @@
+sequenceDiagram
+    participant DT as Digital_Twin
+    participant Model as Model
+    participant V_TDS as Validator TDS
+    participant V_qTDS as Validator qTDS
+    participant Upd as Updator
+    participant RealDB as real_log
+    participant JSON as Model JSON
+
+    DT->>Model: generate_digital_model()
+    DT->>V_TDS: Validator(simtype=TDS), allocate(), run()
+    V_TDS->>Model: run() [TDS traces]
+    V_TDS->>V_TDS: LCSS(Ys, Yr)
+    V_TDS-->>DT: lcss_indicator_logic
+
+    DT->>Model: generate_digital_model()
+    DT->>V_qTDS: Validator(simtype=qTDS), allocate(), run()
+    V_qTDS->>Model: run() [qTDS traces]
+    V_qTDS->>V_qTDS: LCSS(Ys, Yr)
+    V_qTDS-->>DT: lcss_indicator_input
+
+    alt logic < logic_threshold
+        DT->>Upd: Updator(logic), run()
+        Upd->>Upd: update_logic() [stub]
+    end
+    alt input < input_threshold
+        DT->>Upd: Updator(input), run()
+        Upd->>RealDB: generate_qTDS_traces()
+        Upd->>Upd: update_input() → fit dist, aligner()
+        Upd->>JSON: node['contemp'] = new params
+    end

@@ -1,0 +1,8 @@
+# Report generation config
+# Used by scripts/docs/generate-report-pdf.py
+
+report:
+  # Input: path to folder with .md files, or single .md file
+  input_path: docs
+  # Output directory for generated PDFs
+  output_dir: docs/pdf

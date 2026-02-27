@@ -1,0 +1,20 @@
+flowchart LR
+    subgraph cluster_1
+        N1((1))
+    end
+    subgraph cluster_2
+        N2((2))
+    end
+    subgraph cluster_3
+        N3((3))
+        N4((4))
+    end
+    subgraph cluster_4
+        N5((5))
+    end
+    N1 --> N2
+    N2 --> N3
+    N2 --> N4
+    N3 --> N5
+    N4 --> N5
+    N5 --> N1

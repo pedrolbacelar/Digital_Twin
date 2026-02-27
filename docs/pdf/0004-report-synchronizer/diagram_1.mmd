@@ -1,0 +1,48 @@
+sequenceDiagram
+    participant DT as Digital_Twin
+    participant Sync as Synchronizer
+    participant Model as Model
+    participant RealDB as real_log
+    participant Zone as Zone
+    participant JSON as Model JSON
+
+    DT->>Model: generate_digital_model
+    DT->>Sync: Synchronizer digital_model real_db_path start_time end_time
+    Sync->>RealDB: read_store_data_all real_log
+    RealDB-->>Sync: full_database events list
+
+    Sync->>Sync: create_zones
+    loop For each machine
+        Sync->>Model: get_model_components
+        Model-->>Sync: machines_vector
+        Sync->>Zone: Zone machine queue_list
+        Zone->>Zone: init from queue items and initial_part worked_time
+    end
+
+    Sync->>Sync: positioning_discovery
+    loop For each event in full_database
+        alt Event status Finished
+            Sync->>Zone: current_zone addOut Mfinished next_allocation
+            Sync->>Zone: next_zone addIn part_id or new_part_id
+        else Event status Started
+            Sync->>Zone: set_first_zone_event False Mstarted set_last_started_time
+        end
+        Sync->>Sync: count_total_parts
+        alt total parts changed
+            Sync->>Sync: abort exit
+        end
+    end
+    Sync->>Sync: Tnow last event time
+
+    alt repositioning True
+        Sync->>Sync: sync_aligment
+        loop For each zone
+            Sync->>Zone: get_NumParts get_part_id_in_queue get_machine_working
+            Sync->>JSON: open model path read nodes
+            Sync->>JSON: write node worked_time initial allocation_counter
+        end
+    end
+
+    Sync->>Sync: show
+    Sync->>Zone: calculate_parts get_machine_working
+    Sync-->>DT: machine_status queue_status

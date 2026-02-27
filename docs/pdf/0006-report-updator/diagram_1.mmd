@@ -1,0 +1,15 @@
+flowchart TD
+    A["Updator update_type model_last_sync"] --> B[run]
+    B --> C{update_type?}
+    C -->|logic| D[update_logic stub]
+    C -->|input| E[generate_qTDS_traces]
+    E --> F[is_deterministic]
+    F --> G[For each machine in matrix]
+    G --> H["update_input trace returns dist params mean"]
+    H --> I{flag_deterministic?}
+    I -->|yes| J["new_process_time round mean"]
+    I -->|no| K["new_process_time dist param_a param_b"]
+    J --> L["aligner machine_id new_process_time"]
+    K --> L
+    L --> M[Write JSON model_last_sync]
+    M --> N[System Updated]

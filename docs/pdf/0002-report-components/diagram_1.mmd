@@ -1,0 +1,58 @@
+classDiagram
+    class Part {
+        +int id
+        +str name
+        +str type
+        +location
+        +creation_time
+        +termination_time
+        +ptime_TDS
+        +branching_path
+        +get_id()
+        +get_CT()
+        +set_termination()
+    }
+    class Machine {
+        +env
+        +id, name
+        +queue_in, queue_out
+        +process_time, capacity
+        +current_state
+        +run()
+        +get_cluster()
+        +add_queue_in/out()
+    }
+    class Queue {
+        +store : SimPy Store
+        +capacity, arc_links
+        +transp_time
+        +put() get() get_len()
+    }
+    class Generator {
+        +part_vector, queue_vector
+        +allocate_part()
+    }
+    class Terminator {
+        +store
+        +terminate_part()
+        +get_len_terminated()
+    }
+    class Conveyor {
+        +queue_out, transp_time
+        +start_transp() finish_transp()
+        +run()
+    }
+    class Branch {
+        +branch_machine
+        +branch_conveyors
+        +branch_decision(part)
+    }
+    Machine --> Queue : queue_in / queue_out
+    Machine --> Conveyor : conveyors_out
+    Machine --> Branch : branch
+    Conveyor --> Queue : delivers to queue_out
+    Branch --> Conveyor : selects conveyor
+    Part --> Machine : processed
+    Part --> Queue : stored
+    Generator --> Queue : initial parts
+    Terminator --> Part : receives finished

@@ -1,0 +1,2 @@
+# Dependencies for report PDF generation (generate-report-pdf.py)
+pyyaml>=5.4

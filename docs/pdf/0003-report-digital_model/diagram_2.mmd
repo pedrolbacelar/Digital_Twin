@@ -1,0 +1,24 @@
+sequenceDiagram
+    participant Caller
+    participant Model
+    participant JSON
+    participant DB
+
+    Caller->>Model: Model(name, model_path, ...)
+    Caller->>Model: model_translator()
+    Model->>JSON: load model
+    Model->>Model: create machines, queues, queue_allocation
+    Model->>Model: merge_queues, initial_allocation, ...
+    Model->>Model: discovery_working_parts, find_last_part_id
+    Model->>Model: cluster_discovery, create_conveyors, branch_discovery
+    Model->>Model: setting_stop_machines, setting_allocation_counter
+    Model->>Model: check_queue_capacity
+
+    Caller->>Model: run()
+    Model->>DB: clear, initialize
+    Model->>Model: env.process(machine.run), env.process(conveyor.run)
+    Model->>Model: env.run(until=...)
+    Model->>DB: read_all_events
+
+    Caller->>Model: calculate_RCT(...) or analyze_results(...)
+    Model->>Model: terminator.get_all_items(), CT, plots

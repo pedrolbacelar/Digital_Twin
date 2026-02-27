@@ -1,0 +1,15 @@
+flowchart TD
+    A["Validator simtype TDS or qTDS"] --> B[allocate]
+    B --> C{TDS?}
+    C -->|yes| D[generate_TDS_traces]
+    D --> E["set_TDS part ptime_TDS machine simtype TDS"]
+    C -->|qTDS| F[generate_qTDS_traces]
+    F --> G[generate_Xs_machine per machine]
+    G --> H[matrix_ptime_qTDS]
+    H --> I["set_qTDS machine ptime_qTDS simtype qTDS"]
+    E --> J[run]
+    I --> J
+    J --> K[digital_model.run]
+    K --> L[generate_event_sequence digital and real]
+    L --> M[LCSS]
+    M --> N["return lcss lcss_time indicator"]

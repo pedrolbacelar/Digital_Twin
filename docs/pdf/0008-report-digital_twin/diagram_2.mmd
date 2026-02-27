@@ -1,0 +1,18 @@
+flowchart LR
+    subgraph Models
+        M0[initial.json]
+        M1["t1_1.json"]
+        M2["t2_2.json"]
+        M3["t3_3.json"]
+    end
+
+    subgraph Pointers
+        P0[model_pointer_Sync = 0]
+        P1[model_pointer_Sync = 1]
+        P2[model_pointer_Sync = 2]
+    end
+
+    M0 --> P0
+    M1 --> P1
+    M2 --> P2
+    M3 --> P2

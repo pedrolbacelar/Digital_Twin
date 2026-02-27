@@ -1,0 +1,21 @@
+sequenceDiagram
+    participant DT as Digital_Twin
+    participant Gen as generate_digital_model
+    participant Model as Model
+    participant Sync as Synchronizer
+    participant JSON as Model JSON
+    participant RealDB as real_log
+
+    DT->>Gen: generate_digital_model()
+    Gen->>Model: Model(path, db_path, initial, ...)
+    Model->>JSON: open model_path
+    Model->>Model: model_translator() [machines, queues, conveyors, branches, initial]
+    Gen-->>DT: digital_model
+
+    DT->>Sync: Synchronizer(digital_model, real_database_path, start_time, end_time, ...)
+    Sync->>RealDB: read_store_data_all(real_log)
+    Sync->>Sync: create_zones()
+    Sync->>Sync: positioning_discovery() [replay Started/Finished]
+    Sync->>Sync: sync_aligment()
+    Sync->>JSON: write initial, worked_time, allocation_counter
+    Sync-->>DT: (machine_status, queue_status)

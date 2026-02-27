@@ -1,0 +1,7 @@
+stateDiagram-v2
+    [*] --> Idle
+    Idle --> Processing : part available in some queue_in
+    Processing --> Allocating : process_time elapsed
+    Allocating --> Idle : part put in conveyor / terminator
+    Allocating --> Allocating : all queue_out full (wait)
+    Idle --> Idle : no part (timeout 1)

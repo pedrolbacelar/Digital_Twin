@@ -1,0 +1,30 @@
+sequenceDiagram
+    participant DT as Digital_Twin
+    participant Svc as Service_Handler
+    participant Model as Model
+    participant Broker as Broker_Manager
+    participant MQTT
+    participant PS as Physical System
+    participant ID_DB as ID database
+    participant Exp_DB as exp database
+
+    DT->>Svc: Service_Handler(generate_digital_model, broker_manager, rct_threshold, flag_publish)
+    DT->>Svc: run_RCT_service(queue_position)
+    Svc->>Svc: generate_path_scenarios()
+    Svc->>Svc: get_parts_making_decisions()
+    alt parts in position
+        Svc->>Model: generate_digital_model(targeted_part_id), run() [AS IS]
+        Svc->>Model: run() per path (set_branching_path)
+        Svc->>Svc: RCT_check(rct_dict, threshold)
+        Svc->>Svc: publish_feedback(feedback_dict, possible_pathes)
+        Svc->>Broker: publishing(machine_id, part_id, queue_id, topic=RCT_server)
+        Broker->>MQTT: publish
+        MQTT->>PS: chosen queue for part
+        Svc->>ID_DB: (branch queue selection used by broker/model)
+        Svc-->>DT: rct_results
+    end
+    Svc->>Svc: run_RCT_tracking(palletID_tracked)
+    Svc->>ID_DB: get_PID_from_PalletID(palletID)
+    Svc->>Model: generate_digital_model(targeted_part_id), run()
+    Svc->>Model: calculate_RCT(part_id)
+    Svc->>Exp_DB: write_RCTtracking(PID, RCT, palletID)

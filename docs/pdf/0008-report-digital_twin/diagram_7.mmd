@@ -1,0 +1,17 @@
+stateDiagram-v2
+    [*] --> Running
+    Running --> Update_flags: every loop
+    Update_flags --> Check_sync: timestamp >= next_Tsync?
+    Update_flags --> Check_valid: timestamp >= next_Tvalid?
+    Update_flags --> Check_serv: timestamp >= next_Tserv?
+    Check_sync --> Internal: flag_time_to_synchronize = True
+    Check_sync --> Internal: flag_time_to_rct_service = True
+    Check_valid --> Internal: flag_time_to_validate = True
+    Check_serv --> External: flag_time_to_rct_service = True
+    Internal --> Sync: if flag_time_to_synchronize
+    Internal --> Valid: if flag_time_to_validate && flag_validation
+    Valid --> Update: if indicator < threshold
+    External --> RCT: if flag_time_to_rct_service && flag_external_service
+    Sync --> Running: clear flags, set next_Tsync
+    Valid --> Running: clear flags, set next_Tvalid
+    RCT --> Running: clear flags, set next_Tserv

@@ -1,0 +1,13 @@
+flowchart TD
+    A["Real DB real_log"] --> B[read_store_data_all]
+    B --> C[full_database]
+    C --> D[create_zones]
+    D --> E[positioning_discovery]
+    E --> F["Replay events Started Finished"]
+    F --> G["Update zones addIn addOut Mstarted Mfinished"]
+    G --> H["count_total_parts consistency check"]
+    H --> I["Tnow last event time"]
+    I --> J[sync_aligment]
+    J --> K["Write JSON initial worked_time allocation_counter"]
+    K --> L["show machines_status queues_status"]
+    L --> M[Return status vectors]

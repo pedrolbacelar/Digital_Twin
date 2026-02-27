@@ -1,0 +1,11 @@
+---
+description: All documentation in /docs must be written in English
+globs: docs/**/*
+alwaysApply: false
+---
+
+# Documentation language
+
+- All reports and documentation under **`/docs`** must be written in **English**.
+- Use the naming convention `xxxx-report-yyyyy.md` (e.g. `0001-report-models.md`).
+- When creating or editing any file in `docs/`, write titles, headings, body text, tables, and code comments in English.

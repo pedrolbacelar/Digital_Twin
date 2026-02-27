@@ -1,0 +1,12 @@
+flowchart TD
+    A[Service_Handler] --> B[run_RCT_service]
+    B --> C[generate_path_scenarios]
+    C --> D[get_parts_making_decisions]
+    D --> E{Parts in position?}
+    E -->|No| F[return False]
+    E -->|Yes| G[simulate_paths]
+    G --> H["For each part AS IS then each path"]
+    H --> I["RCT_check gain vs threshold"]
+    I --> J["publish_feedback MQTT"]
+    J --> K[return_first_branch]
+    K --> L[return rct_results]

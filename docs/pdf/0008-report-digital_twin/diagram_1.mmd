@@ -1,0 +1,64 @@
+flowchart TB
+    subgraph Orchestrator["Digital_Twin (orchestrator)"]
+        DT[Digital_Twin]
+        gen[generate_digital_model]
+        run_dm[run_digital_model]
+        run_sync[run_sync]
+        run_val[run_validation]
+        run_rct[run_RCT_services]
+        internal[Internal_Services]
+        external[External_Services]
+        update_flags[Update_time_flags]
+        loop[run: while True]
+    end
+
+    subgraph Consumed["Consumed modules"]
+        Model[digital_model.Model]
+        Sync[synchronizer.Synchronizer]
+        Val[validator.Validator]
+        Upd[updator.Updator]
+        Svc[services.Service_Handler]
+        Broker[broker_manager.Broker_Manager]
+        DB[(interfaceDB.Database)]
+        API[interfaceAPI]
+        Helper[helper.Helper]
+    end
+
+    subgraph Physical["Physical / storage"]
+        JSON[(Model JSON)]
+        RealLog[(real_log)]
+        DigitalLog[(digital_log)]
+        ID[(ID DB)]
+        Exp[(exp DB)]
+        MQTT[MQTT / Physical system]
+    end
+
+    DT --> gen
+    gen --> Model
+    Model --> JSON
+    run_dm --> Model
+    run_sync --> Sync
+    Sync --> Model
+    Sync --> RealLog
+    Sync --> JSON
+    run_val --> Val
+    Val --> Model
+    Val --> RealLog
+    Val --> DigitalLog
+    internal --> run_sync
+    internal --> run_val
+    internal --> Upd
+    Upd --> RealLog
+    Upd --> JSON
+    external --> run_rct
+    run_rct --> Svc
+    Svc --> Model
+    Svc --> Broker
+    Broker --> MQTT
+    Svc --> ID
+    DT --> DB
+    DT --> API
+    DT --> Helper
+    loop --> update_flags
+    loop --> internal
+    loop --> external

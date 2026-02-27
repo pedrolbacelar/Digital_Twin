@@ -1,0 +1,50 @@
+sequenceDiagram
+    participant SH as Service_Handler
+    participant Gen as generate_digital_model
+    participant Model as Model
+    participant ID_DB as ID_database
+    participant Term as Terminator
+
+    SH->>SH: generate_path_scenarios
+    SH->>SH: get_parts_making_decisions
+    alt No parts in position
+        SH->>SH: return False
+    else Parts in position
+        loop For each part in parts_making_decisions
+            SH->>Gen: generate_digital_model targeted_part_id part
+            Gen->>Model: Model model_translator
+            Model-->>SH: digital_model
+            SH->>ID_DB: read_parts_branch_queue
+            ID_DB-->>SH: parts_branch_queue
+            SH->>Model: set_parts_branch_queue on all machines
+            SH->>Model: run
+            Model->>Term: part finishes
+            Model->>Model: exit.succeed
+            SH->>Model: calculate_RCT part_id
+            Model->>Term: get terminated parts
+            Model-->>SH: rct_asis
+            SH->>SH: rct_vector append rct_asis
+
+            loop For each path in possible_pathes
+                SH->>Gen: generate_digital_model targeted_part_id part
+                Gen->>Model: Model model_translator
+                Model-->>SH: digital_model
+                SH->>ID_DB: read_parts_branch_queue
+                SH->>Model: set_parts_branch_queue
+                SH->>Model: get_all_parts
+                SH->>Model: find part by id set_branching_path path_scenario
+                SH->>Model: run
+                Model->>Term: part finishes along chosen path
+                SH->>Model: calculate_RCT part_id
+                Model-->>SH: rct_path_k
+                SH->>SH: rct_vector append rct_path_k
+            end
+
+            SH->>SH: rct_dict part_name rct_vector
+        end
+
+        SH->>Model: set_targeted_part_id None
+        SH->>SH: RCT_check rct_dict threshold
+        SH->>SH: publish_feedback feedback_dict possible_pathes
+        SH->>SH: return_first_branch rct_dict publish_results
+    end

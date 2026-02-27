@@ -1,0 +1,75 @@
+sequenceDiagram
+    participant PS as Physical System
+    participant MQTT
+    participant DT as Digital_Twin
+    participant Flags
+    participant Sync as Synchronizer
+    participant Val as Validator
+    participant Upd as Updator
+    participant Svc as Service_Handler
+    participant Model as Model
+    participant RealDB as real_log DB
+    participant JSON as Model JSON
+
+    loop run() - every iteration
+        DT->>Flags: Update_time_flags()
+        Note over Flags: next_Tsync, next_Tvalid, next_Tserv vs now
+
+        alt flag_time_to_synchronize
+            DT->>DT: Duplicate model → new model_path, model_last_sync
+            DT->>Model: generate_digital_model()
+            Model->>JSON: read model_translator
+            DT->>Sync: Synchronizer(digital_model, real_db, start_time, end_time)
+            DT->>Sync: run(repositioning=True)
+            Sync->>RealDB: read_store_data_all(real_log)
+            Sync->>Sync: positioning_discovery (replay events)
+            Sync->>JSON: sync_aligment (initial, worked_time, allocation_counter)
+            Sync-->>DT: (machine_status, queue_status)
+            DT->>DT: API: station_status, queue_status
+            DT->>DT: last_Tsync, next_Tsync += Freq_Sync
+        end
+
+        alt flag_time_to_validate && flag_validation
+            DT->>DT: model_path = model_subpath_dict[model_pointer_Valid]
+            DT->>Model: generate_digital_model()
+            DT->>Val: Validator(TDS), allocate(), run()
+            Val->>Model: run() TDS
+            Val->>Val: LCSS(digital, real)
+            Val-->>DT: lcss_indicator_logic
+            DT->>Model: generate_digital_model()
+            DT->>Val: Validator(qTDS), allocate(), run()
+            Val->>Model: run() qTDS
+            Val-->>DT: lcss_indicator_input
+            DT->>DT: API: indicator([logic, input])
+
+            alt lcss_indicator_logic < logic_threshold
+                DT->>Upd: Updator(logic), run()
+                Upd->>Upd: update_logic() [stub]
+            end
+            alt lcss_indicator_input < input_threshold
+                DT->>Upd: Updator(input), run()
+                Upd->>RealDB: generate_qTDS_traces()
+                Upd->>Upd: update_input() per machine
+                Upd->>JSON: aligner(machine_id, new_process_time)
+            end
+            DT->>DT: exp_database.write_ValidIndicators(...)
+            DT->>DT: last_Tvalid, next_Tvalid += Freq_Valid
+        end
+
+        alt flag_time_to_rct_service && flag_external_service
+            DT->>DT: model_path = model_subpath_dict[model_pointer_Serv]
+            DT->>Svc: Service_Handler(generate_digital_model, broker_manager, ...)
+            DT->>Svc: run_RCT_service(queue_position, ...)
+            Svc->>Model: generate_digital_model(), run() AS IS + per path
+            Svc->>Svc: RCT_check(rct_dict, rct_threshold)
+            Svc->>Svc: publish_feedback(feedback_dict, possible_pathes)
+            Svc->>Broker_Manager: publishing(machine_id, part_id, queue_id)
+            Broker_Manager->>MQTT: publish
+            MQTT->>PS: chosen queue / path
+            Svc->>Svc: run_RCT_tracking(palletID)
+            Svc-->>DT: rct_results
+            DT->>DT: API: RCT_server([part_id, path_1, path_2, queue_id])
+            DT->>DT: exp_database.write_RCTpaths(...)
+            DT->>DT: last_Tserv, next_Tserv += Freq_Service
+        end
+    end

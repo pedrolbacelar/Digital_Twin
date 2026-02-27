@@ -1,0 +1,24 @@
+flowchart LR
+    subgraph Paths
+        P1[Path 1]
+        P2[Path 2]
+        Pn[Path N]
+    end
+    subgraph RCT
+        R1[RCT AS IS]
+        R2[RCT path 1]
+        Rn[RCT path n]
+    end
+    subgraph Feedback
+        G["Gain 1 minus RCT over RCT_ASIS"]
+        T{above threshold?}
+        M["MQTT queue_id"]
+    end
+    P1 --> R1
+    P2 --> R2
+    Pn --> Rn
+    R1 --> G
+    R2 --> G
+    Rn --> G
+    G --> T
+    T -->|Yes| M
